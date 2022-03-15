@@ -1,0 +1,117 @@
+{
+  "name": "journal.do",
+  "productName": "journal.do",
+  "version": "1.0.0",
+  "description": "My Electron application description",
+  "main": ".webpack/main",
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "lint": "eslint --ext .ts,.tsx ."
+  },
+  "keywords": [],
+  "author": "jarek",
+  "license": "MIT",
+  "config": {
+    "forge": {
+      "packagerConfig": {},
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "journal.do"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        }
+      ],
+      "plugins": [
+        [
+          "@electron-forge/plugin-webpack",
+          {
+            "mainConfig": "./webpack.main.config.js",
+            "devContentSecurityPolicy": "connect-src 'self' https://www.journal.local 'unsafe-eval'",
+            "renderer": {
+              "config": "./webpack.renderer.config.js",
+              "entryPoints": [
+                {
+                  "html": "./src/index.html",
+                  "js": "./src/renderer.tsx",
+                  "name": "main_window",
+                  "preload": {
+                    "js": "./src/preload.ts"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      ]
+    }
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^6.0.0-beta.61",
+    "@electron-forge/maker-deb": "^6.0.0-beta.61",
+    "@electron-forge/maker-rpm": "^6.0.0-beta.61",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.61",
+    "@electron-forge/maker-zip": "^6.0.0-beta.61",
+    "@electron-forge/plugin-webpack": "^6.0.0-beta.61",
+    "@types/draft-js": "^0.11.9",
+    "@types/marked": "^4.0.2",
+    "@types/react": "^17.0.38",
+    "@types/react-dom": "^17.0.11",
+    "@types/styled-components": "^5.1.19",
+    "@typescript-eslint/eslint-plugin": "^4.33.0",
+    "@typescript-eslint/parser": "^4.33.0",
+    "@vercel/webpack-asset-relocator-loader": "^1.7.0",
+    "css-loader": "^6.5.1",
+    "electron": "16.0.7",
+    "eslint": "^7.32.0",
+    "eslint-plugin-import": "^2.25.3",
+    "fork-ts-checker-webpack-plugin": "^6.5.0",
+    "node-loader": "^2.0.0",
+    "style-loader": "^3.3.1",
+    "ts-loader": "^9.2.6",
+    "typescript": "^4.5.4"
+  },
+  "dependencies": {
+    "@electron/typescript-definitions": "^8.9.6",
+    "@styled-icons/boxicons-regular": "^10.38.0",
+    "@styled-icons/foundation": "^10.34.0",
+    "@styled-icons/material": "^10.34.0",
+    "@udecode/plate": "^10.2.0",
+    "@udecode/plate-test-utils": "^10.1.0",
+    "af-virtual-scroll": "^2.14.0",
+    "dayjs": "^1.10.7",
+    "electron-squirrel-startup": "^1.0.0",
+    "electron-store": "^8.0.1",
+    "jsdom": "^19.0.0",
+    "markdown-it": "^12.3.2",
+    "marked": "^4.0.12",
+    "nanoid": "^3.3.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "remarkable": "^2.0.1",
+    "slate": "^0.73.1",
+    "slate-history": "^0.66.0",
+    "slate-hyperscript": "^0.67.0",
+    "slate-react": "^0.74.0",
+    "styled-components": "^5.3.3",
+    "tailwindcss": "^3.0.23",
+    "twin.macro": "^2.8.2"
+  }
+}
