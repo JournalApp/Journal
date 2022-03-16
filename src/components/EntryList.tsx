@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, forwardRef } from 'react'
 import styled from 'styled-components'
 import { Entry } from './'
 import { useEventEditorSelectors } from '@udecode/plate'
-import { shallowEqual } from '../utils'
+import { arrayEquals } from '../utils'
 import { useEntriesContext } from '../context'
 
 const BeforeEntries = styled.div`
@@ -35,7 +35,7 @@ type myref = {
 function EntryList() {
   const [entries, setEntries] = useState([])
   const [initialFetchDone, setInitialFetchDone] = useState(false)
-  const { initialCache, indexCache, setCachedIndexes } = useEntriesContext()
+  const { initialCache, daysCache, setCachedDays } = useEntriesContext()
   const listRef = useRef(null)
   const entriesHeight: myref = {} //useRef<myref>(null)
   const itemsRef = useRef<Array<HTMLDivElement | null>>([])
@@ -62,7 +62,7 @@ function EntryList() {
     console.log('Entries updated')
   }, [entries])
 
-  const areEntriesIDsEqual = (local: any, server: any) => {
+  const areDaysEqual = (local: any, server: any) => {
     if (!Array.isArray(local)) {
       return false
     }
@@ -74,14 +74,14 @@ function EntryList() {
     }
 
     for (let i = 0; i < local.length; i++) {
-      if (shallowEqual(local[i], server[i]) == false) return false
+      if (arrayEquals(local[i], server[i]) == false) return false
     }
     return true
   }
 
   const setEntryHeight = (id: string, height: number) => {
     if (!element) {
-      element = document.getElementById('621603e69709a97c2f1d313d-entry')
+      element = document.getElementById('20220306-entry')
     }
     element.scrollIntoView()
 
@@ -101,7 +101,7 @@ function EntryList() {
   const initialFetch = async () => {
     console.log('initialFetch indexes')
 
-    const cached = indexCache.current
+    const cached = daysCache.current
     if (cached) {
       setEntries([...cached])
       setInitialFetchDone(true)
@@ -111,14 +111,14 @@ function EntryList() {
       let headers = {
         'Content-Type': 'application/json',
       }
-      const res = await fetch('https://www.journal.local/api/1/entriesids', {
+      const res = await fetch('https://www.journal.local/api/1/days', {
         headers,
         method: 'GET',
       })
       if (res.status == 200) {
         const json = await res.json()
-        if (!areEntriesIDsEqual(cached, json)) {
-          setCachedIndexes(json)
+        if (!areDaysEqual(cached, json)) {
+          setCachedDays(json)
           setEntries([...json])
         }
         setInitialFetchDone(true)
@@ -139,12 +139,11 @@ function EntryList() {
           .reverse()
           .map((entry, i) => (
             <Entry
-              key={entry._id}
-              entryId={entry._id}
-              entryDay={entry.day}
-              entryDayCount={i + 1}
-              cached={initialCache.current[entry._id]}
-              isFocused={focusedEditorId == entry._id}
+              key={entry}
+              entryDay={entry}
+              entryDayCount={entries.length - i}
+              cached={initialCache.current[entry]}
+              isFocused={focusedEditorId == `${entry}-editor`}
               setEntryHeight={setEntryHeight}
             />
           ))}

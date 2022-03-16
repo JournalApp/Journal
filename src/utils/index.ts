@@ -12,6 +12,15 @@ function shallowEqual(object1: any, object2: any) {
   return true
 }
 
+function arrayEquals(a: Array<number>, b: Array<number>) {
+  return (
+    Array.isArray(a) &&
+    Array.isArray(b) &&
+    a.length === b.length &&
+    a.every((val, index) => val === b[index])
+  )
+}
+
 const countWords = (text: any) => {
   let res = []
   let str = text.replace(/[\t\n\r\.\?\!]/gm, ' ').split(' ')
@@ -24,4 +33,4 @@ const countWords = (text: any) => {
   return res.length
 }
 
-export { shallowEqual, countWords }
+export { shallowEqual, arrayEquals, countWords }

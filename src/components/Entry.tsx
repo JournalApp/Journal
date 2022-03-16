@@ -28,7 +28,6 @@ import {
 } from '@udecode/plate'
 
 type EntryBlockProps = {
-  entryId: any
   entryDay: any
   entryDayCount: number
   isFocused: boolean
@@ -83,12 +82,12 @@ const showDay = (day: any) => {
   }
 }
 
-const fetchEntry = async (id: any) => {
+const fetchEntry = async (day: any) => {
   try {
     let headers = {
       'Content-Type': 'application/json',
     }
-    let res = await fetch(`https://www.journal.local/api/1/entry/${id}`, {
+    let res = await fetch(`https://www.journal.local/api/1/entry/${day}`, {
       headers,
       method: 'GET',
     })
@@ -104,14 +103,7 @@ const fetchEntry = async (id: any) => {
   }
 }
 
-const Entry = ({
-  entryId,
-  entryDay,
-  entryDayCount,
-  isFocused,
-  cached,
-  setEntryHeight,
-}: EntryBlockProps) => {
+const Entry = ({ entryDay, entryDayCount, isFocused, cached, setEntryHeight }: EntryBlockProps) => {
   const [wordCount, setWordCount] = useState(0)
   const [needsSavingToServer, setNeedsSavingToServer] = useState(false)
   const [initialValue, setInitialValue] = useState([])
@@ -125,14 +117,14 @@ const Entry = ({
     setNeedsSavingToServer(true)
   }
 
-  const saveEntry = async (id: any, content: any) => {
-    setCachedEntry(`${id}.content`, content)
+  const saveEntry = async (day: any, content: any) => {
+    setCachedEntry(`${day}.content`, content)
 
     try {
       let headers = {
         'Content-Type': 'application/json',
       }
-      let res = await fetch(`https://www.journal.local/api/1/entry/${id}`, {
+      let res = await fetch(`https://www.journal.local/api/1/entry/${day}`, {
         headers,
         body: JSON.stringify({ content }),
         method: 'POST',
@@ -141,14 +133,14 @@ const Entry = ({
         setNeedsSavingToServer(false)
         console.log('saved')
         let json = await res.json()
-        setCachedEntry(`${id}.modifiedAt`, json.modifiedAt)
-        setCachedEntry(`${id}.needsSavingToServer`, false)
+        setCachedEntry(`${day}.modifiedAt`, json.modifiedAt)
+        setCachedEntry(`${day}.needsSavingToServer`, false)
       } else {
         throw new Error()
       }
     } catch (err) {
       setNeedsSavingToServer(true)
-      setCachedEntry(`${id}.needsSavingToServer`, true)
+      setCachedEntry(`${day}.needsSavingToServer`, true)
       console.log(err)
     }
   }
@@ -156,7 +148,7 @@ const Entry = ({
   const resizeObserver = new ResizeObserver((entries) => {
     for (let entry of entries) {
       // console.log(entry)
-      setEntryHeight(entryId, entry.borderBoxSize[0].blockSize)
+      setEntryHeight(entryDay, entry.borderBoxSize[0].blockSize)
     }
   })
 
@@ -169,13 +161,13 @@ const Entry = ({
       console.log('Cached')
 
       if (cached.needsSavingToServer) {
-        await saveEntry(entryId, cached.content)
+        await saveEntry(entryDay, cached.content)
       }
     }
 
-    const init = await fetchEntry(entryId)
+    const init = await fetchEntry(entryDay)
     if (!cached) {
-      setCachedEntry(entryId, init)
+      setCachedEntry(entryDay, init)
       setInitialValue([...init.content])
     }
     if (cached && init && init.modifiedAt != cached.modifiedAt) {
@@ -186,12 +178,12 @@ const Entry = ({
       if (dayjs(init.modifiedAt).isAfter(dayjs(cached.modifiedAt))) {
         // Server entry is newer
         console.log('Server entry is newer, updating cache')
-        setCachedEntry(entryId, init)
+        setCachedEntry(entryDay, init)
         setInitialValue([...init.content])
       } else {
         // Cached entry is newer
         console.log('Cached entry is newer, updating on server')
-        saveEntry(entryId, cached.content)
+        saveEntry(entryDay, cached.content)
       }
     }
     if (!cached && !init) {
@@ -225,7 +217,7 @@ const Entry = ({
     if (needsSavingToServer) {
       setTimeout(() => {
         setNeedsSavingToServer(false)
-        saveEntry(entryId, debugValue.current)
+        saveEntry(entryDay, debugValue.current)
       }, 5000)
     }
   }, [needsSavingToServer])
@@ -259,12 +251,12 @@ const Entry = ({
   // const st = usePlateStore(entryId)
 
   return (
-    <Container isFocused={isFocused} ref={editor} id={`${entryId}-entry`}>
+    <Container isFocused={isFocused} ref={editor} id={`${entryDay}-entry`}>
       <Aside>{showDay(entryDay)}</Aside>
       <MainWrapper>
-        {initialFetchDone && (
+        {(initialFetchDone || cached) && (
           <Plate
-            id={entryId}
+            id={`${entryDay}-editor`}
             editableProps={editableProps}
             initialValue={initialValue.length ? initialValue : cached.content}
             onChange={onChangeDebug}
