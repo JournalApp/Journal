@@ -4,10 +4,10 @@ import dayjs from 'dayjs'
 interface EntriesContextInterface {
   initialCache: any
   indexCache: any
-  getEntry: any
-  getAllEntries: any
-  setEntry: any
-  setIndexes: any
+  getCachedEntry: any
+  getAllCachedEntries: any
+  setCachedEntry: any
+  setCachedIndexes: any
 }
 
 const EntriesContext = createContext<EntriesContextInterface | null>(null)
@@ -25,21 +25,21 @@ export function EntriesProvider({ children }: any) {
     // TODO if Today does not exist, what next?
   }, [])
 
-  const getEntry = (property: string) => {
+  const getCachedEntry = (property: string) => {
     return window.electronAPI.storeEntries.get(property)
   }
 
-  const getAllEntries = (property: string) => {
+  const getAllCachedEntries = (property: string) => {
     return window.electronAPI.storeEntries.getAll()
   }
 
-  const setEntry = (property: string, value: any) => {
+  const setCachedEntry = (property: string, value: any) => {
     window.electronAPI.storeEntries.set(property, value)
     initialCache.current[property] = value
     console.log('Entry set!')
   }
 
-  const setIndexes = (value: any) => {
+  const setCachedIndexes = (value: any) => {
     window.electronAPI.storeIndex.set('EntriesIDs', value)
     indexCache.current['EntriesIDs'] = value
     console.log('Indexes set!')
@@ -48,10 +48,10 @@ export function EntriesProvider({ children }: any) {
   let state = {
     initialCache,
     indexCache,
-    getEntry,
-    getAllEntries,
-    setEntry,
-    setIndexes,
+    getCachedEntry,
+    getAllCachedEntries,
+    setCachedEntry,
+    setCachedIndexes,
   }
   return <EntriesContext.Provider value={state}>{children}</EntriesContext.Provider>
 }

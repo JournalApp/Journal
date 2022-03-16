@@ -35,7 +35,7 @@ type myref = {
 function EntryList() {
   const [entries, setEntries] = useState([])
   const [initialFetchDone, setInitialFetchDone] = useState(false)
-  const { initialCache, indexCache, setIndexes } = useEntriesContext()
+  const { initialCache, indexCache, setCachedIndexes } = useEntriesContext()
   const listRef = useRef(null)
   const entriesHeight: myref = {} //useRef<myref>(null)
   const itemsRef = useRef<Array<HTMLDivElement | null>>([])
@@ -115,14 +115,16 @@ function EntryList() {
         headers,
         method: 'GET',
       })
-      const json = await res.json()
-
-      if (!areEntriesIDsEqual(cached, json)) {
-        setIndexes(json)
-        // window.electronAPI.storeIndex.set('EntriesIDs', json)
-        setEntries([...json])
+      if (res.status == 200) {
+        const json = await res.json()
+        if (!areEntriesIDsEqual(cached, json)) {
+          setCachedIndexes(json)
+          setEntries([...json])
+        }
+        setInitialFetchDone(true)
+      } else {
+        throw new Error()
       }
-      setInitialFetchDone(true)
     } catch (err) {
       console.log(err)
     }

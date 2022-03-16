@@ -92,9 +92,13 @@ const fetchEntry = async (id: any) => {
       headers,
       method: 'GET',
     })
-    let json = await res.json()
-    // console.log(json[0].content)
-    return json[0]
+    if (res.status == 200) {
+      let json = await res.json()
+      // console.log(json[0].content)
+      return json[0]
+    } else {
+      throw new Error()
+    }
   } catch (err) {
     console.log(err)
   }
@@ -114,7 +118,7 @@ const Entry = ({
   const [initialFetchDone, setInitialFetchDone] = useState(false)
   const debugValue = useRef([])
   const editor = useRef(null)
-  const { setEntry } = useEntriesContext()
+  const { setCachedEntry } = useEntriesContext()
 
   const onChangeDebug = (newValue: any) => {
     debugValue.current = newValue
@@ -122,7 +126,7 @@ const Entry = ({
   }
 
   const saveEntry = async (id: any, content: any) => {
-    setEntry(`${id}.content`, content)
+    setCachedEntry(`${id}.content`, content)
 
     try {
       let headers = {
@@ -133,14 +137,18 @@ const Entry = ({
         body: JSON.stringify({ content }),
         method: 'POST',
       })
-      setNeedsSavingToServer(false)
-      console.log('saved')
-      let json = await res.json()
-      setEntry(`${id}.modifiedAt`, json.modifiedAt)
-      setEntry(`${id}.needsSavingToServer`, false)
+      if (res.status == 200) {
+        setNeedsSavingToServer(false)
+        console.log('saved')
+        let json = await res.json()
+        setCachedEntry(`${id}.modifiedAt`, json.modifiedAt)
+        setCachedEntry(`${id}.needsSavingToServer`, false)
+      } else {
+        throw new Error()
+      }
     } catch (err) {
       setNeedsSavingToServer(true)
-      setEntry(`${id}.needsSavingToServer`, true)
+      setCachedEntry(`${id}.needsSavingToServer`, true)
       console.log(err)
     }
   }
@@ -167,7 +175,7 @@ const Entry = ({
 
     const init = await fetchEntry(entryId)
     if (!cached) {
-      setEntry(entryId, init)
+      setCachedEntry(entryId, init)
       setInitialValue([...init.content])
     }
     if (cached && init && init.modifiedAt != cached.modifiedAt) {
@@ -178,7 +186,7 @@ const Entry = ({
       if (dayjs(init.modifiedAt).isAfter(dayjs(cached.modifiedAt))) {
         // Server entry is newer
         console.log('Server entry is newer, updating cache')
-        setEntry(entryId, init)
+        setCachedEntry(entryId, init)
         setInitialValue([...init.content])
       } else {
         // Cached entry is newer
