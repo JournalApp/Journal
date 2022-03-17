@@ -1,20 +1,30 @@
 import { app, BrowserWindow, Menu, MenuItem, ipcMain } from 'electron'
 import { clipboard } from 'electron'
+import dayjs from 'dayjs'
 import Store from 'electron-store'
+
 const storeIndex = new Store({ name: 'storeIndex' })
 const storeEntries = new Store({ name: 'storeEntries' })
-
-// const cachedEntries = storeEntries.store
+const dayKey = 'Days'
 
 console.log(storeIndex.path)
 console.log(storeEntries.path)
 
 // IPC listener
-ipcMain.on('electron-storeIndex-get', async (event, val) => {
-  event.returnValue = storeIndex.get(val)
+ipcMain.on('electron-storeIndex-get', async (event) => {
+  let value: any = storeIndex.get(dayKey) ?? []
+  let today = dayjs().format('YYYYMMDD')
+  let todayExists = value.some((el: any) => {
+    return el == today
+  })
+  if (!todayExists) {
+    value.push(today)
+    console.log(`Added ${today} to cached Days`)
+  }
+  event.returnValue = value
 })
-ipcMain.on('electron-storeIndex-set', async (event, key, val) => {
-  storeIndex.set(key, val)
+ipcMain.on('electron-storeIndex-set', async (event, val) => {
+  storeIndex.set(dayKey, val)
 })
 
 ipcMain.on('electron-storeEntries-get', async (event, val) => {

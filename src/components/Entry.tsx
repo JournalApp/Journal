@@ -93,8 +93,10 @@ const fetchEntry = async (day: any) => {
     })
     if (res.status == 200) {
       let json = await res.json()
-      // console.log(json[0].content)
-      return json[0]
+      //
+      console.log(`Fetching ${day}`)
+      console.log(json)
+      return json
     } else {
       throw new Error()
     }
@@ -158,7 +160,7 @@ const Entry = ({ entryDay, entryDayCount, isFocused, cached, setEntryHeight }: E
     resizeObserver.observe(editor.current)
 
     if (cached) {
-      console.log('Cached')
+      console.log(`Cached day ${entryDay}`)
 
       if (cached.needsSavingToServer) {
         await saveEntry(entryDay, cached.content)
@@ -172,16 +174,14 @@ const Entry = ({ entryDay, entryDayCount, isFocused, cached, setEntryHeight }: E
     }
     if (cached && init && init.modifiedAt != cached.modifiedAt) {
       console.log(`${init.modifiedAt} != ${cached.modifiedAt}`)
-      // TODO if cached is newer, push it to server
-      // if from server is nerwer, save it to cache
 
       if (dayjs(init.modifiedAt).isAfter(dayjs(cached.modifiedAt))) {
-        // Server entry is newer
+        // Server entry is newer, save it to cache
         console.log('Server entry is newer, updating cache')
         setCachedEntry(entryDay, init)
         setInitialValue([...init.content])
       } else {
-        // Cached entry is newer
+        // Cached entry is newer, push it to server
         console.log('Cached entry is newer, updating on server')
         saveEntry(entryDay, cached.content)
       }

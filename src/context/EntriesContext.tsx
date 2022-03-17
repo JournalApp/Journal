@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react'
-import dayjs from 'dayjs'
 
 interface EntriesContextInterface {
   initialCache: any
@@ -16,16 +15,7 @@ const daysKey = 'Days'
 
 export function EntriesProvider({ children }: any) {
   const initialCache = useRef(window.electronAPI.storeEntries.getAll() || [])
-  const daysCache = useRef(window.electronAPI.storeIndex.get(daysKey) || [])
-
-  useEffect(() => {
-    let today = dayjs().format('YYYYMMDD')
-    let todayExists = daysCache.current.some((el: any) => {
-      return el == today
-    })
-    console.log(`Today exists? ${todayExists}`)
-    // TODO if Today does not exist, what next?
-  }, [])
+  const daysCache = useRef(window.electronAPI.storeIndex.get() || [])
 
   const getCachedEntry = (property: string) => {
     return window.electronAPI.storeEntries.get(property)
@@ -42,8 +32,9 @@ export function EntriesProvider({ children }: any) {
   }
 
   const setCachedDays = (value: any) => {
-    window.electronAPI.storeIndex.set(daysKey, value)
-    daysCache.current[daysKey] = value
+    window.electronAPI.storeIndex.set(value)
+    // TODO does it work?:
+    daysCache.current = value
     console.log('Indexes set!')
   }
 

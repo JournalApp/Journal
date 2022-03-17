@@ -4,6 +4,7 @@ import { Entry } from './'
 import { useEventEditorSelectors } from '@udecode/plate'
 import { arrayEquals } from '../utils'
 import { useEntriesContext } from '../context'
+import dayjs from 'dayjs'
 
 const BeforeEntries = styled.div`
   text-align: center;
@@ -80,10 +81,12 @@ function EntryList() {
   }
 
   const setEntryHeight = (id: string, height: number) => {
-    if (!element) {
-      element = document.getElementById('20220306-entry')
+    if (element) {
+      element.scrollIntoView()
+    } else {
+      let today = dayjs().format('YYYYMMDD')
+      element = document.getElementById(`${today}-entry`)
     }
-    element.scrollIntoView()
 
     // if (id == '6226752be089a49a5c4ddd78') {
     //   entriesHeight[id] = 0
@@ -91,8 +94,6 @@ function EntryList() {
     //   entriesHeight[id] = height
     // }
 
-    // // TODO which objects are above, which below?
-    // // TODO exact target scroll position of Today (not all - 1000 px)
     // let sum = Object.values(entriesHeight).reduce((a, b) => a + b)
 
     // window.scrollTo(0, sum + 156)
@@ -116,10 +117,19 @@ function EntryList() {
         method: 'GET',
       })
       if (res.status == 200) {
-        const json = await res.json()
-        if (!areDaysEqual(cached, json)) {
-          setCachedDays(json)
-          setEntries([...json])
+        let days = await res.json()
+        // Add Today to server Days
+        let today = dayjs().format('YYYYMMDD')
+        let todayExists = days.some((el: any) => {
+          return el == today
+        })
+        if (!todayExists) {
+          days.push(today)
+          console.log(`Added ${today} to server Days`)
+        }
+        if (!areDaysEqual(cached, days)) {
+          setCachedDays(days)
+          setEntries([...days])
         }
         setInitialFetchDone(true)
       } else {
