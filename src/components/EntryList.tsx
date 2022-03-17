@@ -154,6 +154,7 @@ function EntryList() {
               entryDayCount={entries.length - i}
               cached={initialCache.current[entry]}
               isFocused={focusedEditorId == `${entry}-editor`}
+              isFadedOut={focusedEditorId != `${entry}-editor` && focusedEditorId != null}
               setEntryHeight={setEntryHeight}
             />
           ))}

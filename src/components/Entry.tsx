@@ -31,19 +31,20 @@ type EntryBlockProps = {
   entryDay: any
   entryDayCount: number
   isFocused: boolean
+  isFadedOut: boolean
   cached?: any
   ref?: any
   setEntryHeight: (id: string, height: number) => void
 }
 
 interface ContainerProps {
-  readonly isFocused: boolean
+  readonly isFadedOut: boolean
 }
 
 const Container = styled.div<ContainerProps>`
   display: flex;
   padding: 40px;
-  opacity: ${(props) => (props.isFocused ? '1' : '0.5')};
+  opacity: ${(props) => (props.isFadedOut ? '0.5' : '1')};
 `
 
 const Aside = styled.div`
@@ -54,7 +55,9 @@ const Aside = styled.div`
 `
 const MainWrapper = styled.div`
   width: 100%;
-  font-size: 20px;
+  max-width: 75ch;
+  font-size: 21px;
+  font-weight: 500;
   line-height: 30px;
   -webkit-app-region: no-drag;
 `
@@ -105,7 +108,14 @@ const fetchEntry = async (day: any) => {
   }
 }
 
-const Entry = ({ entryDay, entryDayCount, isFocused, cached, setEntryHeight }: EntryBlockProps) => {
+const Entry = ({
+  entryDay,
+  entryDayCount,
+  isFocused,
+  isFadedOut,
+  cached,
+  setEntryHeight,
+}: EntryBlockProps) => {
   const [wordCount, setWordCount] = useState(0)
   const [needsSavingToServer, setNeedsSavingToServer] = useState(false)
   const [initialValue, setInitialValue] = useState([])
@@ -251,8 +261,7 @@ const Entry = ({ entryDay, entryDayCount, isFocused, cached, setEntryHeight }: E
   // const st = usePlateStore(entryId)
 
   return (
-    <Container isFocused={isFocused} ref={editor} id={`${entryDay}-entry`}>
-      <Aside>{showDay(entryDay)}</Aside>
+    <Container isFadedOut={isFadedOut} ref={editor} id={`${entryDay}-entry`}>
       <MainWrapper>
         {(initialFetchDone || cached) && (
           <Plate
@@ -273,6 +282,7 @@ const Entry = ({ entryDay, entryDayCount, isFocused, cached, setEntryHeight }: E
         )}
       </MainWrapper>
       <Aside>
+        {showDay(entryDay)}
         {wordCount} words, day {entryDayCount}
       </Aside>
     </Container>
