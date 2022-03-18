@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import dayjs from 'dayjs'
-import { ToolbarButtons } from './index'
+import { FormatToolbar } from './index'
 // import { usePlateEditorRef } from '@udecode/plate'
 import { countWords } from '../utils'
 import { useEntriesContext } from '../context'
 
 import {
   createPlateUI,
+  BalloonToolbar,
   HeadingToolbar,
   Plate,
   ELEMENT_H1,
@@ -271,13 +272,7 @@ const Entry = ({
             onChange={onChangeDebug}
             plugins={plugins}
           >
-            {isFocused && (
-              <FloatingToolar>
-                <HeadingToolbar>
-                  <ToolbarButtons />
-                </HeadingToolbar>
-              </FloatingToolar>
-            )}
+            <FormatToolbar />
           </Plate>
         )}
       </MainWrapper>

@@ -191,15 +191,32 @@ export const TableToolbarButtons = () => (
   </>
 )
 
-const FloatingToolbar = styled.div``
+export const FormatToolbar = () => {
+  const arrow = false
+  const theme = 'light'
+  const tooltip: any = {
+    arrow: true,
+    delay: 0,
+    duration: [200, 0],
+    hideOnClick: false,
+    offset: [0, 17],
+    placement: 'top',
+  }
 
-export const ToolbarButtons = () => (
-  <>
-    <BasicElementToolbarButtons />
-    <ListToolbarButtons />
-    <IndentToolbarButtons />
-    <BasicMarkToolbarButtons />
+  return (
+    <BalloonToolbar
+      popperOptions={{
+        placement: 'top',
+      }}
+      theme={theme}
+      arrow={arrow}
+    >
+      <BasicElementToolbarButtons />
+      <ListToolbarButtons />
+      <IndentToolbarButtons />
+      <BasicMarkToolbarButtons />
 
-    <LinkToolbarButton icon={<Link />} />
-  </>
-)
+      <LinkToolbarButton icon={<Link />} />
+    </BalloonToolbar>
+  )
+}
