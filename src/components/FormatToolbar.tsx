@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { FormEvent } from 'react'
 import { CodeAlt } from '@styled-icons/boxicons-regular/CodeAlt'
 import { CodeBlock } from '@styled-icons/boxicons-regular/CodeBlock'
 import { Highlight } from '@styled-icons/boxicons-regular/Highlight'
@@ -32,6 +32,8 @@ import { LooksOne } from '@styled-icons/material/LooksOne'
 import { LooksTwo } from '@styled-icons/material/LooksTwo'
 import { Check } from '@styled-icons/material/Check'
 import styled from 'styled-components'
+import { Icon } from './Icon'
+import * as Select from '@radix-ui/react-select'
 
 import {
   addColumn,
@@ -42,6 +44,7 @@ import {
   deleteTable,
   ELEMENT_BLOCKQUOTE,
   ELEMENT_CODE_BLOCK,
+  ELEMENT_DEFAULT,
   ELEMENT_H1,
   ELEMENT_H2,
   ELEMENT_H3,
@@ -77,7 +80,10 @@ import {
   MarkToolbarButton,
   MediaEmbedToolbarButton,
   TableToolbarButton,
+  ToolbarDropdown,
   usePlateEditorRef,
+  getParent,
+  toggleNodeType,
 } from '@udecode/plate'
 import { Link } from '@styled-icons/material/Link'
 import { Image } from '@styled-icons/material/Image'
@@ -85,58 +91,25 @@ import { OndemandVideo } from '@styled-icons/material/OndemandVideo'
 import { FontDownload } from '@styled-icons/material/FontDownload'
 import { FormatColorText } from '@styled-icons/material/FormatColorText'
 
+const H1Item = styled.span`
+  color: 'currentColor';
+`
+
 export const BasicElementToolbarButtons = () => {
   const editor = usePlateEditorRef()
 
   return (
     <>
-      <BlockToolbarButton type={getPluginType(editor, ELEMENT_H1)} icon={<LooksOne />} />
-      <BlockToolbarButton type={getPluginType(editor, ELEMENT_H2)} icon={<LooksTwo />} />
-      <BlockToolbarButton type={getPluginType(editor, ELEMENT_H3)} icon={<Looks3 />} />
-      <BlockToolbarButton type={getPluginType(editor, ELEMENT_BLOCKQUOTE)} icon={<FormatQuote />} />
-      {/* <CodeBlockToolbarButton
-        type={getPluginType(editor, ELEMENT_CODE_BLOCK)}
-        icon={<CodeBlock />}
-      /> */}
-    </>
-  )
-}
-
-export const IndentToolbarButtons = () => {
-  const editor = usePlateEditorRef()
-
-  return (
-    <>
-      <ToolbarButton
-        onMouseDown={editor && getPreventDefaultHandler(outdent, editor)}
-        icon={<FormatIndentDecrease />}
+      <BlockToolbarButton type={getPluginType(editor, ELEMENT_DEFAULT)} icon={<H1Item>P</H1Item>} />
+      <BlockToolbarButton type={getPluginType(editor, ELEMENT_H1)} icon={<H1Item>H1</H1Item>} />
+      <BlockToolbarButton type={getPluginType(editor, ELEMENT_H2)} icon={<H1Item>H2</H1Item>} />
+      <BlockToolbarButton type={getPluginType(editor, ELEMENT_H3)} icon={<H1Item>H3</H1Item>} />
+      <BlockToolbarButton
+        type={getPluginType(editor, ELEMENT_BLOCKQUOTE)}
+        icon={<H1Item>Quote</H1Item>}
       />
-      <ToolbarButton
-        onMouseDown={editor && getPreventDefaultHandler(indent, editor)}
-        icon={<FormatIndentIncrease />}
-      />
-    </>
-  )
-}
-
-export const ListToolbarButtons = () => {
-  const editor = usePlateEditorRef()
-
-  return (
-    <>
-      <ListToolbarButton type={getPluginType(editor, ELEMENT_UL)} icon={<FormatListBulleted />} />
-      <ListToolbarButton type={getPluginType(editor, ELEMENT_OL)} icon={<FormatListNumbered />} />
-    </>
-  )
-}
-
-export const AlignToolbarButtons = () => {
-  return (
-    <>
-      <AlignToolbarButton value='left' icon={<FormatAlignLeft />} />
-      <AlignToolbarButton value='center' icon={<FormatAlignCenter />} />
-      <AlignToolbarButton value='right' icon={<FormatAlignRight />} />
-      <AlignToolbarButton value='justify' icon={<FormatAlignJustify />} />
+      <ListToolbarButton type={getPluginType(editor, ELEMENT_UL)} icon={<H1Item>UL</H1Item>} />
+      <ListToolbarButton type={getPluginType(editor, ELEMENT_OL)} icon={<H1Item>OL</H1Item>} />
     </>
   )
 }
@@ -154,42 +127,74 @@ export const BasicMarkToolbarButtons = () => {
         icon={<FormatStrikethrough />}
       />
       <MarkToolbarButton type={getPluginType(editor, MARK_CODE)} icon={<CodeAlt />} />
-      {/* <MarkToolbarButton
-        type={getPluginType(editor, MARK_SUPERSCRIPT)}
-        clear={getPluginType(editor, MARK_SUBSCRIPT)}
-        icon={<Superscript />}
-      />
-      <MarkToolbarButton
-        type={getPluginType(editor, MARK_SUBSCRIPT)}
-        clear={getPluginType(editor, MARK_SUPERSCRIPT)}
-        icon={<Subscript />}
-      /> */}
+      <MarkToolbarButton type={getPluginType(editor, MARK_HIGHLIGHT)} icon={<Highlight />} />
     </>
   )
 }
 
-export const KbdToolbarButton = () => {
-  const editor = usePlateEditorRef()
+const elementOptions = [
+  { type: ELEMENT_DEFAULT, label: 'Normal' },
+  { type: ELEMENT_H1, label: 'Heading 1' },
+  { type: ELEMENT_H2, label: 'Heading 2' },
+  { type: ELEMENT_H3, label: 'Heading 3' },
+]
 
-  return <MarkToolbarButton type={getPluginType(editor, MARK_KBD)} icon={<Keyboard />} />
+const LevelSelect = () => {
+  const editor = usePlateEditorRef()
+  const parent = getParent(editor, editor?.selection?.anchor)
+  const node = parent && Array.isArray(parent) ? parent[0] : null
+
+  return (
+    <select
+      id='level'
+      name='level'
+      onChange={(e: FormEvent<HTMLSelectElement>) =>
+        toggleNodeType(editor, {
+          activeType: e.currentTarget.value,
+          inactiveType: ELEMENT_DEFAULT,
+        })
+      }
+      onClick={(e: FormEvent<HTMLSelectElement>) => e.stopPropagation()}
+      value={node?.type}
+    >
+      {elementOptions.map((option) => (
+        <option value={option.type} key={option.type}>
+          {option.label}
+        </option>
+      ))}
+    </select>
+  )
 }
 
-export const HighlightToolbarButton = () => {
-  const editor = usePlateEditorRef()
+const NewSelect = () => {
+  return (
+    <div onMouseDown={(e) => console.log('div')}>
+      <Select.Root>
+        <Select.Trigger onMouseDown={(e) => console.log('Select.Trigger')}>
+          <Select.Value onMouseDown={(e) => console.log('Select.Value')} />
+          <Select.Icon onMouseDown={(e) => console.log('Select.Icon')} />
+        </Select.Trigger>
 
-  return <MarkToolbarButton type={getPluginType(editor, MARK_HIGHLIGHT)} icon={<Highlight />} />
+        <Select.Content>
+          <Select.Viewport>
+            <Select.Item value='1'>
+              <Select.ItemText>Text</Select.ItemText>
+              <Select.ItemIndicator />
+            </Select.Item>
+            <Select.Item value='2'>
+              <Select.ItemText>Header 1</Select.ItemText>
+              <Select.ItemIndicator />
+            </Select.Item>
+            <Select.Item value='3'>
+              <Select.ItemText>Header 2</Select.ItemText>
+              <Select.ItemIndicator />
+            </Select.Item>
+          </Select.Viewport>
+        </Select.Content>
+      </Select.Root>
+    </div>
+  )
 }
-
-export const TableToolbarButtons = () => (
-  <>
-    <TableToolbarButton icon={<BorderAll />} transform={insertTable} />
-    <TableToolbarButton icon={<BorderClear />} transform={deleteTable} />
-    <TableToolbarButton icon={<BorderBottom />} transform={addRow} />
-    <TableToolbarButton icon={<BorderTop />} transform={deleteRow} />
-    <TableToolbarButton icon={<BorderLeft />} transform={addColumn} />
-    <TableToolbarButton icon={<BorderRight />} transform={deleteColumn} />
-  </>
-)
 
 export const FormatToolbar = () => {
   const arrow = false
@@ -211,11 +216,11 @@ export const FormatToolbar = () => {
       theme={theme}
       arrow={arrow}
     >
+      Hello
+      <NewSelect />
+      <LevelSelect />
       <BasicElementToolbarButtons />
-      <ListToolbarButtons />
-      <IndentToolbarButtons />
       <BasicMarkToolbarButtons />
-
       <LinkToolbarButton icon={<Link />} />
     </BalloonToolbar>
   )

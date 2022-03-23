@@ -90,10 +90,11 @@
   },
   "dependencies": {
     "@electron/typescript-definitions": "^8.9.6",
+    "@radix-ui/react-select": "^0.1.1",
     "@styled-icons/boxicons-regular": "^10.38.0",
     "@styled-icons/foundation": "^10.34.0",
     "@styled-icons/material": "^10.34.0",
-    "@udecode/plate": "^10.2.0",
+    "@udecode/plate": "^10.4.2",
     "@udecode/plate-test-utils": "^10.1.0",
     "af-virtual-scroll": "^2.14.0",
     "dayjs": "^1.10.7",

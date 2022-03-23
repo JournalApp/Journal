@@ -98,8 +98,8 @@ const fetchEntry = async (day: any) => {
     if (res.status == 200) {
       let json = await res.json()
       //
-      console.log(`Fetching ${day}`)
-      console.log(json)
+      // console.log(`Fetching ${day}`)
+      // console.log(json)
       return json
     } else {
       throw new Error()
@@ -171,7 +171,7 @@ const Entry = ({
     resizeObserver.observe(editor.current)
 
     if (cached) {
-      console.log(`Cached day ${entryDay}`)
+      // console.log(`Cached day ${entryDay}`)
 
       if (cached.needsSavingToServer) {
         await saveEntry(entryDay, cached.content)
@@ -224,7 +224,7 @@ const Entry = ({
   }, [setInitialFetchDone])
 
   useEffect(() => {
-    console.log(`needsSaving: ${needsSavingToServer}`)
+    // console.log(`needsSaving: ${needsSavingToServer}`)
     if (needsSavingToServer) {
       setTimeout(() => {
         setNeedsSavingToServer(false)
