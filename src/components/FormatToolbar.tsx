@@ -20,6 +20,7 @@ import {
   useEventPlateId,
   usePlateEditorState,
   withPlateEventProvider,
+  isMarkActive,
 } from '@udecode/plate-core'
 import styled from 'styled-components'
 
@@ -88,7 +89,11 @@ export const FormatToolbar = () => {
     }
 
     return (
-      <StyledToggle onPressedChange={onPressedChange} onMouseDown={onMouseDown}>
+      <StyledToggle
+        pressed={!!editor?.selection && isMarkActive(editor, type!)}
+        onPressedChange={onPressedChange}
+        onMouseDown={onMouseDown}
+      >
         <Icon name='check24' />
       </StyledToggle>
     )
