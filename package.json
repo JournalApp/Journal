@@ -90,7 +90,10 @@
   },
   "dependencies": {
     "@electron/typescript-definitions": "^8.9.6",
+    "@radix-ui/react-context-menu": "^0.1.6",
     "@radix-ui/react-select": "^0.1.1",
+    "@radix-ui/react-toggle": "^0.1.4",
+    "@radix-ui/react-toolbar": "^0.1.5",
     "@styled-icons/boxicons-regular": "^10.38.0",
     "@styled-icons/foundation": "^10.34.0",
     "@styled-icons/material": "^10.34.0",

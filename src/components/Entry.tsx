@@ -5,6 +5,7 @@ import { FormatToolbar } from './index'
 // import { usePlateEditorRef } from '@udecode/plate'
 import { countWords } from '../utils'
 import { useEntriesContext } from '../context'
+import { ContextMenu } from './ContextMenu'
 
 import {
   createPlateUI,
@@ -265,15 +266,17 @@ const Entry = ({
     <Container isFadedOut={isFadedOut} ref={editor} id={`${entryDay}-entry`}>
       <MainWrapper>
         {(initialFetchDone || cached) && (
-          <Plate
-            id={`${entryDay}-editor`}
-            editableProps={editableProps}
-            initialValue={initialValue.length ? initialValue : cached.content}
-            onChange={onChangeDebug}
-            plugins={plugins}
-          >
-            <FormatToolbar />
-          </Plate>
+          <ContextMenu>
+            <Plate
+              id={`${entryDay}-editor`}
+              editableProps={editableProps}
+              initialValue={initialValue.length ? initialValue : cached.content}
+              onChange={onChangeDebug}
+              plugins={plugins}
+            >
+              <FormatToolbar />
+            </Plate>
+          </ContextMenu>
         )}
       </MainWrapper>
       <Aside>
