@@ -255,12 +255,16 @@ const Entry = ({
     handlers: {
       onFocus: (editor) => () => {
         console.log('Focus')
-        // Transforms.deselect(editor)
+        // Set cursor at the end, as a fix to multiple clicks
+        if (!editor.selection) {
+          Transforms.select(editor, SlateEditor.end(editor, []))
+        }
         setFocused(true)
       },
       onBlur: (editor) => () => {
         console.log('Blur')
         // Transforms.deselect(editor)
+        // Transforms.select(editor, SlateEditor.end(editor, []))
         // editor.selection = null
         setFocused(false)
       },
@@ -273,8 +277,6 @@ const Entry = ({
           setNeedsSavingToServer(true)
           // Another way to access editor value:
           // console.log(editor.children)
-        } else {
-          console.log('not isAstChange')
         }
       },
     },
