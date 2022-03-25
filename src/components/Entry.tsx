@@ -3,9 +3,12 @@ import styled from 'styled-components'
 import dayjs from 'dayjs'
 import { FormatToolbar } from './index'
 // import { usePlateEditorRef } from '@udecode/plate'
+import { usePlateEditorState } from '@udecode/plate-core'
 import { countWords } from '../utils'
 import { useEntriesContext } from '../context'
 import { ContextMenu } from './ContextMenu'
+import { createPluginFactory } from '@udecode/plate'
+import { Transforms, Editor as SlateEditor } from 'slate'
 
 import {
   createPlateUI,
@@ -32,7 +35,6 @@ import {
 type EntryBlockProps = {
   entryDay: any
   entryDayCount: number
-  isFocused: boolean
   isFadedOut: boolean
   cached?: any
   ref?: any
@@ -113,7 +115,6 @@ const fetchEntry = async (day: any) => {
 const Entry = ({
   entryDay,
   entryDayCount,
-  isFocused,
   isFadedOut,
   cached,
   setEntryHeight,
@@ -121,9 +122,10 @@ const Entry = ({
   const [wordCount, setWordCount] = useState(0)
   const [needsSavingToServer, setNeedsSavingToServer] = useState(false)
   const [initialValue, setInitialValue] = useState([])
+  const [focused, setFocused] = useState(false)
   const [initialFetchDone, setInitialFetchDone] = useState(false)
   const debugValue = useRef([])
-  const editor = useRef(null)
+  const editorRef = useRef(null)
   const { setCachedEntry } = useEntriesContext()
 
   const onChangeDebug = (newValue: any) => {
@@ -169,7 +171,7 @@ const Entry = ({
   const initialFetch = async () => {
     // console.log(`initialFetch for ${entryId}`)
 
-    resizeObserver.observe(editor.current)
+    resizeObserver.observe(editorRef.current)
 
     if (cached) {
       // console.log(`Cached day ${entryDay}`)
@@ -219,7 +221,7 @@ const Entry = ({
   useEffect(() => {
     if (initialFetch) {
       setTimeout(() => {
-        resizeObserver.unobserve(editor.current)
+        resizeObserver.unobserve(editorRef.current)
       }, 2000)
     }
   }, [setInitialFetchDone])
@@ -238,6 +240,25 @@ const Entry = ({
     placeholder: "What's on your mind…",
   }
 
+  // Plugin
+
+  const createEventEditorPlugin = createPluginFactory({
+    key: 'events-editor-for-toolbar',
+    handlers: {
+      onFocus: (editor) => () => {
+        console.log('Focus')
+        // Transforms.deselect(editor)
+        setFocused(true)
+      },
+      onBlur: (editor) => () => {
+        console.log('Blur')
+        // Transforms.deselect(editor)
+        editor.selection = null
+        setFocused(false)
+      },
+    },
+  })
+
   const plugins = createPlugins(
     [
       // elements
@@ -253,6 +274,8 @@ const Entry = ({
       createUnderlinePlugin(), // underline mark
       createStrikethroughPlugin(), // strikethrough mark
       createCodePlugin(), // code mark
+
+      createEventEditorPlugin(),
     ],
     {
       // Plate components
@@ -263,7 +286,7 @@ const Entry = ({
   // const st = usePlateStore(entryId)
 
   return (
-    <Container isFadedOut={isFadedOut} ref={editor} id={`${entryDay}-entry`}>
+    <Container isFadedOut={isFadedOut} ref={editorRef} id={`${entryDay}-entry`}>
       <MainWrapper>
         {(initialFetchDone || cached) && (
           <ContextMenu>
@@ -274,7 +297,7 @@ const Entry = ({
               onChange={onChangeDebug}
               plugins={plugins}
             >
-              <FormatToolbar />
+              <FormatToolbar focused={focused} />
             </Plate>
           </ContextMenu>
         )}

@@ -37,7 +37,6 @@ function EntryList() {
   const [entries, setEntries] = useState([])
   const [initialFetchDone, setInitialFetchDone] = useState(false)
   const { initialCache, daysCache, setCachedDays } = useEntriesContext()
-  const listRef = useRef(null)
   const entriesHeight: myref = {} //useRef<myref>(null)
   const itemsRef = useRef<Array<HTMLDivElement | null>>([])
   var element: HTMLElement | null
@@ -53,6 +52,7 @@ function EntryList() {
   }
 
   const focusedEditorId = useEventEditorSelectors.focus?.()
+  const blurEditorId = useEventEditorSelectors.blur?.()
 
   useEffect(() => {
     initialFetch()
@@ -141,7 +141,7 @@ function EntryList() {
   }
 
   return (
-    <Wrapper ref={listRef}>
+    <Wrapper>
       <PostEntries></PostEntries>
       {initialFetchDone &&
         entries
@@ -153,7 +153,6 @@ function EntryList() {
               entryDay={entry}
               entryDayCount={entries.length - i}
               cached={initialCache.current[entry]}
-              isFocused={focusedEditorId == `${entry}-editor`}
               isFadedOut={focusedEditorId != `${entry}-editor` && focusedEditorId != null}
               setEntryHeight={setEntryHeight}
             />

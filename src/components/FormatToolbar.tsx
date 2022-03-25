@@ -1,16 +1,20 @@
-import React, { ReactPortal } from 'react'
+import React, { ReactPortal, useState, useEffect } from 'react'
 import ReactDOM from 'react-dom'
 import * as Toolbar from '@radix-ui/react-toolbar'
 import * as Select from '@radix-ui/react-select'
 import * as Toggle from '@radix-ui/react-toggle'
+import { BaseRange, BasePoint, Transforms, Editor as SlateEditor } from 'slate'
 import { Icon } from './Icon'
 import { FormatBold } from '@styled-icons/material/FormatBold'
+// import { getSelectionText, isSelectionExpanded } from '@udecode/plate-common'
 import {
   MARK_BOLD,
   ELEMENT_H1,
   MarkToolbarButton,
   usePlateEditorRef,
   getPluginType,
+  getSelectionText,
+  isSelectionExpanded,
 } from '@udecode/plate'
 import {
   getPreventDefaultHandler,
@@ -70,8 +74,35 @@ const BlockTypeSelect = () => {
   )
 }
 
-export const FormatToolbar = () => {
+interface FormatToolbarProps {
+  focused: boolean
+}
+
+export const FormatToolbar = ({ focused }: FormatToolbarProps) => {
   const editorRef = usePlateEditorRef()
+  const editor = usePlateEditorState(useEventPlateId())
+  const [isHidden, setIsHidden] = useState(true)
+  const selectionExpanded = editor && isSelectionExpanded(editor)
+  const selectionText = editor && getSelectionText(editor)
+
+  // TODO https://github.com/udecode/plate/issues/1352#issuecomment-1056975461
+  // useEffect(() => {
+  //   if (editor && !editor.selection) {
+  //     Transforms.select(editor, SlateEditor.end(editor, []))
+  //   }
+  // }, [editor])
+
+  useEffect(() => {
+    if (!focused) {
+      setIsHidden(true)
+    } else {
+      if (!selectionText) {
+        setIsHidden(true)
+      } else if (selectionText && selectionExpanded) {
+        setIsHidden(false)
+      }
+    }
+  }, [selectionExpanded, selectionText, focused])
 
   const Toggle = withPlateEventProvider(() => {
     const id = useEventPlateId()
@@ -99,15 +130,43 @@ export const FormatToolbar = () => {
     )
   })
 
+  const Mark = withPlateEventProvider(() => {
+    const id = useEventPlateId()
+    const editor = usePlateEditorState(id)
+    const type = getPluginType(editorRef, ELEMENT_H1)
+
+    const onPressedChange = (pressed: boolean) => {
+      console.log(`Pressed: ${pressed}`)
+    }
+
+    const onMouseDown = (e: any) => {
+      if (editor) {
+        getPreventDefaultHandler(toggleNodeType, editor, {
+          activeType: type,
+          inactiveType: '',
+        })(e)
+      }
+    }
+
+    return (
+      <StyledToggle
+        pressed={!!editor?.selection && someNode(editor, { match: { type } })}
+        onPressedChange={onPressedChange}
+        onMouseDown={onMouseDown}
+      >
+        <Icon name='check24' />
+      </StyledToggle>
+    )
+  })
+
   return (
-    <StyledToolbar>
-      <BlockTypeSelect />
-      <Toggle />
-      <Toolbar.Button />
-      <MarkToolbarButton
-        type={getPluginType(editorRef, MARK_BOLD)}
-        icon={<Icon name='check24' />}
-      />
-    </StyledToolbar>
+    !isHidden && (
+      <StyledToolbar>
+        <BlockTypeSelect />
+        <Mark />
+        <Toggle />
+        <Toolbar.Button />
+      </StyledToolbar>
+    )
   )
 }
