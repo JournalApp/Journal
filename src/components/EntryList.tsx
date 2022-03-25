@@ -51,8 +51,8 @@ function EntryList() {
     modifiedAt: Date // server time
   }
 
-  const focusedEditorId = useEventEditorSelectors.focus?.()
-  const blurEditorId = useEventEditorSelectors.blur?.()
+  const focusedEditorId = '' //useEventEditorSelectors.focus?.()
+  // const blurEditorId = useEventEditorSelectors.blur?.()
 
   useEffect(() => {
     initialFetch()
@@ -153,7 +153,7 @@ function EntryList() {
               entryDay={entry}
               entryDayCount={entries.length - i}
               cached={initialCache.current[entry]}
-              isFadedOut={focusedEditorId != `${entry}-editor` && focusedEditorId != null}
+              isFadedOut={false} //{focusedEditorId != `${entry}-editor` && focusedEditorId != null}
               setEntryHeight={setEntryHeight}
             />
           ))}

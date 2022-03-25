@@ -3,11 +3,11 @@ import styled from 'styled-components'
 import dayjs from 'dayjs'
 import { FormatToolbar } from './index'
 // import { usePlateEditorRef } from '@udecode/plate'
-import { usePlateEditorState } from '@udecode/plate-core'
+import { usePlateEditorState, usePlateSelectors } from '@udecode/plate-core'
 import { countWords } from '../utils'
 import { useEntriesContext } from '../context'
 import { ContextMenu } from './ContextMenu'
-import { createPluginFactory } from '@udecode/plate'
+import { createPluginFactory, getPlateActions } from '@udecode/plate'
 import { Transforms, Editor as SlateEditor } from 'slate'
 
 import {
@@ -127,10 +127,18 @@ const Entry = ({
   const debugValue = useRef([])
   const editorRef = useRef(null)
   const { setCachedEntry } = useEntriesContext()
+  // const st = usePlateEditorState(`${entryDay}-editor`)
 
   const onChangeDebug = (newValue: any) => {
+    // const isAstChange = editor.operations.some(
+    //   op => 'set_selection' !== op.type
+    // )
+    // if (isAstChange) {
+    //   // Save the value to Local Storage.
+    //   const content = JSON.stringify(value)
+    //   localStorage.setItem('content', content)
+    // }
     debugValue.current = newValue
-    setNeedsSavingToServer(true)
   }
 
   const saveEntry = async (day: any, content: any) => {
@@ -253,8 +261,21 @@ const Entry = ({
       onBlur: (editor) => () => {
         console.log('Blur')
         // Transforms.deselect(editor)
-        editor.selection = null
+        // editor.selection = null
         setFocused(false)
+      },
+      onChange: (editor) => () => {
+        console.log('Change')
+        const isAstChange = editor.operations.some((op) => 'set_selection' !== op.type)
+        if (isAstChange) {
+          console.log('isAstChange')
+          // Needs saving as it's an actual content change
+          setNeedsSavingToServer(true)
+          // Another way to access editor value:
+          // console.log(editor.children)
+        } else {
+          console.log('not isAstChange')
+        }
       },
     },
   })
