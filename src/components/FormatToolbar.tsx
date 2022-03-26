@@ -119,28 +119,13 @@ export const FormatToolbar = ({ focused }: FormatToolbarProps) => {
   // }, [editor])
 
   useLayoutEffect(() => {
-    // Call reference with the virtual element inside an effect
-
     reference({
       getBoundingClientRect() {
-        // return getSelectionBoundingClientRect()
-        return {
-          x: getSelectionBoundingClientRect().x,
-          y: getSelectionBoundingClientRect().y,
-          top: getSelectionBoundingClientRect().top,
-          left: getSelectionBoundingClientRect().left,
-          bottom: getSelectionBoundingClientRect().bottom,
-          right: getSelectionBoundingClientRect().right,
-          width: getSelectionBoundingClientRect().width,
-          height: getSelectionBoundingClientRect().height,
-        }
+        const { top, right, bottom, left, width, height, x, y } = getSelectionBoundingClientRect()
+        return { top, right, bottom, left, width, height, x, y }
       },
     })
     console.log('useLayoutEffect')
-    // if (refs.floating.current) {
-    //   console.log('updating')
-    //   return autoUpdate(refs.reference.current, refs.floating.current, update)
-    // }
   }, [reference, selectionExpanded, selectionText])
 
   useEffect(() => {
@@ -153,8 +138,6 @@ export const FormatToolbar = ({ focused }: FormatToolbarProps) => {
         setIsHidden(false)
       }
     }
-    // console.log(getSelectionBoundingClientRect())
-    // console.log(`${x}, ${y}`)
   }, [selectionExpanded, selectionText, focused])
 
   const Toggle = withPlateEventProvider(() => {
