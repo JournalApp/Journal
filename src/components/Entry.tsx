@@ -270,9 +270,9 @@ const Entry = ({
       },
       onChange: (editor) => () => {
         console.log('Change')
-        const isAstChange = editor.operations.some((op) => 'set_selection' !== op.type)
-        if (isAstChange) {
-          console.log('isAstChange')
+        const isContentChange = editor.operations.some((op) => 'set_selection' !== op.type)
+        if (isContentChange) {
+          console.log('isContentChange')
           // Needs saving as it's an actual content change
           setNeedsSavingToServer(true)
           // Another way to access editor value:

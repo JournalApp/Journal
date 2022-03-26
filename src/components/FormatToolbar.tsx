@@ -1,8 +1,9 @@
-import React, { ReactPortal, useState, useEffect } from 'react'
-import ReactDOM from 'react-dom'
+import React, { ReactPortal, useState, useEffect, useLayoutEffect } from 'react'
+import * as ReactDOM from 'react-dom'
 import * as Toolbar from '@radix-ui/react-toolbar'
 import * as Select from '@radix-ui/react-select'
 import * as Toggle from '@radix-ui/react-toggle'
+import { useFloating, shift, flip } from '@floating-ui/react-dom'
 import { BaseRange, BasePoint, Transforms, Editor as SlateEditor } from 'slate'
 import { Icon } from './Icon'
 import { FormatBold } from '@styled-icons/material/FormatBold'
@@ -27,6 +28,20 @@ import {
   isMarkActive,
 } from '@udecode/plate-core'
 import styled from 'styled-components'
+import { VirtualElement } from '@floating-ui/dom'
+
+interface WrapperProps {
+  posX?: string
+  posY?: string
+  pos?: string
+}
+
+const Wrapper = styled.div<WrapperProps>`
+  position: ${(props) => (props.pos ? props.pos : 'absolute')};
+  top: ${(props) => (props.posY ? props.posY : '')};
+  left: ${(props) => (props.posX ? props.posX : '')};
+  transition: 0.2s;
+`
 
 const StyledToolbar = styled(Toolbar.Root)`
   display: flex;
@@ -45,6 +60,13 @@ const StyledToggle = styled(Toggle.Root)`
     background-color: silver;
   }
 `
+
+const getSelectionBoundingClientRect = () => {
+  const domSelection = window.getSelection()
+  if (!domSelection || domSelection.rangeCount < 1) return
+  const domRange = domSelection.getRangeAt(0)
+  return domRange.getBoundingClientRect()
+}
 
 const BlockTypeSelect = () => {
   return (
@@ -84,6 +106,10 @@ export const FormatToolbar = ({ focused }: FormatToolbarProps) => {
   const [isHidden, setIsHidden] = useState(true)
   const selectionExpanded = editor && isSelectionExpanded(editor)
   const selectionText = editor && getSelectionText(editor)
+  const { x, y, reference, floating, strategy, update, refs } = useFloating({
+    placement: 'top',
+    middleware: [shift()],
+  })
 
   // TODO https://github.com/udecode/plate/issues/1352#issuecomment-1056975461
   // useEffect(() => {
@@ -91,6 +117,31 @@ export const FormatToolbar = ({ focused }: FormatToolbarProps) => {
   //     Transforms.select(editor, SlateEditor.end(editor, []))
   //   }
   // }, [editor])
+
+  useLayoutEffect(() => {
+    // Call reference with the virtual element inside an effect
+
+    reference({
+      getBoundingClientRect() {
+        // return getSelectionBoundingClientRect()
+        return {
+          x: getSelectionBoundingClientRect().x,
+          y: getSelectionBoundingClientRect().y,
+          top: getSelectionBoundingClientRect().top,
+          left: getSelectionBoundingClientRect().left,
+          bottom: getSelectionBoundingClientRect().bottom,
+          right: getSelectionBoundingClientRect().right,
+          width: getSelectionBoundingClientRect().width,
+          height: getSelectionBoundingClientRect().height,
+        }
+      },
+    })
+    console.log('useLayoutEffect')
+    // if (refs.floating.current) {
+    //   console.log('updating')
+    //   return autoUpdate(refs.reference.current, refs.floating.current, update)
+    // }
+  }, [reference, selectionExpanded, selectionText])
 
   useEffect(() => {
     if (!focused) {
@@ -102,6 +153,8 @@ export const FormatToolbar = ({ focused }: FormatToolbarProps) => {
         setIsHidden(false)
       }
     }
+    // console.log(getSelectionBoundingClientRect())
+    // console.log(`${x}, ${y}`)
   }, [selectionExpanded, selectionText, focused])
 
   const Toggle = withPlateEventProvider(() => {
@@ -160,13 +213,22 @@ export const FormatToolbar = ({ focused }: FormatToolbarProps) => {
   })
 
   return (
-    !isHidden && (
-      <StyledToolbar>
-        <BlockTypeSelect />
-        <Mark />
-        <Toggle />
-        <Toolbar.Button />
-      </StyledToolbar>
+    !isHidden &&
+    ReactDOM.createPortal(
+      <Wrapper
+        ref={floating}
+        posX={`${Math.floor(x)}px`}
+        posY={`${Math.floor(y)}px`}
+        pos={strategy}
+      >
+        <StyledToolbar>
+          <BlockTypeSelect />
+          <Mark />
+          <Toggle />
+          <Toolbar.Button />
+        </StyledToolbar>
+      </Wrapper>,
+      document.body
     )
   )
 }

@@ -90,6 +90,7 @@
   },
   "dependencies": {
     "@electron/typescript-definitions": "^8.9.6",
+    "@floating-ui/react-dom": "^0.6.0",
     "@radix-ui/react-context-menu": "^0.1.6",
     "@radix-ui/react-select": "^0.1.1",
     "@radix-ui/react-toggle": "^0.1.4",
@@ -98,6 +99,7 @@
     "@styled-icons/foundation": "^10.34.0",
     "@styled-icons/material": "^10.34.0",
     "@udecode/plate": "^10.4.2",
+    "@udecode/plate-core": "^10.4.2",
     "@udecode/plate-test-utils": "^10.1.0",
     "af-virtual-scroll": "^2.14.0",
     "dayjs": "^1.10.7",
@@ -110,10 +112,10 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "remarkable": "^2.0.1",
-    "slate": "^0.73.1",
+    "slate": "^0.76.0",
     "slate-history": "^0.66.0",
     "slate-hyperscript": "^0.67.0",
-    "slate-react": "^0.74.0",
+    "slate-react": "^0.76.0",
     "styled-components": "^5.3.3",
     "tailwindcss": "^3.0.23",
     "twin.macro": "^2.8.2"
