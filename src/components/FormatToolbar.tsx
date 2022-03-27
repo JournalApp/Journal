@@ -1,13 +1,15 @@
-import React, { ReactPortal, useState, useEffect, useLayoutEffect } from 'react'
+import React, { ReactPortal, useState, useEffect, useLayoutEffect, forwardRef } from 'react'
 import * as ReactDOM from 'react-dom'
 import * as Toolbar from '@radix-ui/react-toolbar'
-import * as Select from '@radix-ui/react-select'
+// import * as Select from '@radix-ui/react-select'
 import * as Toggle from '@radix-ui/react-toggle'
 import { useFloating, shift, flip } from '@floating-ui/react-dom'
 import { BaseRange, BasePoint, Transforms, Editor as SlateEditor } from 'slate'
 import { Icon } from './Icon'
 import { FormatBold } from '@styled-icons/material/FormatBold'
+import { BlockTypeSelect } from './FormatToolbarDropdown'
 // import { getSelectionText, isSelectionExpanded } from '@udecode/plate-common'
+
 import {
   MARK_BOLD,
   ELEMENT_H1,
@@ -28,7 +30,6 @@ import {
   isMarkActive,
 } from '@udecode/plate-core'
 import styled from 'styled-components'
-import { VirtualElement } from '@floating-ui/dom'
 
 interface WrapperProps {
   posX?: string
@@ -61,6 +62,15 @@ const StyledToggle = styled(Toggle.Root)`
   }
 `
 
+// const StyledContent = styled(Select.Content)`
+//   position: static;
+//   top: 50px;
+//   overflow: hidden;
+//   background-color: white;
+//   border-radius: 6px;
+//   box-shadow: 0px 10px 38px -10px rgba(22, 23, 24, 0.35), 0px 10px 20px -15px rgba(22, 23, 24, 0.2);
+// `
+
 const getSelectionBoundingClientRect = () => {
   const domSelection = window.getSelection()
   if (!domSelection || domSelection.rangeCount < 1) return
@@ -68,33 +78,39 @@ const getSelectionBoundingClientRect = () => {
   return domRange.getBoundingClientRect()
 }
 
-const BlockTypeSelect = () => {
-  return (
-    <Select.Root>
-      <Select.Trigger onMouseDown={(e) => console.log('Select.Trigger')}>
-        <Select.Value onMouseDown={(e) => console.log('Select.Value')} />
-        <Select.Icon onMouseDown={(e) => console.log('Select.Icon')} />
-      </Select.Trigger>
+// const BlockTypeSelect = () => {
+//   return (
+//     <Select.Root>
+//       <Select.Trigger onMouseDown={(e) => console.log('Select.Trigger')}>
+//         <Select.Value onMouseDown={(e) => console.log('Select.Value')} />
+//         <Select.Icon onMouseDown={(e) => console.log('Select.Icon')} />
+//       </Select.Trigger>
 
-      <Select.Content>
-        <Select.Viewport>
-          <Select.Item value='1'>
-            <Select.ItemText>Text</Select.ItemText>
-            <Select.ItemIndicator />
-          </Select.Item>
-          <Select.Item value='2'>
-            <Select.ItemText>Header 1</Select.ItemText>
-            <Select.ItemIndicator />
-          </Select.Item>
-          <Select.Item value='3'>
-            <Select.ItemText>Header 2</Select.ItemText>
-            <Select.ItemIndicator />
-          </Select.Item>
-        </Select.Viewport>
-      </Select.Content>
-    </Select.Root>
-  )
-}
+//       <StyledContent>
+//         <Select.Viewport>
+//           <Select.Item value='1'>
+//             <Select.ItemText>Text</Select.ItemText>
+//             <Select.ItemIndicator />
+//           </Select.Item>
+//           <Select.Item value='2'>
+//             <Select.ItemText>Header 1</Select.ItemText>
+//             <Select.ItemIndicator />
+//           </Select.Item>
+//           <Select.Item value='3'>
+//             <Select.ItemText>Header 2</Select.ItemText>
+//             <Select.ItemIndicator />
+//           </Select.Item>
+//         </Select.Viewport>
+//       </StyledContent>
+//     </Select.Root>
+//   )
+// }
+
+const options = [
+  { value: 'chocolate', label: 'Chocolate' },
+  { value: 'strawberry', label: 'Strawberry' },
+  { value: 'vanilla', label: 'Vanilla' },
+]
 
 interface FormatToolbarProps {
   focused: boolean
@@ -106,8 +122,8 @@ export const FormatToolbar = ({ focused }: FormatToolbarProps) => {
   const [isHidden, setIsHidden] = useState(true)
   const selectionExpanded = editor && isSelectionExpanded(editor)
   const selectionText = editor && getSelectionText(editor)
-  const { x, y, reference, floating, strategy, update, refs } = useFloating({
-    placement: 'top',
+  const { x, y, reference, floating, strategy } = useFloating({
+    placement: 'top-start',
     middleware: [shift()],
   })
 
@@ -126,7 +142,7 @@ export const FormatToolbar = ({ focused }: FormatToolbarProps) => {
       },
     })
     console.log('useLayoutEffect')
-  }, [reference, selectionExpanded, selectionText])
+  }, [reference, selectionExpanded, selectionText, editor.children])
 
   useEffect(() => {
     if (!focused) {
@@ -161,7 +177,7 @@ export const FormatToolbar = ({ focused }: FormatToolbarProps) => {
         onPressedChange={onPressedChange}
         onMouseDown={onMouseDown}
       >
-        <Icon name='check24' />
+        Bold
       </StyledToggle>
     )
   })
@@ -206,9 +222,7 @@ export const FormatToolbar = ({ focused }: FormatToolbarProps) => {
       >
         <StyledToolbar>
           <BlockTypeSelect />
-          <Mark />
           <Toggle />
-          <Toolbar.Button />
         </StyledToolbar>
       </Wrapper>,
       document.body

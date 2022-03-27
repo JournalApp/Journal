@@ -216,6 +216,7 @@ const Entry = ({
               text: '',
             },
           ],
+          type: 'p',
         },
       ])
     }
