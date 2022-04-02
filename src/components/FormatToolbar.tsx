@@ -1,14 +1,10 @@
 import React, { ReactPortal, useState, useEffect, useLayoutEffect, forwardRef } from 'react'
 import * as ReactDOM from 'react-dom'
 import * as Toolbar from '@radix-ui/react-toolbar'
-// import * as Select from '@radix-ui/react-select'
 import * as Toggle from '@radix-ui/react-toggle'
 import { useFloating, shift, flip } from '@floating-ui/react-dom'
 import { BaseRange, BasePoint, Transforms, Editor as SlateEditor } from 'slate'
-import { Icon } from 'components/Icon'
-import { FormatBold } from '@styled-icons/material/FormatBold'
-import { BlockTypeSelect } from 'components/FormatToolbarDropdown'
-// import { getSelectionText, isSelectionExpanded } from '@udecode/plate-common'
+import { Icon, BlockTypeSelect } from 'components'
 
 import {
   MARK_BOLD,
