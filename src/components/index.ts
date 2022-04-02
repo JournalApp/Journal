@@ -1,5 +1,7 @@
 export * from './Entry'
+export * from './Icon'
 export * from './Calendar'
 export * from './FormatToolbar'
+export * from './FormatToolbarDropdown'
 export * from './EntryList'
 export * from './ContextMenu'

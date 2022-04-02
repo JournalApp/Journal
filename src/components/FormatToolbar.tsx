@@ -5,13 +5,17 @@ import * as Toolbar from '@radix-ui/react-toolbar'
 import * as Toggle from '@radix-ui/react-toggle'
 import { useFloating, shift, flip } from '@floating-ui/react-dom'
 import { BaseRange, BasePoint, Transforms, Editor as SlateEditor } from 'slate'
-import { Icon } from './Icon'
+import { Icon } from 'components/Icon'
 import { FormatBold } from '@styled-icons/material/FormatBold'
-import { BlockTypeSelect } from './FormatToolbarDropdown'
+import { BlockTypeSelect } from 'components/FormatToolbarDropdown'
 // import { getSelectionText, isSelectionExpanded } from '@udecode/plate-common'
 
 import {
   MARK_BOLD,
+  MARK_UNDERLINE,
+  MARK_ITALIC,
+  MARK_STRIKETHROUGH,
+  MARK_CODE,
   ELEMENT_H1,
   MarkToolbarButton,
   usePlateEditorRef,
@@ -156,10 +160,10 @@ export const FormatToolbar = ({ focused }: FormatToolbarProps) => {
     }
   }, [selectionExpanded, selectionText, focused])
 
-  const Toggle = withPlateEventProvider(() => {
+  const Toggle = withPlateEventProvider(({ markType, content }: any) => {
     const id = useEventPlateId()
     const editor = usePlateEditorState(id)
-    const type = getPluginType(editorRef, MARK_BOLD)
+    const type = getPluginType(editorRef, markType)
 
     const onPressedChange = (pressed: boolean) => {
       console.log(`Pressed: ${pressed}`)
@@ -177,7 +181,7 @@ export const FormatToolbar = ({ focused }: FormatToolbarProps) => {
         onPressedChange={onPressedChange}
         onMouseDown={onMouseDown}
       >
-        Bold
+        {content}
       </StyledToggle>
     )
   })
@@ -222,7 +226,11 @@ export const FormatToolbar = ({ focused }: FormatToolbarProps) => {
       >
         <StyledToolbar>
           <BlockTypeSelect />
-          <Toggle />
+          <Toggle markType={MARK_BOLD} content='B' />
+          <Toggle markType={MARK_ITALIC} content='I' />
+          <Toggle markType={MARK_UNDERLINE} content='U' />
+          <Toggle markType={MARK_STRIKETHROUGH} content='S' />
+          <Toggle markType={MARK_CODE} content='<>' />
         </StyledToolbar>
       </Wrapper>,
       document.body

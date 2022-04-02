@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, forwardRef } from 'react'
 import styled from 'styled-components'
 import { Entry } from './'
 import { useEventEditorSelectors } from '@udecode/plate'
-import { arrayEquals } from '../utils'
+import { arrayEquals } from 'utils'
 import { useEntriesContext } from '../context'
 import dayjs from 'dayjs'
 
