@@ -32,7 +32,7 @@ import { LooksOne } from '@styled-icons/material/LooksOne'
 import { LooksTwo } from '@styled-icons/material/LooksTwo'
 import { Check } from '@styled-icons/material/Check'
 import styled from 'styled-components'
-import { Icon } from './Icon'
+// import { Icon } from './Icon'
 import * as Select from '@radix-ui/react-select'
 
 import {

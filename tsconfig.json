@@ -15,7 +15,8 @@
       "*": ["*"],
       "components": ["./src/components/"],
       "utils": ["./src/utils/"]
-    }
+    },
+    "lib": ["es2021", "dom"]
   },
   "include": ["src/**/*", "decs.d.ts"]
 }

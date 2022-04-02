@@ -46,19 +46,51 @@ const Wrapper = styled.div<WrapperProps>`
 
 const StyledToolbar = styled(Toolbar.Root)`
   display: flex;
-  padding: 10px;
-  width: 100%;
+  padding: 4px;
   min-width: max-content;
-  border-radius: 6px;
-  background-color: white;
+  border-radius: 12px;
+  background-color: var(--color-neutral-popper);
 `
 
-const StyledToggle = styled(Toggle.Root)`
-  border-radius: 6px;
-  border: 0;
-  background-color: white;
-  &[data-state='on'] {
-    background-color: silver;
+// const StyledToggle = styled(Toggle.Root)`
+//   border-radius: 6px;
+//   border: 0;
+//   background-color: white;
+//   &[data-state='on'] {
+//     background-color: silver;
+//   }
+// `
+
+interface StyledToggleProps {
+  toggleOn: boolean
+}
+
+const ToggleGroup = styled.div`
+  display: flex;
+  flex-basis: row;
+  border-radius: 8px;
+
+  & > :first-child {
+    border-radius: 8px 0 0 8px;
+  }
+
+  & > :last-child {
+    border-radius: 0 8px 8px 0;
+  }
+`
+
+const StyledToggle = styled.div<StyledToggleProps>`
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background-color: ${(props) =>
+    props.toggleOn ? 'var(--color-neutral-main)' : 'var(--color-neutral-inverted)'};
+  &:hover {
+    background-color: ${(props) =>
+      props.toggleOn ? 'var(--color-neutral-main)' : 'var(--color-neutral-hover)'};
   }
 `
 
@@ -156,14 +188,11 @@ export const FormatToolbar = ({ focused }: FormatToolbarProps) => {
     }
   }, [selectionExpanded, selectionText, focused])
 
-  const Toggle = withPlateEventProvider(({ markType, content }: any) => {
+  const Toggle = withPlateEventProvider(({ markType, iconName }: any) => {
     const id = useEventPlateId()
     const editor = usePlateEditorState(id)
     const type = getPluginType(editorRef, markType)
-
-    const onPressedChange = (pressed: boolean) => {
-      console.log(`Pressed: ${pressed}`)
-    }
+    const state = !!editor?.selection && isMarkActive(editor, type!)
 
     const onMouseDown = (e: any) => {
       if (editor) {
@@ -172,44 +201,42 @@ export const FormatToolbar = ({ focused }: FormatToolbarProps) => {
     }
 
     return (
-      <StyledToggle
-        pressed={!!editor?.selection && isMarkActive(editor, type!)}
-        onPressedChange={onPressedChange}
-        onMouseDown={onMouseDown}
-      >
-        {content}
+      <StyledToggle toggleOn={state} onMouseDown={onMouseDown}>
+        <Icon
+          name={iconName}
+          tintColor={state ? 'var(--color-neutral-inverted)' : 'var(--color-neutral-main)'}
+        />
       </StyledToggle>
     )
   })
 
-  const Mark = withPlateEventProvider(() => {
-    const id = useEventPlateId()
-    const editor = usePlateEditorState(id)
-    const type = getPluginType(editorRef, ELEMENT_H1)
+  // const Mark = withPlateEventProvider(() => {
+  //   const id = useEventPlateId()
+  //   const editor = usePlateEditorState(id)
+  //   const type = getPluginType(editorRef, ELEMENT_H1)
 
-    const onPressedChange = (pressed: boolean) => {
-      console.log(`Pressed: ${pressed}`)
-    }
+  //   const onPressedChange = (pressed: boolean) => {
+  //     console.log(`Pressed: ${pressed}`)
+  //   }
 
-    const onMouseDown = (e: any) => {
-      if (editor) {
-        getPreventDefaultHandler(toggleNodeType, editor, {
-          activeType: type,
-          inactiveType: '',
-        })(e)
-      }
-    }
+  //   const onMouseDown = (e: any) => {
+  //     if (editor) {
+  //       getPreventDefaultHandler(toggleNodeType, editor, {
+  //         activeType: type,
+  //         inactiveType: '',
+  //       })(e)
+  //     }
+  //   }
 
-    return (
-      <StyledToggle
-        pressed={!!editor?.selection && someNode(editor, { match: { type } })}
-        onPressedChange={onPressedChange}
-        onMouseDown={onMouseDown}
-      >
-        <Icon name='check24' />
-      </StyledToggle>
-    )
-  })
+  //   return (
+  //     <StyledToggle
+  //       on={!!editor?.selection && someNode(editor, { match: { type } })}
+  //       onMouseDown={onMouseDown}
+  //     >
+  //       <Icon name='check24' />
+  //     </StyledToggle>
+  //   )
+  // })
 
   return (
     !isHidden &&
@@ -222,11 +249,13 @@ export const FormatToolbar = ({ focused }: FormatToolbarProps) => {
       >
         <StyledToolbar>
           <BlockTypeSelect />
-          <Toggle markType={MARK_BOLD} content='B' />
-          <Toggle markType={MARK_ITALIC} content='I' />
-          <Toggle markType={MARK_UNDERLINE} content='U' />
-          <Toggle markType={MARK_STRIKETHROUGH} content='S' />
-          <Toggle markType={MARK_CODE} content='<>' />
+          <ToggleGroup>
+            <Toggle markType={MARK_BOLD} iconName='FormatBold' />
+            <Toggle markType={MARK_ITALIC} iconName='FormatItalic' />
+            <Toggle markType={MARK_UNDERLINE} iconName='FormatUnderline' />
+            <Toggle markType={MARK_STRIKETHROUGH} iconName='FormatStriketrough' />
+            <Toggle markType={MARK_CODE} iconName='FormatCode' />
+          </ToggleGroup>
         </StyledToolbar>
       </Wrapper>,
       document.body

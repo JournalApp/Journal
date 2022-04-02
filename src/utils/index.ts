@@ -33,4 +33,13 @@ const countWords = (text: any) => {
   return res.length
 }
 
-export { shallowEqual, arrayEquals, countWords }
+const createCssVar = (items: [string], prefix = '-'): string[] =>
+  Object.entries(items).flatMap(([key, value]: any) => {
+    const varName = `${prefix}-${key}`
+    if (typeof value === 'object') return createCssVar(value, varName)
+    return `${varName}:${value}`
+  })
+
+const createCssVars = (themeColors: any) => createCssVar(themeColors).join(';')
+
+export { shallowEqual, arrayEquals, countWords, createCssVars }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useFloating, shift, flip } from '@floating-ui/react-dom'
-import { Icon } from './Icon'
+import { Icon } from 'components'
 import {
   ELEMENT_DEFAULT,
   ELEMENT_PARAGRAPH,
@@ -24,7 +24,7 @@ const Dropdown = styled.div`
   padding: 10px;
 
   border-radius: 6px;
-  background-color: white;
+  background-color: var(--color-neutral-popper);
 `
 
 interface ItemProps {
