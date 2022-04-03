@@ -14,7 +14,8 @@
     "paths": {
       "*": ["*"],
       "components": ["./src/components/"],
-      "utils": ["./src/utils/"]
+      "utils": ["./src/utils/"],
+      "themes": ["./src/themes/"]
     },
     "lib": ["es2021", "dom"]
   },

@@ -5,6 +5,7 @@ import * as Toggle from '@radix-ui/react-toggle'
 import { useFloating, shift, flip } from '@floating-ui/react-dom'
 import { BaseRange, BasePoint, Transforms, Editor as SlateEditor } from 'slate'
 import { Icon, BlockTypeSelect } from 'components'
+import { theme } from 'themes'
 
 import {
   MARK_BOLD,
@@ -49,7 +50,7 @@ const StyledToolbar = styled(Toolbar.Root)`
   padding: 4px;
   min-width: max-content;
   border-radius: 12px;
-  background-color: var(--color-neutral-popper);
+  background-color: ${theme('color.neutral.popper')};
 `
 
 // const StyledToggle = styled(Toggle.Root)`
@@ -87,10 +88,10 @@ const StyledToggle = styled.div<StyledToggleProps>`
   justify-content: center;
   cursor: pointer;
   background-color: ${(props) =>
-    props.toggleOn ? 'var(--color-neutral-main)' : 'var(--color-neutral-inverted)'};
+    props.toggleOn ? theme('color.neutral.main') : theme('color.neutral.inverted')};
   &:hover {
     background-color: ${(props) =>
-      props.toggleOn ? 'var(--color-neutral-main)' : 'var(--color-neutral-hover)'};
+      props.toggleOn ? theme('color.neutral.main') : theme('color.neutral.hover')};
   }
 `
 
@@ -204,7 +205,7 @@ export const FormatToolbar = ({ focused }: FormatToolbarProps) => {
       <StyledToggle toggleOn={state} onMouseDown={onMouseDown}>
         <Icon
           name={iconName}
-          tintColor={state ? 'var(--color-neutral-inverted)' : 'var(--color-neutral-main)'}
+          tintColor={state ? theme('color.neutral.inverted') : theme('color.neutral.main')}
         />
       </StyledToggle>
     )
