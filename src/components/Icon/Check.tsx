@@ -1,20 +1,11 @@
 import React from 'react'
 
-export function Check24({ tintColor, ...props }: any) {
+export function Check({ tintColor, ...props }: any) {
   return (
-    <svg
-      width='24'
-      height='24'
-      viewBox='0 0 24 24'
-      fill='none'
-      xmlns='http://www.w3.org/2000/svg'
-      {...props}
-    >
+    <svg width={24} height={24} fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
       <path
-        d='M6 12L10 16L18 8'
+        d='M5 13l4 4L19 7'
         stroke={tintColor || 'black'}
-        strokeWidth='2'
-        strokeMiterlimit='10'
         strokeLinecap='round'
         strokeLinejoin='round'
       />

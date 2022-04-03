@@ -2,7 +2,7 @@ import React, { ReactPortal, useState, useEffect, useLayoutEffect, forwardRef } 
 import * as ReactDOM from 'react-dom'
 import * as Toolbar from '@radix-ui/react-toolbar'
 import * as Toggle from '@radix-ui/react-toggle'
-import { useFloating, shift, flip } from '@floating-ui/react-dom'
+import { useFloating, shift, offset } from '@floating-ui/react-dom'
 import { BaseRange, BasePoint, Transforms, Editor as SlateEditor } from 'slate'
 import { Icon, BlockTypeSelect } from 'components'
 import { theme } from 'themes'
@@ -30,7 +30,7 @@ import {
   withPlateEventProvider,
   isMarkActive,
 } from '@udecode/plate-core'
-import styled from 'styled-components'
+import styled, { keyframes } from 'styled-components'
 
 interface WrapperProps {
   posX?: string
@@ -38,16 +38,32 @@ interface WrapperProps {
   pos?: string
 }
 
+const showToolbar = keyframes`
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+`
+
 const Wrapper = styled.div<WrapperProps>`
   position: ${(props) => (props.pos ? props.pos : 'absolute')};
   top: ${(props) => (props.posY ? props.posY : '')};
   left: ${(props) => (props.posX ? props.posX : '')};
-  transition: 0.2s;
+  transition: ${theme('animation.time.fast')};
+  animation-name: ${showToolbar};
+  animation-duration: ${theme('animation.time.long')};
 `
 
 const StyledToolbar = styled(Toolbar.Root)`
   display: flex;
   padding: 4px;
+  gap: 8px;
+  box-shadow: ${theme('style.shadow')};
   min-width: max-content;
   border-radius: 12px;
   background-color: ${theme('color.neutral.popper')};
@@ -93,6 +109,7 @@ const StyledToggle = styled.div<StyledToggleProps>`
     background-color: ${(props) =>
       props.toggleOn ? theme('color.neutral.main') : theme('color.neutral.hover')};
   }
+  transition: ${theme('animation.time.normal')};
 `
 
 // const StyledContent = styled(Select.Content)`
@@ -157,7 +174,7 @@ export const FormatToolbar = ({ focused }: FormatToolbarProps) => {
   const selectionText = editor && getSelectionText(editor)
   const { x, y, reference, floating, strategy } = useFloating({
     placement: 'top-start',
-    middleware: [shift()],
+    middleware: [shift(), offset({ mainAxis: 8 })],
   })
 
   // TODO https://github.com/udecode/plate/issues/1352#issuecomment-1056975461

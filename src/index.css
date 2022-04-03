@@ -15,13 +15,6 @@
 body {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-  color: var(--color-text-100);
-  background-color: var(--color-main-surface);
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-  -webkit-app-region: drag;
-  -webkit-user-select: none;
 }
 
 html {

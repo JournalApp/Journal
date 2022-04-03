@@ -31,6 +31,9 @@ const lightTheme = {
       popper: lightPalette.neutral[10],
     },
   },
+  style: {
+    shadow: `0px 0px 0px 4px ${lightPalette.neutral[25]}`,
+  },
   font: {
     main: "'Inter var'",
   },
@@ -38,7 +41,11 @@ const lightTheme = {
     one: '8px',
   },
   animation: {
-    time: '300ms',
+    time: {
+      fast: '100ms',
+      normal: '200ms',
+      long: '400ms',
+    },
   },
 }
 

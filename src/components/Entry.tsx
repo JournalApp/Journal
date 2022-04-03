@@ -1,21 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import dayjs from 'dayjs'
-import { FormatToolbar } from './index'
-// import { usePlateEditorRef } from '@udecode/plate'
+import { FormatToolbar } from 'components'
 import { usePlateEditorState, usePlateSelectors } from '@udecode/plate-core'
-import { countWords } from '../utils'
+import { countWords } from 'utils'
 import { useEntriesContext } from '../context'
-import { ContextMenu } from './ContextMenu'
+import { ContextMenu } from 'components'
 import { createPluginFactory, getPlateActions } from '@udecode/plate'
 import { Transforms, Editor as SlateEditor } from 'slate'
 
 import {
   createPlateUI,
-  BalloonToolbar,
-  HeadingToolbar,
   Plate,
-  ELEMENT_H1,
   createBlockquotePlugin,
   createBoldPlugin,
   createCodeBlockPlugin,
@@ -27,9 +23,6 @@ import {
   createStrikethroughPlugin,
   createUnderlinePlugin,
   createPlugins,
-  useEventEditorSelectors,
-  usePlateStore,
-  usePlateEditorRef,
 } from '@udecode/plate'
 
 type EntryBlockProps = {
@@ -53,31 +46,26 @@ const Container = styled.div<ContainerProps>`
 
 const Aside = styled.div`
   width: 150px;
+  display: flex;
+  flex-direction: column;
+`
+const AsideItem = styled.p`
+  padding: 0;
+  margin: 0;
   color: var(--color-text-50);
   font-size: 12px;
   line-height: 20px;
 `
+
 const MainWrapper = styled.div`
   width: 100%;
-  max-width: 75ch;
+  padding: 0 80px 0 0;
   font-size: 21px;
   font-weight: 500;
   line-height: 30px;
   -webkit-app-region: no-drag;
-`
-
-const FloatingToolar = styled.div`
-  position: fixed;
-  top: 24px;
-  border: 0;
-  left: 50%;
-  transform: translate(-50%, 0);
-  z-index: 9000;
   & > * {
-    border: 0;
-    border-radius: 16px;
-    padding: 0px 8px;
-    background-color: white;
+    max-width: 75ch;
   }
 `
 
@@ -327,8 +315,10 @@ const Entry = ({
         )}
       </MainWrapper>
       <Aside>
-        {showDay(entryDay)}
-        {wordCount} words, day {entryDayCount}
+        <AsideItem>{showDay(entryDay)}</AsideItem>
+        <AsideItem>
+          {wordCount} words, day {entryDayCount}
+        </AsideItem>
       </Aside>
     </Container>
   )
