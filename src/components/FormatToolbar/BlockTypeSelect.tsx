@@ -29,6 +29,12 @@ interface BlockTypeSelectButtonProps {
   isHidden?: boolean
 }
 
+const Divider = styled.div`
+  background-color: ${theme('color.neutral.border')};
+  height: 1px;
+  margin: 8px 12px;
+`
+
 const BlockTypeSelectButton = styled.button<BlockTypeSelectButtonProps>`
   height: 36px;
   display: flex;
@@ -177,6 +183,7 @@ export const BlockTypeSelect = () => {
           >
             Text
           </BlockTypeSelectItem>
+          <Divider />
           <BlockTypeSelectItem
             onMouseDown={(e) => mark(typeH1, e)}
             current={isCurrent(typeH1)}
@@ -198,6 +205,7 @@ export const BlockTypeSelect = () => {
           >
             Heading 3
           </BlockTypeSelectItem>
+          <Divider />
           <BlockTypeSelectItem
             onMouseDown={(e) => markList(typeOL, e)}
             current={isCurrentList(typeOL)}
