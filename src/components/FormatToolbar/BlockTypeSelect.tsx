@@ -44,10 +44,9 @@ const BlockTypeSelectButton = styled.button<BlockTypeSelectButtonProps>`
   justify-content: center;
   cursor: pointer;
   background-color: ${(props) =>
-    props.isHidden ? theme('color.neutral.popper') : theme('color.neutral.hover')};
+    props.isHidden ? theme('color.neutral.popper') : theme('color.neutral.active')};
   &:hover {
-    background-color: ${(props) =>
-      props.isHidden ? theme('color.neutral.hover') : theme('color.neutral.hover')};
+    background-color: ${theme('color.neutral.hoverInverted')};
   }
   transition: ${theme('animation.time.normal')};
 `

@@ -107,7 +107,7 @@ const StyledToggle = styled.div<StyledToggleProps>`
     props.toggleOn ? theme('color.neutral.main') : theme('color.neutral.inverted')};
   &:hover {
     background-color: ${(props) =>
-      props.toggleOn ? theme('color.neutral.main') : theme('color.neutral.hover')};
+      props.toggleOn ? theme('color.neutral.main') : theme('color.neutral.hoverInverted')};
   }
   transition: ${theme('animation.time.normal')};
 `
