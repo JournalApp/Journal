@@ -100,6 +100,7 @@
     "@styled-icons/foundation": "^10.34.0",
     "@styled-icons/material": "^10.34.0",
     "@udecode/plate": "^10.4.2",
+    "@udecode/plate-autoformat": "^10.5.0",
     "@udecode/plate-core": "^10.4.2",
     "@udecode/plate-test-utils": "^10.1.0",
     "af-virtual-scroll": "^2.14.0",

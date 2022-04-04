@@ -8,6 +8,7 @@ import { useEntriesContext } from '../context'
 import { ContextMenu } from 'components'
 import { createPluginFactory, getPlateActions } from '@udecode/plate'
 import { Transforms, Editor as SlateEditor } from 'slate'
+import { CONFIG } from 'config'
 
 import {
   createPlateUI,
@@ -23,6 +24,7 @@ import {
   createStrikethroughPlugin,
   createUnderlinePlugin,
   createPlugins,
+  createAutoformatPlugin,
 } from '@udecode/plate'
 
 type EntryBlockProps = {
@@ -288,6 +290,7 @@ const Entry = ({
       createCodePlugin(), // code mark
 
       createEventEditorPlugin(),
+      createAutoformatPlugin(CONFIG.autoformat),
     ],
     {
       // Plate components
