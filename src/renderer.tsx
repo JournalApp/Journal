@@ -16,6 +16,12 @@ body {
   -webkit-app-region: drag;
   -webkit-user-select: none;
 }
+
+hr {
+  background-color: ${theme('color.neutral.main')}!important;
+  height: 1px!important;
+  opacity: 0.1;
+}
 `
 
 import React from 'react'

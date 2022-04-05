@@ -23,6 +23,7 @@ import {
   createParagraphPlugin,
   createStrikethroughPlugin,
   createUnderlinePlugin,
+  createHorizontalRulePlugin,
   createPlugins,
   createAutoformatPlugin,
   createResetNodePlugin,
@@ -283,6 +284,7 @@ const Entry = ({
       createCodeBlockPlugin(), // code block element
       createHeadingPlugin(), // heading elements
       createListPlugin(),
+      createHorizontalRulePlugin(),
 
       // marks
       createBoldPlugin(), // bold mark
