@@ -25,6 +25,7 @@ import {
   createUnderlinePlugin,
   createPlugins,
   createAutoformatPlugin,
+  createResetNodePlugin,
 } from '@udecode/plate'
 
 type EntryBlockProps = {
@@ -237,6 +238,7 @@ const Entry = ({
 
   const editableProps = {
     placeholder: "What's on your mind…",
+    autoFocus: false,
   }
 
   // Plugin
@@ -291,6 +293,7 @@ const Entry = ({
 
       createEventEditorPlugin(),
       createAutoformatPlugin(CONFIG.autoformat),
+      createResetNodePlugin(CONFIG.resetNode),
     ],
     {
       // Plate components
