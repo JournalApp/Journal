@@ -61,6 +61,11 @@ const AsideItem = styled.p`
   line-height: 20px;
 `
 
+const AsideStickyContainer = styled.div`
+  position: sticky;
+  top: 30px;
+`
+
 const MainWrapper = styled.div`
   width: 100%;
   padding: 0 80px 0 0;
@@ -323,10 +328,12 @@ const Entry = ({
         )}
       </MainWrapper>
       <Aside>
-        <AsideItem>{showDay(entryDay)}</AsideItem>
-        <AsideItem>
-          {wordCount} words, day {entryDayCount}
-        </AsideItem>
+        <AsideStickyContainer>
+          <AsideItem>{showDay(entryDay)}</AsideItem>
+          <AsideItem>
+            {wordCount} words, day {entryDayCount}
+          </AsideItem>
+        </AsideStickyContainer>
       </Aside>
     </Container>
   )
