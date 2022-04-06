@@ -142,6 +142,7 @@ const createWindow = (): void => {
   // Menu.setApplicationMenu(menu2)
 
   mainWindow.webContents.on('context-menu', (event, params) => {
+    console.log('context-menu event')
     const menu = new Menu()
 
     // Add each spelling suggestion

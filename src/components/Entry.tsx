@@ -280,9 +280,9 @@ const Entry = ({
     [
       // elements
       createParagraphPlugin(), // paragraph element
-      createBlockquotePlugin(), // blockquote element
-      createCodeBlockPlugin(), // code block element
-      createHeadingPlugin(), // heading elements
+      // createBlockquotePlugin(), // blockquote element
+      // createCodeBlockPlugin(), // code block element
+      createHeadingPlugin({ options: { levels: 3 } }), // heading elements
       createListPlugin(),
       createHorizontalRulePlugin(),
 
