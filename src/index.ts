@@ -141,32 +141,34 @@ const createWindow = (): void => {
   // )
   // Menu.setApplicationMenu(menu2)
 
-  mainWindow.webContents.on('context-menu', (event, params) => {
+  mainWindow.webContents.on('context-menu', (event: any, params: any) => {
     console.log('context-menu event')
-    const menu = new Menu()
 
-    // Add each spelling suggestion
-    for (const suggestion of params.dictionarySuggestions) {
-      menu.append(
-        new MenuItem({
-          label: suggestion,
-          click: () => mainWindow.webContents.replaceMisspelling(suggestion),
-        })
-      )
-    }
+    mainWindow.webContents.send('electron-handleSpellCheck', params)
+    // const menu = new Menu()
 
-    // Allow users to add the misspelled word to the dictionary
-    if (params.misspelledWord) {
-      menu.append(
-        new MenuItem({
-          label: 'Add to dictionary',
-          click: () =>
-            mainWindow.webContents.session.addWordToSpellCheckerDictionary(params.misspelledWord),
-        })
-      )
-    }
+    // // Add each spelling suggestion
+    // for (const suggestion of params.dictionarySuggestions) {
+    //   menu.append(
+    //     new MenuItem({
+    //       label: suggestion,
+    //       click: () => mainWindow.webContents.replaceMisspelling(suggestion),
+    //     })
+    //   )
+    // }
 
-    menu.popup()
+    // // Allow users to add the misspelled word to the dictionary
+    // if (params.misspelledWord) {
+    //   menu.append(
+    //     new MenuItem({
+    //       label: 'Add to dictionary',
+    //       click: () =>
+    //         mainWindow.webContents.session.addWordToSpellCheckerDictionary(params.misspelledWord),
+    //     })
+    //   )
+    // }
+
+    // menu.popup()
   })
 }
 

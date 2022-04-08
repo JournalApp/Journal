@@ -23,13 +23,13 @@ const showDropdown = keyframes`
     opacity: 1;
   }
 `
-interface MenuProps {
+interface MenurProps {
   posX?: string
   posY?: string
   pos?: string
 }
 
-const Dropdown = styled.div<MenuProps>`
+const Dropdown = styled.div<MenurProps>`
   position: ${(props) => (props.pos ? props.pos : 'absolute')};
   top: ${(props) => (props.posY ? props.posY : '')};
   left: ${(props) => (props.posX ? props.posX : '')};
@@ -75,7 +75,6 @@ const Divider = styled.div`
 
 export const ContextMenu = (props: any) => {
   const [isHidden, setIsHidden] = useState(true)
-  const [spellSuggections, setSpellSuggections] = useState([])
   const { x, y, reference, floating, strategy, refs } = useFloating({
     placement: 'right-start',
     middleware: [offset({ mainAxis: 5, alignmentAxis: 4 }), flip(), shift()],
@@ -85,19 +84,19 @@ export const ContextMenu = (props: any) => {
     console.log(`isHidden: ${isHidden}`)
   }, [isHidden])
 
-  const setOpen = (e: any) => {
-    console.log('onContextMenu')
-    if (isHidden) {
-      window.electronAPI.handleSpellCheck((event: any, value: any) => {
-        console.log('handleSpellCheck')
-        console.log(value)
-        if (!!value.dictionarySuggestions) {
-          setSpellSuggections([...value.dictionarySuggestions])
-        }
-      })
-    }
-    setIsHidden(!isHidden)
+  // useEffect(() => {
 
+  //   refs.reference.current.addEventListener('contextmenu', (event) => {
+  //     setOpen(event)
+  //   })
+
+  //   return () => {
+  //     second
+  //   }
+  // }, [])
+
+  const setOpen = (e: any) => {
+    setIsHidden(!isHidden)
     reference({
       getBoundingClientRect() {
         return {
@@ -112,56 +111,40 @@ export const ContextMenu = (props: any) => {
         }
       },
     })
+    console.log('setOpen')
   }
 
   const done = () => {
-    console.log('done')
     setIsHidden(true)
   }
 
-  useEffect(() => {
-    if (!isHidden) {
-      console.log('addEventListener')
-      window.addEventListener('click', () => setIsHidden(true))
-    }
-
-    return () => {
-      console.log('removeEventListener')
-      window.removeEventListener('click', () => setIsHidden(true))
-    }
-  }, [isHidden])
-
   return (
     <>
-      <div ref={reference} onContextMenu={setOpen}>
-        {props.children}
-      </div>
+      <div ref={reference}>{props.children}</div>
       <FloatingPortal>
         {!isHidden && (
-          <Dropdown
-            ref={floating}
-            posX={`${Math.floor(x)}px`}
-            posY={`${Math.floor(y)}px`}
-            pos={strategy}
-          >
-            {spellSuggections &&
-              spellSuggections.map((suggestion, i) => (
-                <Item key={i} onMouseDown={done}>
-                  <ItemTitle>{suggestion}</ItemTitle>
-                </Item>
-              ))}
-
-            <Divider />
-            <Item>
-              <ItemTitle>Cut</ItemTitle>
-            </Item>
-            <Item>
-              <ItemTitle>Copy</ItemTitle>
-            </Item>
-            <Item>
-              <ItemTitle>Paste</ItemTitle>
-            </Item>
-          </Dropdown>
+          <FloatingOverlay lockScroll>
+            <Dropdown
+              ref={floating}
+              posX={`${Math.floor(x)}px`}
+              posY={`${Math.floor(y)}px`}
+              pos={strategy}
+            >
+              <Item onMouseDown={done}>
+                <ItemTitle>Bla</ItemTitle>
+              </Item>
+              <Divider />
+              <Item>
+                <ItemTitle>Cut</ItemTitle>
+              </Item>
+              <Item>
+                <ItemTitle>Copy</ItemTitle>
+              </Item>
+              <Item>
+                <ItemTitle>Paste</ItemTitle>
+              </Item>
+            </Dropdown>
+          </FloatingOverlay>
         )}
       </FloatingPortal>
     </>

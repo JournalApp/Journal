@@ -22,4 +22,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.send('electron-storeEntries-set', property, val)
     },
   },
+  handleSpellCheck: (callback: any) => ipcRenderer.once('electron-handleSpellCheck', callback),
 })
