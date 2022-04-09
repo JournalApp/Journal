@@ -1,8 +1,6 @@
 import React, { ReactPortal, useState, useEffect, useLayoutEffect, forwardRef } from 'react'
-import * as ReactDOM from 'react-dom'
 import * as Toolbar from '@radix-ui/react-toolbar'
 import * as Toggle from '@radix-ui/react-toggle'
-// import { useFloating, shift, offset } from '@floating-ui/react-dom'
 import { offset, shift, useFloating, FloatingPortal } from '@floating-ui/react-dom-interactions'
 import { BaseRange, BasePoint, Transforms, Editor as SlateEditor } from 'slate'
 import { Icon, BlockTypeSelect } from 'components'
@@ -70,15 +68,6 @@ const StyledToolbar = styled(Toolbar.Root)`
   background-color: ${theme('color.neutral.popper')};
 `
 
-// const StyledToggle = styled(Toggle.Root)`
-//   border-radius: 6px;
-//   border: 0;
-//   background-color: white;
-//   &[data-state='on'] {
-//     background-color: silver;
-//   }
-// `
-
 interface StyledToggleProps {
   toggleOn: boolean
 }
@@ -113,49 +102,12 @@ const StyledToggle = styled.div<StyledToggleProps>`
   transition: ${theme('animation.time.normal')};
 `
 
-// const StyledContent = styled(Select.Content)`
-//   position: static;
-//   top: 50px;
-//   overflow: hidden;
-//   background-color: white;
-//   border-radius: 6px;
-//   box-shadow: 0px 10px 38px -10px rgba(22, 23, 24, 0.35), 0px 10px 20px -15px rgba(22, 23, 24, 0.2);
-// `
-
 const getSelectionBoundingClientRect = () => {
   const domSelection = window.getSelection()
   if (!domSelection || domSelection.rangeCount < 1) return
   const domRange = domSelection.getRangeAt(0)
   return domRange.getBoundingClientRect()
 }
-
-// const BlockTypeSelect = () => {
-//   return (
-//     <Select.Root>
-//       <Select.Trigger onMouseDown={(e) => console.log('Select.Trigger')}>
-//         <Select.Value onMouseDown={(e) => console.log('Select.Value')} />
-//         <Select.Icon onMouseDown={(e) => console.log('Select.Icon')} />
-//       </Select.Trigger>
-
-//       <StyledContent>
-//         <Select.Viewport>
-//           <Select.Item value='1'>
-//             <Select.ItemText>Text</Select.ItemText>
-//             <Select.ItemIndicator />
-//           </Select.Item>
-//           <Select.Item value='2'>
-//             <Select.ItemText>Header 1</Select.ItemText>
-//             <Select.ItemIndicator />
-//           </Select.Item>
-//           <Select.Item value='3'>
-//             <Select.ItemText>Header 2</Select.ItemText>
-//             <Select.ItemIndicator />
-//           </Select.Item>
-//         </Select.Viewport>
-//       </StyledContent>
-//     </Select.Root>
-//   )
-// }
 
 const options = [
   { value: 'chocolate', label: 'Chocolate' },
@@ -165,9 +117,10 @@ const options = [
 
 interface FormatToolbarProps {
   focused: boolean
+  isContextMenuVisible: any
 }
 
-export const FormatToolbar = ({ focused }: FormatToolbarProps) => {
+export const FormatToolbar = ({ focused, isContextMenuVisible }: FormatToolbarProps) => {
   const editorRef = usePlateEditorRef()
   const editor = usePlateEditorState(useEventPlateId())
   const [isHidden, setIsHidden] = useState(true)
@@ -178,7 +131,7 @@ export const FormatToolbar = ({ focused }: FormatToolbarProps) => {
     middleware: [shift(), offset({ mainAxis: 8 })],
   })
 
-  // TODO https://github.com/udecode/plate/issues/1352#issuecomment-1056975461
+  // https://github.com/udecode/plate/issues/1352#issuecomment-1056975461
   // useEffect(() => {
   //   if (editor && !editor.selection) {
   //     Transforms.select(editor, SlateEditor.end(editor, []))
@@ -196,7 +149,6 @@ export const FormatToolbar = ({ focused }: FormatToolbarProps) => {
   }, [reference, selectionExpanded, selectionText, editor.children])
 
   useEffect(() => {
-    // TODO if context menu visible, then don't show toolbar
     if (!focused) {
       setIsHidden(true)
     } else {
@@ -230,37 +182,9 @@ export const FormatToolbar = ({ focused }: FormatToolbarProps) => {
     )
   })
 
-  // const Mark = withPlateEventProvider(() => {
-  //   const id = useEventPlateId()
-  //   const editor = usePlateEditorState(id)
-  //   const type = getPluginType(editorRef, ELEMENT_H1)
-
-  //   const onPressedChange = (pressed: boolean) => {
-  //     console.log(`Pressed: ${pressed}`)
-  //   }
-
-  //   const onMouseDown = (e: any) => {
-  //     if (editor) {
-  //       getPreventDefaultHandler(toggleNodeType, editor, {
-  //         activeType: type,
-  //         inactiveType: '',
-  //       })(e)
-  //     }
-  //   }
-
-  //   return (
-  //     <StyledToggle
-  //       on={!!editor?.selection && someNode(editor, { match: { type } })}
-  //       onMouseDown={onMouseDown}
-  //     >
-  //       <Icon name='check24' />
-  //     </StyledToggle>
-  //   )
-  // })
-
   return (
     <FloatingPortal>
-      {!isHidden && (
+      {!isContextMenuVisible() && !isHidden && (
         <Wrapper
           ref={floating}
           posX={`${Math.floor(x)}px`}

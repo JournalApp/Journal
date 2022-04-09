@@ -1,5 +1,5 @@
 import React, { ReactPortal, useState, useEffect, useLayoutEffect, useRef, useMemo } from 'react'
-import * as ReactDOM from 'react-dom'
+import { FormatToolbar } from 'components'
 import { theme } from 'themes'
 // import { useFloating, shift, offset } from '@floating-ui/react-dom'
 import {
@@ -77,23 +77,24 @@ const Divider = styled.div`
 interface ContextMenuProps {
   focused: boolean
   children: any
+  setContextMenuVisible: (val: any) => void
 }
 
-export const ContextMenu = ({ children, focused }: ContextMenuProps) => {
-  const [isHidden, setIsHidden] = useState(true)
+export const ContextMenu = ({ children, focused, setContextMenuVisible }: ContextMenuProps) => {
   const [spellSuggections, setSpellSuggections] = useState([])
+  const [visible, setVisible] = useState(false)
   const { x, y, reference, floating, strategy, refs } = useFloating({
     placement: 'right-start',
     middleware: [offset({ mainAxis: 5, alignmentAxis: 4 }), flip(), shift()],
   })
 
   useEffect(() => {
-    console.log(`isHidden: ${isHidden}`)
-  }, [isHidden])
+    console.log(`contextMenuVisible: ${visible}`)
+  }, [visible])
 
   const setOpen = (e: any) => {
     console.log('onContextMenu')
-    if (isHidden) {
+    if (!visible) {
       window.electronAPI.handleSpellCheck((event: any, value: any) => {
         console.log('handleSpellCheck')
         console.log(value)
@@ -102,7 +103,7 @@ export const ContextMenu = ({ children, focused }: ContextMenuProps) => {
         }
       })
     }
-    setIsHidden(!isHidden)
+    setVisible(!visible)
 
     reference({
       getBoundingClientRect() {
@@ -122,26 +123,20 @@ export const ContextMenu = ({ children, focused }: ContextMenuProps) => {
 
   const done = () => {
     console.log('done')
-    setIsHidden(true)
+    setVisible(false)
   }
 
   useEffect(() => {
-    if (!isHidden) {
+    setContextMenuVisible(visible)
+    if (visible) {
       console.log('addEventListener')
-      window.addEventListener('click', () => setIsHidden(true), { once: true })
-      // window.addEventListener('contextmenu', () => console.log('-->contextmenu'), { once: true })
+      window.addEventListener('click', () => setVisible(false), { once: true })
     }
-
-    return () => {
-      // console.log('removeEventListener')
-      // window.removeEventListener('click', () => setIsHidden(true))
-      // window.removeEventListener('contextmenu', () => setIsHidden(true))
-    }
-  }, [isHidden])
+  }, [visible])
 
   useEffect(() => {
     if (!focused) {
-      setIsHidden(true)
+      setVisible(false)
     }
   }, [focused])
 
@@ -151,7 +146,7 @@ export const ContextMenu = ({ children, focused }: ContextMenuProps) => {
         {children}
       </div>
       <FloatingPortal>
-        {!isHidden && (
+        {visible && (
           <Dropdown
             ref={floating}
             posX={`${Math.floor(x)}px`}

@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import dayjs from 'dayjs'
-import { FormatToolbar } from 'components'
 import { usePlateEditorState, usePlateSelectors } from '@udecode/plate-core'
 import { countWords } from 'utils'
 import { useEntriesContext } from '../context'
 import { ContextMenu } from 'components'
+import { FormatToolbar } from 'components'
 import { createPluginFactory, getPlateActions } from '@udecode/plate'
 import { Transforms, Editor as SlateEditor } from 'slate'
 import { CONFIG } from 'config'
@@ -120,11 +120,20 @@ const Entry = ({
   const [needsSavingToServer, setNeedsSavingToServer] = useState(false)
   const [initialValue, setInitialValue] = useState([])
   const [focused, setFocused] = useState(false)
+  const contextMenuVisible = useRef(false)
   const [initialFetchDone, setInitialFetchDone] = useState(false)
   const debugValue = useRef([])
   const editorRef = useRef(null)
   const { setCachedEntry } = useEntriesContext()
   // const st = usePlateEditorState(`${entryDay}-editor`)
+
+  const setContextMenuVisible = (val: boolean) => {
+    contextMenuVisible.current = val
+  }
+
+  const isContextMenuVisible = () => {
+    return contextMenuVisible.current
+  }
 
   const onChangeDebug = (newValue: any) => {
     // const isAstChange = editor.operations.some(
@@ -308,13 +317,11 @@ const Entry = ({
     }
   )
 
-  // const st = usePlateStore(entryId)
-
   return (
     <Container isFadedOut={isFadedOut} ref={editorRef} id={`${entryDay}-entry`}>
       <MainWrapper>
         {(initialFetchDone || cached) && (
-          <ContextMenu focused={focused}>
+          <ContextMenu focused={focused} setContextMenuVisible={setContextMenuVisible}>
             <Plate
               id={`${entryDay}-editor`}
               editableProps={editableProps}
@@ -322,7 +329,7 @@ const Entry = ({
               onChange={onChangeDebug}
               plugins={plugins}
             >
-              <FormatToolbar focused={focused} />
+              <FormatToolbar focused={focused} isContextMenuVisible={isContextMenuVisible} />
             </Plate>
           </ContextMenu>
         )}
