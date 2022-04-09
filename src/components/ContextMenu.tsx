@@ -12,7 +12,7 @@ import {
   useInteractions,
   useClick,
 } from '@floating-ui/react-dom-interactions'
-import { usePlateEditorRef } from '@udecode/plate'
+import { getSelectionText } from '@udecode/plate'
 import { usePlateEditorState, useEventPlateId } from '@udecode/plate-core'
 import { Transforms, Editor as SlateEditor } from 'slate'
 import styled, { keyframes } from 'styled-components'
@@ -91,6 +91,7 @@ export const ContextMenu = ({
   const editor = usePlateEditorState(useEventPlateId())
   const [spellSuggections, setSpellSuggections] = useState([])
   const [visible, setVisible] = useState(false)
+  const selectionText = editor && getSelectionText(editor)
   const { x, y, reference, floating, strategy, refs } = useFloating({
     placement: 'right-start',
     middleware: [offset({ mainAxis: 5, alignmentAxis: 4 }), flip(), shift()],
@@ -171,13 +172,16 @@ export const ContextMenu = ({
               </Item>
             ))}
           {spellSuggections.length > 0 ? <Divider /> : ''}
-
-          <Item>
-            <ItemTitle>Cut</ItemTitle>
-          </Item>
-          <Item>
-            <ItemTitle>Copy</ItemTitle>
-          </Item>
+          {selectionText && (
+            <Item>
+              <ItemTitle>Cut</ItemTitle>
+            </Item>
+          )}
+          {selectionText && (
+            <Item>
+              <ItemTitle>Copy</ItemTitle>
+            </Item>
+          )}
           <Item>
             <ItemTitle>Paste</ItemTitle>
           </Item>

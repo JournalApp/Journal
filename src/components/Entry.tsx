@@ -137,14 +137,6 @@ const Entry = ({
   }
 
   const onChangeDebug = (newValue: any) => {
-    // const isAstChange = editor.operations.some(
-    //   op => 'set_selection' !== op.type
-    // )
-    // if (isAstChange) {
-    //   // Save the value to Local Storage.
-    //   const content = JSON.stringify(value)
-    //   localStorage.setItem('content', content)
-    // }
     debugValue.current = newValue
   }
 
