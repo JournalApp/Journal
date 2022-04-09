@@ -79,16 +79,11 @@ const Divider = styled.div`
 
 interface ContextMenuProps {
   focused: boolean
+  children: any
   setContextMenuVisible: (val: any) => void
-  toggleContextMenu: any
 }
 
-export const ContextMenu = ({
-  focused,
-  setContextMenuVisible,
-  toggleContextMenu,
-}: ContextMenuProps) => {
-  // const editorRef = usePlateEditorRef()
+export const ContextMenu = ({ children, focused, setContextMenuVisible }: ContextMenuProps) => {
   const [spellSuggections, setSpellSuggections] = useState([])
   const [visible, setVisible] = useState(false)
   const { x, y, reference, floating, strategy, refs } = useFloating({
@@ -96,11 +91,11 @@ export const ContextMenu = ({
     middleware: [offset({ mainAxis: 5, alignmentAxis: 4 }), flip(), shift()],
   })
 
-  // useEffect(() => {
-  //   console.log(`contextMenuVisible: ${visible}`)
-  // }, [visible])
+  useEffect(() => {
+    console.log(`contextMenuVisible: ${visible}`)
+  }, [visible])
 
-  const setOpen = (e: any, editor: any) => {
+  const setOpen = (e: any) => {
     console.log('onContextMenu')
     if (!visible) {
       window.electronAPI.handleSpellCheck((event: any, value: any) => {
@@ -136,11 +131,6 @@ export const ContextMenu = ({
   }
 
   useEffect(() => {
-    // Assign function to parent's Ref
-    toggleContextMenu.current = setOpen
-  }, [])
-
-  useEffect(() => {
     setContextMenuVisible(visible)
     if (visible) {
       console.log('addEventListener')
@@ -154,34 +144,41 @@ export const ContextMenu = ({
     }
   }, [focused])
 
-  return (
-    <FloatingPortal>
-      {visible && (
-        <Dropdown
-          ref={floating}
-          posX={`${Math.floor(x)}px`}
-          posY={`${Math.floor(y)}px`}
-          pos={strategy}
-        >
-          {spellSuggections &&
-            spellSuggections.map((suggestion, i) => (
-              <Item key={i} onMouseDown={done}>
-                <ItemTitle>{suggestion}</ItemTitle>
-              </Item>
-            ))}
+  const ContextMenu2 = () => {}
 
-          <Divider />
-          <Item>
-            <ItemTitle>Cut</ItemTitle>
-          </Item>
-          <Item>
-            <ItemTitle>Copy</ItemTitle>
-          </Item>
-          <Item>
-            <ItemTitle>Paste</ItemTitle>
-          </Item>
-        </Dropdown>
-      )}
-    </FloatingPortal>
+  return (
+    <>
+      <div ref={reference} onContextMenu={setOpen}>
+        {children}
+      </div>
+      <FloatingPortal>
+        {visible && (
+          <Dropdown
+            ref={floating}
+            posX={`${Math.floor(x)}px`}
+            posY={`${Math.floor(y)}px`}
+            pos={strategy}
+          >
+            {spellSuggections &&
+              spellSuggections.map((suggestion, i) => (
+                <Item key={i} onMouseDown={done}>
+                  <ItemTitle>{suggestion}</ItemTitle>
+                </Item>
+              ))}
+
+            <Divider />
+            <Item>
+              <ItemTitle>Cut</ItemTitle>
+            </Item>
+            <Item>
+              <ItemTitle>Copy</ItemTitle>
+            </Item>
+            <Item>
+              <ItemTitle>Paste</ItemTitle>
+            </Item>
+          </Dropdown>
+        )}
+      </FloatingPortal>
+    </>
   )
 }

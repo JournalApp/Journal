@@ -121,6 +121,7 @@ const Entry = ({
   const [initialValue, setInitialValue] = useState([])
   const [focused, setFocused] = useState(false)
   const contextMenuVisible = useRef(false)
+  const toggleContextMenu = useRef(null)
   const [initialFetchDone, setInitialFetchDone] = useState(false)
   const debugValue = useRef([])
   const editorRef = useRef(null)
@@ -287,6 +288,10 @@ const Entry = ({
           // console.log(editor.children)
         }
       },
+      onContextMenu: (editor) => (e) => {
+        // Invoke function in ContextMenu using Ref
+        toggleContextMenu.current(e, editor)
+      },
     },
   })
 
@@ -321,17 +326,20 @@ const Entry = ({
     <Container isFadedOut={isFadedOut} ref={editorRef} id={`${entryDay}-entry`}>
       <MainWrapper>
         {(initialFetchDone || cached) && (
-          <ContextMenu focused={focused} setContextMenuVisible={setContextMenuVisible}>
-            <Plate
-              id={`${entryDay}-editor`}
-              editableProps={editableProps}
-              initialValue={initialValue.length ? initialValue : cached.content}
-              onChange={onChangeDebug}
-              plugins={plugins}
-            >
-              <FormatToolbar focused={focused} isContextMenuVisible={isContextMenuVisible} />
-            </Plate>
-          </ContextMenu>
+          <Plate
+            id={`${entryDay}-editor`}
+            editableProps={editableProps}
+            initialValue={initialValue.length ? initialValue : cached.content}
+            onChange={onChangeDebug}
+            plugins={plugins}
+          >
+            <ContextMenu
+              focused={focused}
+              setContextMenuVisible={setContextMenuVisible}
+              toggleContextMenu={toggleContextMenu}
+            />
+            <FormatToolbar focused={focused} isContextMenuVisible={isContextMenuVisible} />
+          </Plate>
         )}
       </MainWrapper>
       <Aside>
