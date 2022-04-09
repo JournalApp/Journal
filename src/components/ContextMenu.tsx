@@ -88,7 +88,7 @@ export const ContextMenu = ({
   setContextMenuVisible,
   toggleContextMenu,
 }: ContextMenuProps) => {
-  // const editorRef = usePlateEditorRef()
+  const editor = usePlateEditorState(useEventPlateId())
   const [spellSuggections, setSpellSuggections] = useState([])
   const [visible, setVisible] = useState(false)
   const { x, y, reference, floating, strategy, refs } = useFloating({
@@ -100,7 +100,7 @@ export const ContextMenu = ({
   //   console.log(`contextMenuVisible: ${visible}`)
   // }, [visible])
 
-  const setOpen = (e: any, editor: any) => {
+  const setOpen = (e: any) => {
     console.log('onContextMenu')
     if (!visible) {
       window.electronAPI.handleSpellCheck((event: any, value: any) => {
@@ -129,10 +129,11 @@ export const ContextMenu = ({
     })
   }
 
-  const done = () => {
-    // Transforms.insertText(editor, 'Yay!')
-    console.log('done')
+  const done = (e: any, suggestion: string) => {
+    // TODO Make this action undoable
+    Transforms.insertText(editor, suggestion)
     setVisible(false)
+    e.preventDefault()
   }
 
   useEffect(() => {
@@ -165,12 +166,12 @@ export const ContextMenu = ({
         >
           {spellSuggections &&
             spellSuggections.map((suggestion, i) => (
-              <Item key={i} onMouseDown={done}>
+              <Item key={i} onMouseDown={(e) => done(e, suggestion)}>
                 <ItemTitle>{suggestion}</ItemTitle>
               </Item>
             ))}
+          {spellSuggections.length > 0 ? <Divider /> : ''}
 
-          <Divider />
           <Item>
             <ItemTitle>Cut</ItemTitle>
           </Item>

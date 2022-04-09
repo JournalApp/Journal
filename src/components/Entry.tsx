@@ -288,9 +288,9 @@ const Entry = ({
           // console.log(editor.children)
         }
       },
-      onContextMenu: (editor) => (e) => {
+      onContextMenu: () => (e) => {
         // Invoke function in ContextMenu using Ref
-        toggleContextMenu.current(e, editor)
+        toggleContextMenu.current(e)
       },
     },
   })
