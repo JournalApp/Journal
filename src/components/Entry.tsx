@@ -314,7 +314,7 @@ const Entry = ({
     <Container isFadedOut={isFadedOut} ref={editorRef} id={`${entryDay}-entry`}>
       <MainWrapper>
         {(initialFetchDone || cached) && (
-          <ContextMenu>
+          <ContextMenu focused={focused}>
             <Plate
               id={`${entryDay}-editor`}
               editableProps={editableProps}

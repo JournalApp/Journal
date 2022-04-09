@@ -39,6 +39,7 @@ const Dropdown = styled.div<MenuProps>`
   background-color: ${theme('color.neutral.popper')};
   animation-name: ${showDropdown};
   animation-duration: ${theme('animation.time.normal')};
+  -webkit-app-region: no-drag;
 `
 
 const Item = styled.button`
@@ -73,7 +74,12 @@ const Divider = styled.div`
   margin: 8px 12px;
 `
 
-export const ContextMenu = (props: any) => {
+interface ContextMenuProps {
+  focused: boolean
+  children: any
+}
+
+export const ContextMenu = ({ children, focused }: ContextMenuProps) => {
   const [isHidden, setIsHidden] = useState(true)
   const [spellSuggections, setSpellSuggections] = useState([])
   const { x, y, reference, floating, strategy, refs } = useFloating({
@@ -122,19 +128,27 @@ export const ContextMenu = (props: any) => {
   useEffect(() => {
     if (!isHidden) {
       console.log('addEventListener')
-      window.addEventListener('click', () => setIsHidden(true))
+      window.addEventListener('click', () => setIsHidden(true), { once: true })
+      // window.addEventListener('contextmenu', () => console.log('-->contextmenu'), { once: true })
     }
 
     return () => {
-      console.log('removeEventListener')
-      window.removeEventListener('click', () => setIsHidden(true))
+      // console.log('removeEventListener')
+      // window.removeEventListener('click', () => setIsHidden(true))
+      // window.removeEventListener('contextmenu', () => setIsHidden(true))
     }
   }, [isHidden])
+
+  useEffect(() => {
+    if (!focused) {
+      setIsHidden(true)
+    }
+  }, [focused])
 
   return (
     <>
       <div ref={reference} onContextMenu={setOpen}>
-        {props.children}
+        {children}
       </div>
       <FloatingPortal>
         {!isHidden && (

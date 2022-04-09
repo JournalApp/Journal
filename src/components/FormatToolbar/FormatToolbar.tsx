@@ -2,7 +2,8 @@ import React, { ReactPortal, useState, useEffect, useLayoutEffect, forwardRef } 
 import * as ReactDOM from 'react-dom'
 import * as Toolbar from '@radix-ui/react-toolbar'
 import * as Toggle from '@radix-ui/react-toggle'
-import { useFloating, shift, offset } from '@floating-ui/react-dom'
+// import { useFloating, shift, offset } from '@floating-ui/react-dom'
+import { offset, shift, useFloating, FloatingPortal } from '@floating-ui/react-dom-interactions'
 import { BaseRange, BasePoint, Transforms, Editor as SlateEditor } from 'slate'
 import { Icon, BlockTypeSelect } from 'components'
 import { theme } from 'themes'
@@ -195,6 +196,7 @@ export const FormatToolbar = ({ focused }: FormatToolbarProps) => {
   }, [reference, selectionExpanded, selectionText, editor.children])
 
   useEffect(() => {
+    // TODO if context menu visible, then don't show toolbar
     if (!focused) {
       setIsHidden(true)
     } else {
@@ -257,26 +259,26 @@ export const FormatToolbar = ({ focused }: FormatToolbarProps) => {
   // })
 
   return (
-    !isHidden &&
-    ReactDOM.createPortal(
-      <Wrapper
-        ref={floating}
-        posX={`${Math.floor(x)}px`}
-        posY={`${Math.floor(y)}px`}
-        pos={strategy}
-      >
-        <StyledToolbar>
-          <BlockTypeSelect />
-          <ToggleGroup>
-            <Toggle markType={MARK_BOLD} iconName='FormatBold' />
-            <Toggle markType={MARK_ITALIC} iconName='FormatItalic' />
-            <Toggle markType={MARK_UNDERLINE} iconName='FormatUnderline' />
-            <Toggle markType={MARK_STRIKETHROUGH} iconName='FormatStriketrough' />
-            <Toggle markType={MARK_CODE} iconName='FormatCode' />
-          </ToggleGroup>
-        </StyledToolbar>
-      </Wrapper>,
-      document.body
-    )
+    <FloatingPortal>
+      {!isHidden && (
+        <Wrapper
+          ref={floating}
+          posX={`${Math.floor(x)}px`}
+          posY={`${Math.floor(y)}px`}
+          pos={strategy}
+        >
+          <StyledToolbar>
+            <BlockTypeSelect />
+            <ToggleGroup>
+              <Toggle markType={MARK_BOLD} iconName='FormatBold' />
+              <Toggle markType={MARK_ITALIC} iconName='FormatItalic' />
+              <Toggle markType={MARK_UNDERLINE} iconName='FormatUnderline' />
+              <Toggle markType={MARK_STRIKETHROUGH} iconName='FormatStriketrough' />
+              <Toggle markType={MARK_CODE} iconName='FormatCode' />
+            </ToggleGroup>
+          </StyledToolbar>
+        </Wrapper>
+      )}
+    </FloatingPortal>
   )
 }
