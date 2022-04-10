@@ -48,11 +48,11 @@ const Dropdown = styled.div<MenuProps>`
 const Item = styled.button`
   display: flex;
   border: 0;
-  gap: 8px;
-  padding: 2px 12px 2px 4px;
+  gap: 24px;
+  padding: 8px 12px;
   border-radius: 8px;
   cursor: pointer;
-
+  width: 100%;
   background-color: ${theme('color.neutral.popper')};
   align-items: center;
   transition: ${theme('animation.time.normal')};
@@ -60,15 +60,19 @@ const Item = styled.button`
     background-color: ${theme('color.neutral.hover')};
   }
 `
-type ItemCurrentProps = {
-  current?: boolean
-}
 
-const ItemTitle = styled.span<ItemCurrentProps>`
+const ItemTitle = styled.span`
+  flex-grow: 1;
   font-size: 14px;
-  font-weight: ${(props) => (props.current ? '700' : 'normal')};
   line-height: 20px;
   text-align: left;
+`
+
+const ItemShortcut = styled.span`
+  font-size: 14px;
+  line-height: 20px;
+  text-align: right;
+  opacity: 0.3;
 `
 
 const Divider = styled.div`
@@ -175,15 +179,18 @@ export const ContextMenu = ({
           {selectionText && (
             <Item>
               <ItemTitle>Cut</ItemTitle>
+              <ItemShortcut>⌘+X</ItemShortcut>
             </Item>
           )}
           {selectionText && (
             <Item>
               <ItemTitle>Copy</ItemTitle>
+              <ItemShortcut>⌘+C</ItemShortcut>
             </Item>
           )}
           <Item>
             <ItemTitle>Paste</ItemTitle>
+            <ItemShortcut>⌘+V</ItemShortcut>
           </Item>
         </Dropdown>
       )}
