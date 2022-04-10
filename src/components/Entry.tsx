@@ -284,6 +284,12 @@ const Entry = ({
         // Invoke function in ContextMenu using Ref
         toggleContextMenu.current(e)
       },
+      // onPaste: () => (e) => {
+      //   // navigator.clipboard.read().then((result) => {
+      //   //   console.log(result)
+      //   // })
+      //   // console.log(e.clipboardData)
+      // },
     },
   })
 

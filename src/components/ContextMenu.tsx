@@ -1,7 +1,6 @@
 import React, { ReactPortal, useState, useEffect, useLayoutEffect, useRef, useMemo } from 'react'
 import { FormatToolbar } from 'components'
 import { theme } from 'themes'
-// import { useFloating, shift, offset } from '@floating-ui/react-dom'
 import {
   offset,
   shift,
@@ -101,10 +100,6 @@ export const ContextMenu = ({
     middleware: [offset({ mainAxis: 5, alignmentAxis: 4 }), flip(), shift()],
   })
 
-  // useEffect(() => {
-  //   console.log(`contextMenuVisible: ${visible}`)
-  // }, [visible])
-
   const setOpen = (e: any) => {
     console.log('onContextMenu')
     if (!visible) {
@@ -134,9 +129,68 @@ export const ContextMenu = ({
     })
   }
 
-  const done = (e: any, suggestion: string) => {
-    // TODO Make this action undoable
+  const replaceWithSuggestion = (e: any, suggestion: string) => {
     Transforms.insertText(editor, suggestion)
+    setVisible(false)
+    e.preventDefault()
+  }
+
+  const clipboardCommand = (e: any, command: string) => {
+    switch (command) {
+      case 'copy':
+        document.execCommand('copy')
+        break
+      case 'cut':
+        document.execCommand('cut')
+        break
+      case 'paste':
+        // TODO Handle pasting text/plain
+        navigator.clipboard.read().then((result) => {
+          for (let i = 0; i < result.length; i++) {
+            if (result[i].types.includes('text/html')) {
+              result[i].getType('text/html').then((blob) => {
+                blob.text().then((res) => {
+                  const dataTransfer = {
+                    constructor: {
+                      name: 'DataTransfer',
+                    },
+                    getData: (format: string) => format === 'text/html' && res,
+                  } as any
+                  // TODO Fix bullet lists
+                  editor.insertData(dataTransfer)
+                  console.log(res)
+                })
+              })
+            }
+          }
+        })
+        break
+      default:
+        break
+    }
+    // switch (command) {
+    //   case 'copy':
+    //     // console.log(window.getSelection())
+    //     // console.log(editor.getFragment())
+
+    //     // navigator.permissions
+    //     //   .query({ name: 'clipboard-write' as PermissionName })
+    //     //   .then((result) => {
+    //     //     if (result.state == 'granted' || result.state == 'prompt') {
+    //     //       var type = 'text/html'
+    //     //       var blob = new Blob([selectionText], { type })
+    //     //       var data = [new ClipboardItem({ [type]: blob })]
+    //     //       navigator.clipboard.write(data)
+    //     //     }
+    //     //   })
+
+    //     // clipboard.writeHTML(selectionText)
+    //     // e.clipboardData.setData('text/html', selectionText)
+    //     break
+
+    //   default:
+    //     break
+    // }
     setVisible(false)
     e.preventDefault()
   }
@@ -171,26 +225,26 @@ export const ContextMenu = ({
         >
           {spellSuggections &&
             spellSuggections.map((suggestion, i) => (
-              <Item key={i} onMouseDown={(e) => done(e, suggestion)}>
+              <Item key={i} onMouseDown={(e) => replaceWithSuggestion(e, suggestion)}>
                 <ItemTitle>{suggestion}</ItemTitle>
               </Item>
             ))}
           {spellSuggections.length > 0 ? <Divider /> : ''}
           {selectionText && (
-            <Item>
+            <Item onMouseDown={(e) => clipboardCommand(e, 'cut')}>
               <ItemTitle>Cut</ItemTitle>
-              <ItemShortcut>⌘+X</ItemShortcut>
+              <ItemShortcut>⌘ X</ItemShortcut>
             </Item>
           )}
           {selectionText && (
-            <Item>
+            <Item onMouseDown={(e) => clipboardCommand(e, 'copy')}>
               <ItemTitle>Copy</ItemTitle>
-              <ItemShortcut>⌘+C</ItemShortcut>
+              <ItemShortcut>⌘ C</ItemShortcut>
             </Item>
           )}
-          <Item>
+          <Item onMouseDown={(e) => clipboardCommand(e, 'paste')}>
             <ItemTitle>Paste</ItemTitle>
-            <ItemShortcut>⌘+V</ItemShortcut>
+            <ItemShortcut>⌘ V</ItemShortcut>
           </Item>
         </Dropdown>
       )}
