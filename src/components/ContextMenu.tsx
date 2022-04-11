@@ -144,7 +144,6 @@ export const ContextMenu = ({
         document.execCommand('cut')
         break
       case 'paste':
-        // TODO Handle pasting text/plain
         navigator.clipboard.read().then((result) => {
           for (let i = 0; i < result.length; i++) {
             if (result[i].types.includes('text/html')) {
@@ -156,9 +155,15 @@ export const ContextMenu = ({
                     },
                     getData: (format: string) => format === 'text/html' && res,
                   } as any
-                  // TODO Fix bullet lists
+                  // TODO Fix bullet lists pasting
                   editor.insertData(dataTransfer)
                   console.log(res)
+                })
+              })
+            } else if (result[i].types.includes('text/plain')) {
+              result[i].getType('text/plain').then((blob) => {
+                blob.text().then((res) => {
+                  Transforms.insertText(editor, res)
                 })
               })
             }
@@ -168,29 +173,6 @@ export const ContextMenu = ({
       default:
         break
     }
-    // switch (command) {
-    //   case 'copy':
-    //     // console.log(window.getSelection())
-    //     // console.log(editor.getFragment())
-
-    //     // navigator.permissions
-    //     //   .query({ name: 'clipboard-write' as PermissionName })
-    //     //   .then((result) => {
-    //     //     if (result.state == 'granted' || result.state == 'prompt') {
-    //     //       var type = 'text/html'
-    //     //       var blob = new Blob([selectionText], { type })
-    //     //       var data = [new ClipboardItem({ [type]: blob })]
-    //     //       navigator.clipboard.write(data)
-    //     //     }
-    //     //   })
-
-    //     // clipboard.writeHTML(selectionText)
-    //     // e.clipboardData.setData('text/html', selectionText)
-    //     break
-
-    //   default:
-    //     break
-    // }
     setVisible(false)
     e.preventDefault()
   }
