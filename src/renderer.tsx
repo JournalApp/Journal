@@ -9,8 +9,8 @@ const GlobalStyle = createGlobalStyle`
 
 body {
   box-sizing: border-box;
-  color: ${theme('color.neutral.main')};
-  background-color: ${theme('color.neutral.surface')};
+  color: ${theme('color.primary.main')};
+  background-color: ${theme('color.primary.surface')};
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   -webkit-app-region: drag;
@@ -18,7 +18,7 @@ body {
 }
 
 hr {
-  background-color: ${theme('color.neutral.main')}!important;
+  background-color: ${theme('color.primary.main')}!important;
   height: 1px!important;
   opacity: 0.1;
 }

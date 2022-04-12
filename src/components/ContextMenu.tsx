@@ -38,7 +38,7 @@ const Dropdown = styled.div<MenuProps>`
   padding: 4px;
   border-radius: 12px;
   box-shadow: ${theme('style.shadow')};
-  background-color: ${theme('color.neutral.popper')};
+  background-color: ${theme('color.popper.surface')};
   animation-name: ${showDropdown};
   animation-duration: ${theme('animation.time.normal')};
   -webkit-app-region: no-drag;
@@ -52,11 +52,11 @@ const Item = styled.button`
   border-radius: 8px;
   cursor: pointer;
   width: 100%;
-  background-color: ${theme('color.neutral.popper')};
+  background-color: ${theme('color.popper.surface')};
   align-items: center;
   transition: ${theme('animation.time.normal')};
   &:hover {
-    background-color: ${theme('color.neutral.hover')};
+    background-color: ${theme('color.popper.hover')};
   }
 `
 
@@ -75,7 +75,7 @@ const ItemShortcut = styled.span`
 `
 
 const Divider = styled.div`
-  background-color: ${theme('color.neutral.border')};
+  background-color: ${theme('color.popper.border')};
   height: 1px;
   margin: 8px 12px;
 `

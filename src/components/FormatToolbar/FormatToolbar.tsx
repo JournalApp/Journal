@@ -65,7 +65,7 @@ const StyledToolbar = styled(Toolbar.Root)`
   box-shadow: ${theme('style.shadow')};
   min-width: max-content;
   border-radius: 12px;
-  background-color: ${theme('color.neutral.popper')};
+  background-color: ${theme('color.popper.surface')};
 `
 
 interface StyledToggleProps {
@@ -94,10 +94,10 @@ const StyledToggle = styled.div<StyledToggleProps>`
   justify-content: center;
   cursor: pointer;
   background-color: ${(props) =>
-    props.toggleOn ? theme('color.neutral.main') : theme('color.neutral.inverted')};
+    props.toggleOn ? theme('color.popper.main') : theme('color.popper.inverted')};
   &:hover {
     background-color: ${(props) =>
-      props.toggleOn ? theme('color.neutral.main') : theme('color.neutral.hoverInverted')};
+      props.toggleOn ? theme('color.popper.main') : theme('color.popper.hoverInverted')};
   }
   transition: ${theme('animation.time.normal')};
 `
@@ -176,7 +176,7 @@ export const FormatToolbar = ({ focused, isContextMenuVisible }: FormatToolbarPr
       <StyledToggle toggleOn={state} onMouseDown={onMouseDown}>
         <Icon
           name={iconName}
-          tintColor={state ? theme('color.neutral.inverted') : theme('color.neutral.main')}
+          tintColor={state ? theme('color.popper.inverted') : theme('color.popper.main')}
         />
       </StyledToggle>
     )

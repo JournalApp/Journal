@@ -12,6 +12,9 @@ import { BlockH3 } from './BlockH3'
 import { BlockNumList } from './BlockNumList'
 import { BlockBulletList } from './BlockBulletList'
 import { Chevron } from './Chevron'
+import { Menu } from './Menu'
+import { Bucket } from './Bucket'
+import { Exit } from './Exit'
 
 type IconMapType = {
   [key: string]: any
@@ -41,6 +44,9 @@ const IconMap: IconMapType = {
   BlockNumList,
   BlockBulletList,
   Chevron,
+  Menu,
+  Bucket,
+  Exit,
 }
 
 const Icon = function (props: IconProps) {

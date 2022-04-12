@@ -4,6 +4,8 @@ const lightPalette = {
     '15': '#F3F3F3', // hover, inverted, toggle group bg
     '20': '#E9E9E9', // hover on inverted, border
     '25': '#E0E0E0', // bg
+    '30': '#CFCFCF', // secondary surface
+    '35': '#B7B7B7', // secondary hover
     '100': '#3A3A3A', // text
   },
 }
@@ -22,13 +24,23 @@ const lightPalette = {
 
 const lightTheme = {
   color: {
-    neutral: {
+    primary: {
+      // base colors
+      main: lightPalette.neutral[100],
+      surface: lightPalette.neutral[25],
+    },
+    secondary: {
+      // base colors
+      surface: lightPalette.neutral[30],
+      // colors for states
+      hover: lightPalette.neutral[35],
+    },
+    popper: {
       // base colors
       main: lightPalette.neutral[100],
       inverted: lightPalette.neutral[15],
       border: lightPalette.neutral[20],
-      surface: lightPalette.neutral[25],
-      popper: lightPalette.neutral[10],
+      surface: lightPalette.neutral[10],
 
       // colors for states
       active: lightPalette.neutral[20],

@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import dayjs from 'dayjs'
-import { usePlateEditorState, usePlateSelectors } from '@udecode/plate-core'
+import { usePlateEditorState, useEventPlateId, usePlateEditorRef } from '@udecode/plate-core'
 import { countWords } from 'utils'
 import { useEntriesContext } from '../context'
 import { ContextMenu } from 'components'
 import { FormatToolbar } from 'components'
 import { createPluginFactory, getPlateActions } from '@udecode/plate'
 import { Transforms, Editor as SlateEditor } from 'slate'
+import { ReactEditor } from 'slate-react'
 import { CONFIG } from 'config'
 
 import {
@@ -78,8 +79,12 @@ const MainWrapper = styled.div`
   }
 `
 
+const isToday = (day: any) => {
+  return day.toString() == dayjs().format('YYYYMMDD')
+}
+
 const showDay = (day: any) => {
-  if (day.toString() == dayjs().format('YYYYMMDD')) {
+  if (isToday(day)) {
     return 'Today'
   } else {
     return dayjs(dayjs(day.toString(), 'YYYYMMDD')).format('D MMM YYYY')
@@ -222,8 +227,20 @@ const Entry = ({
     setInitialFetchDone(true)
   }
 
+  const shouldFocus = () => {
+    // TODO focus on editor if it's Today
+    // const editor = usePlateEditorState(`${entryDay}-editor`)
+    // console.log('ShouldFocus')
+    // setTimeout(() => {
+    //   if (isToday(entryDay)) {
+    //     ReactEditor.focus(editor)
+    //   }
+    // }, 2000)
+  }
+
   useEffect(() => {
     initialFetch()
+    shouldFocus()
   }, [])
 
   useEffect(() => {

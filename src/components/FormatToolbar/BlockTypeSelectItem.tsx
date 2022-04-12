@@ -11,11 +11,11 @@ const ItemWrapper = styled.button`
   border-radius: 8px;
   cursor: pointer;
   width: 100%;
-  background-color: ${theme('color.neutral.popper')};
+  background-color: ${theme('color.popper.surface')};
   align-items: center;
   transition: ${theme('animation.time.normal')};
   &:hover {
-    background-color: ${theme('color.neutral.hover')};
+    background-color: ${theme('color.popper.hover')};
   }
 `
 type ItemCurrentProps = {

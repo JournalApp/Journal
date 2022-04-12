@@ -60,7 +60,7 @@ const createWindow = (): void => {
   const mainWindow = new BrowserWindow({
     height: 600,
     width: 800,
-    titleBarStyle: 'hidden',
+    titleBarStyle: 'customButtonsOnHover',
     trafficLightPosition: { x: 16, y: 16 },
     show: false,
     webPreferences: {

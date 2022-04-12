@@ -30,7 +30,7 @@ interface BlockTypeSelectButtonProps {
 }
 
 const Divider = styled.div`
-  background-color: ${theme('color.neutral.border')};
+  background-color: ${theme('color.popper.border')};
   height: 1px;
   margin: 8px 12px;
 `
@@ -44,9 +44,9 @@ const BlockTypeSelectButton = styled.button<BlockTypeSelectButtonProps>`
   justify-content: center;
   cursor: pointer;
   background-color: ${(props) =>
-    props.isHidden ? theme('color.neutral.popper') : theme('color.neutral.active')};
+    props.isHidden ? theme('color.popper.surface') : theme('color.popper.active')};
   &:hover {
-    background-color: ${theme('color.neutral.hoverInverted')};
+    background-color: ${theme('color.popper.hoverInverted')};
   }
   transition: ${theme('animation.time.normal')};
 `
@@ -66,7 +66,7 @@ const Dropdown = styled.div`
   padding: 4px;
   border-radius: 12px;
   box-shadow: ${theme('style.shadow')};
-  background-color: ${theme('color.neutral.popper')};
+  background-color: ${theme('color.popper.surface')};
   animation-name: ${showDropdown};
   animation-duration: ${theme('animation.time.normal')};
 `
