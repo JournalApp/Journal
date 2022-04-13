@@ -59,7 +59,7 @@ function EntryList() {
   }, [])
 
   useEffect(() => {
-    console.log(entries)
+    // console.log(entries)
     console.log('Entries updated')
   }, [entries])
 

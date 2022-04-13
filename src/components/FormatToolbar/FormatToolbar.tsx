@@ -145,7 +145,7 @@ export const FormatToolbar = ({ focused, isContextMenuVisible }: FormatToolbarPr
         return { top, right, bottom, left, width, height, x, y }
       },
     })
-    console.log('useLayoutEffect')
+    // console.log('useLayoutEffect')
   }, [reference, selectionExpanded, selectionText, editor.children])
 
   useEffect(() => {

@@ -125,6 +125,7 @@ const Entry = ({
   const [needsSavingToServer, setNeedsSavingToServer] = useState(false)
   const [initialValue, setInitialValue] = useState([])
   const [focused, setFocused] = useState(false)
+  const [shouldFocus, setShouldFocus] = useState(isToday(entryDay))
   const contextMenuVisible = useRef(false)
   const toggleContextMenu = useRef(null)
   const [initialFetchDone, setInitialFetchDone] = useState(false)
@@ -227,20 +228,18 @@ const Entry = ({
     setInitialFetchDone(true)
   }
 
-  const shouldFocus = () => {
-    // TODO focus on editor if it's Today
-    // const editor = usePlateEditorState(`${entryDay}-editor`)
-    // console.log('ShouldFocus')
-    // setTimeout(() => {
-    //   if (isToday(entryDay)) {
-    //     ReactEditor.focus(editor)
-    //   }
-    // }, 2000)
+  const ShouldFocus = () => {
+    const editor = usePlateEditorState(useEventPlateId())
+    useEffect(() => {
+      ReactEditor.focus(editor)
+      setShouldFocus(false)
+      console.log(`Focus set to ${entryDay}`)
+    }, [])
+    return <></>
   }
 
   useEffect(() => {
     initialFetch()
-    shouldFocus()
   }, [])
 
   useEffect(() => {
@@ -348,6 +347,7 @@ const Entry = ({
             onChange={onChangeDebug}
             plugins={plugins}
           >
+            {shouldFocus && <ShouldFocus />}
             <ContextMenu
               focused={focused}
               setContextMenuVisible={setContextMenuVisible}
