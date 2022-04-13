@@ -3,6 +3,8 @@ import styled, { keyframes } from 'styled-components'
 import { Icon } from 'components'
 import { theme } from 'themes'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
+import * as Toolbar from '@radix-ui/react-toolbar'
+import * as Dialog from '@radix-ui/react-dialog'
 
 const showDropdown = keyframes`
   0% {
@@ -17,6 +19,38 @@ interface MenuProps {
   posY?: string
   pos?: string
 }
+
+const AppearanceToolbarWrapper = styled(Dialog.Content)`
+  position: fixed;
+  bottom: 80px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  z-index: 9999;
+`
+
+const DialogTrigger = styled(Dialog.Trigger)`
+  background-color: transparent;
+  padding: 0;
+  outline: none;
+  border: 0;
+  &:focus,
+  &:hover {
+    outline: none;
+  }
+`
+
+const AppearanceToolbar = styled(Toolbar.Root)`
+  padding: 4px;
+  border-radius: 12px;
+  display: flex;
+  box-shadow: ${theme('style.shadow')};
+  background-color: ${theme('color.popper.surface')};
+  animation-name: ${showDropdown};
+  animation-duration: ${theme('animation.time.normal')};
+  -webkit-app-region: no-drag;
+`
 
 const Dropdown = styled(DropdownMenu.Content)<MenuProps>`
   position: ${(props) => (props.pos ? props.pos : 'absolute')};
@@ -88,22 +122,54 @@ const Divider = styled(DropdownMenu.Separator)`
 
 const Menu = () => {
   return (
-    <DropdownMenu.Root>
-      <MenuButton>
-        <Icon name='Menu' />
-      </MenuButton>
-      <Dropdown side='left' sideOffset={-40} align='end' alignOffset={30}>
-        <Item>
-          <Icon name='Bucket' />
-          <ItemTitle>Appearance</ItemTitle>
-        </Item>
-        <Divider />
-        <Item>
-          <Icon name='Exit' />
-          <ItemTitle>Logout</ItemTitle>
-        </Item>
-      </Dropdown>
-    </DropdownMenu.Root>
+    <Dialog.Root>
+      <DropdownMenu.Root>
+        <MenuButton>
+          <Icon name='Menu' />
+        </MenuButton>
+        <Dropdown side='left' sideOffset={-40} align='end' alignOffset={30}>
+          <DialogTrigger>
+            <Item>
+              <Icon name='Bucket' />
+              <ItemTitle>Appearance</ItemTitle>
+            </Item>
+          </DialogTrigger>
+          <Divider />
+          <Item>
+            <Icon name='Exit' />
+            <ItemTitle>Logout</ItemTitle>
+          </Item>
+        </Dropdown>
+      </DropdownMenu.Root>
+      <Dialog.Portal>
+        <AppearanceToolbarWrapper>
+          <AppearanceToolbar>
+            <Toolbar.ToggleGroup
+              type='single'
+              value='normal'
+              onValueChange={(value) => {
+                console.log(value)
+              }}
+            >
+              <Toolbar.ToggleItem value='small'>A</Toolbar.ToggleItem>
+              <Toolbar.ToggleItem value='normal'>AA</Toolbar.ToggleItem>
+              <Toolbar.ToggleItem value='large'>AAA</Toolbar.ToggleItem>
+            </Toolbar.ToggleGroup>
+            <Toolbar.Separator />
+            <Toolbar.ToggleGroup
+              type='single'
+              value='inter'
+              onValueChange={(value) => {
+                console.log(value)
+              }}
+            >
+              <Toolbar.ToggleItem value='inter'>Inter</Toolbar.ToggleItem>
+              <Toolbar.ToggleItem value='novella'>Novella</Toolbar.ToggleItem>
+            </Toolbar.ToggleGroup>
+          </AppearanceToolbar>
+        </AppearanceToolbarWrapper>
+      </Dialog.Portal>
+    </Dialog.Root>
   )
 }
 

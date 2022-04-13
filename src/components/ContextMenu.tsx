@@ -215,18 +215,18 @@ export const ContextMenu = ({
           {selectionText && (
             <Item onMouseDown={(e) => clipboardCommand(e, 'cut')}>
               <ItemTitle>Cut</ItemTitle>
-              <ItemShortcut>⌘ X</ItemShortcut>
+              <ItemShortcut>⌘X</ItemShortcut>
             </Item>
           )}
           {selectionText && (
             <Item onMouseDown={(e) => clipboardCommand(e, 'copy')}>
               <ItemTitle>Copy</ItemTitle>
-              <ItemShortcut>⌘ C</ItemShortcut>
+              <ItemShortcut>⌘C</ItemShortcut>
             </Item>
           )}
           <Item onMouseDown={(e) => clipboardCommand(e, 'paste')}>
             <ItemTitle>Paste</ItemTitle>
-            <ItemShortcut>⌘ V</ItemShortcut>
+            <ItemShortcut>⌘V</ItemShortcut>
           </Item>
         </Dropdown>
       )}
