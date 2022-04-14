@@ -220,6 +220,8 @@ const Menu = () => {
               defaultValue={fontSize}
               onValueChange={(value) => {
                 console.log(value)
+                // TODO manipulate CSS variables instead of React state
+                // This causes RangeError: Maximum call stack size exceeded
                 setFontSize(value as UserContextInterface['fontSize'])
               }}
             >

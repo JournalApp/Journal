@@ -11,18 +11,6 @@ const lightPalette = {
   },
 }
 
-// const baseTheme = {
-//   font: {
-//     main: "'Inter var'",
-//   },
-//   space: {
-//     one: '8px',
-//   },
-//   animation: {
-//     time: '300ms',
-//   },
-// }
-
 const lightTheme = {
   color: {
     primary: {
@@ -68,28 +56,4 @@ const lightTheme = {
   },
 }
 
-type RecursiveKeyOf<TObj extends object> = {
-  [TKey in keyof TObj & (string | number)]: RecursiveKeyOfHandleValue<TObj[TKey], `${TKey}`>
-}[keyof TObj & (string | number)]
-
-type RecursiveKeyOfInner<TObj extends object> = {
-  [TKey in keyof TObj & (string | number)]: RecursiveKeyOfHandleValue<
-    TObj[TKey],
-    `['${TKey}']` | `.${TKey}`
-  >
-}[keyof TObj & (string | number)]
-
-type RecursiveKeyOfHandleValue<TValue, Text extends string> = TValue extends any[]
-  ? Text
-  : TValue extends object
-  ? Text | `${Text}${RecursiveKeyOfInner<TValue>}`
-  : Text
-
-type ColorKey = RecursiveKeyOf<typeof lightTheme>
-
-const theme = (colorKey: ColorKey) => {
-  const cssVar = colorKey.split('.').reduce((acc, key) => acc + '-' + key, '-')
-  return `var(${cssVar})`
-}
-
-export { theme, lightTheme }
+export { lightTheme }

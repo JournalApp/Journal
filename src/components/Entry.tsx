@@ -10,6 +10,7 @@ import { createPluginFactory, getPlateActions } from '@udecode/plate'
 import { Transforms, Editor as SlateEditor } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { CONFIG } from 'config'
+import { theme } from 'themes'
 
 import {
   createPlateUI,
@@ -67,16 +68,11 @@ const AsideStickyContainer = styled.div`
   top: 30px;
 `
 
-interface MainWrapperProps {
-  userFontSize: number
-  userFontFace: string
-}
-
-const MainWrapper = styled.div<MainWrapperProps>`
+const MainWrapper = styled.div`
   width: 100%;
   padding: 0 80px 0 0;
-  font-size: ${(props) => props.userFontSize + 'px'};
-  font-family: ${(props) => props.userFontFace};
+  font-size: ${theme('appearance.fontSize')};
+  font-family: ${theme('appearance.fontFace')};
   font-weight: 500;
   line-height: 30px;
   -webkit-app-region: no-drag;
@@ -147,7 +143,6 @@ const Entry = ({
   const debugValue = useRef([])
   const editorRef = useRef(null)
   const { setCachedEntry } = useEntriesContext()
-  const { getFontSizePx, getFontFaceName } = useUserContext()
 
   const setContextMenuVisible = (val: boolean) => {
     contextMenuVisible.current = val
@@ -353,7 +348,7 @@ const Entry = ({
 
   return (
     <Container isFadedOut={isFadedOut} ref={editorRef} id={`${entryDay}-entry`}>
-      <MainWrapper userFontSize={getFontSizePx()} userFontFace={getFontFaceName()}>
+      <MainWrapper>
         {(initialFetchDone || cached) && (
           <Plate
             id={`${entryDay}-editor`}

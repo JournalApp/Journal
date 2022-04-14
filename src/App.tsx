@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import { EntryList, Calendar, Menu } from 'components'
 import { UserProvider, EntriesProvider } from './context'
-import { lightTheme, theme } from 'themes'
+import { lightTheme, baseTheme, theme } from 'themes'
 import { createGlobalStyle } from 'styled-components'
 import { createCssVars } from 'utils'
 
@@ -15,7 +15,8 @@ declare global {
 
 const GlobalStyle = createGlobalStyle`
 :root {
-	${createCssVars(lightTheme)}
+	${createCssVars(lightTheme)};
+  ${createCssVars(baseTheme)};
 }
 
 body {
@@ -44,13 +45,13 @@ function App() {
     <>
       <GlobalStyle />
       <EntriesProvider>
-        <UserProvider>
-          <Container>
+        <Container>
+          <UserProvider>
             <Menu />
-            <EntryList />
-            <Calendar />
-          </Container>
-        </UserProvider>
+          </UserProvider>
+          <EntryList />
+          <Calendar />
+        </Container>
       </EntriesProvider>
     </>
   )
