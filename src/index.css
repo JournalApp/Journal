@@ -12,6 +12,34 @@
   src: url('../assets/fonts/Inter.var.woff2?v=3.19') format('woff2');
 }
 
+@font-face {
+  font-family: 'Novela';
+  src: url('../assets/fonts/novela-regular-webfont.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Novela';
+  src: url('../assets/fonts/novela-regularitalic-webfont.woff2') format('woff2');
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Novela';
+  src: url('../assets/fonts/novela-bold-webfont.woff2') format('woff2');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Novela';
+  src: url('../assets/fonts/novela-bolditalic-webfont.woff2') format('woff2');
+  font-weight: bold;
+  font-style: italic;
+}
+
 body {
   margin: 0;
   padding: 0;

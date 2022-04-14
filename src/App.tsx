@@ -6,6 +6,13 @@ import { lightTheme, theme } from 'themes'
 import { createGlobalStyle } from 'styled-components'
 import { createCssVars } from 'utils'
 
+declare global {
+  interface Window {
+    electronAPI?: any
+    clipboardData?: any
+  }
+}
+
 const GlobalStyle = createGlobalStyle`
 :root {
 	${createCssVars(lightTheme)}
@@ -27,13 +34,6 @@ hr {
   opacity: 0.1;
 }
 `
-
-declare global {
-  interface Window {
-    electronAPI?: any
-    clipboardData?: any
-  }
-}
 
 const Container = styled.div`
   min-height: 100vh;

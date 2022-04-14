@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { Entry } from './'
 import { useEventEditorSelectors } from '@udecode/plate'
 import { arrayEquals } from 'utils'
-import { useEntriesContext } from '../context'
+import { useEntriesContext } from 'context'
 import dayjs from 'dayjs'
 
 const BeforeEntries = styled.div`

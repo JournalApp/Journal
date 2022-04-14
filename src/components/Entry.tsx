@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import dayjs from 'dayjs'
 import { usePlateEditorState, useEventPlateId, usePlateEditorRef } from '@udecode/plate-core'
 import { countWords } from 'utils'
-import { useEntriesContext } from '../context'
+import { useEntriesContext, useUserContext } from 'context'
 import { ContextMenu } from 'components'
 import { FormatToolbar } from 'components'
 import { createPluginFactory, getPlateActions } from '@udecode/plate'
@@ -67,13 +67,28 @@ const AsideStickyContainer = styled.div`
   top: 30px;
 `
 
-const MainWrapper = styled.div`
+interface MainWrapperProps {
+  userFontSize: number
+  userFontFace: string
+}
+
+const MainWrapper = styled.div<MainWrapperProps>`
   width: 100%;
   padding: 0 80px 0 0;
-  font-size: 21px;
+  font-size: ${(props) => props.userFontSize + 'px'};
+  font-family: ${(props) => props.userFontFace};
   font-weight: 500;
   line-height: 30px;
   -webkit-app-region: no-drag;
+  & > div:first-child > h1:first-child,
+  & > div:first-child > h2:first-child,
+  & > div:first-child > h3:first-child,
+  & > div:first-child > div:first-child > h1:first-child,
+  & > div:first-child > div:first-child > h2:first-child,
+  & > div:first-child > div:first-child > h3:first-child {
+    margin-block-start: 0;
+  }
+
   & > * {
     max-width: 75ch;
   }
@@ -132,7 +147,7 @@ const Entry = ({
   const debugValue = useRef([])
   const editorRef = useRef(null)
   const { setCachedEntry } = useEntriesContext()
-  // const st = usePlateEditorState(`${entryDay}-editor`)
+  const { getFontSizePx, getFontFaceName } = useUserContext()
 
   const setContextMenuVisible = (val: boolean) => {
     contextMenuVisible.current = val
@@ -338,7 +353,7 @@ const Entry = ({
 
   return (
     <Container isFadedOut={isFadedOut} ref={editorRef} id={`${entryDay}-entry`}>
-      <MainWrapper>
+      <MainWrapper userFontSize={getFontSizePx()} userFontFace={getFontFaceName()}>
         {(initialFetchDone || cached) && (
           <Plate
             id={`${entryDay}-editor`}

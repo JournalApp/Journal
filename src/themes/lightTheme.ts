@@ -6,6 +6,7 @@ const lightPalette = {
     '25': '#E0E0E0', // bg
     '30': '#CFCFCF', // secondary surface
     '35': '#B7B7B7', // secondary hover
+    '40': '#9A9A9A', // Not active toggle in Appearance toolbar
     '100': '#3A3A3A', // text
   },
 }
@@ -46,6 +47,7 @@ const lightTheme = {
       active: lightPalette.neutral[20],
       hover: lightPalette.neutral[15],
       hoverInverted: lightPalette.neutral[20],
+      disabled: lightPalette.neutral[40],
     },
   },
   style: {

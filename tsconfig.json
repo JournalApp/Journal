@@ -16,7 +16,8 @@
       "components": ["./src/components/"],
       "utils": ["./src/utils/"],
       "themes": ["./src/themes/"],
-      "config": ["./src/config/"]
+      "config": ["./src/config/"],
+      "context": ["./src/context/"]
     },
     "lib": ["es2021", "dom"]
   },

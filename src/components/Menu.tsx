@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import styled, { keyframes } from 'styled-components'
 import { Icon } from 'components'
 import { theme } from 'themes'
+import { useUserContext, UserContextInterface } from 'context'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import * as Toolbar from '@radix-ui/react-toolbar'
 import * as Dialog from '@radix-ui/react-dialog'
@@ -13,6 +14,18 @@ const showDropdown = keyframes`
   100% {
     opacity: 1;
   }`
+
+const reveal = keyframes`
+  0% {
+    margin-bottom: -24px;
+    opacity: 0;
+  }
+  100% {
+    margin-bottom: 0px;
+    opacity: 1;
+  }
+  }
+`
 
 interface MenuProps {
   posX?: string
@@ -32,6 +45,7 @@ const AppearanceToolbarWrapper = styled(Dialog.Content)`
 
 const DialogTrigger = styled(Dialog.Trigger)`
   background-color: transparent;
+  color: inherit;
   padding: 0;
   outline: none;
   border: 0;
@@ -42,14 +56,69 @@ const DialogTrigger = styled(Dialog.Trigger)`
 `
 
 const AppearanceToolbar = styled(Toolbar.Root)`
-  padding: 4px;
-  border-radius: 12px;
+  padding: 12px;
+  border-radius: 100px;
+  gap: 8px;
   display: flex;
   box-shadow: ${theme('style.shadow')};
   background-color: ${theme('color.popper.surface')};
-  animation-name: ${showDropdown};
+  transition: ${theme('animation.time.normal')};
+  animation-name: ${reveal};
   animation-duration: ${theme('animation.time.normal')};
+  animation-timing-function: cubic-bezier(0.31, 0.3, 0.17, 0.99);
+  animation-fill-mode: both;
   -webkit-app-region: no-drag;
+`
+const ToggleGroup = styled(Toolbar.ToggleGroup)`
+  gap: 8px;
+  display: flex;
+`
+
+const ToggleButton = styled(Toolbar.ToggleItem)`
+  height: 48px;
+  font-size: 14px;
+  line-height: 14px;
+  min-width: 48px;
+  padding: 16px;
+  border-radius: 100px;
+  cursor: pointer;
+  border: 1px solid ${theme('color.popper.border')};
+  background-color: ${theme('color.popper.surface')};
+  color: ${theme('color.popper.disabled')};
+  transition: ${theme('animation.time.normal')};
+  &:disabled {
+    cursor: initial;
+  }
+  &:focus {
+    outline: 0;
+  }
+  &:hover {
+    border: 1px solid ${theme('color.popper.disabled')};
+  }
+  &[data-state='on'] {
+    opacity: 1;
+    border: 1px solid ${theme('color.popper.main')};
+    border: 1px solid ${theme('color.popper.main')};
+    color: ${theme('color.popper.main')};
+  }
+`
+
+const ToggleFontA = styled(ToggleButton)`
+  font-size: 14px;
+`
+
+const ToggleFontAA = styled(ToggleButton)`
+  font-size: 16px;
+`
+
+const ToggleFontAAA = styled(ToggleButton)`
+  font-size: 21px;
+`
+
+const HorizontalDivider = styled(Toolbar.Separator)`
+  background-color: ${theme('color.popper.border')};
+  width: 1px;
+  margin: 4px 4px;
 `
 
 const Dropdown = styled(DropdownMenu.Content)<MenuProps>`
@@ -117,10 +186,12 @@ const MenuButton = styled(DropdownMenu.Trigger)`
 const Divider = styled(DropdownMenu.Separator)`
   background-color: ${theme('color.popper.border')};
   height: 1px;
-  margin: 8px 12px;
+  margin: 4px 12px;
 `
 
 const Menu = () => {
+  const { fontSize, setFontSize, fontFace, setFontFace } = useUserContext()
+
   return (
     <Dialog.Root>
       <DropdownMenu.Root>
@@ -144,28 +215,40 @@ const Menu = () => {
       <Dialog.Portal>
         <AppearanceToolbarWrapper>
           <AppearanceToolbar>
-            <Toolbar.ToggleGroup
+            <ToggleGroup
               type='single'
-              value='normal'
+              defaultValue={fontSize}
               onValueChange={(value) => {
                 console.log(value)
+                setFontSize(value as UserContextInterface['fontSize'])
               }}
             >
-              <Toolbar.ToggleItem value='small'>A</Toolbar.ToggleItem>
-              <Toolbar.ToggleItem value='normal'>AA</Toolbar.ToggleItem>
-              <Toolbar.ToggleItem value='large'>AAA</Toolbar.ToggleItem>
-            </Toolbar.ToggleGroup>
-            <Toolbar.Separator />
-            <Toolbar.ToggleGroup
+              <ToggleFontA value='small' disabled={fontSize == 'small'}>
+                A
+              </ToggleFontA>
+              <ToggleFontAA value='normal' disabled={fontSize == 'normal'}>
+                A
+              </ToggleFontAA>
+              <ToggleFontAAA value='large' disabled={fontSize == 'large'}>
+                A
+              </ToggleFontAAA>
+            </ToggleGroup>
+            <HorizontalDivider />
+            <ToggleGroup
               type='single'
-              value='inter'
+              defaultValue={fontFace}
               onValueChange={(value) => {
                 console.log(value)
+                setFontFace(value as UserContextInterface['fontFace'])
               }}
             >
-              <Toolbar.ToggleItem value='inter'>Inter</Toolbar.ToggleItem>
-              <Toolbar.ToggleItem value='novella'>Novella</Toolbar.ToggleItem>
-            </Toolbar.ToggleGroup>
+              <ToggleButton value='inter' disabled={fontFace == 'inter'}>
+                Inter
+              </ToggleButton>
+              <ToggleButton value='novela' disabled={fontFace == 'novela'}>
+                Novela
+              </ToggleButton>
+            </ToggleGroup>
           </AppearanceToolbar>
         </AppearanceToolbarWrapper>
       </Dialog.Portal>

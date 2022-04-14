@@ -2,99 +2,57 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import { nanoid } from 'nanoid'
 
 interface UserContextInterface {
-  isUser: any
-  user: any
-  previousUser: any
-  loginUser: any
-  logoutUser: any
-  loginVisible: any
-  toggleLoginForm: any
-  hideLoginForm: any
-  toastsQueue: any
-  sendToast: any
+  theme: 'light' | 'dark'
+  fontFace: 'inter' | 'novela'
+  fontSize: 'small' | 'normal' | 'large'
+  getFontSizePx: () => number
+  setFontSize: (size: UserContextInterface['fontSize']) => void
+  getFontFaceName: () => string
+  setFontFace: (size: UserContextInterface['fontFace']) => void
+}
+
+const userPreferences = {
+  theme: 'light',
+  fontFace: 'inter',
+  fontSize: 'normal',
+}
+
+const fontSizeMap = {
+  small: 18,
+  normal: 21,
+  large: 23,
+}
+
+const fontFaceMap = {
+  inter: 'Inter var',
+  novela: 'Novela',
 }
 
 const UserContext = createContext<UserContextInterface | null>(null)
 
 export function UserProvider({ children }: any) {
   const [user, setUser] = useState({})
-  const [previousUser, setPreviousUser] = useState({})
-  const [loginVisible, setLoginVisible] = useState(false)
-  const [toastsQueue, setToastsQueue] = useState([])
+  const [theme, setTheme] = useState<UserContextInterface['theme']>('light')
+  const [fontFace, setFontFace] = useState<UserContextInterface['fontFace']>('inter')
+  const [fontSize, setFontSize] = useState<UserContextInterface['fontSize']>('normal')
 
-  useEffect(() => {
-    const savedUser = JSON.parse(window.localStorage.getItem('rioll-user'))
-    if (savedUser) setUser({ ...savedUser })
-
-    const savedPreviousUser = JSON.parse(window.localStorage.getItem('rioll-previous-user'))
-    console.log(`savedPreviousUser: ${savedPreviousUser}`)
-    if (savedPreviousUser) setPreviousUser({ ...savedPreviousUser })
-  }, [])
-
-  const loginUser = (newUser: any) => {
-    window.localStorage.setItem('rioll-user', JSON.stringify(newUser))
-    setUser({ ...newUser })
-
-    window.localStorage.setItem('rioll-previous-user', JSON.stringify(newUser))
-    setPreviousUser({ ...newUser })
+  const getFontSizePx = () => {
+    return fontSizeMap[fontSize]
   }
 
-  const sendToast = ({ type, text }: any) => {
-    let key = nanoid(6)
-    setToastsQueue([...toastsQueue, { key, type, text }])
-    setTimeout(() => {
-      setToastsQueue((arr) => {
-        return arr.filter((item) => item.key !== key)
-      })
-    }, 10000)
-  }
-
-  const logoutUser = async (e: any) => {
-    e?.preventDefault()
-    try {
-      const res = await fetch('/api/user/auth', {
-        // headers: {
-        //   'Content-Type': 'application/json',
-        // },
-        method: 'DELETE',
-      })
-      if (res.status == 200) {
-        window.localStorage.removeItem('rioll-user')
-        setUser({})
-        //setToastsQueue([])
-        if (e) sendToast({ type: 'success', text: 'Logged out successfully' })
-      } else {
-        throw new Error()
-      }
-    } catch {
-      console.log('Unknown error')
-    }
-  }
-
-  const isUser = () => {
-    return Object.keys(user).length > 0 && user.constructor === Object
-  }
-
-  const toggleLoginForm = (e: any) => {
-    e?.preventDefault()
-    setLoginVisible(!loginVisible)
-  }
-  const hideLoginForm = (e: any) => {
-    e?.preventDefault()
-    setLoginVisible(false)
+  const getFontFaceName = () => {
+    return fontFaceMap[fontFace]
   }
 
   let state = {
-    isUser,
-    user,
-    previousUser,
-    loginUser,
-    logoutUser,
-    loginVisible,
-    toggleLoginForm,
-    hideLoginForm,
-    toastsQueue,
-    sendToast,
+    theme,
+    setTheme,
+    fontFace,
+    getFontFaceName,
+    setFontFace,
+    fontSize,
+    getFontSizePx,
+    setFontSize,
   }
   return <UserContext.Provider value={state}>{children}</UserContext.Provider>
 }
@@ -102,3 +60,5 @@ export function UserProvider({ children }: any) {
 export function useUserContext() {
   return useContext(UserContext)
 }
+
+export { UserContextInterface }
