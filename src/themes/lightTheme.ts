@@ -42,19 +42,6 @@ const lightTheme = {
   style: {
     shadow: `0px 0px 0px 4px ${lightPalette.neutral[25]}`,
   },
-  font: {
-    main: "'Inter var'",
-  },
-  space: {
-    one: '8px',
-  },
-  animation: {
-    time: {
-      fast: '100ms',
-      normal: '200ms',
-      long: '400ms',
-    },
-  },
 }
 
 export { lightTheme }

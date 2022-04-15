@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import { EntryList, Calendar, Menu } from 'components'
 import { AppearanceProvider, EntriesProvider } from './context'
-import { lightTheme, baseTheme, theme } from 'themes'
+import { lightTheme, darkTheme, baseTheme, theme } from 'themes'
 import { createGlobalStyle } from 'styled-components'
 import { createCssVars } from 'utils'
 

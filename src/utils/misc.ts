@@ -33,6 +33,17 @@ const countWords = (text: any) => {
   return res.length
 }
 
+const setCssVars = (items: any, prefix = '-'): void => {
+  Object.entries(items).flatMap(([key, value]: any) => {
+    const varName = `${prefix}-${key}`
+    if (typeof value === 'object') {
+      setCssVars(value, varName)
+    } else {
+      document.documentElement.style.setProperty(varName, value)
+    }
+  })
+}
+
 const createCssVar = (items: [string], prefix = '-'): string[] =>
   Object.entries(items).flatMap(([key, value]: any) => {
     const varName = `${prefix}-${key}`
@@ -42,4 +53,4 @@ const createCssVar = (items: [string], prefix = '-'): string[] =>
 
 const createCssVars = (themeColors: any) => createCssVar(themeColors).join(';')
 
-export { shallowEqual, arrayEquals, countWords, createCssVars }
+export { shallowEqual, arrayEquals, countWords, createCssVars, setCssVars }

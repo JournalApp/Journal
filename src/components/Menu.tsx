@@ -179,7 +179,8 @@ const MenuButton = styled(DropdownMenu.Trigger)<MenuButtonProps>`
   background-color: ${(props) =>
     props.open ? theme('color.secondary.main') : theme('color.secondary.surface')};
   & * {
-    fill: ${(props) => (props.open ? theme('color.secondary.surface') : 'initial')};
+    fill: ${(props) =>
+      props.open ? theme('color.secondary.surface') : theme('color.secondary.main')};
   }
   &:focus,
   &:hover {

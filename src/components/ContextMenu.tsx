@@ -62,6 +62,7 @@ const Item = styled.button`
 
 const ItemTitle = styled.span`
   flex-grow: 1;
+  color: ${theme('color.popper.main')};
   font-size: 14px;
   line-height: 20px;
   text-align: left;
@@ -69,6 +70,7 @@ const ItemTitle = styled.span`
 
 const ItemShortcut = styled.span`
   font-size: 14px;
+  color: ${theme('color.popper.main')};
   line-height: 20px;
   text-align: right;
   opacity: 0.3;

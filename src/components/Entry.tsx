@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import dayjs from 'dayjs'
 import { usePlateEditorState, useEventPlateId, usePlateEditorRef } from '@udecode/plate-core'
 import { countWords } from 'utils'
@@ -14,6 +14,9 @@ import { theme } from 'themes'
 
 import {
   createPlateUI,
+  ELEMENT_H3,
+  withProps,
+  StyledElement,
   Plate,
   createBlockquotePlugin,
   createBoldPlugin,
@@ -87,6 +90,7 @@ const MainWrapper = styled.div`
 
   & > * {
     max-width: 75ch;
+    color: ${theme('color.primary.main')};
   }
 `
 
@@ -342,7 +346,20 @@ const Entry = ({
     ],
     {
       // Plate components
-      components: createPlateUI(),
+      // Override H3 color (#434343) provided by createPlateUI
+      components: createPlateUI({
+        [ELEMENT_H3]: withProps(StyledElement, {
+          as: 'h3',
+          styles: {
+            root: css`
+              margin: 1em 0 1px;
+              font-size: 1.25em;
+              font-weight: 500;
+              line-height: 1.3;
+            `,
+          },
+        }),
+      }),
     }
   )
 

@@ -24,6 +24,7 @@ type ItemCurrentProps = {
 
 const ItemTitle = styled.span<ItemCurrentProps>`
   font-size: 14px;
+  color: ${theme('color.popper.main')};
   font-weight: ${(props) => (props.current ? '700' : 'normal')};
   line-height: 20px;
   flex-grow: 1;
