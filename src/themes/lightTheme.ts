@@ -20,6 +20,7 @@ const lightTheme = {
     },
     secondary: {
       // base colors
+      main: lightPalette.neutral[100],
       surface: lightPalette.neutral[30],
       // colors for states
       hover: lightPalette.neutral[35],

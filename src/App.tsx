@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import { EntryList, Calendar, Menu } from 'components'
-import { UserProvider, EntriesProvider } from './context'
+import { AppearanceProvider, EntriesProvider } from './context'
 import { lightTheme, baseTheme, theme } from 'themes'
 import { createGlobalStyle } from 'styled-components'
 import { createCssVars } from 'utils'
@@ -46,9 +46,9 @@ function App() {
       <GlobalStyle />
       <EntriesProvider>
         <Container>
-          <UserProvider>
+          <AppearanceProvider>
             <Menu />
-          </UserProvider>
+          </AppearanceProvider>
           <EntryList />
           <Calendar />
         </Container>

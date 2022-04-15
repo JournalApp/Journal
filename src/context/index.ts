@@ -1,2 +1,2 @@
-export * from './UserContext'
+export * from './AppearanceContext'
 export * from './EntriesContext'

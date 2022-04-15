@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import styled, { keyframes } from 'styled-components'
 import { Icon } from 'components'
 import { theme } from 'themes'
-import { useUserContext, UserContextInterface } from 'context'
+import { useAppearanceContext, AppearanceContextInterface } from 'context'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import * as Toolbar from '@radix-ui/react-toolbar'
 import * as Dialog from '@radix-ui/react-dialog'
@@ -104,7 +104,7 @@ const ToggleButton = styled(Toolbar.ToggleItem)`
 `
 
 const ToggleFontA = styled(ToggleButton)`
-  font-size: 14px;
+  font-size: 13px;
 `
 
 const ToggleFontAA = styled(ToggleButton)`
@@ -112,7 +112,7 @@ const ToggleFontAA = styled(ToggleButton)`
 `
 
 const ToggleFontAAA = styled(ToggleButton)`
-  font-size: 21px;
+  font-size: 22px;
 `
 
 const HorizontalDivider = styled(Toolbar.Separator)`
@@ -160,7 +160,11 @@ const ItemTitle = styled.span`
   padding-right: 16px;
 `
 
-const MenuButton = styled(DropdownMenu.Trigger)`
+interface MenuButtonProps {
+  open: boolean
+}
+
+const MenuButton = styled(DropdownMenu.Trigger)<MenuButtonProps>`
   position: fixed;
   top: 8px;
   right: 8px;
@@ -169,8 +173,13 @@ const MenuButton = styled(DropdownMenu.Trigger)`
   border-radius: 100px;
   border: 0;
   padding: 4px;
+  z-index: 9999;
   transition: ${theme('animation.time.normal')};
-  background-color: ${theme('color.secondary.surface')};
+  background-color: ${(props) =>
+    props.open ? theme('color.secondary.main') : theme('color.secondary.surface')};
+  & * {
+    fill: ${(props) => (props.open ? theme('color.secondary.surface') : 'initial')};
+  }
   &:focus,
   &:hover {
     outline: none;
@@ -178,7 +187,6 @@ const MenuButton = styled(DropdownMenu.Trigger)`
     background-color: ${theme('color.secondary.hover')};
     & * {
       transition: ${theme('animation.time.normal')};
-      /* fill: ${theme('color.secondary.surface')}; */
     }
   }
 `
@@ -190,12 +198,13 @@ const Divider = styled(DropdownMenu.Separator)`
 `
 
 const Menu = () => {
-  const { fontSize, setFontSize, fontFace, setFontFace } = useUserContext()
+  const [open, setOpen] = useState(false)
+  const { fontSize, setFontSize, fontFace, setFontFace } = useAppearanceContext()
 
   return (
     <Dialog.Root>
-      <DropdownMenu.Root>
-        <MenuButton>
+      <DropdownMenu.Root onOpenChange={(open) => setOpen(open)}>
+        <MenuButton open={open}>
           <Icon name='Menu' />
         </MenuButton>
         <Dropdown side='left' sideOffset={-40} align='end' alignOffset={30}>
@@ -219,10 +228,7 @@ const Menu = () => {
               type='single'
               defaultValue={fontSize}
               onValueChange={(value) => {
-                console.log(value)
-                // TODO manipulate CSS variables instead of React state
-                // This causes RangeError: Maximum call stack size exceeded
-                setFontSize(value as UserContextInterface['fontSize'])
+                setFontSize(value as AppearanceContextInterface['fontSize'])
               }}
             >
               <ToggleFontA value='small' disabled={fontSize == 'small'}>
@@ -240,8 +246,7 @@ const Menu = () => {
               type='single'
               defaultValue={fontFace}
               onValueChange={(value) => {
-                console.log(value)
-                setFontFace(value as UserContextInterface['fontFace'])
+                setFontFace(value as AppearanceContextInterface['fontFace'])
               }}
             >
               <ToggleButton value='inter' disabled={fontFace == 'inter'}>

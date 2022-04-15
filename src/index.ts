@@ -5,6 +5,7 @@ import Store from 'electron-store'
 
 const storeIndex = new Store({ name: 'storeIndex' })
 const storeEntries = new Store({ name: 'storeEntries' })
+const storeAppearance = new Store({ name: 'storeAppearance' })
 const dayKey = 'Days'
 
 console.log(storeIndex.path)
