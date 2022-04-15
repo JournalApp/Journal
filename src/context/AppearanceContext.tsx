@@ -1,10 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react'
-import { nanoid } from 'nanoid'
+import { setCssVars } from 'utils'
+import { lightTheme, darkTheme } from 'themes'
 
 interface AppearanceContextInterface {
-  theme: 'light' | 'dark'
+  colorTheme: 'light' | 'dark'
   fontFace: 'inter' | 'novela'
   fontSize: 'small' | 'normal' | 'large'
+  setColorTheme: (theme: AppearanceContextInterface['colorTheme']) => void
   getFontSizePx: () => number
   setFontSize: (size: AppearanceContextInterface['fontSize']) => void
   getFontFaceName: () => string
@@ -28,10 +30,16 @@ const fontFaceMap = {
   novela: 'Novela',
 }
 
+const colorThemeMap = {
+  light: lightTheme,
+  dark: darkTheme,
+}
+
 const AppearanceContext = createContext<AppearanceContextInterface | null>(null)
 
 export function AppearanceProvider({ children }: any) {
-  const [theme, setTheme] = useState<AppearanceContextInterface['theme']>('light')
+  const [colorTheme, setColorThemeInternal] =
+    useState<AppearanceContextInterface['colorTheme']>('light')
   const [fontFace, setFontFaceInternal] = useState<AppearanceContextInterface['fontFace']>('inter')
   const [fontSize, setFontSizeInternal] = useState<AppearanceContextInterface['fontSize']>('normal')
 
@@ -46,16 +54,24 @@ export function AppearanceProvider({ children }: any) {
   const setFontFace = (face: AppearanceContextInterface['fontFace']) => {
     setFontFaceInternal(face)
     document.documentElement.style.setProperty('--appearance-fontFace', fontFaceMap[face])
+    // TODO Set it in local config
   }
 
   const setFontSize = (size: AppearanceContextInterface['fontSize']) => {
     setFontSizeInternal(size)
     document.documentElement.style.setProperty('--appearance-fontSize', fontSizeMap[size] + 'px')
+    // TODO Set it in local config
+  }
+
+  const setColorTheme = (theme: AppearanceContextInterface['colorTheme']) => {
+    setColorThemeInternal(theme)
+    setCssVars(colorThemeMap[theme])
+    // TODO Set it in local config
   }
 
   let state = {
-    theme,
-    setTheme,
+    colorTheme,
+    setColorTheme,
     fontFace,
     getFontFaceName,
     setFontFace,

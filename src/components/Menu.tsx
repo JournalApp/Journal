@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import styled, { keyframes } from 'styled-components'
 import { Icon } from 'components'
-import { theme } from 'themes'
+import { theme, lightTheme, darkTheme } from 'themes'
 import { useAppearanceContext, AppearanceContextInterface } from 'context'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import * as Toolbar from '@radix-ui/react-toolbar'
@@ -74,12 +74,18 @@ const ToggleGroup = styled(Toolbar.ToggleGroup)`
   display: flex;
 `
 
-const ToggleButton = styled(Toolbar.ToggleItem)`
+interface ToggleButtonProps {
+  padding?: string
+  fontName?: string
+}
+
+const ToggleButton = styled(Toolbar.ToggleItem)<ToggleButtonProps>`
   height: 48px;
   font-size: 14px;
   line-height: 14px;
   min-width: 48px;
-  padding: 16px;
+  padding: ${(props) => (props.padding ? props.padding : '16px')};
+  font-family: ${(props) => (props.fontName ? props.fontName : 'inherit')};
   border-radius: 100px;
   cursor: pointer;
   border: 1px solid ${theme('color.popper.border')};
@@ -114,11 +120,21 @@ const ToggleFontAA = styled(ToggleButton)`
 const ToggleFontAAA = styled(ToggleButton)`
   font-size: 22px;
 `
+interface ColorSwatchProps {
+  fillColor: string
+}
+
+const ColorSwatch = styled.div<ColorSwatchProps>`
+  height: 31px;
+  width: 31px;
+  border-radius: 100px;
+  background-color: ${(props) => props.fillColor};
+`
 
 const HorizontalDivider = styled(Toolbar.Separator)`
   background-color: ${theme('color.popper.border')};
   width: 1px;
-  margin: 4px 4px;
+  margin: 4px 8px;
 `
 
 const Dropdown = styled(DropdownMenu.Content)<MenuProps>`
@@ -201,7 +217,8 @@ const Divider = styled(DropdownMenu.Separator)`
 
 const Menu = () => {
   const [open, setOpen] = useState(false)
-  const { fontSize, setFontSize, fontFace, setFontFace } = useAppearanceContext()
+  const { fontSize, setFontSize, fontFace, setFontFace, colorTheme, setColorTheme } =
+    useAppearanceContext()
 
   return (
     <Dialog.Root>
@@ -246,6 +263,21 @@ const Menu = () => {
             <HorizontalDivider />
             <ToggleGroup
               type='single'
+              defaultValue={colorTheme}
+              onValueChange={(value) => {
+                setColorTheme(value as AppearanceContextInterface['colorTheme'])
+              }}
+            >
+              <ToggleButton value='light' padding='8px' disabled={colorTheme == 'light'}>
+                <ColorSwatch fillColor={lightTheme.color.primary.surface} />
+              </ToggleButton>
+              <ToggleButton value='dark' padding='8px' disabled={colorTheme == 'dark'}>
+                <ColorSwatch fillColor={darkTheme.color.primary.surface} />
+              </ToggleButton>
+            </ToggleGroup>
+            <HorizontalDivider />
+            <ToggleGroup
+              type='single'
               defaultValue={fontFace}
               onValueChange={(value) => {
                 setFontFace(value as AppearanceContextInterface['fontFace'])
@@ -254,7 +286,7 @@ const Menu = () => {
               <ToggleButton value='inter' disabled={fontFace == 'inter'}>
                 Inter
               </ToggleButton>
-              <ToggleButton value='novela' disabled={fontFace == 'novela'}>
+              <ToggleButton value='novela' fontName='Novela' disabled={fontFace == 'novela'}>
                 Novela
               </ToggleButton>
             </ToggleGroup>
