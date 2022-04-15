@@ -174,6 +174,7 @@ const MenuButton = styled(DropdownMenu.Trigger)<MenuButtonProps>`
   border: 0;
   padding: 4px;
   z-index: 9999;
+  box-shadow: ${theme('style.shadow')};
   transition: ${theme('animation.time.normal')};
   background-color: ${(props) =>
     props.open ? theme('color.secondary.main') : theme('color.secondary.surface')};
