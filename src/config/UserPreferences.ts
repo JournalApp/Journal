@@ -1,24 +1,26 @@
 import { lightTheme, darkTheme } from 'themes'
 
-type ColorTheme = 'light' | 'dark'
-type FontSize = 'small' | 'normal' | 'large'
-type FontFace = 'inter' | 'novela'
-
 const fontSizeMap = {
   small: 18,
   normal: 21,
   large: 23,
 }
 
+type FontSize = keyof typeof fontSizeMap
+
 const fontFaceMap = {
   inter: 'Inter var',
   novela: 'Novela',
 }
 
+type FontFace = keyof typeof fontFaceMap
+
 const colorThemeMap = {
   light: lightTheme,
   dark: darkTheme,
 }
+
+type ColorTheme = keyof typeof colorThemeMap
 
 const defaultUserPreferences = {
   appearance: {
