@@ -15,3 +15,5 @@ export const CONFIG: Config = {
   },
   resetNode: resetNodeRules,
 }
+
+export * from './UserPreferences'

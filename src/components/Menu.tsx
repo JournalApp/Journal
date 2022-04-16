@@ -79,7 +79,9 @@ interface ToggleButtonProps {
   fontName?: string
 }
 
-const ToggleButton = styled(Toolbar.ToggleItem)<ToggleButtonProps>`
+const ToggleButton = styled(({ padding, fontName, ...props }) => (
+  <Toolbar.ToggleItem {...props} />
+))<ToggleButtonProps>`
   height: 48px;
   font-size: 14px;
   line-height: 14px;

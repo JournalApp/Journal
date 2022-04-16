@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import { EntryList, Calendar, Menu } from 'components'
-import { AppearanceProvider, EntriesProvider } from './context'
+import { AppearanceProvider, EntriesProvider } from 'context'
 import { lightTheme, darkTheme, baseTheme, theme } from 'themes'
 import { createGlobalStyle } from 'styled-components'
 import { createCssVars } from 'utils'
+import { defaultUserPreferences, getColorTheme, ColorTheme, FontSize, FontFace } from 'config'
 
 declare global {
   interface Window {
@@ -12,10 +13,14 @@ declare global {
     clipboardData?: any
   }
 }
+const userPreferences = window.electronAPI.storeUserPreferences.getAll()
+
+const colorTheme: ColorTheme =
+  userPreferences.appearance.theme || defaultUserPreferences.appearance.theme
 
 const GlobalStyle = createGlobalStyle`
 :root {
-	${createCssVars(lightTheme)};
+	${createCssVars(getColorTheme(colorTheme))};
   ${createCssVars(baseTheme)};
 }
 
@@ -46,7 +51,7 @@ function App() {
       <GlobalStyle />
       <EntriesProvider>
         <Container>
-          <AppearanceProvider>
+          <AppearanceProvider initialColorTheme={colorTheme}>
             <Menu />
           </AppearanceProvider>
           <EntryList />
