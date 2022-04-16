@@ -2,10 +2,18 @@ import React, { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import { EntryList, Calendar, Menu } from 'components'
 import { AppearanceProvider, EntriesProvider } from 'context'
-import { lightTheme, darkTheme, baseTheme, theme } from 'themes'
+import { lightTheme, darkTheme, theme } from 'themes'
 import { createGlobalStyle } from 'styled-components'
 import { createCssVars } from 'utils'
-import { defaultUserPreferences, getColorTheme, ColorTheme, FontSize, FontFace } from 'config'
+import {
+  defaultUserPreferences,
+  getColorTheme,
+  ColorTheme,
+  FontFace,
+  FontSize,
+  getBaseThemeWithOverrides,
+  baseTheme,
+} from 'config'
 
 declare global {
   interface Window {
@@ -14,14 +22,19 @@ declare global {
   }
 }
 const userPreferences = window.electronAPI.storeUserPreferences.getAll()
-
-const colorTheme: ColorTheme =
+const initialColorTheme: ColorTheme =
   userPreferences.appearance.theme || defaultUserPreferences.appearance.theme
+
+const initialFontFace: FontFace =
+  userPreferences.appearance.fontFace || defaultUserPreferences.appearance.fontFace
+
+const initialFontSize: FontSize =
+  userPreferences.appearance.fontSize || defaultUserPreferences.appearance.fontSize
 
 const GlobalStyle = createGlobalStyle`
 :root {
-	${createCssVars(getColorTheme(colorTheme))};
-  ${createCssVars(baseTheme)};
+  ${createCssVars(getColorTheme(initialColorTheme))};
+  ${createCssVars(getBaseThemeWithOverrides(userPreferences))};
 }
 
 body {
@@ -51,7 +64,11 @@ function App() {
       <GlobalStyle />
       <EntriesProvider>
         <Container>
-          <AppearanceProvider initialColorTheme={colorTheme}>
+          <AppearanceProvider
+            initialColorTheme={initialColorTheme}
+            initialFontFace={initialFontFace}
+            initialFontSize={initialFontSize}
+          >
             <Menu />
           </AppearanceProvider>
           <EntryList />

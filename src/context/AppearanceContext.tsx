@@ -15,13 +15,20 @@ const AppearanceContext = createContext<AppearanceContextInterface | null>(null)
 
 type AppearanceProviderProps = {
   initialColorTheme: ColorTheme
+  initialFontSize: FontSize
+  initialFontFace: FontFace
   children: any
 }
 
-export function AppearanceProvider({ initialColorTheme, children }: AppearanceProviderProps) {
+export function AppearanceProvider({
+  initialColorTheme,
+  initialFontSize,
+  initialFontFace,
+  children,
+}: AppearanceProviderProps) {
   const [colorTheme, setColorThemeInternal] = useState<ColorTheme>(initialColorTheme)
-  const [fontFace, setFontFaceInternal] = useState<FontFace>('inter')
-  const [fontSize, setFontSizeInternal] = useState<FontSize>('normal')
+  const [fontFace, setFontFaceInternal] = useState<FontFace>(initialFontFace)
+  const [fontSize, setFontSizeInternal] = useState<FontSize>(initialFontSize)
 
   const setFontFace = (face: FontFace) => {
     setFontFaceInternal(face)

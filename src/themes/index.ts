@@ -1,6 +1,6 @@
 import { lightTheme } from './lightTheme'
 import { darkTheme } from './darkTheme'
-import { baseTheme } from './baseTheme'
+import { baseTheme } from 'config'
 
 type RecursiveKeyOf<TObj extends object> = {
   [TKey in keyof TObj & (string | number)]: RecursiveKeyOfHandleValue<TObj[TKey], `${TKey}`>
