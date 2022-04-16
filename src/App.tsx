@@ -23,13 +23,13 @@ declare global {
 }
 const userPreferences = window.electronAPI.storeUserPreferences.getAll()
 const initialColorTheme: ColorTheme =
-  userPreferences.appearance.theme || defaultUserPreferences.appearance.theme
+  userPreferences.appearance?.theme || defaultUserPreferences.appearance.theme
 
 const initialFontFace: FontFace =
-  userPreferences.appearance.fontFace || defaultUserPreferences.appearance.fontFace
+  userPreferences.appearance?.fontFace || defaultUserPreferences.appearance.fontFace
 
 const initialFontSize: FontSize =
-  userPreferences.appearance.fontSize || defaultUserPreferences.appearance.fontSize
+  userPreferences.appearance?.fontSize || defaultUserPreferences.appearance.fontSize
 
 const GlobalStyle = createGlobalStyle`
 :root {

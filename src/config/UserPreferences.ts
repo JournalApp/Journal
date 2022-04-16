@@ -60,11 +60,11 @@ const getColorTheme = (name: ColorTheme) => {
 const getBaseThemeWithOverrides = (overrides: any) => {
   let theme = { ...baseTheme }
 
-  if (overrides.appearance.fontFace) {
+  if (overrides.appearance?.fontFace) {
     theme.appearance.fontFace = getFontFace(overrides.appearance.fontFace)
   }
 
-  if (overrides.appearance.fontSize) {
+  if (overrides.appearance?.fontSize) {
     theme.appearance.fontSize = getFontSize(overrides.appearance.fontSize) + 'px'
   }
 
