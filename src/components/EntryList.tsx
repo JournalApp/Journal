@@ -15,7 +15,11 @@ const PostEntries = styled.div`
   min-height: 80vh;
 `
 
+// TODO use CSS var for margin-left to toggle calendar
 const Wrapper = styled.div`
+  border: 2px solid black;
+  width: 100vw;
+  margin-left: 200px;
   display: flex;
   flex-flow: column;
   flex-direction: column-reverse;
@@ -82,7 +86,8 @@ function EntryList() {
 
   const setEntryHeight = (id: string, height: number) => {
     if (element) {
-      element.scrollIntoView()
+      // element.scrollIntoView({ inline: 'center' })
+      element.scrollTop = 0
     } else {
       let today = dayjs().format('YYYYMMDD')
       element = document.getElementById(`${today}-entry`)

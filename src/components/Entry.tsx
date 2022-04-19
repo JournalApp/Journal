@@ -50,11 +50,12 @@ interface ContainerProps {
 const Container = styled.div<ContainerProps>`
   display: flex;
   padding: 40px;
+  word-break: break-word;
   opacity: ${(props) => (props.isFadedOut ? '0.5' : '1')};
 `
 
 const Aside = styled.div`
-  width: 150px;
+  width: 200px;
   display: flex;
   flex-direction: column;
 `
@@ -69,6 +70,7 @@ const AsideItem = styled.p`
 const AsideStickyContainer = styled.div`
   position: sticky;
   top: 30px;
+  text-align: end;
 `
 
 const MainWrapper = styled.div`

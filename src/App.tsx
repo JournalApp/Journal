@@ -55,7 +55,7 @@ hr {
 `
 
 const Container = styled.div`
-  min-height: 100vh;
+  contain: paint;
 `
 
 function App() {
@@ -63,16 +63,16 @@ function App() {
     <>
       <GlobalStyle />
       <EntriesProvider>
+        <AppearanceProvider
+          initialColorTheme={initialColorTheme}
+          initialFontFace={initialFontFace}
+          initialFontSize={initialFontSize}
+        >
+          <Menu />
+        </AppearanceProvider>
+        <Calendar />
         <Container>
-          <AppearanceProvider
-            initialColorTheme={initialColorTheme}
-            initialFontFace={initialFontFace}
-            initialFontSize={initialFontSize}
-          >
-            <Menu />
-          </AppearanceProvider>
           <EntryList />
-          <Calendar />
         </Container>
       </EntriesProvider>
     </>
