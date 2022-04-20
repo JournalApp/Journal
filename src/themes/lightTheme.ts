@@ -17,6 +17,7 @@ const lightTheme = {
       // base colors
       main: lightPalette.neutral[100],
       surface: lightPalette.neutral[25],
+      border: lightPalette.neutral[30],
     },
     secondary: {
       // base colors

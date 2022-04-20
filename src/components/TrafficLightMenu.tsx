@@ -2,20 +2,38 @@ import React, { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import { theme } from 'themes'
 import { useAppearanceContext, AppearanceContextInterface } from 'context'
+import { Icon } from 'components'
+
+const Container = styled.div`
+  position: fixed;
+  display: flex;
+  gap: 8px;
+  top: 16px;
+  left: 15px;
+  z-index: 9999;
+  opacity: 0.3;
+  transition: opacity ${theme('animation.time.normal')};
+  &:hover {
+    opacity: 0.7;
+  }
+`
 
 const ToggleButton = styled.button`
-  position: fixed;
-  top: 12px;
-  left: 80px;
-  z-index: 9999;
+  border: 0;
+  outline: 0;
+  padding: 0;
+  background-color: transparent;
 `
 
 const TrafficLightMenu = () => {
   const { isCalendarOpen, toggleIsCalendarOpen } = useAppearanceContext()
   return (
-    <>
-      <ToggleButton onClick={() => toggleIsCalendarOpen()}>T</ToggleButton>
-    </>
+    <Container>
+      <Icon name='TrafficLightOutline' />
+      <ToggleButton onClick={() => toggleIsCalendarOpen()}>
+        <Icon name='TrafficLightCalendar' type={isCalendarOpen == 'opened' ? 'on' : 'off'} />
+      </ToggleButton>
+    </Container>
   )
 }
 

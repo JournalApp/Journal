@@ -69,7 +69,7 @@ const AsideItem = styled.p`
 
 const AsideStickyContainer = styled.div`
   position: sticky;
-  top: 30px;
+  top: 48px;
   text-align: end;
 `
 

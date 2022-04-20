@@ -17,7 +17,6 @@ const PostEntries = styled.div`
 `
 
 const Wrapper = styled.div`
-  border: 2px solid black;
   width: 100vw;
   margin-left: ${theme('appearance.entriesOffset')};
   transition: margin-left ${theme('animation.time.normal')};

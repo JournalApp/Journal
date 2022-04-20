@@ -53,4 +53,19 @@ const createCssVar = (items: [string], prefix = '-'): string[] =>
 
 const createCssVars = (themeColors: any) => createCssVar(themeColors).join(';')
 
-export { shallowEqual, arrayEquals, countWords, createCssVars, setCssVars }
+function createDays(year: number, month: number) {
+  let mon = month - 1 // months in JS are 0..11, not 1..12
+  let d = new Date(year, mon)
+
+  let days = []
+
+  while (d.getMonth() == mon) {
+    // days.push(`${year}${month}${d.getDate()}`)
+    days.push(d.getDate())
+    d.setDate(d.getDate() + 1)
+  }
+
+  return days
+}
+
+export { shallowEqual, arrayEquals, countWords, createCssVars, setCssVars, createDays }

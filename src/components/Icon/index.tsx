@@ -15,6 +15,8 @@ import { Chevron } from './Chevron'
 import { Menu } from './Menu'
 import { Bucket } from './Bucket'
 import { Exit } from './Exit'
+import { TrafficLightOutline } from './TrafficLightOutline'
+import { TrafficLightCalendar } from './TrafficLightCalendar'
 
 type IconMapType = {
   [key: string]: any
@@ -47,6 +49,8 @@ const IconMap: IconMapType = {
   Menu,
   Bucket,
   Exit,
+  TrafficLightOutline,
+  TrafficLightCalendar,
 }
 
 const Icon = function (props: IconProps) {
