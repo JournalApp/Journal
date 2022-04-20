@@ -1,33 +1,36 @@
 import { lightTheme, darkTheme } from 'themes'
-import merge from 'deepmerge'
 
 const fontSizeMap = {
   small: 18,
   normal: 21,
   large: 23,
 }
-
 type FontSize = keyof typeof fontSizeMap
 
 const fontFaceMap = {
   inter: 'Inter var',
   novela: 'Novela',
 }
-
 type FontFace = keyof typeof fontFaceMap
 
 const colorThemeMap = {
   light: lightTheme,
   dark: darkTheme,
 }
-
 type ColorTheme = keyof typeof colorThemeMap
+
+const calendarOpenMap = {
+  opened: { entriesOffset: 200, miniDatesVisibility: 'visible' },
+  closed: { entriesOffset: 0, miniDatesVisibility: 'hidden' },
+}
+type CalendarOpen = keyof typeof calendarOpenMap
 
 const defaultUserPreferences = {
   appearance: {
     fontSize: 'normal',
     fontFace: 'inter',
     theme: 'light',
+    calendarOpen: false,
   },
 }
 
@@ -35,6 +38,8 @@ const baseTheme = {
   appearance: {
     fontFace: 'Inter var',
     fontSize: '21px',
+    entriesOffset: '0',
+    miniDatesVisibility: 'hidden',
   },
   animation: {
     time: {
@@ -57,6 +62,10 @@ const getColorTheme = (name: ColorTheme) => {
   return colorThemeMap[name] ? colorThemeMap[name] : colorThemeMap['light']
 }
 
+const getCalendarIsOpen = (state: CalendarOpen) => {
+  return calendarOpenMap[state] ? calendarOpenMap[state] : calendarOpenMap['closed']
+}
+
 const getBaseThemeWithOverrides = (overrides: any) => {
   let theme = { ...baseTheme }
 
@@ -77,8 +86,10 @@ export {
   getFontSize,
   getFontFace,
   getColorTheme,
+  getCalendarIsOpen,
   defaultUserPreferences,
   ColorTheme,
   FontSize,
   FontFace,
+  CalendarOpen,
 }

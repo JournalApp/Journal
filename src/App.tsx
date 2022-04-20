@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
-import { EntryList, Calendar, Menu } from 'components'
+import { EntryList, Calendar, Menu, TrafficLightMenu } from 'components'
 import { AppearanceProvider, EntriesProvider } from 'context'
 import { lightTheme, darkTheme, theme } from 'themes'
 import { createGlobalStyle } from 'styled-components'
@@ -69,8 +69,9 @@ function App() {
           initialFontSize={initialFontSize}
         >
           <Menu />
+          <TrafficLightMenu />
+          <Calendar />
         </AppearanceProvider>
-        <Calendar />
         <Container>
           <EntryList />
         </Container>

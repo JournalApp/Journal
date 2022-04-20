@@ -1,14 +1,25 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react'
 import { setCssVars } from 'utils'
-import { getFontSize, getFontFace, getColorTheme, ColorTheme, FontSize, FontFace } from 'config'
+import {
+  getFontSize,
+  getFontFace,
+  getColorTheme,
+  ColorTheme,
+  FontSize,
+  FontFace,
+  CalendarOpen,
+  getCalendarIsOpen,
+} from 'config'
 
 interface AppearanceContextInterface {
   colorTheme: ColorTheme
   fontFace: FontFace
   fontSize: FontSize
+  isCalendarOpen: CalendarOpen
   setColorTheme: (theme: ColorTheme) => void
   setFontSize: (size: FontSize) => void
   setFontFace: (size: FontFace) => void
+  toggleIsCalendarOpen: () => void
 }
 
 const AppearanceContext = createContext<AppearanceContextInterface | null>(null)
@@ -29,6 +40,7 @@ export function AppearanceProvider({
   const [colorTheme, setColorThemeInternal] = useState<ColorTheme>(initialColorTheme)
   const [fontFace, setFontFaceInternal] = useState<FontFace>(initialFontFace)
   const [fontSize, setFontSizeInternal] = useState<FontSize>(initialFontSize)
+  const [isCalendarOpen, setIsCalendarOpenInternal] = useState<CalendarOpen>('closed')
 
   const setFontFace = (face: FontFace) => {
     setFontFaceInternal(face)
@@ -48,13 +60,31 @@ export function AppearanceProvider({
     window.electronAPI.storeUserPreferences.set('appearance.theme', theme)
   }
 
+  const toggleIsCalendarOpen = () => {
+    if (isCalendarOpen == 'closed') {
+      document.documentElement.style.setProperty(
+        '--appearance-entriesOffset',
+        getCalendarIsOpen('opened').entriesOffset + 'px'
+      )
+      setIsCalendarOpenInternal('opened')
+    } else if (isCalendarOpen == 'opened') {
+      document.documentElement.style.setProperty(
+        '--appearance-entriesOffset',
+        getCalendarIsOpen('closed').entriesOffset + 'px'
+      )
+      setIsCalendarOpenInternal('closed')
+    }
+  }
+
   let state = {
     colorTheme,
-    setColorTheme,
     fontFace,
-    setFontFace,
     fontSize,
+    isCalendarOpen,
+    setColorTheme,
+    setFontFace,
     setFontSize,
+    toggleIsCalendarOpen,
   }
   return <AppearanceContext.Provider value={state}>{children}</AppearanceContext.Provider>
 }

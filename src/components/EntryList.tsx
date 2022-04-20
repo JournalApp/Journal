@@ -5,6 +5,7 @@ import { useEventEditorSelectors } from '@udecode/plate'
 import { arrayEquals } from 'utils'
 import { useEntriesContext } from 'context'
 import dayjs from 'dayjs'
+import { theme } from 'themes'
 
 const BeforeEntries = styled.div`
   text-align: center;
@@ -15,11 +16,11 @@ const PostEntries = styled.div`
   min-height: 80vh;
 `
 
-// TODO use CSS var for margin-left to toggle calendar
 const Wrapper = styled.div`
   border: 2px solid black;
   width: 100vw;
-  margin-left: 200px;
+  margin-left: ${theme('appearance.entriesOffset')};
+  transition: margin-left ${theme('animation.time.normal')};
   display: flex;
   flex-flow: column;
   flex-direction: column-reverse;
