@@ -17,6 +17,7 @@ const darkTheme = {
       // base colors
       main: darkPalette.neutral[100],
       surface: darkPalette.neutral[25],
+      hover: darkPalette.neutral[30],
       border: darkPalette.neutral[30],
     },
     secondary: {

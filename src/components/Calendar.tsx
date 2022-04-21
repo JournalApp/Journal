@@ -25,7 +25,51 @@ const Container = styled.div<ContainerProps>`
   }
 `
 
+const DayLabel = styled.div`
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  color: ${theme('color.primary.main')};
+`
+
+const Day = styled.button`
+  background-color: transparent;
+  padding: 5px 12px;
+  width: fit-content;
+  border-radius: 100px;
+  min-width: 40px;
+  text-align: center;
+  cursor: pointer;
+  border: 0;
+  outline: 0;
+  transition: ${theme('animation.time.normal')};
+  &:hover {
+    background-color: ${theme('color.primary.hover')};
+  }
+`
+
+const Month = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+  gap: 6px;
+`
+
+const MonthLabel = styled.div`
+  font-weight: 400;
+  font-size: 10px;
+  text-transform: uppercase;
+  line-height: 20px;
+  color: ${theme('color.primary.main')};
+  opacity: 0.5;
+  padding-right: 12px;
+`
+
 const Days = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+  gap: 32px;
   padding: 48px;
   text-align: end;
 `
@@ -36,14 +80,22 @@ const Calendar = () => {
     <>
       <Container isOpen={isCalendarOpen}>
         <Days>
-          March
-          {createDays(2022, 3).map((day) => (
-            <div key={`202203${day}-calendar`}>{day}</div>
-          ))}
-          April
-          {createDays(2022, 4).map((day) => (
-            <div key={`202204${day}-calendar`}>{day}</div>
-          ))}
+          <Month>
+            <MonthLabel>March 2022</MonthLabel>
+            {createDays(2022, 3).map((day) => (
+              <Day>
+                <DayLabel key={`202203${day}-calendar`}>{day}</DayLabel>
+              </Day>
+            ))}
+          </Month>
+          <Month>
+            <MonthLabel>April 2022</MonthLabel>
+            {createDays(2022, 4).map((day) => (
+              <Day>
+                <DayLabel key={`202204${day}-calendar`}>{day}</DayLabel>
+              </Day>
+            ))}
+          </Month>
         </Days>
       </Container>
     </>
