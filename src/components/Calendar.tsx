@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import { theme } from 'themes'
-import { useAppearanceContext, AppearanceContextInterface } from 'context'
+import { useAppearanceContext, useEntriesContext, AppearanceContextInterface } from 'context'
 import { CalendarOpen, getCalendarIsOpen } from 'config'
 import { createDays } from 'utils'
 
@@ -24,11 +24,15 @@ const Container = styled.div<ContainerProps>`
     display: none;
   }
 `
+interface DayLabelProps {
+  hasEntry: boolean
+}
 
-const DayLabel = styled.div`
-  font-weight: 500;
+const DayLabel = styled.div<DayLabelProps>`
+  font-weight: ${(props) => (props.hasEntry ? '500' : '300')};
   font-size: 14px;
   line-height: 20px;
+  opacity: ${(props) => (props.hasEntry ? '1' : '0.5')};
   color: ${theme('color.primary.main')};
 `
 
@@ -74,8 +78,31 @@ const Days = styled.div`
   text-align: end;
 `
 
+const withLeadingZero = (num: number) => {
+  return (num < 10 ? '0' : '') + num
+}
+
+const scrollToDay = (date: string) => {
+  let element = document.getElementById(`${date}-entry`)
+  if (element) {
+    element.scrollIntoView({ inline: 'center', behavior: 'smooth' })
+  } else {
+    console.log('no such day')
+  }
+}
+
 const Calendar = () => {
   const { isCalendarOpen } = useAppearanceContext()
+  const { daysCache } = useEntriesContext()
+
+  const hasEntry = (date: string) => {
+    if (daysCache.current && Array.isArray(daysCache.current)) {
+      return daysCache.current.some((el: string) => el == date)
+    } else {
+      return false
+    }
+  }
+
   return (
     <>
       <Container isOpen={isCalendarOpen}>
@@ -83,16 +110,22 @@ const Calendar = () => {
           <Month>
             <MonthLabel>March 2022</MonthLabel>
             {createDays(2022, 3).map((day) => (
-              <Day key={`202203${day}-calendar`}>
-                <DayLabel>{day}</DayLabel>
+              <Day
+                key={`202203${withLeadingZero(day)}-calendar`}
+                onClick={() => scrollToDay(`202203${withLeadingZero(day)}`)}
+              >
+                <DayLabel hasEntry={hasEntry(`202203${withLeadingZero(day)}`)}>{day}</DayLabel>
               </Day>
             ))}
           </Month>
           <Month>
             <MonthLabel>April 2022</MonthLabel>
             {createDays(2022, 4).map((day) => (
-              <Day key={`202204${day}-calendar`}>
-                <DayLabel>{day}</DayLabel>
+              <Day
+                key={`202204${withLeadingZero(day)}-calendar`}
+                onClick={() => scrollToDay(`202204${withLeadingZero(day)}`)}
+              >
+                <DayLabel hasEntry={hasEntry(`202204${withLeadingZero(day)}`)}>{day}</DayLabel>
               </Day>
             ))}
           </Month>

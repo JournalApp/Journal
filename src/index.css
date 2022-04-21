@@ -54,6 +54,11 @@ html {
   line-height: 28px;
 }
 
+button {
+  font-family: 'Inter var', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
+}
+
 strong
 {
   font-weight: 700;

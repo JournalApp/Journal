@@ -1,5 +1,6 @@
 const lightPalette = {
   neutral: {
+    // TODO change to RGBA and make theme() func accept opacity
     '10': '#F9F9F9', // popper
     '15': '#F3F3F3', // hover, inverted, toggle group bg
     '20': '#E9E9E9', // hover on inverted, border
