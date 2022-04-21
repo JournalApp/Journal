@@ -30,7 +30,7 @@ const defaultUserPreferences = {
     fontSize: 'normal',
     fontFace: 'inter',
     theme: 'light',
-    calendarOpen: false,
+    calendarOpen: 'closed',
   },
 }
 
@@ -75,6 +75,14 @@ const getBaseThemeWithOverrides = (overrides: any) => {
 
   if (overrides.appearance?.fontSize) {
     theme.appearance.fontSize = getFontSize(overrides.appearance.fontSize) + 'px'
+  }
+
+  if (overrides.appearance?.calendarOpen) {
+    theme.appearance.entriesOffset =
+      getCalendarIsOpen(overrides.appearance.calendarOpen).entriesOffset + 'px'
+    theme.appearance.miniDatesVisibility = getCalendarIsOpen(
+      overrides.appearance.calendarOpen
+    ).miniDatesVisibility
   }
 
   return theme

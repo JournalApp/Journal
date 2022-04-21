@@ -83,16 +83,16 @@ const Calendar = () => {
           <Month>
             <MonthLabel>March 2022</MonthLabel>
             {createDays(2022, 3).map((day) => (
-              <Day>
-                <DayLabel key={`202203${day}-calendar`}>{day}</DayLabel>
+              <Day key={`202203${day}-calendar`}>
+                <DayLabel>{day}</DayLabel>
               </Day>
             ))}
           </Month>
           <Month>
             <MonthLabel>April 2022</MonthLabel>
             {createDays(2022, 4).map((day) => (
-              <Day>
-                <DayLabel key={`202204${day}-calendar`}>{day}</DayLabel>
+              <Day key={`202204${day}-calendar`}>
+                <DayLabel>{day}</DayLabel>
               </Day>
             ))}
           </Month>

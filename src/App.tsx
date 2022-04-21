@@ -11,6 +11,7 @@ import {
   ColorTheme,
   FontFace,
   FontSize,
+  CalendarOpen,
   getBaseThemeWithOverrides,
   baseTheme,
 } from 'config'
@@ -30,6 +31,9 @@ const initialFontFace: FontFace =
 
 const initialFontSize: FontSize =
   userPreferences.appearance?.fontSize || defaultUserPreferences.appearance.fontSize
+
+const initialCalendarOpen: CalendarOpen =
+  userPreferences.appearance?.calendarOpen || defaultUserPreferences.appearance.calendarOpen
 
 const GlobalStyle = createGlobalStyle`
 :root {
@@ -67,6 +71,7 @@ function App() {
           initialColorTheme={initialColorTheme}
           initialFontFace={initialFontFace}
           initialFontSize={initialFontSize}
+          initialCalendarOpen={initialCalendarOpen}
         >
           <FadeOut />
           <Menu />

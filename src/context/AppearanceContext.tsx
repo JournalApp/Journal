@@ -28,6 +28,7 @@ type AppearanceProviderProps = {
   initialColorTheme: ColorTheme
   initialFontSize: FontSize
   initialFontFace: FontFace
+  initialCalendarOpen: CalendarOpen
   children: any
 }
 
@@ -35,12 +36,13 @@ export function AppearanceProvider({
   initialColorTheme,
   initialFontSize,
   initialFontFace,
+  initialCalendarOpen,
   children,
 }: AppearanceProviderProps) {
   const [colorTheme, setColorThemeInternal] = useState<ColorTheme>(initialColorTheme)
   const [fontFace, setFontFaceInternal] = useState<FontFace>(initialFontFace)
   const [fontSize, setFontSizeInternal] = useState<FontSize>(initialFontSize)
-  const [isCalendarOpen, setIsCalendarOpenInternal] = useState<CalendarOpen>('closed')
+  const [isCalendarOpen, setIsCalendarOpenInternal] = useState<CalendarOpen>(initialCalendarOpen)
 
   const setFontFace = (face: FontFace) => {
     setFontFaceInternal(face)
@@ -61,18 +63,20 @@ export function AppearanceProvider({
   }
 
   const toggleIsCalendarOpen = () => {
-    if (isCalendarOpen == 'closed') {
-      document.documentElement.style.setProperty(
-        '--appearance-entriesOffset',
-        getCalendarIsOpen('opened').entriesOffset + 'px'
-      )
-      setIsCalendarOpenInternal('opened')
-    } else if (isCalendarOpen == 'opened') {
+    if (isCalendarOpen == 'opened') {
       document.documentElement.style.setProperty(
         '--appearance-entriesOffset',
         getCalendarIsOpen('closed').entriesOffset + 'px'
       )
       setIsCalendarOpenInternal('closed')
+      window.electronAPI.storeUserPreferences.set('appearance.calendarOpen', 'closed')
+    } else {
+      document.documentElement.style.setProperty(
+        '--appearance-entriesOffset',
+        getCalendarIsOpen('opened').entriesOffset + 'px'
+      )
+      setIsCalendarOpenInternal('opened')
+      window.electronAPI.storeUserPreferences.set('appearance.calendarOpen', 'opened')
     }
   }
 

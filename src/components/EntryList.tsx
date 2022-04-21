@@ -86,8 +86,8 @@ function EntryList() {
 
   const setEntryHeight = (id: string, height: number) => {
     if (element) {
-      // element.scrollIntoView({ inline: 'center' })
-      element.scrollTop = 0
+      element.scrollIntoView({ inline: 'center' })
+      // element.scrollTop = 0
     } else {
       let today = dayjs().format('YYYYMMDD')
       element = document.getElementById(`${today}-entry`)
