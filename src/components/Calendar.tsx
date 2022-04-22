@@ -103,6 +103,12 @@ const Calendar = () => {
     }
   }
 
+  // TODO auto generate months since Jan 2022
+  // TODO add +ADD action do days without entries
+  // TODO scroll to today automatically
+  // TODO Today button, to scroll to today in calendar
+  // TODO Today button, to scroll to today in entry list
+
   return (
     <>
       <Container isOpen={isCalendarOpen}>

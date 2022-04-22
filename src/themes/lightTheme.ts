@@ -19,7 +19,9 @@ const lightTheme = {
       // base colors
       main: lightPalette.neutral[100],
       surface: lightPalette.neutral[25],
-      surface0: lightPalette.neutral[25] + alphaToHex(0),
+      get surface0() {
+        return this.surface + alphaToHex(0)
+      },
       hover: lightPalette.neutral[30],
       border: lightPalette.neutral[30],
     },

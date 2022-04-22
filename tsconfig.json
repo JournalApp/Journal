@@ -19,7 +19,8 @@
       "config": ["./src/config/"],
       "context": ["./src/context/"]
     },
-    "lib": ["es2021", "dom"]
+    "lib": ["es2021", "dom"],
+    "target": "es2021"
   },
   "include": ["src/**/*", "decs.d.ts"]
 }
