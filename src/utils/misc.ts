@@ -68,4 +68,12 @@ function createDays(year: number, month: number) {
   return days
 }
 
-export { shallowEqual, arrayEquals, countWords, createCssVars, setCssVars, createDays }
+const alphaToHex = (alpha: number) => {
+  if (alpha < 0) alpha = 0
+  if (alpha > 100) alpha = 100
+  let multiplier = 255 / 100
+  let val = Math.round(alpha * multiplier).toString(16)
+  return val.length == 1 ? '0' + val : val
+}
+
+export { shallowEqual, arrayEquals, countWords, createCssVars, setCssVars, createDays, alphaToHex }

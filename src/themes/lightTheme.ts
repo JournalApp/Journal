@@ -1,6 +1,7 @@
+import { alphaToHex } from 'utils'
+
 const lightPalette = {
   neutral: {
-    // TODO change to RGBA and make theme() func accept opacity
     '10': '#F9F9F9', // popper
     '15': '#F3F3F3', // hover, inverted, toggle group bg
     '20': '#E9E9E9', // hover on inverted, border
@@ -18,6 +19,7 @@ const lightTheme = {
       // base colors
       main: lightPalette.neutral[100],
       surface: lightPalette.neutral[25],
+      surface0: lightPalette.neutral[25] + alphaToHex(0),
       hover: lightPalette.neutral[30],
       border: lightPalette.neutral[30],
     },

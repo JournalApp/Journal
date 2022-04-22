@@ -1,3 +1,5 @@
+import { alphaToHex } from 'utils'
+
 const darkPalette = {
   neutral: {
     '10': '#3A3A3A', // popper
@@ -17,6 +19,7 @@ const darkTheme = {
       // base colors
       main: darkPalette.neutral[100],
       surface: darkPalette.neutral[25],
+      surface0: darkPalette.neutral[25] + alphaToHex(0),
       hover: darkPalette.neutral[30],
       border: darkPalette.neutral[30],
     },
