@@ -52,10 +52,18 @@ const Day = styled.button<DayProps>`
       props.isToday ? theme('color.primary.surface') : theme('color.primary.main')};
     font-weight: ${(props) => (props.hasEntry ? '500' : '300')};
     opacity: ${(props) => (props.hasEntry ? '1' : '0.5')};
+    &:before {
+      content: '';
+    }
   }
   &:hover {
     background-color: ${(props) =>
       props.isToday ? theme('color.primary.main') : theme('color.primary.hover')};
+    & > div {
+      &:before {
+        ${(props) => (props.hasEntry ? '- ' : "content: '+ '; ")};
+      }
+    }
   }
 `
 
