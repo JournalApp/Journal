@@ -77,6 +77,7 @@ const Days = styled.div`
   gap: 32px;
   padding: 48px;
   text-align: end;
+  padding-bottom: 50vh;
 `
 
 const withLeadingZero = (num: number) => {
@@ -95,6 +96,7 @@ const scrollToDay = (date: string) => {
 const Calendar = () => {
   const { isCalendarOpen } = useAppearanceContext()
   const { daysCache } = useEntriesContext()
+  const today = new Date()
 
   useEffect(() => {
     let today = dayjs().format('YYYYMMDD')
@@ -112,9 +114,22 @@ const Calendar = () => {
     }
   }
 
-  // TODO auto generate months since Jan 2022
+  const isBeforeToday = (year: number, month: number, day?: number) => {
+    if (year < today.getFullYear()) {
+      return true
+    } else if (year == today.getFullYear()) {
+      if (month < today.getMonth()) {
+        return true
+      } else if (month == today.getMonth()) {
+        if (!day || day <= today.getDate()) {
+          return true
+        }
+      }
+    }
+    return false
+  }
+
   // TODO add +ADD action do days without entries
-  // TODO scroll to today automatically
   // TODO Today button, to scroll to today in calendar
   // TODO Today button, to scroll to today in entry list
 
@@ -122,32 +137,44 @@ const Calendar = () => {
     <>
       <Container isOpen={isCalendarOpen}>
         <Days>
-          {getYearsSince(2021).map((year) =>
-            [...Array(12)].map((i, month) => (
-              <Month key={`${year}${month}`}>
-                <MonthLabel>
-                  {new Intl.DateTimeFormat('en-US', { month: 'short' }).format(
-                    new Date(year, month)
-                  )}{' '}
-                  {year}
-                </MonthLabel>
-                {createDays(year, month + 1).map((day) => (
-                  <Day
-                    key={year + withLeadingZero(month + 1) + withLeadingZero(day) + '-calendar'}
-                    id={year + withLeadingZero(month + 1) + withLeadingZero(day) + '-calendar'}
-                    onClick={() =>
-                      scrollToDay(year + withLeadingZero(month + 1) + withLeadingZero(day))
-                    }
-                  >
-                    <DayLabel
-                      hasEntry={hasEntry(year + withLeadingZero(month + 1) + withLeadingZero(day))}
-                    >
-                      {day}
-                    </DayLabel>
-                  </Day>
-                ))}
-              </Month>
-            ))
+          {getYearsSince(2020).map((year) =>
+            [...Array(12)].map(
+              (i, month) =>
+                isBeforeToday(year, month) && (
+                  <Month key={`${year}${month}`}>
+                    <MonthLabel>
+                      {new Intl.DateTimeFormat('en-US', { month: 'short' }).format(
+                        new Date(year, month)
+                      )}{' '}
+                      {year}
+                    </MonthLabel>
+                    {createDays(year, month + 1).map(
+                      (day) =>
+                        isBeforeToday(year, month, day) && (
+                          <Day
+                            key={
+                              year + withLeadingZero(month + 1) + withLeadingZero(day) + '-calendar'
+                            }
+                            id={
+                              year + withLeadingZero(month + 1) + withLeadingZero(day) + '-calendar'
+                            }
+                            onClick={() =>
+                              scrollToDay(year + withLeadingZero(month + 1) + withLeadingZero(day))
+                            }
+                          >
+                            <DayLabel
+                              hasEntry={hasEntry(
+                                year + withLeadingZero(month + 1) + withLeadingZero(day)
+                              )}
+                            >
+                              {day}
+                            </DayLabel>
+                          </Day>
+                        )
+                    )}
+                  </Month>
+                )
+            )
           )}
         </Days>
       </Container>
