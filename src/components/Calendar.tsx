@@ -25,20 +25,19 @@ const Container = styled.div<ContainerProps>`
     display: none;
   }
 `
-interface DayLabelProps {
+
+const DayLabel = styled.div`
+  font-size: 14px;
+  line-height: 20px;
+`
+
+interface DayProps {
+  isToday: boolean
   hasEntry: boolean
 }
 
-const DayLabel = styled.div<DayLabelProps>`
-  font-weight: ${(props) => (props.hasEntry ? '500' : '300')};
-  font-size: 14px;
-  line-height: 20px;
-  opacity: ${(props) => (props.hasEntry ? '1' : '0.5')};
-  color: ${theme('color.primary.main')};
-`
-
-const Day = styled.button`
-  background-color: transparent;
+const Day = styled.button<DayProps>`
+  background-color: ${(props) => (props.isToday ? theme('color.primary.main') : 'transparent')};
   padding: 5px 12px;
   width: fit-content;
   border-radius: 100px;
@@ -48,8 +47,15 @@ const Day = styled.button`
   border: 0;
   outline: 0;
   transition: ${theme('animation.time.normal')};
+  & > div {
+    color: ${(props) =>
+      props.isToday ? theme('color.primary.surface') : theme('color.primary.main')};
+    font-weight: ${(props) => (props.hasEntry ? '500' : '300')};
+    opacity: ${(props) => (props.hasEntry ? '1' : '0.5')};
+  }
   &:hover {
-    background-color: ${theme('color.primary.hover')};
+    background-color: ${(props) =>
+      props.isToday ? theme('color.primary.main') : theme('color.primary.hover')};
   }
 `
 
@@ -114,6 +120,10 @@ const Calendar = () => {
     }
   }
 
+  const isToday = (year: number, month: number, day: number) => {
+    return year == today.getFullYear() && month == today.getMonth() && day == today.getDate()
+  }
+
   const isBeforeToday = (year: number, month: number, day?: number) => {
     if (year < today.getFullYear()) {
       return true
@@ -161,14 +171,12 @@ const Calendar = () => {
                             onClick={() =>
                               scrollToDay(year + withLeadingZero(month + 1) + withLeadingZero(day))
                             }
+                            isToday={isToday(year, month, day)}
+                            hasEntry={hasEntry(
+                              year + withLeadingZero(month + 1) + withLeadingZero(day)
+                            )}
                           >
-                            <DayLabel
-                              hasEntry={hasEntry(
-                                year + withLeadingZero(month + 1) + withLeadingZero(day)
-                              )}
-                            >
-                              {day}
-                            </DayLabel>
+                            <DayLabel>{day}</DayLabel>
                           </Day>
                         )
                     )}

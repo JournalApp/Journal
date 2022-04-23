@@ -53,31 +53,6 @@ const createCssVar = (items: [string], prefix = '-'): string[] =>
 
 const createCssVars = (themeColors: any) => createCssVar(themeColors).join(';')
 
-function createDays(year: number, month: number) {
-  let mon = month - 1 // months in JS are 0..11, not 1..12
-  let d = new Date(year, mon)
-
-  let days = []
-
-  while (d.getMonth() == mon) {
-    // days.push(`${year}${month}${d.getDate()}`)
-    days.push(d.getDate())
-    d.setDate(d.getDate() + 1)
-  }
-
-  return days
-}
-
-function getYearsSince(year: number) {
-  let years = []
-  let currentYear = new Date().getFullYear()
-  while (year <= currentYear) {
-    years.push(year)
-    year++
-  }
-  return years
-}
-
 const alphaToHex = (alpha: number) => {
   if (alpha < 0) alpha = 0
   if (alpha > 100) alpha = 100
@@ -86,13 +61,4 @@ const alphaToHex = (alpha: number) => {
   return val.length == 1 ? '0' + val : val
 }
 
-export {
-  shallowEqual,
-  arrayEquals,
-  countWords,
-  createCssVars,
-  setCssVars,
-  createDays,
-  alphaToHex,
-  getYearsSince,
-}
+export { shallowEqual, arrayEquals, countWords, createCssVars, setCssVars, alphaToHex }
