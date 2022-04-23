@@ -68,6 +68,16 @@ function createDays(year: number, month: number) {
   return days
 }
 
+function getYearsSince(year: number) {
+  let years = []
+  let currentYear = new Date().getFullYear()
+  while (year <= currentYear) {
+    years.push(year)
+    year++
+  }
+  return years
+}
+
 const alphaToHex = (alpha: number) => {
   if (alpha < 0) alpha = 0
   if (alpha > 100) alpha = 100
@@ -76,4 +86,13 @@ const alphaToHex = (alpha: number) => {
   return val.length == 1 ? '0' + val : val
 }
 
-export { shallowEqual, arrayEquals, countWords, createCssVars, setCssVars, createDays, alphaToHex }
+export {
+  shallowEqual,
+  arrayEquals,
+  countWords,
+  createCssVars,
+  setCssVars,
+  createDays,
+  alphaToHex,
+  getYearsSince,
+}

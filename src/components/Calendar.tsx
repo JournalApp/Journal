@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
+import dayjs from 'dayjs'
 import { theme } from 'themes'
 import { useAppearanceContext, useEntriesContext, AppearanceContextInterface } from 'context'
 import { CalendarOpen, getCalendarIsOpen } from 'config'
-import { createDays } from 'utils'
+import { createDays, getYearsSince } from 'utils'
 
 interface ContainerProps {
   isOpen: CalendarOpen
@@ -95,6 +96,14 @@ const Calendar = () => {
   const { isCalendarOpen } = useAppearanceContext()
   const { daysCache } = useEntriesContext()
 
+  useEffect(() => {
+    let today = dayjs().format('YYYYMMDD')
+    let element = document.getElementById(`${today}-calendar`)
+    if (element) {
+      element.scrollIntoView({ block: 'center' })
+    }
+  }, [])
+
   const hasEntry = (date: string) => {
     if (daysCache.current && Array.isArray(daysCache.current)) {
       return daysCache.current.some((el: string) => el == date)
@@ -113,28 +122,33 @@ const Calendar = () => {
     <>
       <Container isOpen={isCalendarOpen}>
         <Days>
-          <Month>
-            <MonthLabel>March 2022</MonthLabel>
-            {createDays(2022, 3).map((day) => (
-              <Day
-                key={`202203${withLeadingZero(day)}-calendar`}
-                onClick={() => scrollToDay(`202203${withLeadingZero(day)}`)}
-              >
-                <DayLabel hasEntry={hasEntry(`202203${withLeadingZero(day)}`)}>{day}</DayLabel>
-              </Day>
-            ))}
-          </Month>
-          <Month>
-            <MonthLabel>April 2022</MonthLabel>
-            {createDays(2022, 4).map((day) => (
-              <Day
-                key={`202204${withLeadingZero(day)}-calendar`}
-                onClick={() => scrollToDay(`202204${withLeadingZero(day)}`)}
-              >
-                <DayLabel hasEntry={hasEntry(`202204${withLeadingZero(day)}`)}>{day}</DayLabel>
-              </Day>
-            ))}
-          </Month>
+          {getYearsSince(2021).map((year) =>
+            [...Array(12)].map((i, month) => (
+              <Month key={`${year}${month}`}>
+                <MonthLabel>
+                  {new Intl.DateTimeFormat('en-US', { month: 'short' }).format(
+                    new Date(year, month)
+                  )}{' '}
+                  {year}
+                </MonthLabel>
+                {createDays(year, month + 1).map((day) => (
+                  <Day
+                    key={year + withLeadingZero(month + 1) + withLeadingZero(day) + '-calendar'}
+                    id={year + withLeadingZero(month + 1) + withLeadingZero(day) + '-calendar'}
+                    onClick={() =>
+                      scrollToDay(year + withLeadingZero(month + 1) + withLeadingZero(day))
+                    }
+                  >
+                    <DayLabel
+                      hasEntry={hasEntry(year + withLeadingZero(month + 1) + withLeadingZero(day))}
+                    >
+                      {day}
+                    </DayLabel>
+                  </Day>
+                ))}
+              </Month>
+            ))
+          )}
         </Days>
       </Container>
     </>
