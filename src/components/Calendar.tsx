@@ -94,6 +94,38 @@ const Days = styled.div`
   padding-bottom: 50vh;
 `
 
+const FadeTop = styled.div`
+  position: fixed;
+  pointer-events: none;
+  top: 0;
+  left: 0;
+  width: 200px;
+  height: 72px;
+  z-index: 10;
+  background: linear-gradient(
+    180deg,
+    ${theme('color.primary.surface')} 0%,
+    ${theme('color.primary.surface')} 35%,
+    ${theme('color.primary.surface0')} 100%
+  );
+`
+
+const FadeDown = styled.div`
+  position: fixed;
+  pointer-events: none;
+  bottom: 0;
+  left: 0;
+  width: 200px;
+  height: 48px;
+  z-index: 10;
+  background: linear-gradient(
+    0deg,
+    ${theme('color.primary.surface')} 0%,
+    ${theme('color.primary.surface')} 20%,
+    ${theme('color.primary.surface0')} 100%
+  );
+`
+
 const withLeadingZero = (num: number) => {
   return (num < 10 ? '0' : '') + num
 }
@@ -154,6 +186,8 @@ const Calendar = () => {
   return (
     <>
       <Container isOpen={isCalendarOpen}>
+        <FadeTop />
+        <FadeDown />
         <Days>
           {getYearsSince(2020).map((year) =>
             [...Array(12)].map(
