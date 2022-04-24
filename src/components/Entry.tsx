@@ -95,6 +95,15 @@ const MainWrapper = styled.div`
     color: ${theme('color.primary.main')};
   }
 `
+const MiniDate = styled.div`
+  padding: 0 0 8px 0;
+  margin: 0;
+  opacity: 0.5;
+  visibility: ${theme('appearance.miniDatesVisibility')};
+  color: var(--color-text-50);
+  font-size: 12px;
+  line-height: 16px;
+`
 
 const isToday = (day: any) => {
   return day.toString() == dayjs().format('YYYYMMDD')
@@ -368,6 +377,7 @@ const Entry = ({
   return (
     <Container isFadedOut={isFadedOut} ref={editorRef} id={`${entryDay}-entry`}>
       <MainWrapper>
+        <MiniDate>{showDay(entryDay)}</MiniDate>
         {(initialFetchDone || cached) && (
           <Plate
             id={`${entryDay}-editor`}

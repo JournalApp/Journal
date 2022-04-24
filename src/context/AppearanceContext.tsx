@@ -68,12 +68,20 @@ export function AppearanceProvider({
         '--appearance-entriesOffset',
         getCalendarIsOpen('closed').entriesOffset + 'px'
       )
+      document.documentElement.style.setProperty(
+        '--appearance-miniDatesVisibility',
+        getCalendarIsOpen('closed').miniDatesVisibility
+      )
       setIsCalendarOpenInternal('closed')
       window.electronAPI.storeUserPreferences.set('appearance.calendarOpen', 'closed')
     } else {
       document.documentElement.style.setProperty(
         '--appearance-entriesOffset',
         getCalendarIsOpen('opened').entriesOffset + 'px'
+      )
+      document.documentElement.style.setProperty(
+        '--appearance-miniDatesVisibility',
+        getCalendarIsOpen('opened').miniDatesVisibility
       )
       setIsCalendarOpenInternal('opened')
       window.electronAPI.storeUserPreferences.set('appearance.calendarOpen', 'opened')

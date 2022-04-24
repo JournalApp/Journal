@@ -69,27 +69,50 @@ const Day = styled.button<DayProps>`
 
 const Month = styled.div`
   display: flex;
-  flex-direction: column;
-  align-items: end;
+  flex-direction: row;
+  width: 100%;
   gap: 6px;
 `
 
 const MonthLabel = styled.div`
+  top: 48px;
+  text-align: left;
+  position: sticky;
+  height: fit-content;
+  padding: 4px 0;
+`
+
+const MonthLabelMonth = styled.div`
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 16px;
+  color: ${theme('color.primary.main')};
+  opacity: 0.7;
+`
+
+const MonthLabelYear = styled.div`
   font-weight: 400;
   font-size: 10px;
-  text-transform: uppercase;
-  line-height: 20px;
+  line-height: 16px;
   color: ${theme('color.primary.main')};
-  opacity: 0.5;
-  padding-right: 12px;
+  opacity: 0.3;
 `
 
 const Days = styled.div`
   display: flex;
   flex-direction: column;
   align-items: end;
-  gap: 32px;
-  padding: 48px;
+  gap: 6px;
+  text-align: end;
+  flex-grow: 1;
+`
+
+const Years = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+  gap: 12px;
+  padding: 0 48px 0 16px;
   text-align: end;
   padding-bottom: 50vh;
 `
@@ -100,7 +123,7 @@ const FadeTop = styled.div`
   top: 0;
   left: 0;
   width: 200px;
-  height: 72px;
+  height: 64px;
   z-index: 10;
   background: linear-gradient(
     180deg,
@@ -188,45 +211,57 @@ const Calendar = () => {
       <Container isOpen={isCalendarOpen}>
         <FadeTop />
         <FadeDown />
-        <Days>
+        <Years>
           {getYearsSince(2020).map((year) =>
             [...Array(12)].map(
               (i, month) =>
                 isBeforeToday(year, month) && (
                   <Month key={`${year}${month}`}>
                     <MonthLabel>
-                      {new Intl.DateTimeFormat('en-US', { month: 'short' }).format(
-                        new Date(year, month)
-                      )}{' '}
-                      {year}
+                      <MonthLabelMonth>
+                        {new Intl.DateTimeFormat('en-US', { month: 'long' }).format(
+                          new Date(year, month)
+                        )}
+                      </MonthLabelMonth>
+                      <MonthLabelYear>{year}</MonthLabelYear>
                     </MonthLabel>
-                    {createDays(year, month + 1).map(
-                      (day) =>
-                        isBeforeToday(year, month, day) && (
-                          <Day
-                            key={
-                              year + withLeadingZero(month + 1) + withLeadingZero(day) + '-calendar'
-                            }
-                            id={
-                              year + withLeadingZero(month + 1) + withLeadingZero(day) + '-calendar'
-                            }
-                            onClick={() =>
-                              scrollToDay(year + withLeadingZero(month + 1) + withLeadingZero(day))
-                            }
-                            isToday={isToday(year, month, day)}
-                            hasEntry={hasEntry(
-                              year + withLeadingZero(month + 1) + withLeadingZero(day)
-                            )}
-                          >
-                            <DayLabel>{day}</DayLabel>
-                          </Day>
-                        )
-                    )}
+                    <Days>
+                      {createDays(year, month + 1).map(
+                        (day) =>
+                          isBeforeToday(year, month, day) && (
+                            <Day
+                              key={
+                                year +
+                                withLeadingZero(month + 1) +
+                                withLeadingZero(day) +
+                                '-calendar'
+                              }
+                              id={
+                                year +
+                                withLeadingZero(month + 1) +
+                                withLeadingZero(day) +
+                                '-calendar'
+                              }
+                              onClick={() =>
+                                scrollToDay(
+                                  year + withLeadingZero(month + 1) + withLeadingZero(day)
+                                )
+                              }
+                              isToday={isToday(year, month, day)}
+                              hasEntry={hasEntry(
+                                year + withLeadingZero(month + 1) + withLeadingZero(day)
+                              )}
+                            >
+                              <DayLabel>{day}</DayLabel>
+                            </Day>
+                          )
+                      )}
+                    </Days>
                   </Month>
                 )
             )
           )}
-        </Days>
+        </Years>
       </Container>
     </>
   )
