@@ -41,7 +41,7 @@ const Day = styled.button<DayProps>`
   padding: 5px 12px;
   width: fit-content;
   border-radius: 100px;
-  min-width: 40px;
+  width: 42px;
   text-align: center;
   cursor: pointer;
   border: 0;
@@ -52,16 +52,21 @@ const Day = styled.button<DayProps>`
       props.isToday ? theme('color.primary.surface') : theme('color.primary.main')};
     font-weight: ${(props) => (props.hasEntry ? '500' : '300')};
     opacity: ${(props) => (props.hasEntry ? '1' : '0.5')};
-    &:before {
-      content: '';
-    }
   }
   &:hover {
     background-color: ${(props) =>
       props.isToday ? theme('color.primary.main') : theme('color.primary.hover')};
     & > div {
+      color: ${(props) => (props.hasEntry ? theme('color.primary.main') : 'transparent')};
       &:before {
-        ${(props) => (props.hasEntry ? '- ' : "content: '+ '; ")};
+        color: ${theme('color.primary.main')};
+        ${(props) => (props.hasEntry ? '' : "content: '+'; ")};
+        position: relative;
+        top: 1px;
+        left: 1px;
+        font-size: 24px;
+        font-weight: 300;
+        line-height: 0px;
       }
     }
   }
@@ -147,6 +152,19 @@ const FadeDown = styled.div`
     ${theme('color.primary.surface')} 20%,
     ${theme('color.primary.surface0')} 100%
   );
+`
+
+const RangeVisible = styled.div`
+  position: absolute;
+  border-radius: 18px;
+  pointer-events: none;
+  height: 50px;
+  width: 47px;
+  left: 108px;
+  transition: ${theme('animation.time.normal')};
+  background-color: ${theme('color.popper.surface')};
+  z-index: -1;
+  opacity: 0.3;
 `
 
 const withLeadingZero = (num: number) => {
@@ -262,6 +280,7 @@ const Calendar = () => {
             )
           )}
         </Years>
+        <RangeVisible id='RangeVisible' />
       </Container>
     </>
   )

@@ -38,6 +38,7 @@ type EntryBlockProps = {
   entryDay: any
   entryDayCount: number
   isFadedOut: boolean
+  entriesObserver: IntersectionObserver
   cached?: any
   ref?: any
   setEntryHeight: (id: string, height: number) => void
@@ -146,6 +147,7 @@ const Entry = ({
   isFadedOut,
   cached,
   setEntryHeight,
+  entriesObserver,
 }: EntryBlockProps) => {
   const [wordCount, setWordCount] = useState(0)
   const [needsSavingToServer, setNeedsSavingToServer] = useState(false)
@@ -265,6 +267,13 @@ const Entry = ({
 
   useEffect(() => {
     initialFetch()
+
+    entriesObserver.observe(editorRef.current)
+
+    // Remove observers
+    return () => {
+      entriesObserver.unobserve(editorRef.current)
+    }
   }, [])
 
   useEffect(() => {

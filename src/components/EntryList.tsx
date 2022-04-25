@@ -25,13 +25,54 @@ const Wrapper = styled.div`
   flex-direction: column-reverse;
 `
 
-const Stats = styled.div`
-  position: fixed;
-  top: 0;
-  right: 0;
-  background-color: white;
-  padding: 8px;
-`
+var visibleSections: String[] = []
+var rangeMarker: any
+var rangeMarkerTop: number
+
+const renderMarker = () => {
+  visibleSections.sort()
+
+  if (!rangeMarker) {
+    rangeMarker = document.getElementById('RangeVisible')
+  }
+
+  visibleSections.forEach((date: string, i) => {
+    let elem = document.getElementById(`${date}-calendar`)
+    if (elem) {
+      const top = elem.offsetTop
+
+      if (i == 0) {
+        rangeMarkerTop = top
+        rangeMarker.style.top = rangeMarkerTop - 2 + 'px'
+      }
+
+      if (i == visibleSections.length - 1) {
+        let height = top - rangeMarkerTop + elem.offsetHeight + 4 + 'px'
+        rangeMarker.style.height = height
+      }
+    }
+  })
+}
+
+const onIntersection = (entries: any) => {
+  entries.forEach((entry: any) => {
+    let date = entry.target.id.slice(0, 8)
+    if (entry.isIntersecting) {
+      // Add to array
+      visibleSections.push(date)
+    } else {
+      // Remove from array
+      visibleSections = visibleSections.filter((v) => {
+        return v != date
+      })
+    }
+    renderMarker()
+  })
+}
+
+const entriesObserver = new IntersectionObserver(onIntersection, {
+  rootMargin: '-100px',
+})
 
 type myref = {
   [id: string]: number
@@ -41,7 +82,7 @@ function EntryList() {
   const [entries, setEntries] = useState([])
   const [initialFetchDone, setInitialFetchDone] = useState(false)
   const { initialCache, daysCache, setCachedDays } = useEntriesContext()
-  const entriesHeight: myref = {} //useRef<myref>(null)
+  const entriesHeight: myref = {}
   const itemsRef = useRef<Array<HTMLDivElement | null>>([])
   var element: HTMLElement | null
 
@@ -156,6 +197,7 @@ function EntryList() {
             <Entry
               key={entry}
               entryDay={entry}
+              entriesObserver={entriesObserver}
               entryDayCount={entries.length - i}
               cached={initialCache.current[entry]}
               isFadedOut={false} //{focusedEditorId != `${entry}-editor` && focusedEditorId != null}
