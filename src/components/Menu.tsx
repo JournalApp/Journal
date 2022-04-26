@@ -65,7 +65,7 @@ const AppearanceToolbar = styled(Toolbar.Root)`
   transition: ${theme('animation.time.normal')};
   animation-name: ${reveal};
   animation-duration: ${theme('animation.time.normal')};
-  animation-timing-function: cubic-bezier(0.31, 0.3, 0.17, 0.99);
+  animation-timing-function: ${theme('animation.timingFunction.dynamic')};
   animation-fill-mode: both;
   -webkit-app-region: no-drag;
 `

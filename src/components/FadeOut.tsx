@@ -25,12 +25,12 @@ const FadeDown = styled.div`
   bottom: 0;
   left: 0;
   right: 0;
-  height: 48px;
+  height: 56px;
   z-index: 10;
   background: linear-gradient(
     0deg,
     ${theme('color.primary.surface')} 0%,
-    ${theme('color.primary.surface')} 20%,
+    ${theme('color.primary.surface')} 30%,
     ${theme('color.primary.surface0')} 100%
   );
 `

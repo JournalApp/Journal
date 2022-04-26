@@ -103,6 +103,7 @@ const MiniDate = styled.div`
   visibility: ${theme('appearance.miniDatesVisibility')};
   color: var(--color-text-50);
   font-size: 12px;
+  font-family: 'Inter var';
   line-height: 16px;
 `
 

@@ -57,7 +57,12 @@ const Day = styled.button<DayProps>`
     background-color: ${(props) =>
       props.isToday ? theme('color.primary.main') : theme('color.primary.hover')};
     & > div {
-      color: ${(props) => (props.hasEntry ? theme('color.primary.main') : 'transparent')};
+      color: ${(props) =>
+        props.hasEntry
+          ? props.isToday
+            ? theme('color.primary.surface')
+            : theme('color.primary.main')
+          : 'transparent'};
       &:before {
         color: ${theme('color.primary.main')};
         ${(props) => (props.hasEntry ? '' : "content: '+'; ")};

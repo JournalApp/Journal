@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React from 'react'
 import styled from 'styled-components'
-import { EntryList, Calendar, Menu, TrafficLightMenu, FadeOut } from 'components'
+import { EntryList, Calendar, Menu, TrafficLightMenu, FadeOut, ScrollToToday } from 'components'
 import { AppearanceProvider, EntriesProvider } from 'context'
-import { lightTheme, darkTheme, theme } from 'themes'
+import { theme } from 'themes'
 import { createGlobalStyle } from 'styled-components'
 import { createCssVars } from 'utils'
 import {
@@ -13,7 +13,6 @@ import {
   FontSize,
   CalendarOpen,
   getBaseThemeWithOverrides,
-  baseTheme,
 } from 'config'
 
 declare global {
@@ -77,6 +76,7 @@ function App() {
           <Menu />
           <TrafficLightMenu />
           <Calendar />
+          <ScrollToToday />
         </AppearanceProvider>
         <Container>
           <EntryList />

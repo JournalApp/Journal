@@ -47,6 +47,9 @@ const baseTheme = {
       normal: '200ms',
       long: '400ms',
     },
+    timingFunction: {
+      dynamic: 'cubic-bezier(0.31, 0.3, 0.17, 0.99)',
+    },
   },
 }
 

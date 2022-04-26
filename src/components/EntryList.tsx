@@ -27,7 +27,20 @@ const Wrapper = styled.div`
 
 var visibleSections: String[] = []
 var rangeMarker: any
+var scrollToToday: any
 var rangeMarkerTop: number
+
+const renderScrollToToday = () => {
+  if (!scrollToToday) {
+    scrollToToday = document.getElementById('ScrollToToday')
+  }
+  let today = dayjs().format('YYYYMMDD')
+  if (visibleSections.some((day) => day == today)) {
+    scrollToToday.style.marginBottom = '-32px'
+  } else {
+    scrollToToday.style.marginBottom = 0
+  }
+}
 
 const renderMarker = () => {
   visibleSections.sort()
@@ -67,6 +80,7 @@ const onIntersection = (entries: any) => {
       })
     }
     renderMarker()
+    renderScrollToToday()
   })
 }
 
