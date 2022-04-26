@@ -8,12 +8,12 @@ const FadeTop = styled.div`
   top: 0;
   left: 0;
   right: 0;
-  height: 72px;
+  height: 56px;
   z-index: 10;
   background: linear-gradient(
     180deg,
     ${theme('color.primary.surface')} 0%,
-    ${theme('color.primary.surface')} 35%,
+    ${theme('color.primary.surface')} 30%,
     ${theme('color.primary.surface0')} 100%
   );
 `

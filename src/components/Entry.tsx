@@ -57,6 +57,7 @@ const Container = styled.div<ContainerProps>`
 
 const Aside = styled.div`
   width: 200px;
+  padding-top: 24px;
   display: flex;
   flex-direction: column;
 `
@@ -82,12 +83,12 @@ const MainWrapper = styled.div`
   font-weight: 500;
   line-height: 30px;
   -webkit-app-region: no-drag;
-  & > div:first-child > h1:first-child,
-  & > div:first-child > h2:first-child,
-  & > div:first-child > h3:first-child,
-  & > div:first-child > div:first-child > h1:first-child,
-  & > div:first-child > div:first-child > h2:first-child,
-  & > div:first-child > div:first-child > h3:first-child {
+  & > div:nth-child(2) > h1:first-child,
+  & > div:nth-child(2) > h2:first-child,
+  & > div:nth-child(2) > h3:first-child,
+  & > div:nth-child(2) > div:first-child > h1:first-child,
+  & > div:nth-child(2) > div:first-child > h2:first-child,
+  & > div:nth-child(2) > div:first-child > h3:first-child {
     margin-block-start: 0;
   }
 

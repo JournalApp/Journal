@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, forwardRef } from 'react'
-import styled from 'styled-components'
+import styled, { keyframes, css, createGlobalStyle } from 'styled-components'
 import { Entry } from './'
 import { useEventEditorSelectors } from '@udecode/plate'
 import { arrayEquals } from 'utils'
@@ -25,8 +25,29 @@ const Wrapper = styled.div`
   flex-direction: column-reverse;
 `
 
+// const Styles = createGlobalStyle`
+//   @keyframes buttonShow {
+//     0% {
+
+//     }
+//     100% {
+//       margin-bottom: 0;
+//     }
+//   };
+
+//   @keyframes buttonHide {
+//     0% {
+
+//     }
+//     100% {
+//       margin-bottom: -32px;
+//     }
+//   }
+// `
+
 var visibleSections: String[] = []
 var rangeMarker: any
+var calendarContainer: any
 var scrollToToday: any
 var rangeMarkerTop: number
 
@@ -37,8 +58,10 @@ const renderScrollToToday = () => {
   let today = dayjs().format('YYYYMMDD')
   if (visibleSections.some((day) => day == today)) {
     scrollToToday.style.marginBottom = '-32px'
+    // scrollToToday.style.animationName = 'buttonHide'
   } else {
     scrollToToday.style.marginBottom = 0
+    // scrollToToday.style.animationName = 'buttonShow'
   }
 }
 
@@ -81,6 +104,15 @@ const onIntersection = (entries: any) => {
     }
     renderMarker()
     renderScrollToToday()
+  })
+
+  if (!calendarContainer) {
+    calendarContainer = document.getElementById('CalendarContainer')
+  }
+
+  calendarContainer.scrollTo({
+    top: rangeMarkerTop - 48,
+    behavior: 'smooth',
   })
 }
 

@@ -179,7 +179,7 @@ const withLeadingZero = (num: number) => {
 const scrollToDay = (date: string) => {
   let element = document.getElementById(`${date}-entry`)
   if (element) {
-    element.scrollIntoView({ inline: 'center', behavior: 'smooth' })
+    element.scrollIntoView()
   } else {
     console.log('no such day')
   }
@@ -225,13 +225,9 @@ const Calendar = () => {
     return false
   }
 
-  // TODO add +ADD action do days without entries
-  // TODO Today button, to scroll to today in calendar
-  // TODO Today button, to scroll to today in entry list
-
   return (
     <>
-      <Container isOpen={isCalendarOpen}>
+      <Container isOpen={isCalendarOpen} id='CalendarContainer'>
         <FadeTop />
         <FadeDown />
         <Years>
