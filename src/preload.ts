@@ -4,11 +4,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onPaste: (callback: any) => ipcRenderer.on('paste', callback),
   onCopy: (callback: any) => ipcRenderer.on('copy', callback),
   storeIndex: {
-    get() {
-      return ipcRenderer.sendSync('electron-storeIndex-get')
+    getAll() {
+      return ipcRenderer.sendSync('electron-storeIndex-get-all')
     },
-    set(val: any) {
-      ipcRenderer.send('electron-storeIndex-set', val)
+    setAll(val: any) {
+      ipcRenderer.send('electron-storeIndex-set-all', val)
+    },
+    add(val: any) {
+      return ipcRenderer.sendSync('electron-storeIndex-add', val)
     },
   },
   storeEntries: {

@@ -176,18 +176,9 @@ const withLeadingZero = (num: number) => {
   return (num < 10 ? '0' : '') + num
 }
 
-const scrollToDay = (date: string) => {
-  let element = document.getElementById(`${date}-entry`)
-  if (element) {
-    element.scrollIntoView()
-  } else {
-    console.log('no such day')
-  }
-}
-
 const Calendar = () => {
   const { isCalendarOpen } = useAppearanceContext()
-  const { daysCache } = useEntriesContext()
+  const { daysCache, addCachedDay, setScrollToDay } = useEntriesContext()
   const today = new Date()
 
   useEffect(() => {
@@ -199,8 +190,8 @@ const Calendar = () => {
   }, [])
 
   const hasEntry = (date: string) => {
-    if (daysCache.current && Array.isArray(daysCache.current)) {
-      return daysCache.current.some((el: string) => el == date)
+    if (daysCache && Array.isArray(daysCache)) {
+      return daysCache.some((el: string) => el == date)
     } else {
       return false
     }
@@ -223,6 +214,17 @@ const Calendar = () => {
       }
     }
     return false
+  }
+
+  const scrollToDay = (day: string) => {
+    let element = document.getElementById(`${day}-entry`)
+    if (element) {
+      element.scrollIntoView()
+    } else {
+      console.log('no such day, adding...')
+      addCachedDay(day)
+      setScrollToDay(day)
+    }
   }
 
   return (

@@ -35,24 +35,21 @@ import {
 } from '@udecode/plate'
 
 type EntryBlockProps = {
-  entryDay: any
-  entryDayCount: number
-  isFadedOut: boolean
+  entryDay: string
+  entryDayCount?: number
   entriesObserver: IntersectionObserver
-  cached?: any
+  cachedEntry?: any
   ref?: any
   setEntryHeight: (id: string, height: number) => void
+  setCachedEntry: (property: string, value: any) => void
+  shouldScrollToDay: (day: string) => boolean
+  clearScrollToDay: () => void
 }
 
-interface ContainerProps {
-  readonly isFadedOut: boolean
-}
-
-const Container = styled.div<ContainerProps>`
+const Container = styled.div`
   display: flex;
   padding: 40px;
   word-break: break-word;
-  opacity: ${(props) => (props.isFadedOut ? '0.5' : '1')};
 `
 
 const Aside = styled.div`
@@ -91,7 +88,6 @@ const MainWrapper = styled.div`
   & > div:nth-child(2) > div:first-child > h3:first-child {
     margin-block-start: 0;
   }
-
   & > * {
     max-width: 75ch;
     color: ${theme('color.primary.main')};
@@ -131,9 +127,6 @@ const fetchEntry = async (day: any) => {
     })
     if (res.status == 200) {
       let json = await res.json()
-      //
-      // console.log(`Fetching ${day}`)
-      // console.log(json)
       return json
     } else {
       throw new Error()
@@ -143,13 +136,15 @@ const fetchEntry = async (day: any) => {
   }
 }
 
-const Entry = ({
+const EntryComponent = ({
   entryDay,
-  entryDayCount,
-  isFadedOut,
-  cached,
+  entryDayCount = 5,
+  cachedEntry,
   setEntryHeight,
   entriesObserver,
+  setCachedEntry,
+  shouldScrollToDay,
+  clearScrollToDay,
 }: EntryBlockProps) => {
   const [wordCount, setWordCount] = useState(0)
   const [needsSavingToServer, setNeedsSavingToServer] = useState(false)
@@ -161,7 +156,8 @@ const Entry = ({
   const [initialFetchDone, setInitialFetchDone] = useState(false)
   const debugValue = useRef([])
   const editorRef = useRef(null)
-  const { setCachedEntry } = useEntriesContext()
+
+  console.log(`Entry render`)
 
   const setContextMenuVisible = (val: boolean) => {
     contextMenuVisible.current = val
@@ -205,33 +201,28 @@ const Entry = ({
 
   const resizeObserver = new ResizeObserver((entries) => {
     for (let entry of entries) {
-      // console.log(entry)
       setEntryHeight(entryDay, entry.borderBoxSize[0].blockSize)
     }
   })
 
   const initialFetch = async () => {
-    // console.log(`initialFetch for ${entryId}`)
-
     resizeObserver.observe(editorRef.current)
 
-    if (cached) {
-      // console.log(`Cached day ${entryDay}`)
-
-      if (cached.needsSavingToServer) {
-        await saveEntry(entryDay, cached.content)
+    if (cachedEntry) {
+      if (cachedEntry.needsSavingToServer) {
+        await saveEntry(entryDay, cachedEntry.content)
       }
     }
 
     const init = await fetchEntry(entryDay)
-    if (!cached) {
+    if (!cachedEntry) {
       setCachedEntry(entryDay, init)
       setInitialValue([...init.content])
     }
-    if (cached && init && init.modifiedAt != cached.modifiedAt) {
-      console.log(`${init.modifiedAt} != ${cached.modifiedAt}`)
+    if (cachedEntry && init && init.modifiedAt != cachedEntry.modifiedAt) {
+      console.log(`${init.modifiedAt} != ${cachedEntry.modifiedAt}`)
 
-      if (dayjs(init.modifiedAt).isAfter(dayjs(cached.modifiedAt))) {
+      if (dayjs(init.modifiedAt).isAfter(dayjs(cachedEntry.modifiedAt))) {
         // Server entry is newer, save it to cache
         console.log('Server entry is newer, updating cache')
         setCachedEntry(entryDay, init)
@@ -239,10 +230,10 @@ const Entry = ({
       } else {
         // Cached entry is newer, push it to server
         console.log('Cached entry is newer, updating on server')
-        saveEntry(entryDay, cached.content)
+        saveEntry(entryDay, cachedEntry.content)
       }
     }
-    if (!cached && !init) {
+    if (!cachedEntry && !init) {
       setInitialValue([
         {
           children: [
@@ -268,9 +259,15 @@ const Entry = ({
   }
 
   useEffect(() => {
+    console.log(`Entry mounted`)
     initialFetch()
 
     entriesObserver.observe(editorRef.current)
+
+    if (shouldScrollToDay(entryDay)) {
+      editorRef.current.scrollIntoView()
+      clearScrollToDay()
+    }
 
     // Remove observers
     return () => {
@@ -349,19 +346,15 @@ const Entry = ({
     [
       // elements
       createParagraphPlugin(), // paragraph element
-      // createBlockquotePlugin(), // blockquote element
-      // createCodeBlockPlugin(), // code block element
       createHeadingPlugin({ options: { levels: 3 } }), // heading elements
       createListPlugin(),
       createHorizontalRulePlugin(),
-
       // marks
       createBoldPlugin(), // bold mark
       createItalicPlugin(), // italic mark
       createUnderlinePlugin(), // underline mark
       createStrikethroughPlugin(), // strikethrough mark
       createCodePlugin(), // code mark
-
       createEventEditorPlugin(),
       createAutoformatPlugin(CONFIG.autoformat),
       createResetNodePlugin(CONFIG.resetNode),
@@ -386,14 +379,14 @@ const Entry = ({
   )
 
   return (
-    <Container isFadedOut={isFadedOut} ref={editorRef} id={`${entryDay}-entry`}>
+    <Container ref={editorRef} id={`${entryDay}-entry`}>
       <MainWrapper>
         <MiniDate>{showDay(entryDay)}</MiniDate>
-        {(initialFetchDone || cached) && (
+        {(initialFetchDone || cachedEntry) && (
           <Plate
             id={`${entryDay}-editor`}
             editableProps={editableProps}
-            initialValue={initialValue.length ? initialValue : cached.content}
+            initialValue={initialValue.length ? initialValue : cachedEntry.content}
             onChange={onChangeDebug}
             plugins={plugins}
           >
@@ -419,4 +412,9 @@ const Entry = ({
   )
 }
 
-export { Entry }
+function areEqual(prevProps: any, nextProps: any) {
+  console.log(`Comparing memo`)
+  return true
+}
+
+export const Entry = React.memo(EntryComponent, areEqual)

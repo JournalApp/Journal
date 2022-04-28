@@ -33,6 +33,7 @@ const scrollToToday = () => {
   }
 }
 
+// TODO When app is opened overningt, Today is not created, thus cant scroll to it
 function ScrollToToday() {
   return (
     <ScrollToTodayButton id='ScrollToToday' onClick={() => scrollToToday()}>

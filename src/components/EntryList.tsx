@@ -127,7 +127,14 @@ type myref = {
 function EntryList() {
   const [entries, setEntries] = useState([])
   const [initialFetchDone, setInitialFetchDone] = useState(false)
-  const { initialCache, daysCache, setCachedDays } = useEntriesContext()
+  const {
+    initialCache,
+    daysCache,
+    setAllCachedDays,
+    setCachedEntry,
+    shouldScrollToDay,
+    clearScrollToDay,
+  } = useEntriesContext()
   const entriesHeight: myref = {}
   const itemsRef = useRef<Array<HTMLDivElement | null>>([])
   var element: HTMLElement | null
@@ -153,6 +160,12 @@ function EntryList() {
     // console.log(entries)
     console.log('Entries updated')
   }, [entries])
+
+  useEffect(() => {
+    // e.g. user has added a day
+    console.log('daysCache have changed')
+    setEntries([...daysCache])
+  }, [daysCache])
 
   const areDaysEqual = (local: any, server: any) => {
     if (!Array.isArray(local)) {
@@ -194,7 +207,7 @@ function EntryList() {
   const initialFetch = async () => {
     console.log('initialFetch indexes')
 
-    const cached = daysCache.current
+    let cached = daysCache
     if (cached) {
       setEntries([...cached])
       setInitialFetchDone(true)
@@ -220,8 +233,14 @@ function EntryList() {
           console.log(`Added ${today} to server Days`)
         }
         if (!areDaysEqual(cached, days)) {
-          setCachedDays(days)
-          setEntries([...days])
+          // Merge two arrays if not equal?
+          console.log('Cached days not equal to server days, merging...')
+          if (!Array.isArray(cached)) cached = []
+          if (!Array.isArray(days)) days = []
+
+          let merged = [...new Set([...days, ...cached])].sort()
+          setAllCachedDays(merged)
+          setEntries([...merged])
         }
         setInitialFetchDone(true)
       } else {
@@ -244,10 +263,11 @@ function EntryList() {
               key={entry}
               entryDay={entry}
               entriesObserver={entriesObserver}
-              entryDayCount={entries.length - i}
-              cached={initialCache.current[entry]}
-              isFadedOut={false} //{focusedEditorId != `${entry}-editor` && focusedEditorId != null}
+              cachedEntry={initialCache.current[entry]}
               setEntryHeight={setEntryHeight}
+              setCachedEntry={setCachedEntry}
+              shouldScrollToDay={shouldScrollToDay}
+              clearScrollToDay={clearScrollToDay}
             />
           ))}
       <BeforeEntries>This is the beginning...</BeforeEntries>

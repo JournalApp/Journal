@@ -3,19 +3,23 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 interface EntriesContextInterface {
   initialCache: any
   daysCache: any
+  setDaysCache: (days: String[]) => void
   getCachedEntry: any
   getAllCachedEntries: any
-  setCachedEntry: any
-  setCachedDays: any
+  setCachedEntry: (property: string, value: any) => void
+  setAllCachedDays: (value: any) => void
+  addCachedDay: (day: string) => void
+  setScrollToDay: (day: string) => void
+  clearScrollToDay: () => void
+  shouldScrollToDay: (day: string) => boolean
 }
 
 const EntriesContext = createContext<EntriesContextInterface | null>(null)
 
-const daysKey = 'Days'
-
 export function EntriesProvider({ children }: any) {
   const initialCache = useRef(window.electronAPI.storeEntries.getAll() || [])
-  const daysCache = useRef(window.electronAPI.storeIndex.get() || [])
+  const scrollToDay = useRef('')
+  const [daysCache, setDaysCache] = useState(window.electronAPI.storeIndex.getAll() || [])
 
   const getCachedEntry = (property: string) => {
     return window.electronAPI.storeEntries.get(property)
@@ -27,24 +31,46 @@ export function EntriesProvider({ children }: any) {
 
   const setCachedEntry = (property: string, value: any) => {
     window.electronAPI.storeEntries.set(property, value)
-    initialCache.current[property] = value
     console.log('Entry set!')
   }
 
-  const setCachedDays = (value: any) => {
-    window.electronAPI.storeIndex.set(value)
-    // TODO does it work?:
-    daysCache.current = value
+  const setAllCachedDays = (value: any) => {
+    window.electronAPI.storeIndex.setAll(value)
+    setDaysCache([...value])
     console.log('Indexes set!')
+  }
+
+  const addCachedDay = (day: string) => {
+    let days = window.electronAPI.storeIndex.add(day)
+    // console.log(days)
+    setDaysCache([...days])
+    console.log(`Added day ${day}`)
+  }
+
+  const setScrollToDay = (day: string) => {
+    scrollToDay.current = day
+  }
+
+  const shouldScrollToDay = (day: string) => {
+    return scrollToDay.current == day
+  }
+
+  const clearScrollToDay = () => {
+    scrollToDay.current = ''
   }
 
   let state = {
     initialCache,
     daysCache,
+    setDaysCache,
     getCachedEntry,
     getAllCachedEntries,
     setCachedEntry,
-    setCachedDays,
+    setAllCachedDays,
+    addCachedDay,
+    setScrollToDay,
+    clearScrollToDay,
+    shouldScrollToDay,
   }
   return <EntriesContext.Provider value={state}>{children}</EntriesContext.Provider>
 }
