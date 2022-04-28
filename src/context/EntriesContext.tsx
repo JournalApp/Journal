@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react'
+import dayjs from 'dayjs'
 
 interface EntriesContextInterface {
   initialCache: any
@@ -19,7 +20,23 @@ const EntriesContext = createContext<EntriesContextInterface | null>(null)
 export function EntriesProvider({ children }: any) {
   const initialCache = useRef(window.electronAPI.storeEntries.getAll() || [])
   const scrollToDay = useRef('')
+  const [today, setToday] = useState(dayjs().format('YYYYMMDD'))
   const [daysCache, setDaysCache] = useState(window.electronAPI.storeIndex.getAll() || [])
+
+  useEffect(() => {
+    const hasNewDayCome = setInterval(() => {
+      let realToday = dayjs().format('YYYYMMDD')
+      if (today != realToday) {
+        console.log(`New Day day ${realToday} !!!`)
+        setToday(realToday)
+        addCachedDay(realToday)
+      }
+    }, 1000)
+
+    return () => {
+      clearInterval(hasNewDayCome)
+    }
+  }, [])
 
   const getCachedEntry = (property: string) => {
     return window.electronAPI.storeEntries.get(property)
