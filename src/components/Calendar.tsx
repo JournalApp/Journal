@@ -127,11 +127,12 @@ const Years = styled.div`
   padding-bottom: 50vh;
 `
 
-const FadeTop = styled.div`
+const FadeTop = styled.div<ContainerProps>`
   position: fixed;
   pointer-events: none;
   top: 0;
-  left: 0;
+  left: ${(props) =>
+    props.isOpen == 'opened' ? '0' : -getCalendarIsOpen('opened').entriesOffset + 'px'};
   width: 200px;
   height: 64px;
   z-index: 10;
@@ -143,11 +144,12 @@ const FadeTop = styled.div`
   );
 `
 
-const FadeDown = styled.div`
+const FadeDown = styled.div<ContainerProps>`
   position: fixed;
   pointer-events: none;
   bottom: 0;
-  left: 0;
+  left: ${(props) =>
+    props.isOpen == 'opened' ? '0' : -getCalendarIsOpen('opened').entriesOffset + 'px'};
   width: 200px;
   height: 48px;
   z-index: 10;
@@ -230,8 +232,8 @@ const Calendar = () => {
   return (
     <>
       <Container isOpen={isCalendarOpen} id='CalendarContainer'>
-        <FadeTop />
-        <FadeDown />
+        <FadeTop isOpen={isCalendarOpen} />
+        <FadeDown isOpen={isCalendarOpen} />
         <Years>
           {getYearsSince(2020).map((year) =>
             [...Array(12)].map(

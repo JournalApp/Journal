@@ -7,7 +7,7 @@ import { useEntriesContext } from 'context'
 import { ContextMenu } from 'components'
 import { FormatToolbar } from 'components'
 import { createPluginFactory, getPlateActions } from '@udecode/plate'
-import { Transforms, Editor as SlateEditor } from 'slate'
+import { Transforms, Node, Editor as SlateEditor } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { CONFIG } from 'config'
 import { theme } from 'themes'
@@ -59,10 +59,32 @@ const Aside = styled.div`
   flex-direction: column;
 `
 const AsideItem = styled.p`
+  padding: 16px 0 0 0;
+  margin: 0;
+  color: ${theme('color.primary.main')};
+  opacity: 0.3;
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 20px;
+`
+
+const AsideDay = styled.p`
   padding: 0;
   margin: 0;
-  color: var(--color-text-50);
-  font-size: 12px;
+  color: ${theme('color.primary.main')};
+  opacity: 0.3;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 24px;
+`
+
+const AsideYear = styled.p`
+  padding: 0;
+  margin: 0;
+  color: ${theme('color.primary.main')};
+  opacity: 0.3;
+  font-size: 14px;
+  font-weight: 300;
   line-height: 20px;
 `
 
@@ -96,9 +118,9 @@ const MainWrapper = styled.div`
 const MiniDate = styled.div`
   padding: 0 0 8px 0;
   margin: 0;
-  opacity: 0.5;
+  opacity: 0.3;
   visibility: ${theme('appearance.miniDatesVisibility')};
-  color: var(--color-text-50);
+  color: ${theme('color.primary.main')};
   font-size: 12px;
   font-family: 'Inter var';
   line-height: 16px;
@@ -106,14 +128,6 @@ const MiniDate = styled.div`
 
 const isToday = (day: any) => {
   return day.toString() == dayjs().format('YYYYMMDD')
-}
-
-const showDay = (day: any) => {
-  if (isToday(day)) {
-    return 'Today'
-  } else {
-    return dayjs(dayjs(day.toString(), 'YYYYMMDD')).format('D MMM YYYY')
-  }
 }
 
 const fetchEntry = async (day: any) => {
@@ -136,6 +150,14 @@ const fetchEntry = async (day: any) => {
   }
 }
 
+const countEntryWords = (content: any) => {
+  if (Array.isArray(content)) {
+    return countWords(content.map((n: any) => Node.string(n)).join(' '))
+  } else {
+    return 0
+  }
+}
+
 const EntryComponent = ({
   entryDay,
   entryDayCount = 5,
@@ -146,7 +168,9 @@ const EntryComponent = ({
   shouldScrollToDay,
   clearScrollToDay,
 }: EntryBlockProps) => {
-  const [wordCount, setWordCount] = useState(0)
+  const [wordCount, setWordCount] = useState(
+    countEntryWords(cachedEntry ? cachedEntry.content : '')
+  )
   const [needsSavingToServer, setNeedsSavingToServer] = useState(false)
   const [initialValue, setInitialValue] = useState([])
   const [focused, setFocused] = useState(false)
@@ -168,6 +192,7 @@ const EntryComponent = ({
   }
 
   const onChangeDebug = (newValue: any) => {
+    setWordCount(countEntryWords(newValue))
     debugValue.current = newValue
   }
 
@@ -378,10 +403,36 @@ const EntryComponent = ({
     }
   )
 
+  const showDate = (day: any) => {
+    if (isToday(day)) {
+      return (
+        <>
+          <AsideDay>Today</AsideDay>
+          <AsideYear>{dayjs(dayjs(day.toString(), 'YYYYMMDD')).format('D MMMM YYYY')}</AsideYear>
+        </>
+      )
+    } else {
+      return (
+        <>
+          <AsideDay>{dayjs(dayjs(day.toString(), 'YYYYMMDD')).format('D MMMM')}</AsideDay>
+          <AsideYear>{dayjs(dayjs(day.toString(), 'YYYYMMDD')).format('YYYY')}</AsideYear>
+        </>
+      )
+    }
+  }
+
+  const showMiniDate = (day: any) => {
+    if (isToday(day)) {
+      return 'Today'
+    } else {
+      return dayjs(dayjs(day.toString(), 'YYYYMMDD')).format('D MMM YYYY')
+    }
+  }
+
   return (
     <Container ref={editorRef} id={`${entryDay}-entry`}>
       <MainWrapper>
-        <MiniDate>{showDay(entryDay)}</MiniDate>
+        <MiniDate>{showMiniDate(entryDay)}</MiniDate>
         {(initialFetchDone || cachedEntry) && (
           <Plate
             id={`${entryDay}-editor`}
@@ -402,7 +453,7 @@ const EntryComponent = ({
       </MainWrapper>
       <Aside>
         <AsideStickyContainer>
-          <AsideItem>{showDay(entryDay)}</AsideItem>
+          {showDate(entryDay)}
           <AsideItem>
             {wordCount} words, day {entryDayCount}
           </AsideItem>
