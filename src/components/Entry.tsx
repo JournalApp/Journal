@@ -2,15 +2,13 @@ import React, { useState, useEffect, useRef } from 'react'
 import styled, { css } from 'styled-components'
 import dayjs from 'dayjs'
 import { usePlateEditorState, useEventPlateId, usePlateEditorRef } from '@udecode/plate-core'
-import { countWords } from 'utils'
-import { useEntriesContext } from 'context'
-import { ContextMenu } from 'components'
-import { FormatToolbar } from 'components'
+import { ContextMenu, FormatToolbar, EntryAside } from 'components'
 import { createPluginFactory, getPlateActions } from '@udecode/plate'
 import { Transforms, Node, Editor as SlateEditor } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { CONFIG } from 'config'
 import { theme } from 'themes'
+import { countWords } from 'utils'
 
 import {
   createPlateUI,
@@ -50,48 +48,6 @@ const Container = styled.div`
   display: flex;
   padding: 40px;
   word-break: break-word;
-`
-
-const Aside = styled.div`
-  width: 200px;
-  padding-top: 24px;
-  display: flex;
-  flex-direction: column;
-`
-const AsideItem = styled.p`
-  padding: 16px 0 0 0;
-  margin: 0;
-  color: ${theme('color.primary.main')};
-  opacity: 0.3;
-  font-size: 14px;
-  font-weight: 300;
-  line-height: 20px;
-`
-
-const AsideDay = styled.p`
-  padding: 0;
-  margin: 0;
-  color: ${theme('color.primary.main')};
-  opacity: 0.3;
-  font-size: 18px;
-  font-weight: 500;
-  line-height: 24px;
-`
-
-const AsideYear = styled.p`
-  padding: 0;
-  margin: 0;
-  color: ${theme('color.primary.main')};
-  opacity: 0.3;
-  font-size: 14px;
-  font-weight: 300;
-  line-height: 20px;
-`
-
-const AsideStickyContainer = styled.div`
-  position: sticky;
-  top: 48px;
-  text-align: end;
 `
 
 const MainWrapper = styled.div`
@@ -160,7 +116,6 @@ const countEntryWords = (content: any) => {
 
 const EntryComponent = ({
   entryDay,
-  entryDayCount = 5,
   cachedEntry,
   setEntryHeight,
   entriesObserver,
@@ -403,24 +358,6 @@ const EntryComponent = ({
     }
   )
 
-  const showDate = (day: any) => {
-    if (isToday(day)) {
-      return (
-        <>
-          <AsideDay>Today</AsideDay>
-          <AsideYear>{dayjs(dayjs(day.toString(), 'YYYYMMDD')).format('D MMMM YYYY')}</AsideYear>
-        </>
-      )
-    } else {
-      return (
-        <>
-          <AsideDay>{dayjs(dayjs(day.toString(), 'YYYYMMDD')).format('D MMMM')}</AsideDay>
-          <AsideYear>{dayjs(dayjs(day.toString(), 'YYYYMMDD')).format('YYYY')}</AsideYear>
-        </>
-      )
-    }
-  }
-
   const showMiniDate = (day: any) => {
     if (isToday(day)) {
       return 'Today'
@@ -451,14 +388,8 @@ const EntryComponent = ({
           </Plate>
         )}
       </MainWrapper>
-      <Aside>
-        <AsideStickyContainer>
-          {showDate(entryDay)}
-          <AsideItem>
-            {wordCount} words, day {entryDayCount}
-          </AsideItem>
-        </AsideStickyContainer>
-      </Aside>
+
+      <EntryAside wordCount={wordCount} date={entryDay} />
     </Container>
   )
 }
