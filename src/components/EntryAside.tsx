@@ -3,15 +3,9 @@ import { useEntriesContext } from 'context'
 import { theme } from 'themes'
 import styled from 'styled-components'
 import dayjs from 'dayjs'
+import { ordinal } from 'utils'
 
-const Aside = styled.div`
-  width: 200px;
-  padding-top: 24px;
-  display: flex;
-  flex-direction: column;
-`
 const AsideItem = styled.p`
-  padding: 16px 0 0 0;
   margin: 0;
   color: ${theme('color.primary.main')};
   opacity: 0.3;
@@ -20,7 +14,7 @@ const AsideItem = styled.p`
   line-height: 16px;
 `
 const AsideItemLabel = styled.p`
-  padding: 0;
+  padding: 0 0 16px 0;
   margin: 0;
   color: ${theme('color.primary.main')};
   opacity: 0.3;
@@ -49,18 +43,45 @@ const AsideYear = styled.p`
   line-height: 20px;
 `
 
-const AsideVisibleOnHover = styled.div`
+const AsideMeta = styled.div`
   opacity: 0;
-  transition: opacity ${theme('animation.time.normal')};
+  top: 0;
+  right: 0;
+  position: absolute;
+  transition: ${theme('animation.time.normal')};
+`
+
+const AsideMain = styled.div`
+  transition: ${theme('animation.time.normal')};
 `
 
 const AsideStickyContainer = styled.div`
   position: sticky;
   top: 48px;
   text-align: end;
+`
+
+const Aside = styled.div`
+  width: 200px;
+  padding-top: 24px;
+  display: flex;
+  flex-direction: column;
+  & ${AsideMeta} {
+    opacity: 0;
+    right: 16px;
+  }
+  & ${AsideMain} {
+    opacity: 1;
+    right: 0;
+  }
   &:hover {
-    & ${AsideVisibleOnHover} {
+    & ${AsideMeta} {
       opacity: 1;
+      right: 0;
+    }
+    & ${AsideMain} {
+      opacity: 0;
+      right: 16px;
     }
   }
 `
@@ -94,17 +115,22 @@ type EntryAsideProps = {
 
 function EntryAside({ date, wordCount }: EntryAsideProps) {
   const { daysCache } = useEntriesContext()
-  // TODO make it return day number
+
+  const dayCountOrdinar = () => {
+    let count = daysCache.findIndex((d: any) => d == date) + 1
+    return ordinal(count)
+  }
+
   return (
     <Aside>
       <AsideStickyContainer>
-        {showDate(date)}
-        <AsideVisibleOnHover>
-          <AsideItem>{daysCache.findIndex((d: any) => d == date) + 1}</AsideItem>
+        <AsideMain>{showDate(date)}</AsideMain>
+        <AsideMeta>
+          <AsideItem>{dayCountOrdinar()}</AsideItem>
           <AsideItemLabel>day</AsideItemLabel>
           <AsideItem>{wordCount}</AsideItem>
-          <AsideItemLabel>words</AsideItemLabel>
-        </AsideVisibleOnHover>
+          <AsideItemLabel>{wordCount == 1 ? 'word' : 'words'}</AsideItemLabel>
+        </AsideMeta>
       </AsideStickyContainer>
     </Aside>
   )
