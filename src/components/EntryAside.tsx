@@ -68,7 +68,7 @@ const Aside = styled.div`
   flex-direction: column;
   & ${AsideMeta} {
     opacity: 0;
-    right: 16px;
+    right: 8px;
   }
   & ${AsideMain} {
     opacity: 1;
@@ -81,7 +81,7 @@ const Aside = styled.div`
     }
     & ${AsideMain} {
       opacity: 0;
-      right: 16px;
+      margin-right: 8px;
     }
   }
 `

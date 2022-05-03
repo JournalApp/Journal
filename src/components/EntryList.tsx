@@ -217,7 +217,7 @@ function EntryList() {
       let headers = {
         'Content-Type': 'application/json',
       }
-      const res = await fetch('https://www.journal.local/api/1/days', {
+      const res = await fetch('https://app.journal.local/api/1/days', {
         headers,
         method: 'GET',
       })

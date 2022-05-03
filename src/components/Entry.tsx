@@ -91,7 +91,7 @@ const fetchEntry = async (day: any) => {
     let headers = {
       'Content-Type': 'application/json',
     }
-    let res = await fetch(`https://www.journal.local/api/1/entry/${day}`, {
+    let res = await fetch(`https://app.journal.local/api/1/entry/${day}`, {
       headers,
       method: 'GET',
     })
@@ -158,7 +158,7 @@ const EntryComponent = ({
       let headers = {
         'Content-Type': 'application/json',
       }
-      let res = await fetch(`https://www.journal.local/api/1/entry/${day}`, {
+      let res = await fetch(`https://app.journal.local/api/1/entry/${day}`, {
         headers,
         body: JSON.stringify({ content }),
         method: 'POST',

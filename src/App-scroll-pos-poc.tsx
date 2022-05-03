@@ -60,7 +60,7 @@ const EntryBlock = ({ entryData }: any) => {
       let headers = {
         'Content-Type': 'application/json',
       }
-      res = await fetch('https://www.journal.local/api/1/entry', {
+      res = await fetch('https://app.journal.local/api/1/entry', {
         headers,
         body: JSON.stringify({ mystate }),
         method: 'POST',
@@ -119,7 +119,7 @@ function App({ message }: AppProps) {
       let headers = {
         'Content-Type': 'application/json',
       }
-      res = await fetch('https://www.journal.local/api/1/entries', {
+      res = await fetch('https://app.journal.local/api/1/entries', {
         headers,
         method: 'GET',
       })
