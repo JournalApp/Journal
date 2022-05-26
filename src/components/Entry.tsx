@@ -9,6 +9,7 @@ import { ReactEditor } from 'slate-react'
 import { CONFIG } from 'config'
 import { theme } from 'themes'
 import { countWords } from 'utils'
+import { supabase } from 'utils'
 
 import {
   createPlateUI,
@@ -82,25 +83,43 @@ const MiniDate = styled.div`
   line-height: 16px;
 `
 
+const defaultContent = [
+  {
+    children: [
+      {
+        text: '',
+      },
+    ],
+  },
+]
+
 const isToday = (day: any) => {
   return day.toString() == dayjs().format('YYYYMMDD')
 }
 
 const fetchEntry = async (day: any) => {
   try {
-    let headers = {
-      'Content-Type': 'application/json',
+    let { data, error } = await supabase.from('journals').select().eq('day', day).single()
+    if (!data) {
+      let { data, error } = await supabase
+        .from('journals')
+        .insert([
+          {
+            user_id: '3b458b19-b191-40d6-940b-fef2a3295d3f',
+            day: parseInt(day),
+            content: defaultContent,
+          },
+        ])
+        .single()
+      if (error) {
+        throw new Error(error.message)
+      }
+      return data
     }
-    let res = await fetch(`https://app.journal.local/api/1/entry/${day}`, {
-      headers,
-      method: 'GET',
-    })
-    if (res.status == 200) {
-      let json = await res.json()
-      return json
-    } else {
-      throw new Error()
+    if (error) {
+      throw new Error(error.message)
     }
+    return data
   } catch (err) {
     console.log(err)
   }
@@ -127,13 +146,13 @@ const EntryComponent = ({
     countEntryWords(cachedEntry ? cachedEntry.content : '')
   )
   const [needsSavingToServer, setNeedsSavingToServer] = useState(false)
-  const [initialValue, setInitialValue] = useState([])
+  const [initialValue, setInitialValue] = useState(cachedEntry?.content ?? [])
   const [focused, setFocused] = useState(false)
   const [shouldFocus, setShouldFocus] = useState(isToday(entryDay))
   const contextMenuVisible = useRef(false)
   const toggleContextMenu = useRef(null)
   const [initialFetchDone, setInitialFetchDone] = useState(false)
-  const debugValue = useRef([])
+  const debugValue = useRef(cachedEntry?.content ?? [])
   const editorRef = useRef(null)
 
   console.log(`Entry render`)
@@ -154,24 +173,24 @@ const EntryComponent = ({
   const saveEntry = async (day: any, content: any) => {
     setCachedEntry(`${day}.content`, content)
 
+    if (content == undefined) {
+      console.log(`Undefined content on day: ${day}`)
+    }
+
     try {
-      let headers = {
-        'Content-Type': 'application/json',
+      const { data, error } = await supabase
+        .from('journals')
+        .upsert({ user_id: '3b458b19-b191-40d6-940b-fef2a3295d3f', day: parseInt(day), content })
+        .single()
+
+      if (error) {
+        throw new Error(error.message)
       }
-      let res = await fetch(`https://app.journal.local/api/1/entry/${day}`, {
-        headers,
-        body: JSON.stringify({ content }),
-        method: 'POST',
-      })
-      if (res.status == 200) {
-        setNeedsSavingToServer(false)
-        console.log('saved')
-        let json = await res.json()
-        setCachedEntry(`${day}.modifiedAt`, json.modifiedAt)
-        setCachedEntry(`${day}.needsSavingToServer`, false)
-      } else {
-        throw new Error()
-      }
+
+      setNeedsSavingToServer(false)
+      console.log('saved')
+      setCachedEntry(`${day}.modified_at`, data.modified_at)
+      setCachedEntry(`${day}.needsSavingToServer`, false)
     } catch (err) {
       setNeedsSavingToServer(true)
       setCachedEntry(`${day}.needsSavingToServer`, true)
@@ -195,14 +214,14 @@ const EntryComponent = ({
     }
 
     const init = await fetchEntry(entryDay)
-    if (!cachedEntry) {
+    if (!cachedEntry && init) {
       setCachedEntry(entryDay, init)
       setInitialValue([...init.content])
     }
-    if (cachedEntry && init && init.modifiedAt != cachedEntry.modifiedAt) {
-      console.log(`${init.modifiedAt} != ${cachedEntry.modifiedAt}`)
+    if (cachedEntry && init && init.modified_at != cachedEntry.modified_at) {
+      console.log(`${init.modified_at} != ${cachedEntry.modified_at}`)
 
-      if (dayjs(init.modifiedAt).isAfter(dayjs(cachedEntry.modifiedAt))) {
+      if (dayjs(init.modified_at).isAfter(dayjs(cachedEntry.modified_at))) {
         // Server entry is newer, save it to cache
         console.log('Server entry is newer, updating cache')
         setCachedEntry(entryDay, init)
@@ -212,18 +231,6 @@ const EntryComponent = ({
         console.log('Cached entry is newer, updating on server')
         saveEntry(entryDay, cachedEntry.content)
       }
-    }
-    if (!cachedEntry && !init) {
-      setInitialValue([
-        {
-          children: [
-            {
-              text: '',
-            },
-          ],
-          type: 'p',
-        },
-      ])
     }
     setInitialFetchDone(true)
   }
@@ -272,6 +279,10 @@ const EntryComponent = ({
       }, 5000)
     }
   }, [needsSavingToServer])
+
+  useEffect(() => {
+    debugValue.current = initialValue
+  }, [initialValue])
 
   const editableProps = {
     placeholder: "What's on your mind…",
@@ -374,7 +385,9 @@ const EntryComponent = ({
           <Plate
             id={`${entryDay}-editor`}
             editableProps={editableProps}
-            initialValue={initialValue.length ? initialValue : cachedEntry.content}
+            initialValue={
+              initialValue.length ? initialValue : cachedEntry.content || defaultContent
+            }
             onChange={onChangeDebug}
             plugins={plugins}
           >

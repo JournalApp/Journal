@@ -95,6 +95,7 @@ const createWindow = (): void => {
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
       nodeIntegration: true,
+      spellcheck: false,
     },
   })
 
@@ -107,68 +108,6 @@ const createWindow = (): void => {
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
-
-  // const menu2 = new Menu()
-  // menu2.append(
-  //   new MenuItem({
-  //     label: 'Electron',
-  //     // role: 'window',
-  //     submenu: [
-  //       {
-  //         label: 'Copy',
-  //         accelerator: 'Cmd+C',
-  //         click: () => {
-  //           console.log('Cmd+C')
-  //           mainWindow.webContents.copy()
-  //           // mainWindow.webContents.send('copy')
-  //         },
-  //       },
-  //       {
-  //         label: 'Paste',
-  //         accelerator: 'Cmd+V',
-  //         click: () => {
-  //           console.log('Cmd+V')
-  //           // mainWindow.webContents.send('paste', clipboard.readHTML())
-  //           mainWindow.webContents.pasteAndMatchStyle()
-  //           // mainWindow.webContents.insertText(clipboard.readText())
-  //         },
-  //       },
-  //       {
-  //         label: 'Cut',
-  //         accelerator: 'Cmd+X',
-  //         click: () => {
-  //           console.log('Cmd+X')
-  //           mainWindow.webContents.cut()
-  //         },
-  //       },
-  //       {
-  //         label: 'Undo',
-  //         accelerator: 'Cmd+Z',
-  //         click: () => {
-  //           console.log('Cmd+Z')
-  //           mainWindow.webContents.undo()
-  //         },
-  //       },
-  //       {
-  //         label: 'Redo',
-  //         accelerator: 'Shift+Cmd+Z',
-  //         click: () => {
-  //           console.log('Shift+Cmd+Z')
-  //           mainWindow.webContents.redo()
-  //         },
-  //       },
-  //       {
-  //         label: 'Select all',
-  //         accelerator: 'Cmd+A',
-  //         click: () => {
-  //           console.log('Cmd+A')
-  //           mainWindow.webContents.selectAll()
-  //         },
-  //       },
-  //     ],
-  //   })
-  // )
-  // Menu.setApplicationMenu(menu2)
 
   mainWindow.webContents.on('context-menu', (event: any, params: any) => {
     console.log('context-menu event')

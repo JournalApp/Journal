@@ -6,6 +6,7 @@ import { arrayEquals } from 'utils'
 import { useEntriesContext } from 'context'
 import dayjs from 'dayjs'
 import { theme } from 'themes'
+import { supabase } from 'utils'
 
 const BeforeEntries = styled.div`
   text-align: center;
@@ -146,7 +147,7 @@ function EntryList() {
     loadedFromServerAt: Date // maybe?
     saveToServerError: boolean
     saveToServerErrorAt: Date //  maybe?
-    modifiedAt: Date // server time
+    modified_at: Date // server time
   }
 
   const focusedEditorId = '' //useEventEditorSelectors.focus?.()
@@ -168,20 +169,7 @@ function EntryList() {
   }, [daysCache])
 
   const areDaysEqual = (local: any, server: any) => {
-    if (!Array.isArray(local)) {
-      return false
-    }
-    if (!Array.isArray(server)) {
-      return false
-    }
-    if (local.length != server.length) {
-      return false
-    }
-
-    for (let i = 0; i < local.length; i++) {
-      if (arrayEquals(local[i], server[i]) == false) return false
-    }
-    return true
+    return arrayEquals(local, server)
   }
 
   const setEntryHeight = (id: string, height: number) => {
@@ -214,38 +202,34 @@ function EntryList() {
     }
 
     try {
-      let headers = {
-        'Content-Type': 'application/json',
-      }
-      const res = await fetch('https://app.journal.local/api/1/days', {
-        headers,
-        method: 'GET',
-      })
-      if (res.status == 200) {
-        let days = await res.json()
-        // Add Today to server Days
-        let today = dayjs().format('YYYYMMDD')
-        let todayExists = days.some((el: any) => {
-          return el == today
-        })
-        if (!todayExists) {
-          days.push(today)
-          console.log(`Added ${today} to server Days`)
-        }
-        if (!areDaysEqual(cached, days)) {
-          // Merge two arrays if not equal?
-          console.log('Cached days not equal to server days, merging...')
-          if (!Array.isArray(cached)) cached = []
-          if (!Array.isArray(days)) days = []
+      let { data: days, error } = await supabase
+        .from('journals')
+        .select('day')
+        .order('day', { ascending: true })
+      if (error) throw new Error(error.message)
+      days = days.map((d) => (d = d.day.toString()))
 
-          let merged = [...new Set([...days, ...cached])].sort()
-          setAllCachedDays(merged)
-          setEntries([...merged])
-        }
-        setInitialFetchDone(true)
-      } else {
-        throw new Error()
+      // let days = await res.json()
+      // Add Today to server Days
+      let today = dayjs().format('YYYYMMDD')
+      let todayExists = days.some((el: any) => {
+        return el == today
+      })
+      if (!todayExists) {
+        days.push(today)
+        console.log(`Added ${today} to server Days`)
       }
+      if (!areDaysEqual(cached, days)) {
+        // Merge two arrays if not equal?
+        console.log('Cached days not equal to server days, merging...')
+        if (!Array.isArray(cached)) cached = []
+        if (!Array.isArray(days)) days = []
+
+        let merged = [...new Set([...days, ...cached])].sort()
+        setAllCachedDays(merged)
+        setEntries([...merged])
+      }
+      setInitialFetchDone(true)
     } catch (err) {
       console.log(err)
     }

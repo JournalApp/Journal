@@ -12,7 +12,7 @@ function shallowEqual(object1: any, object2: any) {
   return true
 }
 
-function arrayEquals(a: Array<number>, b: Array<number>) {
+function arrayEquals(a: Array<string>, b: Array<string>) {
   return (
     Array.isArray(a) &&
     Array.isArray(b) &&
