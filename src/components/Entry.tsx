@@ -178,9 +178,15 @@ const EntryComponent = ({
     }
 
     try {
+      let modified_at = new Date().toISOString()
       const { data, error } = await supabase
         .from('journals')
-        .upsert({ user_id: '3b458b19-b191-40d6-940b-fef2a3295d3f', day: parseInt(day), content })
+        .upsert({
+          user_id: '3b458b19-b191-40d6-940b-fef2a3295d3f',
+          day: parseInt(day),
+          content,
+          modified_at,
+        })
         .single()
 
       if (error) {
