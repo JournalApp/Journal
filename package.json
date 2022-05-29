@@ -1,8 +1,8 @@
 {
-  "name": "journal.do",
-  "productName": "journal.do",
-  "version": "1.0.0",
-  "description": "My Electron application description",
+  "name": "journal",
+  "productName": "Journal",
+  "version": "1.0.0-beta.1",
+  "description": "Beautiful journal app",
   "main": ".webpack/main",
   "scripts": {
     "start": "electron-forge start",
@@ -16,7 +16,17 @@
   "license": "MIT",
   "config": {
     "forge": {
-      "packagerConfig": {},
+      "packagerConfig": {
+        "icon": "./assets/icons/journal-macos-icon.icns",
+        "protocols": [
+          {
+            "name": "Journal",
+            "schemes": [
+              "journal"
+            ]
+          }
+        ]
+      },
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",
@@ -32,7 +42,11 @@
         },
         {
           "name": "@electron-forge/maker-deb",
-          "config": {}
+          "config": {
+            "mimeType": [
+              "x-scheme-handler/journal"
+            ]
+          }
         },
         {
           "name": "@electron-forge/maker-rpm",

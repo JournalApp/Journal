@@ -37,4 +37,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
     },
   },
   handleSpellCheck: (callback: any) => ipcRenderer.once('electron-handleSpellCheck', callback),
+  handleOpenUrl: (callback: any) => ipcRenderer.on('open-url', callback),
 })

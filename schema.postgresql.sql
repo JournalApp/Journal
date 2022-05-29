@@ -14,6 +14,7 @@ alter table profiles
 create policy "Users can manipulate only their own profiles" on profiles
   for insert with check (auth.uid() = user_id);
 
+
 -- Create a table for Public Journals
   create table journals (
   id uuid DEFAULT extensions.uuid_generate_v4() unique,
@@ -30,4 +31,20 @@ alter table journals
   enable row level security;
 
 create policy "Users can manipulate only their own journals" on journals
-  for all with check (auth.uid() = user_id);
+  for all using (auth.uid() = user_id);
+
+
+-- Create a table for Public Website pages
+create table website_pages (
+  id serial unique not null,
+  page varchar(100) not null,
+  content text,
+
+  primary key (page)
+);
+
+alter table website_pages
+  enable row level security;
+
+create policy "Anyone can read content" on website_pages
+  for select using (true);

@@ -1,12 +1,23 @@
-import { app, BrowserWindow, Menu, MenuItem, ipcMain } from 'electron'
+import { app, BrowserWindow, Menu, MenuItem, ipcMain, shell } from 'electron'
+import path from 'path'
 import { clipboard } from 'electron'
 import dayjs from 'dayjs'
 import Store from 'electron-store'
+
+var openUrl = ''
 
 const storeIndex = new Store({ name: 'storeIndex' })
 const storeEntries = new Store({ name: 'storeEntries' })
 const storeUserPreferences = new Store({ name: 'storeUserPreferences' })
 const dayKey = 'Days'
+
+if (process.defaultApp) {
+  if (process.argv.length >= 2) {
+    app.setAsDefaultProtocolClient('journal', process.execPath, [path.resolve(process.argv[1])])
+  }
+} else {
+  app.setAsDefaultProtocolClient('journal')
+}
 
 console.log(storeIndex.path)
 console.log(storeEntries.path)
@@ -101,6 +112,11 @@ const createWindow = (): void => {
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show()
+
+    // Handle open from url when app was closed
+    if (openUrl) {
+      mainWindow.webContents.send('open-url', openUrl)
+    }
   })
 
   // and load the index.html of the app.
@@ -159,6 +175,18 @@ app.on('activate', () => {
   // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow()
+  }
+})
+
+// Handle the protocol
+app.on('open-url', (event, url) => {
+  const win = BrowserWindow.getAllWindows()[0]
+  if (win) {
+    // Handle open from url when app is opened
+    win.webContents.send('open-url', url)
+  } else {
+    // If app is closed/no windows, save url for when app opens
+    openUrl = url
   }
 })
 
