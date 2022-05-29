@@ -116,6 +116,7 @@ const createWindow = (): void => {
     // Handle open from url when app was closed
     if (openUrl) {
       mainWindow.webContents.send('open-url', openUrl)
+      openUrl = ''
     }
   })
 
