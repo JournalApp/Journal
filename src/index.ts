@@ -3,6 +3,7 @@ import path from 'path'
 import { clipboard } from 'electron'
 import dayjs from 'dayjs'
 import Store from 'electron-store'
+import url from 'url'
 
 var openUrl = ''
 
@@ -189,6 +190,18 @@ app.on('open-url', (event, url) => {
     // If app is closed/no windows, save url for when app opens
     openUrl = url
   }
+})
+
+// Open links in the browser
+app.on('web-contents-created', (event, contents) => {
+  contents.on('will-navigate', (event, navigationUrl) => {
+    const parsedUrl = new url.URL(navigationUrl)
+    const isDev = parsedUrl.host == 'localhost:3000'
+    if (!isDev && ['https:', 'http:', 'mailto:'].includes(parsedUrl.protocol)) {
+      event.preventDefault()
+      shell.openExternal(navigationUrl)
+    }
+  })
 })
 
 app.commandLine.appendSwitch('ignore-certificate-errors')

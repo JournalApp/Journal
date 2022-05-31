@@ -10,6 +10,7 @@ import { CONFIG } from 'config'
 import { theme } from 'themes'
 import { countWords } from 'utils'
 import { supabase } from 'utils'
+import { useUserContext } from 'context'
 
 import {
   createPlateUI,
@@ -112,11 +113,15 @@ const fetchEntry = async (day: any) => {
         ])
         .single()
       if (error) {
+        // TODO if 401 (JWT expired) signout user
+        console.log(error)
         throw new Error(error.message)
       }
       return data
     }
     if (error) {
+      // TODO if 401 (JWT expired) signout user
+      console.log(error)
       throw new Error(error.message)
     }
     return data
@@ -154,6 +159,7 @@ const EntryComponent = ({
   const [initialFetchDone, setInitialFetchDone] = useState(false)
   const debugValue = useRef(cachedEntry?.content ?? [])
   const editorRef = useRef(null)
+  const { session } = useUserContext()
 
   console.log(`Entry render`)
 
@@ -182,7 +188,7 @@ const EntryComponent = ({
       const { data, error } = await supabase
         .from('journals')
         .upsert({
-          user_id: '3b458b19-b191-40d6-940b-fef2a3295d3f',
+          user_id: session.user.id,
           day: parseInt(day),
           content,
           modified_at,
@@ -190,6 +196,8 @@ const EntryComponent = ({
         .single()
 
       if (error) {
+        // TODO if 401 (JWT expired) signout user
+        console.log(error)
         throw new Error(error.message)
       }
 
@@ -264,14 +272,14 @@ const EntryComponent = ({
 
     // Remove observers
     return () => {
-      entriesObserver.unobserve(editorRef.current)
+      if (editorRef.current) entriesObserver.unobserve(editorRef.current)
     }
   }, [])
 
   useEffect(() => {
     if (initialFetch) {
       setTimeout(() => {
-        resizeObserver.unobserve(editorRef.current)
+        if (editorRef.current) resizeObserver.unobserve(editorRef.current)
       }, 2000)
     }
   }, [setInitialFetchDone])
@@ -392,7 +400,7 @@ const EntryComponent = ({
             id={`${entryDay}-editor`}
             editableProps={editableProps}
             initialValue={
-              initialValue.length ? initialValue : cachedEntry.content || defaultContent
+              initialValue.length ? initialValue : cachedEntry?.content || defaultContent
             }
             onChange={onChangeDebug}
             plugins={plugins}

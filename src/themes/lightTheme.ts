@@ -11,6 +11,9 @@ const lightPalette = {
     '40': '#9A9A9A', // Not active toggle in Appearance toolbar
     '100': '#3A3A3A', // text
   },
+  red: {
+    '100': '#EA2F2F',
+  },
 }
 
 const lightTheme = {
@@ -44,6 +47,9 @@ const lightTheme = {
       hover: lightPalette.neutral[15],
       hoverInverted: lightPalette.neutral[20],
       disabled: lightPalette.neutral[40],
+    },
+    error: {
+      main: lightPalette.red[100],
     },
   },
   style: {

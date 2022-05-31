@@ -11,6 +11,9 @@ const darkPalette = {
     '40': '#8F8F8F', // Not active toggle in Appearance toolbar
     '100': '#E3E3E3', // text
   },
+  red: {
+    '100': '#FF5B5B',
+  },
 }
 
 const darkTheme = {
@@ -44,6 +47,9 @@ const darkTheme = {
       hover: darkPalette.neutral[15],
       hoverInverted: darkPalette.neutral[20],
       disabled: darkPalette.neutral[40],
+    },
+    error: {
+      main: darkPalette.red[100],
     },
   },
   style: {

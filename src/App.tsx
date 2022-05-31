@@ -1,10 +1,10 @@
-import React from 'react'
-import styled from 'styled-components'
+import React, { useState, useEffect } from 'react'
+import styled, { createGlobalStyle } from 'styled-components'
 import { EntryList, Calendar, Menu, TrafficLightMenu, FadeOut, ScrollToToday } from 'components'
-import { AppearanceProvider, EntriesProvider } from 'context'
+import { AppearanceProvider, EntriesProvider, UserProvider } from 'context'
 import { theme } from 'themes'
-import { createGlobalStyle } from 'styled-components'
-import { createCssVars } from 'utils'
+import { createCssVars, supabase } from 'utils'
+import { Session } from '@supabase/supabase-js'
 import {
   defaultUserPreferences,
   getColorTheme,
@@ -21,6 +21,7 @@ declare global {
     clipboardData?: any
   }
 }
+
 const userPreferences = window.electronAPI.storeUserPreferences.getAll()
 const initialColorTheme: ColorTheme =
   userPreferences.appearance?.theme || defaultUserPreferences.appearance.theme
@@ -65,23 +66,25 @@ function App() {
   return (
     <>
       <GlobalStyle />
-      <EntriesProvider>
-        <AppearanceProvider
-          initialColorTheme={initialColorTheme}
-          initialFontFace={initialFontFace}
-          initialFontSize={initialFontSize}
-          initialCalendarOpen={initialCalendarOpen}
-        >
-          <FadeOut />
-          <Menu />
-          <TrafficLightMenu />
-          <Calendar />
-          <ScrollToToday />
-        </AppearanceProvider>
-        <Container>
-          <EntryList />
-        </Container>
-      </EntriesProvider>
+      <UserProvider>
+        <EntriesProvider>
+          <AppearanceProvider
+            initialColorTheme={initialColorTheme}
+            initialFontFace={initialFontFace}
+            initialFontSize={initialFontSize}
+            initialCalendarOpen={initialCalendarOpen}
+          >
+            <FadeOut />
+            <Menu />
+            <TrafficLightMenu />
+            <Calendar />
+            <ScrollToToday />
+          </AppearanceProvider>
+          <Container>
+            <EntryList />
+          </Container>
+        </EntriesProvider>
+      </UserProvider>
     </>
   )
 }

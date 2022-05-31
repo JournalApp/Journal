@@ -6,6 +6,9 @@ import { useAppearanceContext, AppearanceContextInterface } from 'context'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import * as Toolbar from '@radix-ui/react-toolbar'
 import * as Dialog from '@radix-ui/react-dialog'
+import { supabase } from 'utils'
+import { Session } from '@supabase/supabase-js'
+import { useUserContext } from 'context'
 
 const showDropdown = keyframes`
   0% {
@@ -176,6 +179,14 @@ const ItemTitle = styled.span`
   line-height: 20px;
   text-align: left;
   padding-right: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 160px;
+  overflow: hidden;
+  & em {
+    opacity: 0.6;
+    font-style: normal;
+  }
 `
 
 interface MenuButtonProps {
@@ -221,6 +232,7 @@ const Menu = () => {
   const [open, setOpen] = useState(false)
   const { fontSize, setFontSize, fontFace, setFontFace, colorTheme, setColorTheme } =
     useAppearanceContext()
+  const { session } = useUserContext()
 
   return (
     <Dialog.Root>
@@ -236,9 +248,11 @@ const Menu = () => {
             </Item>
           </DialogTrigger>
           <Divider />
-          <Item>
+          <Item onSelect={() => supabase.auth.signOut()}>
             <Icon name='Exit' />
-            <ItemTitle>Logout</ItemTitle>
+            <ItemTitle>
+              Logout <em>{session.user.email}</em>
+            </ItemTitle>
           </Item>
         </Dropdown>
       </DropdownMenu.Root>
