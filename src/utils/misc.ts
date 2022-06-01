@@ -67,4 +67,17 @@ function ordinal(n: number) {
   return n + (s[(v - 20) % 10] || s[v] || s[0])
 }
 
-export { shallowEqual, arrayEquals, countWords, createCssVars, setCssVars, alphaToHex, ordinal }
+function isDev() {
+  return process.env.NODE_ENV == 'development'
+}
+
+export {
+  shallowEqual,
+  arrayEquals,
+  countWords,
+  createCssVars,
+  setCssVars,
+  alphaToHex,
+  ordinal,
+  isDev,
+}

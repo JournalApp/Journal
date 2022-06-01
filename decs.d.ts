@@ -1,1 +1,1 @@
-declare module 'af-virtual-scroll'
+declare module '*.png'

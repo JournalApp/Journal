@@ -3,7 +3,8 @@ import styled from 'styled-components'
 import { theme } from 'themes'
 import { useUserContext } from 'context'
 import { Icon } from 'components'
-import { supabase } from 'utils'
+import { supabase, isDev } from 'utils'
+import logo from '../../assets/icons/journaldo-logo@2x.png'
 
 const Container = styled.div`
   position: fixed;
@@ -18,17 +19,40 @@ const Container = styled.div`
   -webkit-app-region: drag;
 `
 
-const LoginButton = styled.a``
+const Welcome = styled.h1`
+  font-weight: 500;
+  font-size: 28px;
+  line-height: 34px;
+  text-align: center;
+  letter-spacing: -0.03em;
+  color: ${theme('color.primary.main')};
+  margin: 40px 0 32px 0;
+`
+
+const LoginButton = styled.a`
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 32px;
+  text-align: center;
+  letter-spacing: -0.03em;
+  color: ${theme('color.primary.surface')};
+  background-color: ${theme('color.primary.main')};
+  padding: 16px 40px;
+  border-radius: 100px;
+  text-decoration: none;
+  white-space: nowrap;
+  outline: 0;
+`
 
 const ErrorMessage = styled.div`
   color: ${theme('color.error.main')};
 `
 
 const RTForm = styled.form`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
 `
 
 const RTInput = styled.input`
@@ -40,6 +64,11 @@ const RTInput = styled.input`
   border: 1px solid ${theme('color.primary.border')};
   background-color: ${theme('color.primary.surface')};
   color: ${theme('color.primary.main')};
+  width: -webkit-fill-available;
+  outline: 0;
+  &:focus {
+    border: 1px solid ${theme('color.secondary.hover')};
+  }
 `
 
 const RTError = styled.div`
@@ -50,10 +79,15 @@ const RTError = styled.div`
   color: ${theme('color.error.main')};
 `
 
+const Logo = styled.img`
+  width: 64px;
+  height: 64px;
+`
+
 const LoginWithToken = () => {
   const [authError, setAuthError] = useState('')
   const rt = useRef(null)
-
+  console.log(`process.env.NODE_ENV=${process.env.NODE_ENV}`)
   const keyPress = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       let refreshToken = rt.current.value
@@ -69,15 +103,14 @@ const LoginWithToken = () => {
 
   return (
     <RTForm onSubmit={(e) => e.preventDefault()}>
+      <RTError>{authError}</RTError>
       <RTInput
         placeholder='Type refresh token and hit enter'
         type='text'
         name='refresh_token'
         ref={rt}
-        size={50}
         onKeyDown={(e) => keyPress(e)}
       ></RTInput>
-      <RTError>{authError}</RTError>
     </RTForm>
   )
 }
@@ -87,9 +120,13 @@ const Login = () => {
 
   return (
     <Container>
-      <LoginButton href='https://www.journal.do/auth?action=signout'>Login in browser</LoginButton>
+      <Logo src={logo}></Logo>
+      <Welcome>Welcome to Journal</Welcome>
+      <LoginButton href='https://www.journal.do/auth?action=signout'>
+        Log in with browser
+      </LoginButton>
       <ErrorMessage>{authError}</ErrorMessage>
-      <LoginWithToken />
+      {isDev() && <LoginWithToken />}
     </Container>
   )
 }

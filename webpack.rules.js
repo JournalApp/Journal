@@ -22,8 +22,12 @@ module.exports = [
     use: {
       loader: 'ts-loader',
       options: {
-        transpileOnly: true
-      }
-    }
+        transpileOnly: true,
+      },
+    },
   },
-];
+  {
+    test: /\.png/,
+    type: 'asset/resource',
+  },
+]
