@@ -41,7 +41,14 @@ export function UserProvider({ children }: any) {
     })
   }, [])
 
-  const signOut = () => {}
+  const signOut = () => {
+    console.log('signOut')
+    supabase.auth.signOut()
+    window.electronAPI.storeIndex.clearAll()
+    window.electronAPI.storeEntries.clearAll()
+    window.electronAPI.storeUserPreferences.clearAll()
+    window.electronAPI.reloadWindow()
+  }
 
   let state = {
     session,

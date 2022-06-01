@@ -87,7 +87,7 @@ const Logo = styled.img`
 const LoginWithToken = () => {
   const [authError, setAuthError] = useState('')
   const rt = useRef(null)
-  console.log(`process.env.NODE_ENV=${process.env.NODE_ENV}`)
+
   const keyPress = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       let refreshToken = rt.current.value

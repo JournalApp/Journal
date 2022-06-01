@@ -98,38 +98,6 @@ const isToday = (day: any) => {
   return day.toString() == dayjs().format('YYYYMMDD')
 }
 
-const fetchEntry = async (day: any) => {
-  try {
-    let { data, error } = await supabase.from('journals').select().eq('day', day).single()
-    if (!data) {
-      let { data, error } = await supabase
-        .from('journals')
-        .insert([
-          {
-            user_id: '3b458b19-b191-40d6-940b-fef2a3295d3f',
-            day: parseInt(day),
-            content: defaultContent,
-          },
-        ])
-        .single()
-      if (error) {
-        // TODO if 401 (JWT expired) signout user
-        console.log(error)
-        throw new Error(error.message)
-      }
-      return data
-    }
-    if (error) {
-      // TODO if 401 (JWT expired) signout user
-      console.log(error)
-      throw new Error(error.message)
-    }
-    return data
-  } catch (err) {
-    console.log(err)
-  }
-}
-
 const countEntryWords = (content: any) => {
   if (Array.isArray(content)) {
     return countWords(content.map((n: any) => Node.string(n)).join(' '))
@@ -159,7 +127,7 @@ const EntryComponent = ({
   const [initialFetchDone, setInitialFetchDone] = useState(false)
   const debugValue = useRef(cachedEntry?.content ?? [])
   const editorRef = useRef(null)
-  const { session } = useUserContext()
+  const { session, signOut } = useUserContext()
 
   console.log(`Entry render`)
 
@@ -174,6 +142,44 @@ const EntryComponent = ({
   const onChangeDebug = (newValue: any) => {
     setWordCount(countEntryWords(newValue))
     debugValue.current = newValue
+  }
+
+  const fetchEntry = async (day: any) => {
+    try {
+      let { data, error } = await supabase
+        .from('journals')
+        .select()
+        .match({ user_id: session.user.id, day: parseInt(day) })
+        .single()
+      if (!data) {
+        let { data, error } = await supabase
+          .from('journals')
+          .insert([
+            {
+              user_id: session.user.id,
+              day: parseInt(day),
+              content: defaultContent,
+            },
+          ])
+          .single()
+        if (error) {
+          // TODO if 401 (JWT expired) signout user
+          console.log(error)
+          if (error.code == '401') signOut()
+          throw new Error(error.message)
+        }
+        return data
+      }
+      if (error) {
+        // TODO if 401 (JWT expired) signout user
+        console.log(error)
+        if (error.code == '401') signOut()
+        throw new Error(error.message)
+      }
+      return data
+    } catch (err) {
+      console.log(err)
+    }
   }
 
   const saveEntry = async (day: any, content: any) => {
@@ -197,6 +203,7 @@ const EntryComponent = ({
 
       if (error) {
         // TODO if 401 (JWT expired) signout user
+        if (error.code == '401') signOut()
         console.log(error)
         throw new Error(error.message)
       }
@@ -327,7 +334,7 @@ const EntryComponent = ({
         console.log('Change')
         const isContentChange = editor.operations.some((op) => 'set_selection' !== op.type)
         if (isContentChange) {
-          console.log('isContentChange')
+          // console.log('isContentChange')
           // Needs saving as it's an actual content change
           setNeedsSavingToServer(true)
           // Another way to access editor value:

@@ -7,6 +7,7 @@ import { useEntriesContext } from 'context'
 import dayjs from 'dayjs'
 import { theme } from 'themes'
 import { supabase } from 'utils'
+import { useUserContext } from 'context'
 
 const BeforeEntries = styled.div`
   text-align: center;
@@ -139,6 +140,7 @@ function EntryList() {
   const entriesHeight: myref = {}
   const itemsRef = useRef<Array<HTMLDivElement | null>>([])
   var element: HTMLElement | null
+  const { session } = useUserContext()
 
   interface EntriesState {
     date: number
@@ -205,6 +207,7 @@ function EntryList() {
       let { data: days, error } = await supabase
         .from('journals')
         .select('day')
+        .eq('user_id', session.user.id)
         .order('day', { ascending: true })
       if (error) throw new Error(error.message)
       days = days.map((d) => (d = d.day.toString()))

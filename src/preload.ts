@@ -13,6 +13,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     add(val: any) {
       return ipcRenderer.sendSync('electron-storeIndex-add', val)
     },
+    clearAll() {
+      ipcRenderer.send('electron-storeIndex-clear-all')
+    },
   },
   storeEntries: {
     get(val: any) {
@@ -23,6 +26,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     },
     set(property: any, val: any) {
       ipcRenderer.send('electron-storeEntries-set', property, val)
+    },
+    clearAll() {
+      ipcRenderer.send('electron-storeEntries-clear-all')
     },
   },
   storeUserPreferences: {
@@ -35,7 +41,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
     set(property: any, val: any) {
       ipcRenderer.send('electron-storeUserPreferences-set', property, val)
     },
+    clearAll() {
+      ipcRenderer.send('electron-storeUserPreferences-clear-all')
+    },
   },
   handleSpellCheck: (callback: any) => ipcRenderer.once('electron-handleSpellCheck', callback),
   handleOpenUrl: (callback: any) => ipcRenderer.on('open-url', callback),
+  reloadWindow() {
+    ipcRenderer.send('electron-reload')
+  },
 })
