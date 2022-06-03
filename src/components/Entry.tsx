@@ -8,7 +8,7 @@ import { Transforms, Node, Editor as SlateEditor } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { CONFIG } from 'config'
 import { theme } from 'themes'
-import { countWords } from 'utils'
+import { countWords, isUnauthorized } from 'utils'
 import { supabase } from 'utils'
 import { useUserContext } from 'context'
 
@@ -163,17 +163,15 @@ const EntryComponent = ({
           ])
           .single()
         if (error) {
-          // TODO if 401 (JWT expired) signout user
           console.log(error)
-          if (error.code == '401') signOut()
+          if (isUnauthorized(error)) signOut()
           throw new Error(error.message)
         }
         return data
       }
       if (error) {
-        // TODO if 401 (JWT expired) signout user
         console.log(error)
-        if (error.code == '401') signOut()
+        if (isUnauthorized(error)) signOut()
         throw new Error(error.message)
       }
       return data
@@ -202,9 +200,8 @@ const EntryComponent = ({
         .single()
 
       if (error) {
-        // TODO if 401 (JWT expired) signout user
-        if (error.code == '401') signOut()
         console.log(error)
+        if (isUnauthorized(error)) signOut()
         throw new Error(error.message)
       }
 

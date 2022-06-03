@@ -1,3 +1,5 @@
+import type { PostgrestError } from '@supabase/supabase-js'
+
 function shallowEqual(object1: any, object2: any) {
   const keys1 = Object.keys(object1)
   const keys2 = Object.keys(object2)
@@ -71,6 +73,14 @@ function isDev() {
   return process.env.NODE_ENV == 'development'
 }
 
+function isUnauthorized(error: PostgrestError) {
+  if (error.message == 'JWT expired' || error.code == '42501') {
+    return true
+  } else {
+    return false
+  }
+}
+
 export {
   shallowEqual,
   arrayEquals,
@@ -80,4 +90,5 @@ export {
   alphaToHex,
   ordinal,
   isDev,
+  isUnauthorized,
 }

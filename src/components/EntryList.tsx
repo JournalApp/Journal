@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, forwardRef } from 'react'
 import styled, { keyframes, css, createGlobalStyle } from 'styled-components'
 import { Entry } from './'
 import { useEventEditorSelectors } from '@udecode/plate'
-import { arrayEquals } from 'utils'
+import { arrayEquals, isUnauthorized } from 'utils'
 import { useEntriesContext } from 'context'
 import dayjs from 'dayjs'
 import { theme } from 'themes'
@@ -27,26 +27,6 @@ const Wrapper = styled.div`
   flex-direction: column-reverse;
 `
 
-// const Styles = createGlobalStyle`
-//   @keyframes buttonShow {
-//     0% {
-
-//     }
-//     100% {
-//       margin-bottom: 0;
-//     }
-//   };
-
-//   @keyframes buttonHide {
-//     0% {
-
-//     }
-//     100% {
-//       margin-bottom: -32px;
-//     }
-//   }
-// `
-
 var visibleSections: String[] = []
 var rangeMarker: any
 var calendarContainer: any
@@ -60,10 +40,8 @@ const renderScrollToToday = () => {
   let today = dayjs().format('YYYYMMDD')
   if (visibleSections.some((day) => day == today)) {
     scrollToToday.style.marginBottom = '-32px'
-    // scrollToToday.style.animationName = 'buttonHide'
   } else {
     scrollToToday.style.marginBottom = 0
-    // scrollToToday.style.animationName = 'buttonShow'
   }
 }
 
@@ -140,7 +118,7 @@ function EntryList() {
   const entriesHeight: myref = {}
   const itemsRef = useRef<Array<HTMLDivElement | null>>([])
   var element: HTMLElement | null
-  const { session } = useUserContext()
+  const { session, signOut } = useUserContext()
 
   interface EntriesState {
     date: number
@@ -151,9 +129,6 @@ function EntryList() {
     saveToServerErrorAt: Date //  maybe?
     modified_at: Date // server time
   }
-
-  const focusedEditorId = '' //useEventEditorSelectors.focus?.()
-  // const blurEditorId = useEventEditorSelectors.blur?.()
 
   useEffect(() => {
     initialFetch()
@@ -182,16 +157,6 @@ function EntryList() {
       let today = dayjs().format('YYYYMMDD')
       element = document.getElementById(`${today}-entry`)
     }
-
-    // if (id == '6226752be089a49a5c4ddd78') {
-    //   entriesHeight[id] = 0
-    // } else {
-    //   entriesHeight[id] = height
-    // }
-
-    // let sum = Object.values(entriesHeight).reduce((a, b) => a + b)
-
-    // window.scrollTo(0, sum + 156)
   }
 
   const initialFetch = async () => {
@@ -209,10 +174,15 @@ function EntryList() {
         .select('day')
         .eq('user_id', session.user.id)
         .order('day', { ascending: true })
-      if (error) throw new Error(error.message)
+
+      if (error) {
+        console.log(error)
+        if (isUnauthorized(error)) signOut()
+        throw new Error(error.message)
+      }
+
       days = days.map((d) => (d = d.day.toString()))
 
-      // let days = await res.json()
       // Add Today to server Days
       let today = dayjs().format('YYYYMMDD')
       let todayExists = days.some((el: any) => {
