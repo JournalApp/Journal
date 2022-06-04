@@ -48,3 +48,22 @@ alter table website_pages
 
 create policy "Anyone can read content" on website_pages
   for select using (true);
+
+
+  -- Create a table for user feedback
+create table feedback (
+  id serial unique not null,
+  user_id uuid references auth.users(id) not null,
+  rating int,
+  check(rating >=1 and rating <= 5),
+  feedback text,
+  created_at timestamp with time zone default now(),
+
+  primary key (id)
+);
+
+alter table feedback
+  enable row level security;
+
+create policy "Only Authenticated users can add feedback" on feedback
+  for insert with check (auth.uid() = user_id);

@@ -51,6 +51,7 @@ const DialogTrigger = styled(Dialog.Trigger)`
   padding: 0;
   outline: none;
   border: 0;
+  width: 100%;
   &:focus,
   &:hover {
     outline: none;
@@ -254,9 +255,12 @@ const Menu = () => {
             </ItemTitle>
           </Item>
           {isDev() && (
-            <Item>
-              <ItemTitle>Development</ItemTitle>
-            </Item>
+            <>
+              <Divider />
+              <Item>
+                <ItemTitle>Development</ItemTitle>
+              </Item>
+            </>
           )}
         </Dropdown>
       </DropdownMenu.Root>

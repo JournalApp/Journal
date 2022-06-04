@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import styled, { createGlobalStyle } from 'styled-components'
-import { EntryList, Calendar, Menu, TrafficLightMenu, FadeOut, ScrollToToday } from 'components'
+import {
+  EntryList,
+  Calendar,
+  Menu,
+  TrafficLightMenu,
+  FadeOut,
+  ScrollToToday,
+  FeedbackWidget,
+} from 'components'
 import { AppearanceProvider, EntriesProvider, UserProvider } from 'context'
 import { theme } from 'themes'
 import { createCssVars, supabase } from 'utils'
-import { Session } from '@supabase/supabase-js'
 import {
   defaultUserPreferences,
   getColorTheme,
@@ -79,6 +86,7 @@ function App() {
             <TrafficLightMenu />
             <Calendar />
             <ScrollToToday />
+            <FeedbackWidget />
           </AppearanceProvider>
           <Container>
             <EntryList />

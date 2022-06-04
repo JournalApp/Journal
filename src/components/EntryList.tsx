@@ -15,7 +15,7 @@ const BeforeEntries = styled.div`
 `
 
 const PostEntries = styled.div`
-  min-height: 80vh;
+  min-height: calc(100vh - 150px);
 `
 
 const Wrapper = styled.div`

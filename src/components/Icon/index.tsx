@@ -1,5 +1,6 @@
 import React from 'react'
 import { Check } from './Check'
+import { Cross } from './Cross'
 import { FormatBold } from './FormatBold'
 import { FormatItalic } from './FormatItalic'
 import { FormatUnderline } from './FormatUnderline'
@@ -17,6 +18,8 @@ import { Bucket } from './Bucket'
 import { Exit } from './Exit'
 import { TrafficLightOutline } from './TrafficLightOutline'
 import { TrafficLightCalendar } from './TrafficLightCalendar'
+import { RatingEmoji } from './RatingEmoji'
+import { RisedHands } from './RisedHands'
 
 type IconMapType = {
   [key: string]: any
@@ -34,6 +37,7 @@ type IconProps = {
 const IconMap: IconMapType = {
   Empty,
   Check,
+  Cross,
   FormatBold,
   FormatItalic,
   FormatUnderline,
@@ -51,6 +55,8 @@ const IconMap: IconMapType = {
   Exit,
   TrafficLightOutline,
   TrafficLightCalendar,
+  RatingEmoji,
+  RisedHands,
 }
 
 const Icon = function (props: IconProps) {
