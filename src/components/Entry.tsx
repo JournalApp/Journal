@@ -9,7 +9,7 @@ import { ReactEditor } from 'slate-react'
 import { CONFIG } from 'config'
 import { theme } from 'themes'
 import { countWords, isUnauthorized } from 'utils'
-import { supabase } from 'utils'
+import { supabase, breakpoints } from 'utils'
 import { useUserContext } from 'context'
 
 import {
@@ -71,6 +71,9 @@ const MainWrapper = styled.div`
   & > * {
     max-width: 75ch;
     color: ${theme('color.primary.main')};
+  }
+  @media ${breakpoints.s} {
+    padding: 0;
   }
 `
 const MiniDate = styled.div`

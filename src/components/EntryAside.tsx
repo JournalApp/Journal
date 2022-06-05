@@ -3,7 +3,7 @@ import { useEntriesContext } from 'context'
 import { theme } from 'themes'
 import styled from 'styled-components'
 import dayjs from 'dayjs'
-import { ordinal } from 'utils'
+import { ordinal, breakpoints } from 'utils'
 
 const AsideItem = styled.p`
   margin: 0;
@@ -83,6 +83,9 @@ const Aside = styled.div`
       opacity: 0;
       margin-right: 8px;
     }
+  }
+  @media ${breakpoints.s} {
+    display: none;
   }
 `
 

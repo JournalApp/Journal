@@ -69,6 +69,15 @@ const Container = styled.div`
   contain: paint;
 `
 
+const NoDragScrollBars = styled.div`
+  -webkit-app-region: no-drag;
+  position: fixed;
+  top: 0px;
+  bottom: 0px;
+  right: 0px;
+  width: 12px;
+`
+
 function App() {
   return (
     <>
@@ -88,6 +97,7 @@ function App() {
             <ScrollToToday />
             <FeedbackWidget />
           </AppearanceProvider>
+          <NoDragScrollBars />
           <Container>
             <EntryList />
           </Container>

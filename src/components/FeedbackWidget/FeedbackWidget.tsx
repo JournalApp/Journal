@@ -202,6 +202,7 @@ interface FormProps {
 }
 
 const FeedbackForm = styled.form<FormProps>`
+  -webkit-app-region: no-drag;
   position: absolute;
   bottom: 36px;
   right: 8px;
@@ -227,6 +228,7 @@ const FeedbackForm = styled.form<FormProps>`
 `
 
 const ThankYouScreen = styled.div<FormProps>`
+  -webkit-app-region: no-drag;
   position: absolute;
   bottom: 36px;
   right: 8px;
