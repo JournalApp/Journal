@@ -8,6 +8,7 @@ import {
   FadeOut,
   ScrollToToday,
   FeedbackWidget,
+  Splash,
 } from 'components'
 import { AppearanceProvider, EntriesProvider, UserProvider } from 'context'
 import { theme } from 'themes'
@@ -82,6 +83,7 @@ function App() {
   return (
     <>
       <GlobalStyle />
+      <Splash />
       <UserProvider>
         <EntriesProvider>
           <AppearanceProvider
