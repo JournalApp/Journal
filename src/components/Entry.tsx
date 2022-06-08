@@ -98,7 +98,7 @@ const defaultContent = [
 ]
 
 const isToday = (day: any) => {
-  return day.toString() == dayjs().format('YYYYMMDD')
+  return day.toString() == dayjs().format('YYYY-MM-DD')
 }
 
 const countEntryWords = (content: any) => {
@@ -152,7 +152,7 @@ const EntryComponent = ({
       let { data, error } = await supabase
         .from('journals')
         .select()
-        .match({ user_id: session.user.id, day: parseInt(day) })
+        .match({ user_id: session.user.id, day })
         .single()
       if (!data) {
         let { data, error } = await supabase
@@ -160,7 +160,7 @@ const EntryComponent = ({
           .insert([
             {
               user_id: session.user.id,
-              day: parseInt(day),
+              day,
               content: defaultContent,
             },
           ])
@@ -196,7 +196,7 @@ const EntryComponent = ({
         .from('journals')
         .upsert({
           user_id: session.user.id,
-          day: parseInt(day),
+          day: day,
           content,
           modified_at,
         })
@@ -394,7 +394,7 @@ const EntryComponent = ({
     if (isToday(day)) {
       return 'Today'
     } else {
-      return dayjs(dayjs(day.toString(), 'YYYYMMDD')).format('D MMM YYYY')
+      return dayjs(dayjs(day.toString(), 'YYYY-MM-DD')).format('D MMM YYYY')
     }
   }
 

@@ -20,12 +20,12 @@ const EntriesContext = createContext<EntriesContextInterface | null>(null)
 export function EntriesProvider({ children }: any) {
   const initialCache = useRef(window.electronAPI.storeEntries.getAll() || [])
   const scrollToDay = useRef('')
-  const today = useRef(dayjs().format('YYYYMMDD'))
+  const today = useRef(dayjs().format('YYYY-MM-DD'))
   const [daysCache, setDaysCache] = useState(window.electronAPI.storeIndex.getAll() || [])
 
   useEffect(() => {
     const hasNewDayCome = setInterval(() => {
-      let realToday = dayjs().format('YYYYMMDD')
+      let realToday = dayjs().format('YYYY-MM-DD')
       if (today.current != realToday) {
         console.log(`${today.current} != ${realToday}`)
         console.log(`New day has come ${realToday} !!!`)

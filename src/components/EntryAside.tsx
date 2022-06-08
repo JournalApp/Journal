@@ -90,7 +90,7 @@ const Aside = styled.div`
 `
 
 const isToday = (day: any) => {
-  return day.toString() == dayjs().format('YYYYMMDD')
+  return day.toString() == dayjs().format('YYYY-MM-DD')
 }
 
 const showDate = (day: any) => {
@@ -98,14 +98,14 @@ const showDate = (day: any) => {
     return (
       <>
         <AsideDay>Today</AsideDay>
-        <AsideYear>{dayjs(dayjs(day.toString(), 'YYYYMMDD')).format('D MMMM YYYY')}</AsideYear>
+        <AsideYear>{dayjs(dayjs(day.toString(), 'YYYY-MM-DD')).format('D MMMM YYYY')}</AsideYear>
       </>
     )
   } else {
     return (
       <>
-        <AsideDay>{dayjs(dayjs(day.toString(), 'YYYYMMDD')).format('D MMMM')}</AsideDay>
-        <AsideYear>{dayjs(dayjs(day.toString(), 'YYYYMMDD')).format('YYYY')}</AsideYear>
+        <AsideDay>{dayjs(dayjs(day.toString(), 'YYYY-MM-DD')).format('D MMMM')}</AsideDay>
+        <AsideYear>{dayjs(dayjs(day.toString(), 'YYYY-MM-DD')).format('YYYY')}</AsideYear>
       </>
     )
   }

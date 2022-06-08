@@ -37,7 +37,7 @@ const renderScrollToToday = () => {
   if (!scrollToToday) {
     scrollToToday = document.getElementById('ScrollToToday')
   }
-  let today = dayjs().format('YYYYMMDD')
+  let today = dayjs().format('YYYY-MM-DD')
   if (visibleSections.some((day) => day == today)) {
     scrollToToday.style.marginBottom = '-32px'
   } else {
@@ -72,7 +72,7 @@ const renderMarker = () => {
 
 const onIntersection = (entries: any) => {
   entries.forEach((entry: any) => {
-    let date = entry.target.id.slice(0, 8)
+    let date = entry.target.id.slice(0, 10)
     if (entry.isIntersecting) {
       // Add to array
       visibleSections.push(date)
@@ -154,7 +154,7 @@ function EntryList() {
       element.scrollIntoView({ inline: 'center' })
       // element.scrollTop = 0
     } else {
-      let today = dayjs().format('YYYYMMDD')
+      let today = dayjs().format('YYYY-MM-DD')
       element = document.getElementById(`${today}-entry`)
     }
   }
@@ -184,7 +184,7 @@ function EntryList() {
       days = days.map((d) => (d = d.day.toString()))
 
       // Add Today to server Days
-      let today = dayjs().format('YYYYMMDD')
+      let today = dayjs().format('YYYY-MM-DD')
       let todayExists = days.some((el: any) => {
         return el == today
       })

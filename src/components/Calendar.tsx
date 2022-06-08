@@ -184,7 +184,7 @@ const Calendar = () => {
   const today = new Date()
 
   useEffect(() => {
-    let today = dayjs().format('YYYYMMDD')
+    let today = dayjs().format('YYYY-MM-DD')
     let element = document.getElementById(`${today}-calendar`)
     if (element) {
       element.scrollIntoView({ block: 'center' })
@@ -239,7 +239,7 @@ const Calendar = () => {
             [...Array(12)].map(
               (i, month) =>
                 isBeforeToday(year, month) && (
-                  <Month key={`${year}${month}`}>
+                  <Month key={`${year}-${month}`}>
                     <MonthLabel>
                       <MonthLabelMonth>
                         {new Intl.DateTimeFormat('en-US', { month: 'long' }).format(
@@ -255,24 +255,32 @@ const Calendar = () => {
                             <Day
                               key={
                                 year +
+                                '-' +
                                 withLeadingZero(month + 1) +
+                                '-' +
                                 withLeadingZero(day) +
                                 '-calendar'
                               }
                               id={
                                 year +
+                                '-' +
                                 withLeadingZero(month + 1) +
+                                '-' +
                                 withLeadingZero(day) +
                                 '-calendar'
                               }
                               onClick={() =>
                                 scrollToDay(
-                                  year + withLeadingZero(month + 1) + withLeadingZero(day)
+                                  year +
+                                    '-' +
+                                    withLeadingZero(month + 1) +
+                                    '-' +
+                                    withLeadingZero(day)
                                 )
                               }
                               isToday={isToday(year, month, day)}
                               hasEntry={hasEntry(
-                                year + withLeadingZero(month + 1) + withLeadingZero(day)
+                                year + '-' + withLeadingZero(month + 1) + '-' + withLeadingZero(day)
                               )}
                             >
                               <DayLabel>{day}</DayLabel>

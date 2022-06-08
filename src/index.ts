@@ -1,9 +1,52 @@
-import { app, BrowserWindow, Menu, MenuItem, ipcMain, shell } from 'electron'
+import { app, BrowserWindow, autoUpdater, ipcMain, shell } from 'electron'
 import path from 'path'
-import { clipboard } from 'electron'
 import dayjs from 'dayjs'
 import Store from 'electron-store'
 import url from 'url'
+import log from 'electron-log'
+import { isDev } from './utils/misc'
+
+// autoUpdater
+if (!isDev()) {
+  const server = 'https://desktop.journal.do'
+  const updateUrl = `${server}/${process.platform}/${process.arch}/update.json`
+  console.log(`updateUrl: ${updateUrl}`)
+  log.info(`updateUrl: ${updateUrl}`)
+  autoUpdater.setFeedURL({ url: updateUrl, serverType: 'json' })
+
+  autoUpdater.on('update-available', () => {
+    console.log('update-available')
+    log.info('update-available')
+  })
+
+  autoUpdater.on('update-not-available', () => {
+    console.log('update-not-available')
+    log.info('update-not-available')
+  })
+
+  autoUpdater.on('error', (error) => {
+    console.log('Error:')
+    console.log(error)
+    log.info('Error:')
+    log.info(error)
+  })
+
+  autoUpdater.on('update-downloaded', () => {
+    console.log('update-downloaded')
+    log.info('update-downloaded')
+    // TODO
+    // Send message to renderer to show 'Update now' item in the menu
+    // 'Update now' should send a message to main and call autoUpdater.quitAndInstall()
+  })
+
+  setInterval(() => {
+    console.log('autoUpdater.checkForUpdates()')
+    log.info('autoUpdater.checkForUpdates()')
+    autoUpdater.checkForUpdates()
+  }, 60000)
+
+  autoUpdater.checkForUpdates()
+}
 
 var openUrl = ''
 
@@ -29,7 +72,7 @@ console.log(storeEntries.path)
 
 ipcMain.on('electron-storeIndex-get-all', async (event) => {
   let value: any = storeIndex.get(dayKey) ?? []
-  let today = dayjs().format('YYYYMMDD')
+  let today = dayjs().format('YYYY-MM-DD')
   let todayExists = value.some((el: any) => {
     return el == today
   })

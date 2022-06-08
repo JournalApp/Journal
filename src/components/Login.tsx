@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import { theme } from 'themes'
 import { useUserContext } from 'context'
-import { Icon } from 'components'
+import { Splash } from 'components'
 import { supabase, isDev } from 'utils'
 import logo from '../../assets/icons/journaldo-logo@2x.png'
 
@@ -119,15 +119,18 @@ const Login = () => {
   const { authError } = useUserContext()
 
   return (
-    <Container>
-      <Logo src={logo}></Logo>
-      <Welcome>Welcome to Journal</Welcome>
-      <LoginButton href='https://www.journal.do/auth?action=signout'>
-        Log in with browser
-      </LoginButton>
-      <ErrorMessage>{authError}</ErrorMessage>
-      {isDev() && <LoginWithToken />}
-    </Container>
+    <>
+      <Splash />
+      <Container>
+        <Logo src={logo}></Logo>
+        <Welcome>Welcome to Journal</Welcome>
+        <LoginButton href='https://www.journal.do/auth?action=signout'>
+          Log in with browser
+        </LoginButton>
+        <ErrorMessage>{authError}</ErrorMessage>
+        {isDev() && <LoginWithToken />}
+      </Container>
+    </>
   )
 }
 

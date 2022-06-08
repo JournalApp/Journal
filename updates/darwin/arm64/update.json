@@ -1,0 +1,25 @@
+{
+  "currentRelease": "1.0.0-beta.2",
+  "releases": [
+    {
+      "version": "1.0.0-beta.2",
+      "updateTo": {
+        "version": "1.0.0-beta.2",
+        "pub_date": "2022-06-06T12:00:00+00:00",
+        "notes": "Theses are some release notes innit",
+        "name": "1.0.0-beta.2",
+        "url": "https://desktop.journal.do/darwin/arm64/Journal-darwin-arm64-1.0.0-beta.2.zip"
+      }
+    },
+    {
+      "version": "1.0.0-beta.1",
+      "updateTo": {
+        "version": "1.0.0-beta.1",
+        "pub_date": "2022-06-05T12:00:00+00:00",
+        "notes": "Theses are some release notes innit",
+        "name": "1.0.0-beta.1",
+        "url": "https://desktop.journal.do/darwin/arm64/Journal-darwin-arm64-1.0.0-beta.1.zip"
+      }
+    }
+  ]
+}

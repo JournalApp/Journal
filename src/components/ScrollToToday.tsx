@@ -26,14 +26,13 @@ const ScrollToTodayButton = styled.button`
 `
 
 const scrollToToday = () => {
-  let today = dayjs().format('YYYYMMDD')
+  let today = dayjs().format('YYYY-MM-DD')
   let entry = document.getElementById(`${today}-entry`)
   if (entry) {
     entry.scrollIntoView()
   }
 }
 
-// TODO When app is opened overningt, Today is not created, thus cant scroll to it
 function ScrollToToday() {
   return (
     <ScrollToTodayButton id='ScrollToToday' onClick={() => scrollToToday()}>
