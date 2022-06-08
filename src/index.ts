@@ -31,14 +31,6 @@ if (!isDev()) {
     log.info(error)
   })
 
-  autoUpdater.on('update-downloaded', () => {
-    console.log('update-downloaded')
-    log.info('update-downloaded')
-    // TODO
-    // Send message to renderer to show 'Update now' item in the menu
-    // 'Update now' should send a message to main and call autoUpdater.quitAndInstall()
-  })
-
   setInterval(() => {
     console.log('autoUpdater.checkForUpdates()')
     log.info('autoUpdater.checkForUpdates()')
@@ -46,6 +38,10 @@ if (!isDev()) {
   }, 60000)
 
   autoUpdater.checkForUpdates()
+
+  ipcMain.on('electron-quit-and-install', () => {
+    autoUpdater.quitAndInstall()
+  })
 }
 
 var openUrl = ''
@@ -182,6 +178,13 @@ const createWindow = (): void => {
       mainWindow.webContents.send('open-url', openUrl)
       openUrl = ''
     }
+
+    // Handle Update downloaded
+    autoUpdater.on('update-downloaded', () => {
+      console.log('update-downloaded')
+      log.info('update-downloaded')
+      mainWindow.webContents.send('update-downloaded')
+    })
   })
 
   // and load the index.html of the app.

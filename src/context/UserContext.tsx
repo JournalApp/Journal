@@ -7,6 +7,7 @@ interface UserContextInterface {
   session: Session
   authError: string
   signOut: () => void
+  quitAndInstall: () => void
 }
 
 const UserContext = createContext<UserContextInterface | null>(null)
@@ -50,10 +51,16 @@ export function UserProvider({ children }: any) {
     window.electronAPI.reloadWindow()
   }
 
+  const quitAndInstall = () => {
+    console.log('quitAndInstall')
+    window.electronAPI.quitAndInstall()
+  }
+
   let state = {
     session,
     authError,
     signOut,
+    quitAndInstall,
   }
   return <UserContext.Provider value={state}>{session ? children : <Login />}</UserContext.Provider>
 }

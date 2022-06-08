@@ -26,7 +26,6 @@ const reveal = keyframes`
     margin-bottom: 0px;
     opacity: 1;
   }
-  }
 `
 
 interface MenuProps {
@@ -222,6 +221,17 @@ const MenuButton = styled(DropdownMenu.Trigger)<MenuButtonProps>`
   }
 `
 
+const Badge = styled.div`
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: ${theme('color.primary.main')};
+  top: -4px;
+  right: -4px;
+  border-radius: 100px;
+  border: 2px solid ${theme('color.primary.surface')};
+`
+
 const Divider = styled(DropdownMenu.Separator)`
   background-color: ${theme('color.popper.border')};
   height: 1px;
@@ -230,15 +240,21 @@ const Divider = styled(DropdownMenu.Separator)`
 
 const Menu = () => {
   const [open, setOpen] = useState(false)
+  const [updateDownloaded, setUpdateDownloaded] = useState(false)
   const { fontSize, setFontSize, fontFace, setFontFace, colorTheme, setColorTheme } =
     useAppearanceContext()
-  const { session, signOut } = useUserContext()
+  const { session, signOut, quitAndInstall } = useUserContext()
+
+  window.electronAPI.onUpdateDownloaded(() => {
+    setUpdateDownloaded(true)
+  })
 
   return (
     <Dialog.Root>
       <DropdownMenu.Root onOpenChange={(open) => setOpen(open)}>
         <MenuButton open={open}>
           <Icon name='Menu' />
+          {updateDownloaded && <Badge />}
         </MenuButton>
         <Dropdown side='left' sideOffset={-40} align='end' alignOffset={30}>
           <DialogTrigger>
@@ -254,6 +270,12 @@ const Menu = () => {
               Logout <em>{session.user.email}</em>
             </ItemTitle>
           </Item>
+          {updateDownloaded && (
+            <Item onSelect={() => quitAndInstall()}>
+              <Icon name='UpdateNow' />
+              <ItemTitle>Update now</ItemTitle>
+            </Item>
+          )}
           {isDev() && (
             <>
               <Divider />

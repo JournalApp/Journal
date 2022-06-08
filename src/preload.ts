@@ -3,6 +3,7 @@ import { contextBridge, ipcRenderer, clipboard } from 'electron'
 contextBridge.exposeInMainWorld('electronAPI', {
   onPaste: (callback: any) => ipcRenderer.on('paste', callback),
   onCopy: (callback: any) => ipcRenderer.on('copy', callback),
+  onUpdateDownloaded: (callback: any) => ipcRenderer.on('update-downloaded', callback),
   storeIndex: {
     getAll() {
       return ipcRenderer.sendSync('electron-storeIndex-get-all')
@@ -49,5 +50,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   handleOpenUrl: (callback: any) => ipcRenderer.on('open-url', callback),
   reloadWindow() {
     ipcRenderer.send('electron-reload')
+  },
+  quitAndInstall() {
+    ipcRenderer.send('electron-quit-and-install')
   },
 })
