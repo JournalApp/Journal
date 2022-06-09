@@ -66,6 +66,14 @@ console.log(storeEntries.path)
 
 // storeIndex
 
+const storeIndexAdd = (val: string) => {
+  let days = (storeIndex.get(dayKey) as String[]) ?? []
+  days.push(val)
+  let daysUnique = [...new Set([...days])].sort()
+  storeIndex.set(dayKey, daysUnique)
+  return daysUnique
+}
+
 ipcMain.on('electron-storeIndex-get-all', async (event) => {
   let value: any = storeIndex.get(dayKey) ?? []
   let today = dayjs().format('YYYY-MM-DD')
@@ -74,6 +82,7 @@ ipcMain.on('electron-storeIndex-get-all', async (event) => {
   })
   if (!todayExists) {
     value.push(today)
+    storeIndexAdd(today)
     console.log(`Added ${today} to cached Days`)
   }
   event.returnValue = value
@@ -84,11 +93,7 @@ ipcMain.on('electron-storeIndex-set-all', async (event, val) => {
 })
 
 ipcMain.on('electron-storeIndex-add', async (event, val) => {
-  let days = (storeIndex.get(dayKey) as String[]) ?? []
-  days.push(val)
-  let daysUnique = [...new Set([...days])].sort()
-  storeIndex.set(dayKey, daysUnique)
-  event.returnValue = daysUnique
+  event.returnValue = storeIndexAdd(val)
 })
 
 ipcMain.on('electron-storeIndex-clear-all', () => {
