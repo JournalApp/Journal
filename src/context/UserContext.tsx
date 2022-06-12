@@ -8,6 +8,7 @@ interface UserContextInterface {
   authError: string
   signOut: () => void
   quitAndInstall: () => void
+  secretKey: string
 }
 
 const UserContext = createContext<UserContextInterface | null>(null)
@@ -15,6 +16,7 @@ const UserContext = createContext<UserContextInterface | null>(null)
 export function UserProvider({ children }: any) {
   const [session, setSession] = useState<Session | null>(null)
   const [authError, setAuthError] = useState('')
+  const secretKey = '55xuIvNUNu29GnfN98oB9ghH-elgHliK'
 
   window.electronAPI.handleOpenUrl(async (event: any, value: any) => {
     const url = new URL(value)
@@ -61,6 +63,7 @@ export function UserProvider({ children }: any) {
     authError,
     signOut,
     quitAndInstall,
+    secretKey,
   }
   return <UserContext.Provider value={state}>{session ? children : <Login />}</UserContext.Provider>
 }

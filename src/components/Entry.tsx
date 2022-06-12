@@ -8,7 +8,7 @@ import { Transforms, Node, Editor as SlateEditor } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { CONFIG } from 'config'
 import { theme } from 'themes'
-import { countWords, isUnauthorized } from 'utils'
+import { countWords, isUnauthorized, encryptEntry, decryptEntry } from 'utils'
 import { supabase, breakpoints } from 'utils'
 import { useUserContext } from 'context'
 
@@ -130,7 +130,7 @@ const EntryComponent = ({
   const [initialFetchDone, setInitialFetchDone] = useState(false)
   const debugValue = useRef(cachedEntry?.content ?? [])
   const editorRef = useRef(null)
-  const { session, signOut } = useUserContext()
+  const { session, signOut, secretKey } = useUserContext()
 
   console.log(`Entry render`)
 
@@ -155,13 +155,18 @@ const EntryComponent = ({
         .match({ user_id: session.user.id, day })
         .single()
       if (!data) {
+        const { contentEncrypted, iv } = await encryptEntry(
+          JSON.stringify(defaultContent),
+          secretKey
+        )
         let { data, error } = await supabase
           .from('journals')
           .insert([
             {
               user_id: session.user.id,
               day,
-              content: defaultContent,
+              content: '\\x' + contentEncrypted,
+              iv: '\\x' + iv,
             },
           ])
           .single()
@@ -170,6 +175,10 @@ const EntryComponent = ({
           if (isUnauthorized(error)) signOut()
           throw new Error(error.message)
         }
+        const { contentDecrypted } = await decryptEntry(data.content, data.iv, secretKey)
+        console.log('contentDecrypted')
+        console.log(contentDecrypted)
+        data.content = JSON.parse(contentDecrypted)
         return data
       }
       if (error) {
@@ -177,6 +186,10 @@ const EntryComponent = ({
         if (isUnauthorized(error)) signOut()
         throw new Error(error.message)
       }
+      const { contentDecrypted } = await decryptEntry(data.content, data.iv, secretKey)
+      console.log('contentDecrypted')
+      console.log(contentDecrypted)
+      data.content = JSON.parse(contentDecrypted)
       return data
     } catch (err) {
       console.log(err)
@@ -191,13 +204,16 @@ const EntryComponent = ({
     }
 
     try {
+      const { contentEncrypted, iv } = await encryptEntry(JSON.stringify(content), secretKey)
+
       let modified_at = new Date().toISOString()
       const { data, error } = await supabase
         .from('journals')
         .upsert({
           user_id: session.user.id,
-          day: day,
-          content,
+          day,
+          content: '\\x' + contentEncrypted,
+          iv: '\\x' + iv,
           modified_at,
         })
         .single()

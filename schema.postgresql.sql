@@ -21,7 +21,8 @@ create table journals (
   day date not null,
   created_at timestamp with time zone default now(),
   modified_at timestamp with time zone default now(),
-  content json[],
+  content bytea,
+  iv bytea,
 
   primary key (user_id, day)
 ) PARTITION BY LIST(user_id);
