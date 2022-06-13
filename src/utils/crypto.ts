@@ -13,15 +13,8 @@ const fromHex = (h: string) => {
   return s
 }
 
-const encryptEntry = async (content: any, secretKey: string) => {
+const encryptEntry = async (content: any, secretKey: CryptoKey) => {
   let utf8Encoder = new TextEncoder()
-  const aesKey = await window.crypto.subtle.importKey(
-    'raw',
-    utf8Encoder.encode(secretKey),
-    'AES-CTR',
-    true,
-    ['encrypt', 'decrypt']
-  )
 
   let ivBuffer = window.crypto.getRandomValues(new Uint8Array(16))
   let contentBuffer = await window.crypto.subtle.encrypt(
@@ -30,7 +23,7 @@ const encryptEntry = async (content: any, secretKey: string) => {
       counter: ivBuffer,
       length: 32,
     },
-    aesKey,
+    secretKey,
     utf8Encoder.encode(content)
   )
   let contentEncrypted = ab2str(contentBuffer, 'hex')
@@ -39,16 +32,7 @@ const encryptEntry = async (content: any, secretKey: string) => {
   return { contentEncrypted, iv }
 }
 
-const decryptEntry = async (content: any, iv: string, secretKey: string) => {
-  let utf8Encoder = new TextEncoder()
-  const aesKey = await window.crypto.subtle.importKey(
-    'raw',
-    utf8Encoder.encode(secretKey),
-    'AES-CTR',
-    true,
-    ['encrypt', 'decrypt']
-  )
-
+const decryptEntry = async (content: any, iv: string, secretKey: CryptoKey) => {
   let ivUtf = fromHex(iv)
   let ivAb = str2ab(ivUtf)
 
@@ -61,7 +45,7 @@ const decryptEntry = async (content: any, iv: string, secretKey: string) => {
       counter: ivAb,
       length: 32,
     },
-    aesKey,
+    secretKey,
     contentAb
   )
   let contentDecrypted = ab2str(contentBuffer, 'utf8')

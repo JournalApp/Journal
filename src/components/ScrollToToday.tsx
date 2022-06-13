@@ -29,6 +29,7 @@ const scrollToToday = () => {
   let today = dayjs().format('YYYY-MM-DD')
   let entry = document.getElementById(`${today}-entry`)
   if (entry) {
+    console.log('scrollToToday')
     entry.scrollIntoView()
   }
 }

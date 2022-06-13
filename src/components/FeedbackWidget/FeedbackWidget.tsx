@@ -10,7 +10,6 @@ import { useUserContext } from 'context'
 const InputContainer = styled.div`
   position: relative;
   display: flex;
-  }
 `
 
 const Label = styled.label`

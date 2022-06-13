@@ -130,7 +130,7 @@ const EntryComponent = ({
   const [initialFetchDone, setInitialFetchDone] = useState(false)
   const debugValue = useRef(cachedEntry?.content ?? [])
   const editorRef = useRef(null)
-  const { session, signOut, secretKey } = useUserContext()
+  const { session, signOut, getSecretKey } = useUserContext()
 
   console.log(`Entry render`)
 
@@ -149,6 +149,7 @@ const EntryComponent = ({
 
   const fetchEntry = async (day: any) => {
     try {
+      const secretKey = await getSecretKey()
       let { data, error } = await supabase
         .from('journals')
         .select()
@@ -176,8 +177,6 @@ const EntryComponent = ({
           throw new Error(error.message)
         }
         const { contentDecrypted } = await decryptEntry(data.content, data.iv, secretKey)
-        console.log('contentDecrypted')
-        console.log(contentDecrypted)
         data.content = JSON.parse(contentDecrypted)
         return data
       }
@@ -187,8 +186,6 @@ const EntryComponent = ({
         throw new Error(error.message)
       }
       const { contentDecrypted } = await decryptEntry(data.content, data.iv, secretKey)
-      console.log('contentDecrypted')
-      console.log(contentDecrypted)
       data.content = JSON.parse(contentDecrypted)
       return data
     } catch (err) {
@@ -204,9 +201,11 @@ const EntryComponent = ({
     }
 
     try {
+      const secretKey = await getSecretKey()
       const { contentEncrypted, iv } = await encryptEntry(JSON.stringify(content), secretKey)
 
       let modified_at = new Date().toISOString()
+      // NOTE could add { returning: 'minimal' } to reduce network load
       const { data, error } = await supabase
         .from('journals')
         .upsert({

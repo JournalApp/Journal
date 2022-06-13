@@ -121,20 +121,16 @@ export const BlockTypeSelect = () => {
 
   const isCurrent = (type: any) => {
     let current = !!editor?.selection && someNode(editor, { match: { type } })
-    console.log(`isCurrent ${current}`)
     return current
   }
 
   const isCurrentList = (type: any) => {
     const res = !!editor?.selection && getListItemEntry(editor)
     let current = !!res && res.list[0].type === type
-    console.log(`isCurrent ${current}`)
     return current
   }
 
   const nodeFullName = (nodeType: string) => {
-    console.log(nodeType)
-    console.log(list)
     if (nodeType == 'lic') {
       switch (list) {
         case 'ol':

@@ -8,7 +8,7 @@ interface UserContextInterface {
   authError: string
   signOut: () => void
   quitAndInstall: () => void
-  secretKey: string
+  getSecretKey: () => Promise<CryptoKey>
 }
 
 const UserContext = createContext<UserContextInterface | null>(null)
@@ -16,7 +16,7 @@ const UserContext = createContext<UserContextInterface | null>(null)
 export function UserProvider({ children }: any) {
   const [session, setSession] = useState<Session | null>(null)
   const [authError, setAuthError] = useState('')
-  const secretKey = '55xuIvNUNu29GnfN98oB9ghH-elgHliK'
+  const secretKey = useRef(null)
 
   window.electronAPI.handleOpenUrl(async (event: any, value: any) => {
     const url = new URL(value)
@@ -44,6 +44,30 @@ export function UserProvider({ children }: any) {
     })
   }, [])
 
+  const getSecretKey = async () => {
+    if (secretKey.current) {
+      return secretKey.current
+    } else {
+      const response = await fetch('https://kms.journal.do/key', {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+      const { key } = await response.json()
+      if (!key) throw new Error("Can't fetch key")
+
+      let utf8Encoder = new TextEncoder()
+      const aesKey = await window.crypto.subtle.importKey(
+        'raw',
+        utf8Encoder.encode(key),
+        'AES-CTR',
+        true,
+        ['encrypt', 'decrypt']
+      )
+      secretKey.current = aesKey
+
+      return aesKey
+    }
+  }
+
   const signOut = () => {
     console.log('signOut')
     supabase.auth.signOut()
@@ -63,7 +87,7 @@ export function UserProvider({ children }: any) {
     authError,
     signOut,
     quitAndInstall,
-    secretKey,
+    getSecretKey,
   }
   return <UserContext.Provider value={state}>{session ? children : <Login />}</UserContext.Provider>
 }
