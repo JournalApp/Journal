@@ -4,6 +4,7 @@ import { theme } from 'themes'
 import styled from 'styled-components'
 import dayjs from 'dayjs'
 import { ordinal, breakpoints } from 'utils'
+import { Icon } from 'components'
 
 const AsideItem = styled.p`
   margin: 0;
@@ -89,6 +90,36 @@ const Aside = styled.div`
   }
 `
 
+const AsideMenu = styled.div`
+  width: 40px;
+  padding-top: 24px;
+  display: flex;
+  flex-direction: column;
+  @media ${breakpoints.s} {
+    display: none;
+  }
+`
+
+const AsideMenuStickyContainer = styled.div`
+  position: sticky;
+  top: 48px;
+  text-align: center;
+`
+
+const Remove = styled((props) => <Icon {...props} />)`
+  position: sticky;
+  top: 48px;
+  -webkit-app-region: no-drag;
+  cursor: pointer;
+  right: -27px;
+  top: 3px;
+  opacity: 0.5;
+  transition: opacity ${theme('animation.time.normal')};
+  &:hover {
+    opacity: 0.8;
+  }
+`
+
 const isToday = (day: any) => {
   return day.toString() == dayjs().format('YYYY-MM-DD')
 }
@@ -111,6 +142,10 @@ const showDate = (day: any) => {
   }
 }
 
+const removeDay = (date: string) => {
+  console.log(`removeDay ${date}`)
+}
+
 type EntryAsideProps = {
   date: string
   wordCount: number
@@ -125,17 +160,26 @@ function EntryAside({ date, wordCount }: EntryAsideProps) {
   }
 
   return (
-    <Aside>
-      <AsideStickyContainer>
-        <AsideMain>{showDate(date)}</AsideMain>
-        <AsideMeta>
-          <AsideItem>{dayCountOrdinar()}</AsideItem>
-          <AsideItemLabel>day</AsideItemLabel>
-          <AsideItem>{wordCount}</AsideItem>
-          <AsideItemLabel>{wordCount == 1 ? 'word' : 'words'}</AsideItemLabel>
-        </AsideMeta>
-      </AsideStickyContainer>
-    </Aside>
+    <>
+      <Aside>
+        <AsideStickyContainer>
+          <AsideMain>{showDate(date)}</AsideMain>
+          <AsideMeta>
+            <AsideItem>{dayCountOrdinar()}</AsideItem>
+            <AsideItemLabel>day</AsideItemLabel>
+            <AsideItem>{wordCount}</AsideItem>
+            <AsideItemLabel>{wordCount == 1 ? 'word' : 'words'}</AsideItemLabel>
+          </AsideMeta>
+        </AsideStickyContainer>
+      </Aside>
+      <AsideMenu>
+        <AsideMenuStickyContainer>
+          {wordCount == 0 && !isToday(date) && (
+            <Remove name='Cross' size={16} onClick={() => removeDay(date)} />
+          )}
+        </AsideMenuStickyContainer>
+      </AsideMenu>
+    </>
   )
 }
 

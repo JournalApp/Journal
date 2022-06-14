@@ -56,7 +56,7 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   -webkit-app-region: drag;
-  -webkit-user-select: none;
+  user-select: none;
 }
 
 hr {

@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react'
 import styled, { css } from 'styled-components'
 import dayjs from 'dayjs'
-import { usePlateEditorState, useEventPlateId, usePlateEditorRef } from '@udecode/plate-core'
+import { usePlateEditorState, useEventPlateId } from '@udecode/plate-core'
 import { ContextMenu, FormatToolbar, EntryAside } from 'components'
-import { createPluginFactory, getPlateActions } from '@udecode/plate'
+import { createPluginFactory } from '@udecode/plate'
 import { Transforms, Node, Editor as SlateEditor } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { CONFIG } from 'config'
@@ -48,8 +48,11 @@ type EntryBlockProps = {
 
 const Container = styled.div`
   display: flex;
-  padding: 40px;
+  padding: 40px 0 40px 40px;
   word-break: break-word;
+  @media ${breakpoints.s} {
+    padding: 40px;
+  }
 `
 
 const MainWrapper = styled.div`
