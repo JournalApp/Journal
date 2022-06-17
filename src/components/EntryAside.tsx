@@ -142,17 +142,18 @@ const showDate = (day: any) => {
   }
 }
 
-const removeDay = (date: string) => {
-  console.log(`removeDay ${date}`)
-}
-
 type EntryAsideProps = {
   date: string
   wordCount: number
 }
 
 function EntryAside({ date, wordCount }: EntryAsideProps) {
-  const { daysCache } = useEntriesContext()
+  const { daysCache, removeCachedDay } = useEntriesContext()
+
+  const removeDay = (date: string) => {
+    console.log(`removeDay ${date}`)
+    removeCachedDay(date)
+  }
 
   const dayCountOrdinar = () => {
     let count = daysCache.findIndex((d: any) => d == date) + 1

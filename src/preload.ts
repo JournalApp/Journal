@@ -14,6 +14,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     add(val: any) {
       return ipcRenderer.sendSync('electron-storeIndex-add', val)
     },
+    remove(val: any) {
+      return ipcRenderer.sendSync('electron-storeIndex-remove', val)
+    },
     clearAll() {
       ipcRenderer.send('electron-storeIndex-clear-all')
     },

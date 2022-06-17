@@ -74,6 +74,14 @@ const storeIndexAdd = (val: string) => {
   return daysUnique
 }
 
+const storeIndexRemove = (val: string) => {
+  let days = (storeIndex.get(dayKey) as String[]) ?? []
+  days = days.filter((day) => day != val)
+  let daysUnique = [...new Set([...days])].sort()
+  storeIndex.set(dayKey, daysUnique)
+  return daysUnique
+}
+
 ipcMain.on('electron-storeIndex-get-all', async (event) => {
   let value: any = storeIndex.get(dayKey) ?? []
   let today = dayjs().format('YYYY-MM-DD')
@@ -94,6 +102,10 @@ ipcMain.on('electron-storeIndex-set-all', async (event, val) => {
 
 ipcMain.on('electron-storeIndex-add', async (event, val) => {
   event.returnValue = storeIndexAdd(val)
+})
+
+ipcMain.on('electron-storeIndex-remove', async (event, val) => {
+  event.returnValue = storeIndexRemove(val)
 })
 
 ipcMain.on('electron-storeIndex-clear-all', () => {

@@ -10,6 +10,7 @@ interface EntriesContextInterface {
   setCachedEntry: (property: string, value: any) => void
   setAllCachedDays: (value: any) => void
   addCachedDay: (day: string) => void
+  removeCachedDay: (day: string) => void
   setScrollToDay: (day: string) => void
   clearScrollToDay: () => void
   shouldScrollToDay: (day: string) => boolean
@@ -65,6 +66,13 @@ export function EntriesProvider({ children }: any) {
     console.log(`Added day ${day}`)
   }
 
+  const removeCachedDay = (day: string) => {
+    let days = window.electronAPI.storeIndex.remove(day)
+    // console.log(days)
+    setDaysCache([...days])
+    console.log(`Removed day ${day}`)
+  }
+
   const setScrollToDay = (day: string) => {
     scrollToDay.current = day
   }
@@ -86,6 +94,7 @@ export function EntriesProvider({ children }: any) {
     setCachedEntry,
     setAllCachedDays,
     addCachedDay,
+    removeCachedDay,
     setScrollToDay,
     clearScrollToDay,
     shouldScrollToDay,
