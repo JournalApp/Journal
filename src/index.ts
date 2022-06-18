@@ -5,6 +5,7 @@ import Store from 'electron-store'
 import url from 'url'
 import log from 'electron-log'
 import { isDev } from './utils/misc'
+require('./services/sqlite')
 
 // autoUpdater
 if (!isDev()) {

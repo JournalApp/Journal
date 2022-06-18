@@ -22,10 +22,11 @@ import {
   CalendarOpen,
   getBaseThemeWithOverrides,
 } from 'config'
+import { electronAPIType } from './preload'
 
 declare global {
   interface Window {
-    electronAPI?: any
+    electronAPI: electronAPIType
     clipboardData?: any
   }
 }

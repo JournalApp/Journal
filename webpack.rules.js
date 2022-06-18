@@ -30,4 +30,8 @@ module.exports = [
     test: /\.png/,
     type: 'asset/resource',
   },
+  {
+    test: /\.sql/,
+    type: 'asset/source',
+  },
 ]

@@ -133,7 +133,7 @@ const EntryComponent = ({
   const [initialFetchDone, setInitialFetchDone] = useState(false)
   const debugValue = useRef(cachedEntry?.content ?? [])
   const editorRef = useRef(null)
-  const { session, signOut, getSecretKey } = useUserContext()
+  const { session, signOut, getSecretKey, serverTimeNow } = useUserContext()
 
   console.log(`Entry render`)
 
@@ -163,12 +163,15 @@ const EntryComponent = ({
           JSON.stringify(defaultContent),
           secretKey
         )
+        let now = serverTimeNow()
         let { data, error } = await supabase
           .from('journals')
           .insert([
             {
               user_id: session.user.id,
               day,
+              modified_at: now,
+              created_at: now,
               content: '\\x' + contentEncrypted,
               iv: '\\x' + iv,
             },
@@ -188,6 +191,7 @@ const EntryComponent = ({
         if (isUnauthorized(error)) signOut()
         throw new Error(error.message)
       }
+      // TODO if modified_at is the same is in cache skip decryption
       const { contentDecrypted } = await decryptEntry(data.content, data.iv, secretKey)
       data.content = JSON.parse(contentDecrypted)
       return data
@@ -207,7 +211,7 @@ const EntryComponent = ({
       const secretKey = await getSecretKey()
       const { contentEncrypted, iv } = await encryptEntry(JSON.stringify(content), secretKey)
 
-      let modified_at = new Date().toISOString()
+      let modified_at = serverTimeNow()
       // NOTE could add { returning: 'minimal' } to reduce network load
       const { data, error } = await supabase
         .from('journals')

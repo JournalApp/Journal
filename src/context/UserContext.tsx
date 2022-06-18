@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react'
-import { createCssVars, supabase } from 'utils'
+import { createCssVars, supabase, supabaseUrl, supabaseAnonKey } from 'utils'
 import { Login } from 'components'
 import { Session } from '@supabase/supabase-js'
+import dayjs from 'dayjs'
 
 interface UserContextInterface {
   session: Session
@@ -9,6 +10,7 @@ interface UserContextInterface {
   signOut: () => void
   quitAndInstall: () => void
   getSecretKey: () => Promise<CryptoKey>
+  serverTimeNow: () => string
 }
 
 const UserContext = createContext<UserContextInterface | null>(null)
@@ -17,6 +19,7 @@ export function UserProvider({ children }: any) {
   const [session, setSession] = useState<Session | null>(null)
   const [authError, setAuthError] = useState('')
   const secretKey = useRef(null)
+  const serverClientTimeDelta = useRef(0) //  server time - client time = delta
 
   window.electronAPI.handleOpenUrl(async (event: any, value: any) => {
     const url = new URL(value)
@@ -34,6 +37,7 @@ export function UserProvider({ children }: any) {
 
   useEffect(() => {
     setSession(supabase.auth.session())
+    fetchServerTimeDelta()
 
     supabase.auth.onAuthStateChange((_event, session) => {
       console.log('Auth event:')
@@ -44,6 +48,8 @@ export function UserProvider({ children }: any) {
     })
   }, [])
 
+  // TODO on app lauch this function is called for each entry
+  // consider saving secretKey in SQLite
   const getSecretKey = async () => {
     if (secretKey.current) {
       return secretKey.current
@@ -68,6 +74,44 @@ export function UserProvider({ children }: any) {
     }
   }
 
+  // TODO getserver time
+  // 1. fetch <supabase>/rest/v1/ OPTIONS
+  // 2. read time from response header
+  // 3. calculate delta client time vs server time
+  // 4. save delta to use it when saving entries (created_at, modified_at)
+
+  const fetchServerTimeDelta = async () => {
+    try {
+      // Fetch server time
+      const headers = {
+        apikey: supabaseAnonKey,
+        authorization: `Bearer: ${supabaseAnonKey}`,
+      }
+      const response = await fetch(`${supabaseUrl}/rest/v1/`, { method: 'HEAD', headers })
+      let headerDate = response.headers.get('date')
+
+      // Calculate delta
+      const dateServerTime = dayjs(new Date(headerDate))
+      const dateClientTime = dayjs(new Date())
+      const diff = dateServerTime.diff(dateClientTime, 'ms')
+      console.log(`Delta (ms): ${diff}`)
+      serverClientTimeDelta.current = diff
+      // TODO save delta to SQLite
+    } catch (error) {
+      // TODO (error = offline) read delta from SQLite
+      // save delta in serverClientTimeDelta.current
+      console.log(error)
+    }
+  }
+
+  const serverTimeNow = () => {
+    const delta = serverClientTimeDelta.current
+    const dateClientTime = dayjs(new Date())
+    const computedServerTime = dateClientTime.add(delta, 'ms').toISOString()
+    console.log(`Using delta(ms) of: ${delta}, to compute: ${computedServerTime}`)
+    return computedServerTime
+  }
+
   const signOut = () => {
     console.log('signOut')
     supabase.auth.signOut()
@@ -88,6 +132,7 @@ export function UserProvider({ children }: any) {
     signOut,
     quitAndInstall,
     getSecretKey,
+    serverTimeNow,
   }
   return <UserContext.Provider value={state}>{session ? children : <Login />}</UserContext.Provider>
 }

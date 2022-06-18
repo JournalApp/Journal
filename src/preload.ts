@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer, clipboard } from 'electron'
 
-contextBridge.exposeInMainWorld('electronAPI', {
+const electronAPI = {
   onPaste: (callback: any) => ipcRenderer.on('paste', callback),
   onCopy: (callback: any) => ipcRenderer.on('copy', callback),
   onUpdateDownloaded: (callback: any) => ipcRenderer.on('update-downloaded', callback),
@@ -57,4 +57,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   quitAndInstall() {
     ipcRenderer.send('electron-quit-and-install')
   },
-})
+}
+
+contextBridge.exposeInMainWorld('electronAPI', electronAPI)
+
+type electronAPIType = typeof electronAPI
+export { electronAPIType }
