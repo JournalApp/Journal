@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useFloating, shift, offset } from '@floating-ui/react-dom'
-import { Icon, BlockTypeSelectItem } from 'components'
+import { Icon } from 'components'
+import { BlockTypeSelectItem } from './BlockTypeSelectItem'
 import { theme } from 'themes'
 import styled, { keyframes } from 'styled-components'
 import {

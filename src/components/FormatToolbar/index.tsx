@@ -3,7 +3,8 @@ import * as Toolbar from '@radix-ui/react-toolbar'
 import * as Toggle from '@radix-ui/react-toggle'
 import { offset, shift, useFloating, FloatingPortal } from '@floating-ui/react-dom-interactions'
 import { BaseRange, BasePoint, Transforms, Editor as SlateEditor } from 'slate'
-import { Icon, BlockTypeSelect } from 'components'
+import { Icon } from 'components'
+import { BlockTypeSelect } from './BlockTypeSelect'
 import { theme } from 'themes'
 
 import {
