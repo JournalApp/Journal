@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import styled, { css } from 'styled-components'
+import { css } from 'styled-components'
 import dayjs from 'dayjs'
 import { usePlateEditorState, useEventPlateId } from '@udecode/plate-core'
 import { ContextMenu, FormatToolbar, EntryAside } from 'components'
@@ -7,10 +7,10 @@ import { createPluginFactory } from '@udecode/plate'
 import { Transforms, Node, Editor as SlateEditor } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { CONFIG } from 'config'
-import { theme } from 'themes'
 import { countWords, isUnauthorized, encryptEntry, decryptEntry } from 'utils'
-import { supabase, breakpoints } from 'utils'
+import { supabase } from 'utils'
 import { useUserContext } from 'context'
+import { Container, MainWrapper, MiniDate } from './styled'
 
 import {
   createPlateUI,
@@ -45,50 +45,6 @@ type EntryBlockProps = {
   shouldScrollToDay: (day: string) => boolean
   clearScrollToDay: () => void
 }
-
-const Container = styled.div`
-  display: flex;
-  padding: 40px 0 40px 40px;
-  word-break: break-word;
-  @media ${breakpoints.s} {
-    padding: 40px;
-  }
-`
-
-const MainWrapper = styled.div`
-  width: 100%;
-  padding: 0 80px 0 0;
-  font-size: ${theme('appearance.fontSize')};
-  font-family: ${theme('appearance.fontFace')};
-  font-weight: 500;
-  line-height: 30px;
-  -webkit-app-region: no-drag;
-  & > div:nth-child(2) > h1:first-child,
-  & > div:nth-child(2) > h2:first-child,
-  & > div:nth-child(2) > h3:first-child,
-  & > div:nth-child(2) > div:first-child > h1:first-child,
-  & > div:nth-child(2) > div:first-child > h2:first-child,
-  & > div:nth-child(2) > div:first-child > h3:first-child {
-    margin-block-start: 0;
-  }
-  & > * {
-    max-width: 75ch;
-    color: ${theme('color.primary.main')};
-  }
-  @media ${breakpoints.s} {
-    padding: 0;
-  }
-`
-const MiniDate = styled.div`
-  padding: 0 0 8px 0;
-  margin: 0;
-  opacity: 0.3;
-  visibility: ${theme('appearance.miniDatesVisibility')};
-  color: ${theme('color.primary.main')};
-  font-size: 12px;
-  font-family: 'Inter var';
-  line-height: 16px;
-`
 
 const defaultContent = [
   {

@@ -74,12 +74,6 @@ export function UserProvider({ children }: any) {
     }
   }
 
-  // TODO getserver time
-  // 1. fetch <supabase>/rest/v1/ OPTIONS
-  // 2. read time from response header
-  // 3. calculate delta client time vs server time
-  // 4. save delta to use it when saving entries (created_at, modified_at)
-
   const fetchServerTimeDelta = async () => {
     try {
       // Fetch server time

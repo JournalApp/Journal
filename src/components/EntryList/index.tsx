@@ -1,31 +1,10 @@
-import React, { useState, useEffect, useRef, forwardRef } from 'react'
-import styled, { keyframes, css, createGlobalStyle } from 'styled-components'
-import { Entry } from './'
+import React, { useState, useEffect, useRef } from 'react'
+import { Entry } from 'components'
 import { useEventEditorSelectors } from '@udecode/plate'
-import { arrayEquals, isUnauthorized } from 'utils'
-import { useEntriesContext } from 'context'
+import { supabase, arrayEquals, isUnauthorized } from 'utils'
+import { useEntriesContext, useUserContext } from 'context'
 import dayjs from 'dayjs'
-import { theme } from 'themes'
-import { supabase } from 'utils'
-import { useUserContext } from 'context'
-
-const BeforeEntries = styled.div`
-  text-align: center;
-  padding: 64px 0;
-`
-
-const PostEntries = styled.div`
-  min-height: calc(100vh - 150px);
-`
-
-const Wrapper = styled.div`
-  width: 100vw;
-  margin-left: ${theme('appearance.entriesOffset')};
-  transition: margin-left ${theme('animation.time.normal')};
-  display: flex;
-  flex-flow: column;
-  flex-direction: column-reverse;
-`
+import { BeforeEntries, PostEntries, Wrapper } from './styled'
 
 var visibleSections: String[] = []
 var rangeMarker: any
