@@ -7,6 +7,16 @@ interface Config {
   resetNode: Partial<PlatePlugin<{}, ResetNodePlugin>>
 }
 
+export const defaultContent = [
+  {
+    children: [
+      {
+        text: '',
+      },
+    ],
+  },
+]
+
 export const CONFIG: Config = {
   autoformat: {
     options: {

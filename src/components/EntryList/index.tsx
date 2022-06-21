@@ -89,32 +89,23 @@ function EntryList() {
   const {
     initialCache,
     daysCache,
-    setAllCachedDays,
-    setCachedEntry,
+    setDaysCache,
     shouldScrollToDay,
     clearScrollToDay,
+    cacheAddOrUpdateEntry,
+    cacheUpdateEntry,
+    cacheUpdateEntryProperty,
   } = useEntriesContext()
   const entriesHeight: myref = {}
   const itemsRef = useRef<Array<HTMLDivElement | null>>([])
   var element: HTMLElement | null
   const { session, signOut } = useUserContext()
 
-  interface EntriesState {
-    date: number
-    _id: string
-    loadedFromServer: boolean
-    loadedFromServerAt: Date // maybe?
-    saveToServerError: boolean
-    saveToServerErrorAt: Date //  maybe?
-    modified_at: Date // server time
-  }
-
   useEffect(() => {
     initialFetch()
   }, [])
 
   useEffect(() => {
-    // console.log(entries)
     console.log('Entries updated')
   }, [entries])
 
@@ -128,7 +119,7 @@ function EntryList() {
     return arrayEquals(local, server)
   }
 
-  const setEntryHeight = (id: string, height: number) => {
+  const setEntryHeight = () => {
     if (element) {
       element.scrollIntoView({ inline: 'center' })
       // element.scrollTop = 0
@@ -139,12 +130,14 @@ function EntryList() {
   }
 
   const initialFetch = async () => {
-    console.log('initialFetch indexes')
-
     let cached = daysCache
-    if (cached) {
+    if (cached.length) {
+      console.log('---> Cached entries')
+      console.log(cached)
       setEntries([...cached])
       setInitialFetchDone(true)
+    } else {
+      console.log('---> No cached entries')
     }
 
     try {
@@ -174,12 +167,18 @@ function EntryList() {
       if (!areDaysEqual(cached, days)) {
         // Merge two arrays if not equal?
         console.log('Cached days not equal to server days, merging...')
+        console.log(cached)
+        console.log(days)
+        // console.log(days)
         if (!Array.isArray(cached)) cached = []
         if (!Array.isArray(days)) days = []
 
         let merged = [...new Set([...days, ...cached])].sort()
-        setAllCachedDays(merged)
-        setEntries([...merged])
+        // setAllCachedDays(merged)
+        // setEntries([...merged])
+        setDaysCache([...merged])
+      } else {
+        console.log('Cached days equal')
       }
       setInitialFetchDone(true)
     } catch (err) {
@@ -194,14 +193,16 @@ function EntryList() {
         entries
           .slice(0)
           .reverse()
-          .map((entry, i) => (
+          .map((day, i) => (
             <Entry
-              key={entry}
-              entryDay={entry}
+              key={day}
+              entryDay={day}
               entriesObserver={entriesObserver}
-              cachedEntry={initialCache.current[entry]}
+              cachedEntry={initialCache.current.find((item: any) => item.day == day)}
               setEntryHeight={setEntryHeight}
-              setCachedEntry={setCachedEntry}
+              cacheAddOrUpdateEntry={cacheAddOrUpdateEntry}
+              cacheUpdateEntry={cacheUpdateEntry}
+              cacheUpdateEntryProperty={cacheUpdateEntryProperty}
               shouldScrollToDay={shouldScrollToDay}
               clearScrollToDay={clearScrollToDay}
             />

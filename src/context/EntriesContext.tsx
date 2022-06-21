@@ -1,37 +1,86 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react'
 import dayjs from 'dayjs'
+import { useUserContext } from 'context'
+import { electronAPIType } from '../preload'
+import { defaultContent } from 'config'
+import { supabase, isUnauthorized } from 'utils'
 
 interface EntriesContextInterface {
   initialCache: any
-  daysCache: any
+  daysCache: String[]
   setDaysCache: (days: String[]) => void
-  getCachedEntry: any
-  getAllCachedEntries: any
-  setCachedEntry: (property: string, value: any) => void
-  setAllCachedDays: (value: any) => void
-  addCachedDay: (day: string) => void
-  removeCachedDay: (day: string) => void
+  cacheCreateNewEntry: (day: string) => Promise<void>
+  removeCachedDay: (day: string) => Promise<void>
   setScrollToDay: (day: string) => void
   clearScrollToDay: () => void
   shouldScrollToDay: (day: string) => boolean
+  cacheAddOrUpdateEntry: electronAPIType['cache']['addOrUpdateEntry']
+  cacheUpdateEntry: electronAPIType['cache']['updateEntry']
+  cacheUpdateEntryProperty: electronAPIType['cache']['updateEntryProperty']
 }
 
 const EntriesContext = createContext<EntriesContextInterface | null>(null)
 
 export function EntriesProvider({ children }: any) {
-  const initialCache = useRef(window.electronAPI.storeEntries.getAll() || [])
+  const { session, serverTimeNow, signOut } = useUserContext()
+  const initialCache = useRef([])
   const scrollToDay = useRef('')
+  const [initialCacheFetchDone, setInitialCacheFetchDone] = useState(false)
+  const [pendingDeletedEntries, setPendingDeletedEntries] = useState(false)
   const today = useRef(dayjs().format('YYYY-MM-DD'))
-  const [daysCache, setDaysCache] = useState(window.electronAPI.storeIndex.getAll() || [])
+  const [daysCache, setDaysCache] = useState([])
 
   useEffect(() => {
+    console.log('daysCache updated:')
+    console.log(daysCache)
+  }, [daysCache])
+
+  const syncPendingDeletedEntries = async () => {
+    const days = await window.electronAPI.cache.getDeletedDays(session.user.id)
+    console.log(`Days to delete:`)
+    console.log(days)
+    if (days) {
+      await Promise.all(
+        days.map(async (day: string) => {
+          // TODO check if local modified_at > server modified_at
+          let { error } = await supabase
+            .from('journals')
+            .delete({ returning: 'minimal' })
+            .match({ user_id: session.user.id, day })
+          if (error) {
+            console.log(error)
+            setPendingDeletedEntries(true)
+            if (isUnauthorized(error)) signOut()
+          } else {
+            await window.electronAPI.cache.deleteEntry({ user_id: session.user.id, day })
+          }
+        })
+      )
+    } else {
+      setPendingDeletedEntries(false)
+      console.log('No days to delete')
+    }
+  }
+
+  useEffect(() => {
+    const cacheFetch = async () => {
+      const entries = await window.electronAPI.cache.getEntries(session.user.id)
+      const days = await window.electronAPI.cache.getDays(session.user.id)
+      initialCache.current = entries
+      setDaysCache([...days])
+      setInitialCacheFetchDone(true)
+    }
+
+    cacheFetch()
+    syncPendingDeletedEntries()
+
     const hasNewDayCome = setInterval(() => {
       let realToday = dayjs().format('YYYY-MM-DD')
       if (today.current != realToday) {
         console.log(`${today.current} != ${realToday}`)
         console.log(`New day has come ${realToday} !!!`)
         today.current = realToday
-        addCachedDay(realToday)
+        window.electronAPI.cache.getDays(session.user.id).then((days) => setDaysCache([...days]))
       }
     }, 1000)
 
@@ -40,36 +89,63 @@ export function EntriesProvider({ children }: any) {
     }
   }, [])
 
-  const getCachedEntry = (property: string) => {
-    return window.electronAPI.storeEntries.get(property)
+  useEffect(() => {
+    if (pendingDeletedEntries) {
+      setTimeout(() => {
+        setPendingDeletedEntries(false)
+        syncPendingDeletedEntries()
+      }, 5000)
+    }
+  }, [pendingDeletedEntries])
+
+  const cacheAddOrUpdateEntry = async (query: any) => {
+    await window.electronAPI.cache.addOrUpdateEntry(query)
   }
 
-  const getAllCachedEntries = (property: string) => {
-    return window.electronAPI.storeEntries.getAll()
+  const cacheUpdateEntry = async (set: any, where: any) => {
+    await window.electronAPI.cache.updateEntry(set, where)
   }
 
-  const setCachedEntry = (property: string, value: any) => {
-    window.electronAPI.storeEntries.set(property, value)
-    console.log('Entry set!')
+  const cacheUpdateEntryProperty = async (set: any, where: any) => {
+    await window.electronAPI.cache.updateEntryProperty(set, where)
   }
 
-  const setAllCachedDays = (value: any) => {
-    window.electronAPI.storeIndex.setAll(value)
-    setDaysCache([...value])
-    console.log('Indexes set!')
-  }
-
-  const addCachedDay = (day: string) => {
-    let days = window.electronAPI.storeIndex.add(day)
-    // console.log(days)
+  const cacheCreateNewEntry = async (day: string) => {
+    let now = serverTimeNow()
+    let entry = {
+      user_id: session.user.id,
+      day,
+      created_at: now,
+      modified_at: now,
+      content: JSON.stringify(defaultContent) as any,
+    }
+    await window.electronAPI.cache.addOrUpdateEntry(entry)
+    let days = await window.electronAPI.cache.getDays(session.user.id)
+    entry.content = defaultContent
+    initialCache.current.push(entry)
     setDaysCache([...days])
     console.log(`Added day ${day}`)
   }
 
-  const removeCachedDay = (day: string) => {
-    let days = window.electronAPI.storeIndex.remove(day)
-    // console.log(days)
+  const removeCachedDay = async (day: string) => {
+    let user_id = session.user.id
+    let { error } = await supabase
+      .from('journals')
+      .delete({ returning: 'minimal' })
+      .match({ user_id, day })
+    if (error) {
+      console.log(error)
+      setPendingDeletedEntries(true)
+      await window.electronAPI.cache.markPendingDeleteEntry({ user_id, day })
+      if (isUnauthorized(error)) signOut()
+    } else {
+      await window.electronAPI.cache.deleteEntry({ user_id, day })
+    }
+
+    let days = await window.electronAPI.cache.getDays(user_id)
+    initialCache.current = initialCache.current.filter((item) => item.day !== day)
     setDaysCache([...days])
+    // setDaysCache((prev) => prev.filter((d) => d !== day))
     console.log(`Removed day ${day}`)
   }
 
@@ -89,17 +165,20 @@ export function EntriesProvider({ children }: any) {
     initialCache,
     daysCache,
     setDaysCache,
-    getCachedEntry,
-    getAllCachedEntries,
-    setCachedEntry,
-    setAllCachedDays,
-    addCachedDay,
+    cacheCreateNewEntry,
     removeCachedDay,
     setScrollToDay,
     clearScrollToDay,
     shouldScrollToDay,
+    cacheAddOrUpdateEntry,
+    cacheUpdateEntry,
+    cacheUpdateEntryProperty,
   }
-  return <EntriesContext.Provider value={state}>{children}</EntriesContext.Provider>
+  return (
+    <EntriesContext.Provider value={state}>
+      {initialCacheFetchDone && children}
+    </EntriesContext.Provider>
+  )
 }
 
 export function useEntriesContext() {

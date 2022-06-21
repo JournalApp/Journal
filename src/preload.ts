@@ -4,35 +4,36 @@ const electronAPI = {
   onPaste: (callback: any) => ipcRenderer.on('paste', callback),
   onCopy: (callback: any) => ipcRenderer.on('copy', callback),
   onUpdateDownloaded: (callback: any) => ipcRenderer.on('update-downloaded', callback),
-  storeIndex: {
-    getAll() {
-      return ipcRenderer.sendSync('electron-storeIndex-get-all')
+  cache: {
+    async addOrUpdateEntry(query: any) {
+      await ipcRenderer.invoke('cache-add-or-update-entry', query)
     },
-    setAll(val: any) {
-      ipcRenderer.send('electron-storeIndex-set-all', val)
+    async deleteEntry(query: any) {
+      await ipcRenderer.invoke('cache-delete-entry', query)
     },
-    add(val: any) {
-      return ipcRenderer.sendSync('electron-storeIndex-add', val)
+    async markPendingDeleteEntry(query: any) {
+      await ipcRenderer.invoke('cache-mark-deleted-entry', query)
     },
-    remove(val: any) {
-      return ipcRenderer.sendSync('electron-storeIndex-remove', val)
+    async deleteAll(user_id: string) {
+      await ipcRenderer.invoke('cache-delete-all', user_id)
     },
-    clearAll() {
-      ipcRenderer.send('electron-storeIndex-clear-all')
+    async updateEntry(set: any, where: any) {
+      await ipcRenderer.invoke('cache-update-entry', set, where)
     },
-  },
-  storeEntries: {
-    get(val: any) {
-      return ipcRenderer.sendSync('electron-storeEntries-get', val)
+    async updateEntryProperty(set: any, where: any) {
+      await ipcRenderer.invoke('cache-update-entry-property', set, where)
     },
-    getAll() {
-      return ipcRenderer.sendSync('electron-storeEntries-get-all')
+    async addUser(id: string) {
+      await ipcRenderer.invoke('cache-add-user', id)
     },
-    set(property: any, val: any) {
-      ipcRenderer.send('electron-storeEntries-set', property, val)
+    async getDays(user_id: string) {
+      return await ipcRenderer.invoke('cache-get-days', user_id)
     },
-    clearAll() {
-      ipcRenderer.send('electron-storeEntries-clear-all')
+    async getEntries(user_id: string) {
+      return await ipcRenderer.invoke('cache-get-entries', user_id)
+    },
+    async getDeletedDays(user_id: string) {
+      return await ipcRenderer.invoke('cache-get-deleted-days', user_id)
     },
   },
   storeUserPreferences: {

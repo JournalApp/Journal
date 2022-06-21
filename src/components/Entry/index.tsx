@@ -6,11 +6,12 @@ import { ContextMenu, FormatToolbar, EntryAside } from 'components'
 import { createPluginFactory } from '@udecode/plate'
 import { Transforms, Node, Editor as SlateEditor } from 'slate'
 import { ReactEditor } from 'slate-react'
-import { CONFIG } from 'config'
+import { CONFIG, defaultContent } from 'config'
 import { countWords, isUnauthorized, encryptEntry, decryptEntry } from 'utils'
 import { supabase } from 'utils'
 import { useUserContext } from 'context'
 import { Container, MainWrapper, MiniDate } from './styled'
+import { electronAPIType } from '../../preload'
 
 import {
   createPlateUI,
@@ -40,21 +41,13 @@ type EntryBlockProps = {
   entriesObserver: IntersectionObserver
   cachedEntry?: any
   ref?: any
-  setEntryHeight: (id: string, height: number) => void
-  setCachedEntry: (property: string, value: any) => void
+  setEntryHeight: () => void
   shouldScrollToDay: (day: string) => boolean
   clearScrollToDay: () => void
+  cacheAddOrUpdateEntry: electronAPIType['cache']['addOrUpdateEntry']
+  cacheUpdateEntry: electronAPIType['cache']['updateEntry']
+  cacheUpdateEntryProperty: electronAPIType['cache']['updateEntryProperty']
 }
-
-const defaultContent = [
-  {
-    children: [
-      {
-        text: '',
-      },
-    ],
-  },
-]
 
 const isToday = (day: any) => {
   return day.toString() == dayjs().format('YYYY-MM-DD')
@@ -73,14 +66,17 @@ const EntryComponent = ({
   cachedEntry,
   setEntryHeight,
   entriesObserver,
-  setCachedEntry,
   shouldScrollToDay,
   clearScrollToDay,
+  cacheAddOrUpdateEntry,
+  cacheUpdateEntry,
+  cacheUpdateEntryProperty,
 }: EntryBlockProps) => {
   const [wordCount, setWordCount] = useState(
     countEntryWords(cachedEntry ? cachedEntry.content : '')
   )
   const [needsSavingToServer, setNeedsSavingToServer] = useState(false)
+  const [needsSavingToServerModifiedAt, setNeedsSavingToServerModifiedAt] = useState('')
   const [initialValue, setInitialValue] = useState(cachedEntry?.content ?? [])
   const [focused, setFocused] = useState(false)
   const [shouldFocus, setShouldFocus] = useState(isToday(entryDay))
@@ -90,6 +86,7 @@ const EntryComponent = ({
   const debugValue = useRef(cachedEntry?.content ?? [])
   const editorRef = useRef(null)
   const { session, signOut, getSecretKey, serverTimeNow } = useUserContext()
+  const saveTimer = useRef<NodeJS.Timeout | null>(null)
 
   console.log(`Entry render`)
 
@@ -115,32 +112,34 @@ const EntryComponent = ({
         .match({ user_id: session.user.id, day })
         .single()
       if (!data) {
-        const { contentEncrypted, iv } = await encryptEntry(
-          JSON.stringify(defaultContent),
-          secretKey
-        )
-        let now = serverTimeNow()
-        let { data, error } = await supabase
-          .from('journals')
-          .insert([
-            {
-              user_id: session.user.id,
-              day,
-              modified_at: now,
-              created_at: now,
-              content: '\\x' + contentEncrypted,
-              iv: '\\x' + iv,
-            },
-          ])
-          .single()
-        if (error) {
-          console.log(error)
-          if (isUnauthorized(error)) signOut()
-          throw new Error(error.message)
+        if (!isToday(day)) {
+          const { contentEncrypted, iv } = await encryptEntry(
+            JSON.stringify(defaultContent),
+            secretKey
+          )
+          let now = serverTimeNow()
+          let { data, error } = await supabase
+            .from('journals')
+            .insert([
+              {
+                user_id: session.user.id,
+                day,
+                modified_at: now,
+                created_at: now,
+                content: '\\x' + contentEncrypted,
+                iv: '\\x' + iv,
+              },
+            ])
+            .single()
+          if (error) {
+            console.log(error)
+            if (isUnauthorized(error)) signOut()
+            throw new Error(error.message)
+          }
+          const { contentDecrypted } = await decryptEntry(data.content, data.iv, secretKey)
+          data.content = JSON.parse(contentDecrypted)
+          return data
         }
-        const { contentDecrypted } = await decryptEntry(data.content, data.iv, secretKey)
-        data.content = JSON.parse(contentDecrypted)
-        return data
       }
       if (error) {
         console.log(error)
@@ -156,8 +155,15 @@ const EntryComponent = ({
     }
   }
 
-  const saveEntry = async (day: any, content: any) => {
-    setCachedEntry(`${day}.content`, content)
+  const saveEntry = async (day: string, content: any, modified_at: string) => {
+    console.log(`Save entry day: ${day}, modified_at: ${modified_at}`)
+    cacheAddOrUpdateEntry({
+      user_id: session.user.id,
+      day,
+      created_at: modified_at, // not added when upsert
+      modified_at, // when needsSaving... keep same date in cache
+      content: JSON.stringify(content),
+    })
 
     if (content == undefined) {
       console.log(`Undefined content on day: ${day}`)
@@ -167,17 +173,18 @@ const EntryComponent = ({
       const secretKey = await getSecretKey()
       const { contentEncrypted, iv } = await encryptEntry(JSON.stringify(content), secretKey)
 
-      let modified_at = serverTimeNow()
-      // NOTE could add { returning: 'minimal' } to reduce network load
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('journals')
-        .upsert({
-          user_id: session.user.id,
-          day,
-          content: '\\x' + contentEncrypted,
-          iv: '\\x' + iv,
-          modified_at,
-        })
+        .upsert(
+          {
+            user_id: session.user.id,
+            day,
+            content: '\\x' + contentEncrypted,
+            iv: '\\x' + iv,
+            modified_at,
+          },
+          { returning: 'minimal' }
+        )
         .single()
 
       if (error) {
@@ -187,48 +194,63 @@ const EntryComponent = ({
       }
 
       setNeedsSavingToServer(false)
+      cacheUpdateEntryProperty({ needs_saving_to_server: 0 }, { day, user_id: session.user.id })
       console.log('saved')
-      setCachedEntry(`${day}.modified_at`, data.modified_at)
-      setCachedEntry(`${day}.needsSavingToServer`, false)
     } catch (err) {
+      if (!needsSavingToServerModifiedAt) {
+        setNeedsSavingToServerModifiedAt(modified_at)
+      }
       setNeedsSavingToServer(true)
-      setCachedEntry(`${day}.needsSavingToServer`, true)
+      cacheUpdateEntryProperty({ needs_saving_to_server: 1 }, { day, user_id: session.user.id })
       console.log(err)
     }
   }
 
-  const resizeObserver = new ResizeObserver((entries) => {
-    for (let entry of entries) {
-      setEntryHeight(entryDay, entry.borderBoxSize[0].blockSize)
-    }
-  })
+  // const resizeObserver = new ResizeObserver((entries) => {
+  //   for (let entry of entries) {
+  //     console.log(`scrollIntoView ${entryDay}`)
+  //     // setEntryHeight()
+  //   }
+  // })
 
   const initialFetch = async () => {
-    resizeObserver.observe(editorRef.current)
+    // resizeObserver.observe(editorRef.current)
 
     if (cachedEntry) {
-      if (cachedEntry.needsSavingToServer) {
-        await saveEntry(entryDay, cachedEntry.content)
+      if (cachedEntry.needs_saving_to_server) {
+        await saveEntry(entryDay, cachedEntry.content, cachedEntry.modified_at)
       }
     }
 
     const init = await fetchEntry(entryDay)
     if (!cachedEntry && init) {
-      setCachedEntry(entryDay, init)
+      const { user_id, day, created_at, modified_at, content } = init
+      cacheAddOrUpdateEntry({
+        user_id,
+        day,
+        created_at,
+        modified_at,
+        content: JSON.stringify(content),
+      })
       setInitialValue([...init.content])
     }
-    if (cachedEntry && init && init.modified_at != cachedEntry.modified_at) {
+    if (cachedEntry && init && !dayjs(init.modified_at).isSame(cachedEntry.modified_at)) {
       console.log(`${init.modified_at} != ${cachedEntry.modified_at}`)
 
       if (dayjs(init.modified_at).isAfter(dayjs(cachedEntry.modified_at))) {
         // Server entry is newer, save it to cache
         console.log('Server entry is newer, updating cache')
-        setCachedEntry(entryDay, init)
+
+        const { user_id, day, modified_at, content } = init
+        let set = { modified_at, content: JSON.stringify(content) }
+        let where = { day, user_id }
+        cacheUpdateEntry(set, where)
+
         setInitialValue([...init.content])
       } else {
         // Cached entry is newer, push it to server
         console.log('Cached entry is newer, updating on server')
-        saveEntry(entryDay, cachedEntry.content)
+        saveEntry(entryDay, cachedEntry.content, cachedEntry.modified_at)
       }
     }
     setInitialFetchDone(true)
@@ -257,14 +279,25 @@ const EntryComponent = ({
 
     // Remove observers
     return () => {
-      if (editorRef.current) entriesObserver.unobserve(editorRef.current)
+      console.log('Entry unmounted')
+      if (editorRef.current) {
+        entriesObserver.unobserve(editorRef.current)
+        // resizeObserver.unobserve(editorRef.current)
+      }
+      if (saveTimer.current) {
+        clearTimeout(saveTimer.current)
+      }
     }
   }, [])
 
   useEffect(() => {
-    if (initialFetch) {
+    setEntryHeight()
+    if (initialFetchDone) {
       setTimeout(() => {
-        if (editorRef.current) resizeObserver.unobserve(editorRef.current)
+        if (editorRef.current) {
+          console.log(`----> unobserve ${entryDay}`)
+          // resizeObserver.unobserve(editorRef.current)
+        }
       }, 2000)
     }
   }, [setInitialFetchDone])
@@ -272,15 +305,16 @@ const EntryComponent = ({
   useEffect(() => {
     // console.log(`needsSaving: ${needsSavingToServer}`)
     if (needsSavingToServer) {
-      setTimeout(() => {
+      saveTimer.current = setTimeout(() => {
         setNeedsSavingToServer(false)
-        saveEntry(entryDay, debugValue.current)
+        saveEntry(entryDay, debugValue.current, needsSavingToServerModifiedAt)
       }, 5000)
     }
   }, [needsSavingToServer])
 
   useEffect(() => {
     debugValue.current = initialValue
+    setWordCount(countEntryWords(initialValue))
   }, [initialValue])
 
   const editableProps = {
@@ -314,6 +348,7 @@ const EntryComponent = ({
         if (isContentChange) {
           // console.log('isContentChange')
           // Needs saving as it's an actual content change
+          setNeedsSavingToServerModifiedAt(serverTimeNow())
           setNeedsSavingToServer(true)
           // Another way to access editor value:
           // console.log(editor.children)

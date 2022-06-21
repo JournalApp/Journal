@@ -106,6 +106,7 @@
     "@vercel/webpack-asset-relocator-loader": "^1.7.0",
     "css-loader": "^6.5.1",
     "electron": "^16.2.2",
+    "electron-devtools-installer": "^3.2.0",
     "eslint": "^7.32.0",
     "eslint-plugin-import": "^2.25.3",
     "fork-ts-checker-webpack-plugin": "^6.5.0",

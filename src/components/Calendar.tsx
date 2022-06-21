@@ -180,7 +180,7 @@ const withLeadingZero = (num: number) => {
 
 const Calendar = () => {
   const { isCalendarOpen } = useAppearanceContext()
-  const { daysCache, addCachedDay, setScrollToDay } = useEntriesContext()
+  const { daysCache, cacheCreateNewEntry, setScrollToDay } = useEntriesContext()
   const today = new Date()
 
   useEffect(() => {
@@ -218,13 +218,13 @@ const Calendar = () => {
     return false
   }
 
-  const scrollToDay = (day: string) => {
+  const scrollToDay = async (day: string) => {
     let element = document.getElementById(`${day}-entry`)
     if (element) {
       element.scrollIntoView()
     } else {
       console.log('no such day, adding...')
-      addCachedDay(day)
+      await cacheCreateNewEntry(day)
       setScrollToDay(day)
     }
   }

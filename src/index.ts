@@ -1,10 +1,10 @@
 import { app, BrowserWindow, autoUpdater, ipcMain, shell } from 'electron'
 import path from 'path'
-import dayjs from 'dayjs'
 import Store from 'electron-store'
 import url from 'url'
 import log from 'electron-log'
 import { isDev } from './utils/misc'
+import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer'
 require('./services/sqlite')
 
 // autoUpdater
@@ -47,10 +47,7 @@ if (!isDev()) {
 
 var openUrl = ''
 
-const storeIndex = new Store({ name: 'storeIndex' })
-const storeEntries = new Store({ name: 'storeEntries' })
 const storeUserPreferences = new Store({ name: 'storeUserPreferences' })
-const dayKey = 'Days'
 
 if (process.defaultApp) {
   if (process.argv.length >= 2) {
@@ -60,78 +57,7 @@ if (process.defaultApp) {
   app.setAsDefaultProtocolClient('journal')
 }
 
-console.log(storeIndex.path)
-console.log(storeEntries.path)
-
 // IPC listeners
-
-// storeIndex
-
-const storeIndexAdd = (val: string) => {
-  let days = (storeIndex.get(dayKey) as String[]) ?? []
-  days.push(val)
-  let daysUnique = [...new Set([...days])].sort()
-  storeIndex.set(dayKey, daysUnique)
-  return daysUnique
-}
-
-const storeIndexRemove = (val: string) => {
-  let days = (storeIndex.get(dayKey) as String[]) ?? []
-  days = days.filter((day) => day != val)
-  let daysUnique = [...new Set([...days])].sort()
-  storeIndex.set(dayKey, daysUnique)
-  return daysUnique
-}
-
-ipcMain.on('electron-storeIndex-get-all', async (event) => {
-  let value: any = storeIndex.get(dayKey) ?? []
-  let today = dayjs().format('YYYY-MM-DD')
-  let todayExists = value.some((el: any) => {
-    return el == today
-  })
-  if (!todayExists) {
-    value.push(today)
-    storeIndexAdd(today)
-    console.log(`Added ${today} to cached Days`)
-  }
-  event.returnValue = value
-})
-
-ipcMain.on('electron-storeIndex-set-all', async (event, val) => {
-  storeIndex.set(dayKey, val)
-})
-
-ipcMain.on('electron-storeIndex-add', async (event, val) => {
-  event.returnValue = storeIndexAdd(val)
-})
-
-ipcMain.on('electron-storeIndex-remove', async (event, val) => {
-  event.returnValue = storeIndexRemove(val)
-})
-
-ipcMain.on('electron-storeIndex-clear-all', () => {
-  console.log('Clear storeIndex')
-  storeIndex.clear()
-})
-
-// storeEntries
-
-ipcMain.on('electron-storeEntries-get', async (event, val) => {
-  event.returnValue = storeEntries.get(val)
-})
-
-ipcMain.on('electron-storeEntries-get-all', async (event, val) => {
-  event.returnValue = storeEntries.store
-})
-
-ipcMain.on('electron-storeEntries-set', async (event, key, val) => {
-  storeEntries.set(key, val)
-})
-
-ipcMain.on('electron-storeEntries-clear-all', () => {
-  console.log('Clear storeEntries')
-  storeEntries.clear()
-})
 
 // storeUserPreferences
 
@@ -171,15 +97,14 @@ if (require('electron-squirrel-startup')) {
 const createWindow = (): void => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    height: 600,
-    width: 800,
+    height: 1600,
+    width: 1800,
     titleBarStyle: 'customButtonsOnHover',
     trafficLightPosition: { x: 16, y: 16 },
     show: false,
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
       nodeIntegration: true,
-      // TODO enable
       spellcheck: true,
     },
   })
@@ -209,7 +134,10 @@ const createWindow = (): void => {
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY)
 
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
+  installExtension(REACT_DEVELOPER_TOOLS)
+    .then((name) => console.log(`Added Extension:  ${name}`))
+    .catch((err) => console.log('An error occurred: ', err))
 
   mainWindow.webContents.on('context-menu', (event: any, params: any) => {
     console.log('context-menu event')

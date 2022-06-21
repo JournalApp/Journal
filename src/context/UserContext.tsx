@@ -21,6 +21,8 @@ export function UserProvider({ children }: any) {
   const secretKey = useRef(null)
   const serverClientTimeDelta = useRef(0) //  server time - client time = delta
 
+  console.log('UserProvider re-render')
+
   window.electronAPI.handleOpenUrl(async (event: any, value: any) => {
     const url = new URL(value)
     const refresh_token = url.searchParams.get('refresh_token')
@@ -37,14 +39,21 @@ export function UserProvider({ children }: any) {
 
   useEffect(() => {
     setSession(supabase.auth.session())
+    let id = supabase.auth.session()?.user?.id ?? ''
+    if (id) {
+      window.electronAPI.cache.addUser(id)
+    }
+
     fetchServerTimeDelta()
 
     supabase.auth.onAuthStateChange((_event, session) => {
       console.log('Auth event:')
       console.log(_event)
-      console.log('Session:')
       console.log(session)
+      console.log('Session:')
       setSession(session)
+
+      window.electronAPI.cache.addUser(session.user.id)
     })
   }, [])
 
@@ -109,8 +118,7 @@ export function UserProvider({ children }: any) {
   const signOut = () => {
     console.log('signOut')
     supabase.auth.signOut()
-    window.electronAPI.storeIndex.clearAll()
-    window.electronAPI.storeEntries.clearAll()
+    window.electronAPI.cache.deleteAll(session.user.id)
     window.electronAPI.storeUserPreferences.clearAll()
     window.electronAPI.reloadWindow()
   }
