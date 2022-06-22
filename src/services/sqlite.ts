@@ -26,6 +26,8 @@ try {
   log.error(error)
 }
 
+// Entries
+
 ipcMain.handle('cache-add-user', async (event, id) => {
   console.log('cache-add-user')
   try {
@@ -111,7 +113,7 @@ ipcMain.handle('cache-update-entry-property', async (event, set, where) => {
   try {
     const db = getDB()
     const { user_id, day } = where
-    const property = Object.keys(set)[0]
+    const property = Object.keys(set)[0] as string
     const value = Object.values(set)[0]
 
     const stmt = db.prepare(
@@ -189,11 +191,109 @@ ipcMain.handle('cache-delete-all', async (event, user_id) => {
   try {
     const db = getDB()
     const stmt = db.prepare('DELETE FROM journals WHERE user_id = @user_id')
+    return stmt.run({ user_id })
+  } catch (error) {
+    console.log(`error`)
+    console.log(error)
+    return error
+  }
+})
+
+// Preferences
+
+ipcMain.on('preferences-get-all', (event) => {
+  interface prefMap {
+    [key: string]: string
+  }
+
+  console.log('preferences-get-all')
+  try {
+    const db = getDB()
+    const stmt1 = db.prepare('SELECT value FROM app WHERE key = @key')
+    const lastUser = stmt1.get({ key: 'lastUser' })
+    if (lastUser) {
+      const user_id = lastUser.value
+      const stmt2 = db.prepare('SELECT * FROM preferences WHERE user_id = @user_id')
+      let prefs = stmt2.all({ user_id })
+      if (prefs.length) {
+        let prettyPrefs = {} as prefMap
+        for (let i = 0; i < prefs.length; i++) {
+          prettyPrefs[prefs[i].item] = prefs[i].value
+        }
+        event.returnValue = prettyPrefs
+      } else {
+        event.returnValue = undefined
+      }
+    } else {
+      event.returnValue = undefined
+    }
+  } catch (error) {
+    console.log(`error`)
+    console.log(error)
+    event.returnValue = error
+  }
+})
+
+ipcMain.handle('preferences-set', async (event, user_id, set) => {
+  console.log('preferences-set')
+  try {
+    const db = getDB()
+    const item = Object.keys(set)[0]
+    const value = Object.values(set)[0]
+    const stmt = db.prepare(
+      `INSERT INTO preferences (user_id, item, value) VALUES (@user_id, @item, @value)
+      ON CONFLICT(user_id, item) DO UPDATE SET value = excluded.value`
+    )
+    return stmt.run({ user_id, item, value })
+  } catch (error) {
+    console.log(`error`)
+    console.log(error)
+    return error
+  }
+})
+
+ipcMain.handle('preferences-delete-all', async (event, user_id) => {
+  console.log('preferences-delete-all')
+  try {
+    const db = getDB()
+    const stmt = db.prepare('DELETE FROM preferences WHERE user_id = @user_id')
     const result = stmt.run({ user_id })
     return result
   } catch (error) {
     console.log(`error`)
     console.log(error)
     return error
+  }
+})
+
+// App (sync api)
+
+ipcMain.on('app-get-key', (event, key) => {
+  console.log('app-get-key')
+  try {
+    const db = getDB()
+    const stmt = db.prepare('SELECT value FROM app WHERE key = @key')
+    event.returnValue = stmt.get({ key })
+  } catch (error) {
+    console.log(`error`)
+    console.log(error)
+    event.returnValue = error
+  }
+})
+
+ipcMain.handle('app-set-key', async (event, set) => {
+  console.log('app-set-key')
+  try {
+    const db = getDB()
+    const key = Object.keys(set)[0]
+    const value = Object.values(set)[0]
+    const stmt = db.prepare(
+      `INSERT INTO app (key, value) VALUES (@key, @value)
+      ON CONFLICT(key) DO UPDATE SET value = excluded.value`
+    )
+    stmt.run({ key, value })
+  } catch (error) {
+    console.log(`error`)
+    console.log(error)
   }
 })

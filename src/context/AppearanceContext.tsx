@@ -10,6 +10,7 @@ import {
   CalendarOpen,
   getCalendarIsOpen,
 } from 'config'
+import { useUserContext } from 'context'
 
 interface AppearanceContextInterface {
   colorTheme: ColorTheme
@@ -43,23 +44,24 @@ export function AppearanceProvider({
   const [fontFace, setFontFaceInternal] = useState<FontFace>(initialFontFace)
   const [fontSize, setFontSizeInternal] = useState<FontSize>(initialFontSize)
   const [isCalendarOpen, setIsCalendarOpenInternal] = useState<CalendarOpen>(initialCalendarOpen)
+  const { session } = useUserContext()
 
   const setFontFace = (face: FontFace) => {
     setFontFaceInternal(face)
     document.documentElement.style.setProperty('--appearance-fontFace', getFontFace(face))
-    window.electronAPI.storeUserPreferences.set('appearance.fontFace', face)
+    window.electronAPI.preferences.set(session.user.id, { fontFace: face })
   }
 
   const setFontSize = (size: FontSize) => {
     setFontSizeInternal(size)
     document.documentElement.style.setProperty('--appearance-fontSize', getFontSize(size) + 'px')
-    window.electronAPI.storeUserPreferences.set('appearance.fontSize', size)
+    window.electronAPI.preferences.set(session.user.id, { fontSize: size })
   }
 
   const setColorTheme = (theme: ColorTheme) => {
     setColorThemeInternal(theme)
     setCssVars(getColorTheme(theme))
-    window.electronAPI.storeUserPreferences.set('appearance.theme', theme)
+    window.electronAPI.preferences.set(session.user.id, { theme })
   }
 
   const toggleIsCalendarOpen = () => {
@@ -73,7 +75,7 @@ export function AppearanceProvider({
         getCalendarIsOpen('closed').miniDatesVisibility
       )
       setIsCalendarOpenInternal('closed')
-      window.electronAPI.storeUserPreferences.set('appearance.calendarOpen', 'closed')
+      window.electronAPI.preferences.set(session.user.id, { calendarOpen: 'closed' })
     } else {
       document.documentElement.style.setProperty(
         '--appearance-entriesOffset',
@@ -84,7 +86,7 @@ export function AppearanceProvider({
         getCalendarIsOpen('opened').miniDatesVisibility
       )
       setIsCalendarOpenInternal('opened')
-      window.electronAPI.storeUserPreferences.set('appearance.calendarOpen', 'opened')
+      window.electronAPI.preferences.set(session.user.id, { calendarOpen: 'opened' })
     }
   }
 

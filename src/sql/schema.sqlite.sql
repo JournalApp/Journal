@@ -30,6 +30,14 @@ create table if not exists preferences (
   FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 
+-- Create a table for app
+create table if not exists app (
+  key text not null,
+  value text,
+
+  PRIMARY KEY (key)
+);
+
 -- Create a table for app version on which db was last used
 -- create table if not exists version (
 --   version_id int primary key not null,

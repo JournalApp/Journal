@@ -26,12 +26,10 @@ const calendarOpenMap = {
 type CalendarOpen = keyof typeof calendarOpenMap
 
 const defaultUserPreferences = {
-  appearance: {
-    fontSize: 'normal',
-    fontFace: 'inter',
-    theme: 'light',
-    calendarOpen: 'closed',
-  },
+  fontSize: 'normal',
+  fontFace: 'inter',
+  theme: 'light',
+  calendarOpen: 'closed',
 }
 
 const baseTheme = {
@@ -72,19 +70,18 @@ const getCalendarIsOpen = (state: CalendarOpen) => {
 const getBaseThemeWithOverrides = (overrides: any) => {
   let theme = { ...baseTheme }
 
-  if (overrides.appearance?.fontFace) {
-    theme.appearance.fontFace = getFontFace(overrides.appearance.fontFace)
+  if (overrides && overrides.fontFace) {
+    theme.appearance.fontFace = getFontFace(overrides.fontFace)
   }
 
-  if (overrides.appearance?.fontSize) {
-    theme.appearance.fontSize = getFontSize(overrides.appearance.fontSize) + 'px'
+  if (overrides && overrides.fontSize) {
+    theme.appearance.fontSize = getFontSize(overrides.fontSize) + 'px'
   }
 
-  if (overrides.appearance?.calendarOpen) {
-    theme.appearance.entriesOffset =
-      getCalendarIsOpen(overrides.appearance.calendarOpen).entriesOffset + 'px'
+  if (overrides && overrides.calendarOpen) {
+    theme.appearance.entriesOffset = getCalendarIsOpen(overrides.calendarOpen).entriesOffset + 'px'
     theme.appearance.miniDatesVisibility = getCalendarIsOpen(
-      overrides.appearance.calendarOpen
+      overrides.calendarOpen
     ).miniDatesVisibility
   }
 

@@ -36,18 +36,23 @@ const electronAPI = {
       return await ipcRenderer.invoke('cache-get-deleted-days', user_id)
     },
   },
-  storeUserPreferences: {
-    get(val: any) {
-      return ipcRenderer.sendSync('electron-storeUserPreferences-get', val)
+  preferences: {
+    async set(user_id: string, set: object) {
+      await ipcRenderer.invoke('preferences-set', user_id, set)
+    },
+    async deleteAll(user_id: string) {
+      await ipcRenderer.invoke('preferences-delete-all', user_id)
     },
     getAll() {
-      return ipcRenderer.sendSync('electron-storeUserPreferences-get-all')
+      return ipcRenderer.sendSync('preferences-get-all')
     },
-    set(property: any, val: any) {
-      ipcRenderer.send('electron-storeUserPreferences-set', property, val)
+  },
+  app: {
+    async setKey(set: object) {
+      ipcRenderer.invoke('app-set-key', set)
     },
-    clearAll() {
-      ipcRenderer.send('electron-storeUserPreferences-clear-all')
+    getKey(key: string) {
+      return ipcRenderer.send('app-get-key', key)
     },
   },
   handleSpellCheck: (callback: any) => ipcRenderer.once('electron-handleSpellCheck', callback),

@@ -31,18 +31,12 @@ declare global {
   }
 }
 
-const userPreferences = window.electronAPI.storeUserPreferences.getAll()
-const initialColorTheme: ColorTheme =
-  userPreferences.appearance?.theme || defaultUserPreferences.appearance.theme
-
-const initialFontFace: FontFace =
-  userPreferences.appearance?.fontFace || defaultUserPreferences.appearance.fontFace
-
-const initialFontSize: FontSize =
-  userPreferences.appearance?.fontSize || defaultUserPreferences.appearance.fontSize
-
+const userPreferences = window.electronAPI.preferences.getAll()
+const initialColorTheme: ColorTheme = userPreferences?.theme || defaultUserPreferences.theme
+const initialFontFace: FontFace = userPreferences?.fontFace || defaultUserPreferences.fontFace
+const initialFontSize: FontSize = userPreferences?.fontSize || defaultUserPreferences.fontSize
 const initialCalendarOpen: CalendarOpen =
-  userPreferences.appearance?.calendarOpen || defaultUserPreferences.appearance.calendarOpen
+  userPreferences?.calendarOpen || defaultUserPreferences.calendarOpen
 
 const GlobalStyle = createGlobalStyle`
 :root {

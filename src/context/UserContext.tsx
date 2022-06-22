@@ -42,6 +42,7 @@ export function UserProvider({ children }: any) {
     let id = supabase.auth.session()?.user?.id ?? ''
     if (id) {
       window.electronAPI.cache.addUser(id)
+      window.electronAPI.app.setKey({ lastUser: id })
     }
 
     fetchServerTimeDelta()
@@ -53,7 +54,10 @@ export function UserProvider({ children }: any) {
       console.log('Session:')
       setSession(session)
 
-      window.electronAPI.cache.addUser(session.user.id)
+      if (_event == 'SIGNED_IN') {
+        window.electronAPI.cache.addUser(session.user.id)
+        window.electronAPI.app.setKey({ lastUser: session.user.id })
+      }
     })
   }, [])
 
@@ -118,8 +122,9 @@ export function UserProvider({ children }: any) {
   const signOut = () => {
     console.log('signOut')
     supabase.auth.signOut()
+    window.electronAPI.app.setKey({ lastUser: null })
     window.electronAPI.cache.deleteAll(session.user.id)
-    window.electronAPI.storeUserPreferences.clearAll()
+    window.electronAPI.preferences.deleteAll(session.user.id)
     window.electronAPI.reloadWindow()
   }
 

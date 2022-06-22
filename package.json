@@ -143,7 +143,6 @@
     "dayjs": "^1.10.7",
     "electron-log": "^4.4.7",
     "electron-squirrel-startup": "^1.0.0",
-    "electron-store": "^8.0.1",
     "jsdom": "^19.0.0",
     "markdown-it": "^12.3.2",
     "marked": "^4.0.12",
