@@ -13,6 +13,7 @@ import {
   MARK_ITALIC,
   MARK_STRIKETHROUGH,
   MARK_CODE,
+  MARK_HIGHLIGHT,
   ELEMENT_H1,
   MarkToolbarButton,
   usePlateEditorRef,
@@ -200,6 +201,7 @@ export const FormatToolbar = ({ focused, isContextMenuVisible }: FormatToolbarPr
               <Toggle markType={MARK_UNDERLINE} iconName='FormatUnderline' />
               <Toggle markType={MARK_STRIKETHROUGH} iconName='FormatStriketrough' />
               <Toggle markType={MARK_CODE} iconName='FormatCode' />
+              <Toggle markType={MARK_HIGHLIGHT} iconName='FormatMark' />
             </ToggleGroup>
           </StyledToolbar>
         </Wrapper>

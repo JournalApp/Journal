@@ -21,6 +21,7 @@ import { TrafficLightCalendar } from './TrafficLightCalendar'
 import { RatingEmoji } from './RatingEmoji'
 import { RisedHands } from './RisedHands'
 import { UpdateNow } from './UpdateNow'
+import { FormatMark } from './FormatMark'
 
 type IconMapType = {
   [key: string]: any
@@ -59,6 +60,7 @@ const IconMap: IconMapType = {
   RatingEmoji,
   RisedHands,
   UpdateNow,
+  FormatMark,
 }
 
 const Icon = function (props: IconProps) {

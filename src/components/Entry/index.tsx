@@ -12,10 +12,12 @@ import { supabase } from 'utils'
 import { useUserContext } from 'context'
 import { Container, MainWrapper, MiniDate } from './styled'
 import { electronAPIType } from '../../preload'
+import { theme } from 'themes'
 
 import {
   createPlateUI,
   ELEMENT_H3,
+  MARK_HIGHLIGHT,
   withProps,
   StyledElement,
   Plate,
@@ -33,6 +35,7 @@ import {
   createPlugins,
   createAutoformatPlugin,
   createResetNodePlugin,
+  createHighlightPlugin,
 } from '@udecode/plate'
 
 type EntryBlockProps = {
@@ -383,6 +386,7 @@ const EntryComponent = ({
       createEventEditorPlugin(),
       createAutoformatPlugin(CONFIG.autoformat),
       createResetNodePlugin(CONFIG.resetNode),
+      createHighlightPlugin(),
     ],
     {
       // Plate components
@@ -396,6 +400,19 @@ const EntryComponent = ({
               font-size: 1.25em;
               font-weight: 500;
               line-height: 1.3;
+            `,
+          },
+        }),
+        [MARK_HIGHLIGHT]: withProps(StyledElement, {
+          as: 'mark',
+          styles: {
+            root: css`
+              background-color: ${theme('color.highlight.surface')};
+              color: ${theme('color.highlight.main')};
+              border-radius: 100px;
+              padding: 3px 5px;
+              margin: -5px;
+              mix-blend-mode: ${theme('color.highlight.blendMode')};
             `,
           },
         }),

@@ -14,6 +14,10 @@ const lightPalette = {
   red: {
     '100': '#EA2F2F',
   },
+  highlight: {
+    main: '#104B00',
+    surface: '#EDF56E',
+  },
 }
 
 const lightTheme = {
@@ -50,6 +54,11 @@ const lightTheme = {
     },
     error: {
       main: lightPalette.red[100],
+    },
+    highlight: {
+      main: lightPalette.highlight['main'],
+      surface: lightPalette.highlight['surface'],
+      blendMode: 'darken',
     },
   },
   style: {
