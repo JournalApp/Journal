@@ -22,6 +22,7 @@ import { RatingEmoji } from './RatingEmoji'
 import { RisedHands } from './RisedHands'
 import { UpdateNow } from './UpdateNow'
 import { FormatMark } from './FormatMark'
+import { FormatHandStriketrough } from './FormatHandStriketrough'
 
 type IconMapType = {
   [key: string]: any
@@ -44,6 +45,7 @@ const IconMap: IconMapType = {
   FormatItalic,
   FormatUnderline,
   FormatStriketrough,
+  FormatHandStriketrough,
   FormatCode,
   BlockText,
   BlockH1,

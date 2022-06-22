@@ -33,6 +33,8 @@ import {
 } from '@udecode/plate-core'
 import styled, { keyframes } from 'styled-components'
 
+const MARK_HAND_STRIKETHROUGH = 'hand-strikethrough'
+
 interface WrapperProps {
   posX?: string
   posY?: string
@@ -200,6 +202,7 @@ export const FormatToolbar = ({ focused, isContextMenuVisible }: FormatToolbarPr
               <Toggle markType={MARK_ITALIC} iconName='FormatItalic' />
               <Toggle markType={MARK_UNDERLINE} iconName='FormatUnderline' />
               <Toggle markType={MARK_STRIKETHROUGH} iconName='FormatStriketrough' />
+              <Toggle markType={MARK_HAND_STRIKETHROUGH} iconName='FormatHandStriketrough' />
               <Toggle markType={MARK_CODE} iconName='FormatCode' />
               <Toggle markType={MARK_HIGHLIGHT} iconName='FormatMark' />
             </ToggleGroup>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { css } from 'styled-components'
+import styled, { css } from 'styled-components'
 import dayjs from 'dayjs'
 import { usePlateEditorState, useEventPlateId } from '@udecode/plate-core'
 import { ContextMenu, FormatToolbar, EntryAside } from 'components'
@@ -37,6 +37,8 @@ import {
   createResetNodePlugin,
   createHighlightPlugin,
 } from '@udecode/plate'
+
+const MARK_HAND_STRIKETHROUGH = 'hand-strikethrough'
 
 type EntryBlockProps = {
   entryDay: string
@@ -370,6 +372,10 @@ const EntryComponent = ({
     },
   })
 
+  const createHandStrikethroughPlugin = createPluginFactory({
+    key: MARK_HAND_STRIKETHROUGH,
+  })
+
   const plugins = createPlugins(
     [
       // elements
@@ -387,6 +393,20 @@ const EntryComponent = ({
       createAutoformatPlugin(CONFIG.autoformat),
       createResetNodePlugin(CONFIG.resetNode),
       createHighlightPlugin(),
+      createHandStrikethroughPlugin({
+        key: MARK_HAND_STRIKETHROUGH,
+        isLeaf: true,
+        deserializeHtml: {
+          rules: [
+            {
+              validNodeName: ['MARK'],
+            },
+          ],
+        },
+        options: {
+          clear: MARK_HAND_STRIKETHROUGH,
+        },
+      }),
     ],
     {
       // Plate components

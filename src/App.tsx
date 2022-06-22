@@ -59,6 +59,13 @@ hr {
   height: 1px!important;
   opacity: 0.1;
 }
+
+.slate-hand-strikethrough {
+  background-image: ${theme('style.handStriketrough')};
+  background-position: center;
+  background-repeat: repeat-x;
+  
+}
 `
 
 const Container = styled.div`
