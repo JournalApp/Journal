@@ -207,7 +207,7 @@ function EntryList() {
               clearScrollToDay={clearScrollToDay}
             />
           ))}
-      <BeforeEntries>This is the beginning...</BeforeEntries>
+      <BeforeEntries></BeforeEntries>
     </Wrapper>
   )
 }

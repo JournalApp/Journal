@@ -3,7 +3,10 @@ import { theme } from 'themes'
 
 const BeforeEntries = styled.div`
   text-align: center;
-  padding: 64px 0;
+  margin: 48px 0 24px 0;
+  height: 70px;
+  background: ${theme('style.beginningImage')} no-repeat top center;
+  background-size: 300px 70px;
 `
 
 const PostEntries = styled.div`

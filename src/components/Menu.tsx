@@ -202,6 +202,7 @@ const MenuButton = styled(DropdownMenu.Trigger)<MenuButtonProps>`
   border: 0;
   padding: 4px;
   z-index: 9999;
+  -webkit-app-region: no-drag;
   box-shadow: ${theme('style.shadow')};
   transition: ${theme('animation.time.normal')};
   background-color: ${(props) =>
