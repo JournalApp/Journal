@@ -116,7 +116,15 @@ const LoginWithToken = () => {
 }
 
 const Login = () => {
-  const { authError } = useUserContext()
+  const { authError, session } = useUserContext()
+
+  const log = () => {
+    let lastUser = window.electronAPI.app.getKey('lastUser')
+    window.electronAPI.capture({
+      distinctId: lastUser || 'anonymous',
+      event: 'user login-with-browser',
+    })
+  }
 
   return (
     <>
@@ -124,7 +132,7 @@ const Login = () => {
       <Container>
         <Logo src={logo}></Logo>
         <Welcome>Welcome to Journal</Welcome>
-        <LoginButton href='https://www.journal.do/auth?action=signout'>
+        <LoginButton href='https://www.journal.do/auth?action=signout' onClick={() => log()}>
           Log in with browser
         </LoginButton>
         <ErrorMessage>{authError}</ErrorMessage>

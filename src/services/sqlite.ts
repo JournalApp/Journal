@@ -275,7 +275,8 @@ ipcMain.on('app-get-key', (event, key) => {
   try {
     const db = getDB()
     const stmt = db.prepare('SELECT value FROM app WHERE key = @key')
-    event.returnValue = stmt.get({ key })
+    let res = stmt.get({ key })
+    event.returnValue = res.value
   } catch (error) {
     logger(`error`)
     logger(error)

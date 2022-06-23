@@ -56,7 +56,7 @@ const electronAPI = {
       ipcRenderer.invoke('app-set-key', set)
     },
     getKey(key: string) {
-      return ipcRenderer.send('app-get-key', key)
+      return ipcRenderer.sendSync('app-get-key', key)
     },
   },
   handleSpellCheck: (callback: any) => ipcRenderer.once('electron-handleSpellCheck', callback),
