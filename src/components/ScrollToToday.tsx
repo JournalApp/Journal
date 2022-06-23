@@ -2,6 +2,7 @@ import React from 'react'
 import styled, { keyframes } from 'styled-components'
 import { theme } from 'themes'
 import dayjs from 'dayjs'
+import { useUserContext } from 'context'
 
 const ScrollToTodayButton = styled.button`
   position: fixed;
@@ -25,16 +26,22 @@ const ScrollToTodayButton = styled.button`
   }
 `
 
-const scrollToToday = () => {
-  let today = dayjs().format('YYYY-MM-DD')
-  let entry = document.getElementById(`${today}-entry`)
-  if (entry) {
-    console.log('scrollToToday')
-    entry.scrollIntoView()
-  }
-}
-
 function ScrollToToday() {
+  const { session } = useUserContext()
+
+  const scrollToToday = () => {
+    let today = dayjs().format('YYYY-MM-DD')
+    let entry = document.getElementById(`${today}-entry`)
+    if (entry) {
+      console.log('scrollToToday')
+      entry.scrollIntoView()
+    }
+    window.electronAPI.capture({
+      distinctId: session.user.id,
+      event: 'entry scroll-to-today',
+    })
+  }
+
   return (
     <ScrollToTodayButton id='ScrollToToday' onClick={() => scrollToToday()}>
       ↓ Back to Today

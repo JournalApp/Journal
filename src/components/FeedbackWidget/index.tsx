@@ -410,6 +410,10 @@ function FeedbackWidget() {
     e?.preventDefault()
     setFormVisible(true)
     setFormSubmitted(false)
+    window.electronAPI.capture({
+      distinctId: session.user.id,
+      event: 'feedback open',
+    })
   }
 
   const closeForm = (e?: React.MouseEvent<HTMLElement, MouseEvent>) => {

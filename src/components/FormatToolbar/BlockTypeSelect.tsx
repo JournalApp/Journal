@@ -25,6 +25,7 @@ import {
   useEventPlateId,
   usePlateEditorState,
 } from '@udecode/plate-core'
+import { useUserContext } from 'context'
 
 interface BlockTypeSelectButtonProps {
   isHidden?: boolean
@@ -81,6 +82,7 @@ export const BlockTypeSelect = () => {
     placement: 'bottom-start',
     middleware: [shift(), offset({ crossAxis: -4, mainAxis: 8 })],
   })
+  const { session } = useUserContext()
 
   const parent = getParent(editor, editor?.selection?.anchor)
   const node = parent && Array.isArray(parent) ? parent[0] : null
@@ -118,6 +120,13 @@ export const BlockTypeSelect = () => {
         activeType: type,
       })(e)
     }
+    window.electronAPI.capture({
+      distinctId: session.user.id,
+      event: 'entry toolbar',
+      properties: {
+        item: type,
+      },
+    })
   }
 
   const isCurrent = (type: any) => {

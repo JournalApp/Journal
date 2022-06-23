@@ -8,7 +8,8 @@ var database: any
 
 const getDB = () => {
   if (!database) {
-    database = new Database(app.getPath('userData') + '/cache.db', { verbose: console.log })
+    database = new Database(app.getPath('userData') + '/cache.db')
+    // database = new Database(app.getPath('userData') + '/cache.db', { verbose: console.log })
   }
   return database
 }
@@ -297,3 +298,26 @@ ipcMain.handle('app-set-key', async (event, set) => {
     console.log(error)
   }
 })
+
+// functions
+
+const getLastUser = () => {
+  console.log('getLastUser')
+  try {
+    const db = getDB()
+    const stmt = db.prepare('SELECT value FROM app WHERE key = @key')
+    const lastUser = stmt.get({ key: 'lastUser' })
+    if (lastUser) {
+      console.log(`Last user: ${lastUser.value}`)
+      return lastUser.value
+    } else {
+      return 'anonymous'
+    }
+  } catch (error) {
+    console.log(`error`)
+    console.log(error)
+    return 'anonymous'
+  }
+}
+
+export { getLastUser }

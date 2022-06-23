@@ -5,6 +5,7 @@ import { theme } from 'themes'
 import { useAppearanceContext, useEntriesContext, AppearanceContextInterface } from 'context'
 import { CalendarOpen, getCalendarIsOpen } from 'config'
 import { createDays, getYearsSince } from 'utils'
+import { useUserContext } from 'context'
 
 interface ContainerProps {
   isOpen: CalendarOpen
@@ -181,6 +182,7 @@ const withLeadingZero = (num: number) => {
 const Calendar = () => {
   const { isCalendarOpen } = useAppearanceContext()
   const { daysCache, cacheCreateNewEntry, setScrollToDay } = useEntriesContext()
+  const { session } = useUserContext()
   const today = new Date()
 
   useEffect(() => {
@@ -222,10 +224,18 @@ const Calendar = () => {
     let element = document.getElementById(`${day}-entry`)
     if (element) {
       element.scrollIntoView()
+      window.electronAPI.capture({
+        distinctId: session.user.id,
+        event: 'calendar scroll-to-day',
+      })
     } else {
       console.log('no such day, adding...')
       await cacheCreateNewEntry(day)
       setScrollToDay(day)
+      window.electronAPI.capture({
+        distinctId: session.user.id,
+        event: 'calendar add-day',
+      })
     }
   }
 

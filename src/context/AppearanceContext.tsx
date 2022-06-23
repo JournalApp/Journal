@@ -50,18 +50,33 @@ export function AppearanceProvider({
     setFontFaceInternal(face)
     document.documentElement.style.setProperty('--appearance-fontFace', getFontFace(face))
     window.electronAPI.preferences.set(session.user.id, { fontFace: face })
+    window.electronAPI.capture({
+      distinctId: session.user.id,
+      event: 'appearance set-font-face',
+      properties: { face },
+    })
   }
 
   const setFontSize = (size: FontSize) => {
     setFontSizeInternal(size)
     document.documentElement.style.setProperty('--appearance-fontSize', getFontSize(size) + 'px')
     window.electronAPI.preferences.set(session.user.id, { fontSize: size })
+    window.electronAPI.capture({
+      distinctId: session.user.id,
+      event: 'appearance set-font-size',
+      properties: { size },
+    })
   }
 
   const setColorTheme = (theme: ColorTheme) => {
     setColorThemeInternal(theme)
     setCssVars(getColorTheme(theme))
     window.electronAPI.preferences.set(session.user.id, { theme })
+    window.electronAPI.capture({
+      distinctId: session.user.id,
+      event: 'appearance set-theme',
+      properties: { theme },
+    })
   }
 
   const toggleIsCalendarOpen = () => {
@@ -76,6 +91,11 @@ export function AppearanceProvider({
       )
       setIsCalendarOpenInternal('closed')
       window.electronAPI.preferences.set(session.user.id, { calendarOpen: 'closed' })
+      window.electronAPI.capture({
+        distinctId: session.user.id,
+        event: 'calendar toggle',
+        properties: { action: 'close' },
+      })
     } else {
       document.documentElement.style.setProperty(
         '--appearance-entriesOffset',
@@ -87,6 +107,11 @@ export function AppearanceProvider({
       )
       setIsCalendarOpenInternal('opened')
       window.electronAPI.preferences.set(session.user.id, { calendarOpen: 'opened' })
+      window.electronAPI.capture({
+        distinctId: session.user.id,
+        event: 'calendar toggle',
+        properties: { action: 'open' },
+      })
     }
   }
 

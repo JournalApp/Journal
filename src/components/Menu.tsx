@@ -250,6 +250,14 @@ const Menu = () => {
     setUpdateDownloaded(true)
   })
 
+  const signOutAndCapture = () => {
+    window.electronAPI.capture({
+      distinctId: session.user.id,
+      event: 'user signout',
+    })
+    signOut()
+  }
+
   return (
     <Dialog.Root>
       <DropdownMenu.Root onOpenChange={(open) => setOpen(open)}>
@@ -265,7 +273,7 @@ const Menu = () => {
             </Item>
           </DialogTrigger>
           <Divider />
-          <Item onSelect={() => signOut()}>
+          <Item onSelect={() => signOutAndCapture()}>
             <Icon name='Exit' />
             <ItemTitle>
               Logout <em>{session.user.email}</em>

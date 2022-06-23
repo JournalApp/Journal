@@ -1,9 +1,13 @@
 import { contextBridge, ipcRenderer, clipboard } from 'electron'
+import { EventMessage } from 'posthog-node'
 
 const electronAPI = {
   onPaste: (callback: any) => ipcRenderer.on('paste', callback),
   onCopy: (callback: any) => ipcRenderer.on('copy', callback),
   onUpdateDownloaded: (callback: any) => ipcRenderer.on('update-downloaded', callback),
+  async capture({ distinctId, event, properties }: EventMessage) {
+    await ipcRenderer.invoke('analytics-capture', { distinctId, event, properties })
+  },
   cache: {
     async addOrUpdateEntry(query: any) {
       await ipcRenderer.invoke('cache-add-or-update-entry', query)

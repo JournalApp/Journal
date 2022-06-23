@@ -6,6 +6,7 @@ import { BaseRange, BasePoint, Transforms, Editor as SlateEditor } from 'slate'
 import { Icon } from 'components'
 import { BlockTypeSelect } from './BlockTypeSelect'
 import { theme } from 'themes'
+import { useUserContext } from 'context'
 
 import {
   MARK_BOLD,
@@ -134,6 +135,7 @@ export const FormatToolbar = ({ focused, isContextMenuVisible }: FormatToolbarPr
     placement: 'top-start',
     middleware: [shift(), offset({ mainAxis: 8 })],
   })
+  const { session } = useUserContext()
 
   // https://github.com/udecode/plate/issues/1352#issuecomment-1056975461
   // useEffect(() => {
@@ -174,6 +176,13 @@ export const FormatToolbar = ({ focused, isContextMenuVisible }: FormatToolbarPr
       if (editor) {
         getPreventDefaultHandler(toggleMark, editor, { key: type, clear: '' })(e)
       }
+      window.electronAPI.capture({
+        distinctId: session.user.id,
+        event: 'entry toolbar',
+        properties: {
+          item: markType,
+        },
+      })
     }
 
     return (

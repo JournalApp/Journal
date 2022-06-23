@@ -3,8 +3,18 @@ import path from 'path'
 import url from 'url'
 import log from 'electron-log'
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer'
-require('./services/sqlite')
 require('./services/autoUpdater')
+import { getLastUser } from './services/sqlite'
+import { capture, client } from './services/analytics'
+
+const lastUser = getLastUser()
+capture({
+  distinctId: lastUser,
+  event: 'app launched',
+  properties: {
+    appVersion: app.getVersion(),
+  },
+})
 
 var openUrl = ''
 
@@ -48,6 +58,39 @@ const createWindow = (): void => {
 
   ipcMain.on('electron-reload', async () => {
     mainWindow.reload()
+  })
+
+  mainWindow.on('resized', () => {
+    console.log('resized')
+    capture({
+      distinctId: getLastUser(),
+      event: 'app resized',
+      properties: mainWindow.getBounds(),
+    })
+  })
+
+  mainWindow.on('maximize', () => {
+    console.log('maximize')
+    capture({
+      distinctId: getLastUser(),
+      event: 'app maximize',
+    })
+  })
+
+  mainWindow.on('minimize', () => {
+    console.log('minimize')
+    capture({
+      distinctId: getLastUser(),
+      event: 'app minimize',
+    })
+  })
+
+  mainWindow.on('enter-full-screen', () => {
+    console.log('enter-full-screen')
+    capture({
+      distinctId: getLastUser(),
+      event: 'app enter-full-screen',
+    })
   })
 
   mainWindow.once('ready-to-show', () => {
@@ -119,6 +162,18 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }
+})
+
+app.on('before-quit', () => {
+  console.log('before-quit')
+  capture({
+    distinctId: getLastUser(),
+    event: 'app close',
+  })
+})
+
+app.on('will-quit', () => {
+  client.shutdown()
 })
 
 app.on('activate', () => {

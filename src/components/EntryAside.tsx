@@ -5,6 +5,7 @@ import styled from 'styled-components'
 import dayjs from 'dayjs'
 import { ordinal, breakpoints } from 'utils'
 import { Icon } from 'components'
+import { useUserContext } from 'context'
 
 const AsideItem = styled.p`
   margin: 0;
@@ -149,10 +150,15 @@ type EntryAsideProps = {
 
 function EntryAside({ date, wordCount }: EntryAsideProps) {
   const { daysCache, removeCachedDay } = useEntriesContext()
+  const { session } = useUserContext()
 
   const removeDay = (date: string) => {
     console.log(`removeDay ${date}`)
     removeCachedDay(date)
+    window.electronAPI.capture({
+      distinctId: session.user.id,
+      event: 'entry remove',
+    })
   }
 
   const dayCountOrdinar = () => {
