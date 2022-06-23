@@ -1,5 +1,5 @@
 import React, { ReactPortal, useState, useEffect, useLayoutEffect, useRef, useMemo } from 'react'
-import { FormatToolbar } from 'components'
+import { logger } from 'utils'
 import { theme } from 'themes'
 import {
   offset,
@@ -103,11 +103,11 @@ export const ContextMenu = ({
   })
 
   const setOpen = (e: any) => {
-    console.log('onContextMenu')
+    logger('onContextMenu')
     if (!visible) {
       window.electronAPI.handleSpellCheck((event: any, value: any) => {
-        console.log('handleSpellCheck')
-        console.log(value)
+        logger('handleSpellCheck')
+        logger(value)
         if (!!value.dictionarySuggestions) {
           setSpellSuggections([...value.dictionarySuggestions])
         }
@@ -159,7 +159,7 @@ export const ContextMenu = ({
                   } as any
                   // TODO Fix bullet lists pasting
                   editor.insertData(dataTransfer)
-                  console.log(res)
+                  logger(res)
                 })
               })
             } else if (result[i].types.includes('text/plain')) {
@@ -187,7 +187,7 @@ export const ContextMenu = ({
   useEffect(() => {
     setContextMenuVisible(visible)
     if (visible) {
-      console.log('addEventListener')
+      logger('addEventListener')
       window.addEventListener('click', () => setVisible(false), { once: true })
     }
   }, [visible])

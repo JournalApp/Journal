@@ -4,7 +4,7 @@ import { theme } from 'themes'
 import { Icon } from 'components'
 import { RatingEmojiControl } from './RatingEmojiControl'
 import { useForm } from 'react-hook-form'
-import { supabase, isUnauthorized } from 'utils'
+import { supabase, isUnauthorized, logger } from 'utils'
 import { useUserContext } from 'context'
 
 const InputContainer = styled.div`
@@ -397,7 +397,7 @@ function FeedbackWidget() {
     setFormSubmitting(false)
 
     if (error) {
-      console.log(error)
+      logger(error)
       if (isUnauthorized(error)) signOut()
       setFormMessage(['error', 'Error, try again later'])
     }

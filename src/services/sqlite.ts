@@ -3,13 +3,14 @@ import Database from 'better-sqlite3'
 import log from 'electron-log'
 import initializeSql from '../sql/schema.sqlite.sql'
 import dayjs from 'dayjs'
+import { logger } from '../utils'
 
 var database: any
 
 const getDB = () => {
   if (!database) {
     database = new Database(app.getPath('userData') + '/cache.db')
-    // database = new Database(app.getPath('userData') + '/cache.db', { verbose: console.log })
+    // database = new Database(app.getPath('userData') + '/cache.db', { verbose: logger })
   }
   return database
 }
@@ -23,27 +24,27 @@ try {
   getDB()
   initializeDB()
 } catch (error) {
-  console.log(error)
+  logger(error)
   log.error(error)
 }
 
 // Entries
 
 ipcMain.handle('cache-add-user', async (event, id) => {
-  console.log('cache-add-user')
+  logger('cache-add-user')
   try {
     const db = getDB()
     const stmt = db.prepare('INSERT INTO users (id) VALUES (@id) ON CONFLICT (id) DO NOTHING')
     return stmt.run({ id })
   } catch (error) {
-    console.log(`error`)
-    console.log(error)
+    logger(`error`)
+    logger(error)
     return error
   }
 })
 
 ipcMain.handle('cache-add-or-update-entry', async (event, val) => {
-  console.log('cache-add-or-update-entry')
+  logger('cache-add-or-update-entry')
   try {
     const db = getDB()
     const { user_id, day, created_at, modified_at, content } = val
@@ -53,14 +54,14 @@ ipcMain.handle('cache-add-or-update-entry', async (event, val) => {
     )
     return stmt.run({ user_id, day, created_at, modified_at, content })
   } catch (error) {
-    console.log(`error`)
-    console.log(error)
+    logger(`error`)
+    logger(error)
     return error
   }
 })
 
 ipcMain.handle('cache-delete-entry', async (event, query) => {
-  console.log('cache-delete-entry')
+  logger('cache-delete-entry')
   try {
     const db = getDB()
     const { user_id, day } = query
@@ -68,14 +69,14 @@ ipcMain.handle('cache-delete-entry', async (event, query) => {
     const result = stmt.run({ user_id, day })
     return result
   } catch (error) {
-    console.log(`error`)
-    console.log(error)
+    logger(`error`)
+    logger(error)
     return error
   }
 })
 
 ipcMain.handle('cache-mark-deleted-entry', async (event, query) => {
-  console.log('cache-mark-deleted-entry')
+  logger('cache-mark-deleted-entry')
   try {
     const db = getDB()
     const { user_id, day } = query
@@ -85,14 +86,14 @@ ipcMain.handle('cache-mark-deleted-entry', async (event, query) => {
     const result = stmt.run({ user_id, day })
     return result
   } catch (error) {
-    console.log(`error`)
-    console.log(error)
+    logger(`error`)
+    logger(error)
     return error
   }
 })
 
 ipcMain.handle('cache-update-entry', async (event, set, where) => {
-  console.log('cache-update-entry')
+  logger('cache-update-entry')
   try {
     const db = getDB()
     const { user_id, day } = where
@@ -103,14 +104,14 @@ ipcMain.handle('cache-update-entry', async (event, set, where) => {
     )
     return stmt.run({ user_id, day, modified_at, content })
   } catch (error) {
-    console.log(`error`)
-    console.log(error)
+    logger(`error`)
+    logger(error)
     return error
   }
 })
 
 ipcMain.handle('cache-update-entry-property', async (event, set, where) => {
-  console.log('cache-update-entry-property')
+  logger('cache-update-entry-property')
   try {
     const db = getDB()
     const { user_id, day } = where
@@ -122,14 +123,14 @@ ipcMain.handle('cache-update-entry-property', async (event, set, where) => {
     )
     return stmt.run({ user_id, day, value })
   } catch (error) {
-    console.log(`error`)
-    console.log(error)
+    logger(`error`)
+    logger(error)
     return error
   }
 })
 
 ipcMain.handle('cache-get-days', async (event, user_id) => {
-  console.log('cache-get-days')
+  logger('cache-get-days')
   try {
     const db = getDB()
     const stmt = db.prepare(
@@ -143,18 +144,18 @@ ipcMain.handle('cache-get-days', async (event, user_id) => {
     })
     if (!todayExists) {
       days.push(today)
-      console.log(`Added ${today} in cache-get-days`)
+      logger(`Added ${today} in cache-get-days`)
     }
     return days
   } catch (error) {
-    console.log(`error`)
-    console.log(error)
+    logger(`error`)
+    logger(error)
     return error
   }
 })
 
 ipcMain.handle('cache-get-entries', async (event, user_id) => {
-  console.log('cache-get-entries')
+  logger('cache-get-entries')
   try {
     const db = getDB()
     const stmt = db.prepare('SELECT * FROM journals WHERE user_id = @user_id AND deleted = FALSE')
@@ -164,38 +165,38 @@ ipcMain.handle('cache-get-entries', async (event, user_id) => {
     })
     return result
   } catch (error) {
-    console.log(`error`)
-    console.log(error)
+    logger(`error`)
+    logger(error)
     return error
   }
 })
 
 ipcMain.handle('cache-get-deleted-days', async (event, user_id) => {
-  console.log('cache-get-deleted-days')
+  logger('cache-get-deleted-days')
   try {
     const db = getDB()
     const stmt = db.prepare('SELECT day FROM journals WHERE user_id = @user_id AND deleted = TRUE')
     const result = stmt.all({ user_id })
     const days = result.map((entry: any) => entry.day)
-    console.log('Deleted days:')
-    console.log(days)
+    logger('Deleted days:')
+    logger(days)
     return days
   } catch (error) {
-    console.log(`error`)
-    console.log(error)
+    logger(`error`)
+    logger(error)
     return error
   }
 })
 
 ipcMain.handle('cache-delete-all', async (event, user_id) => {
-  console.log('cache-delete-all')
+  logger('cache-delete-all')
   try {
     const db = getDB()
     const stmt = db.prepare('DELETE FROM journals WHERE user_id = @user_id')
     return stmt.run({ user_id })
   } catch (error) {
-    console.log(`error`)
-    console.log(error)
+    logger(`error`)
+    logger(error)
     return error
   }
 })
@@ -207,7 +208,7 @@ ipcMain.on('preferences-get-all', (event) => {
     [key: string]: string
   }
 
-  console.log('preferences-get-all')
+  logger('preferences-get-all')
   try {
     const db = getDB()
     const stmt1 = db.prepare('SELECT value FROM app WHERE key = @key')
@@ -229,14 +230,14 @@ ipcMain.on('preferences-get-all', (event) => {
       event.returnValue = undefined
     }
   } catch (error) {
-    console.log(`error`)
-    console.log(error)
+    logger(`error`)
+    logger(error)
     event.returnValue = error
   }
 })
 
 ipcMain.handle('preferences-set', async (event, user_id, set) => {
-  console.log('preferences-set')
+  logger('preferences-set')
   try {
     const db = getDB()
     const item = Object.keys(set)[0]
@@ -247,22 +248,22 @@ ipcMain.handle('preferences-set', async (event, user_id, set) => {
     )
     return stmt.run({ user_id, item, value })
   } catch (error) {
-    console.log(`error`)
-    console.log(error)
+    logger(`error`)
+    logger(error)
     return error
   }
 })
 
 ipcMain.handle('preferences-delete-all', async (event, user_id) => {
-  console.log('preferences-delete-all')
+  logger('preferences-delete-all')
   try {
     const db = getDB()
     const stmt = db.prepare('DELETE FROM preferences WHERE user_id = @user_id')
     const result = stmt.run({ user_id })
     return result
   } catch (error) {
-    console.log(`error`)
-    console.log(error)
+    logger(`error`)
+    logger(error)
     return error
   }
 })
@@ -270,20 +271,20 @@ ipcMain.handle('preferences-delete-all', async (event, user_id) => {
 // App (sync api)
 
 ipcMain.on('app-get-key', (event, key) => {
-  console.log('app-get-key')
+  logger('app-get-key')
   try {
     const db = getDB()
     const stmt = db.prepare('SELECT value FROM app WHERE key = @key')
     event.returnValue = stmt.get({ key })
   } catch (error) {
-    console.log(`error`)
-    console.log(error)
+    logger(`error`)
+    logger(error)
     event.returnValue = error
   }
 })
 
 ipcMain.handle('app-set-key', async (event, set) => {
-  console.log('app-set-key')
+  logger('app-set-key')
   try {
     const db = getDB()
     const key = Object.keys(set)[0]
@@ -294,28 +295,23 @@ ipcMain.handle('app-set-key', async (event, set) => {
     )
     stmt.run({ key, value })
   } catch (error) {
-    console.log(`error`)
-    console.log(error)
+    logger(`error`)
+    logger(error)
   }
 })
 
 // functions
 
 const getLastUser = () => {
-  console.log('getLastUser')
+  logger('getLastUser')
   try {
     const db = getDB()
     const stmt = db.prepare('SELECT value FROM app WHERE key = @key')
     const lastUser = stmt.get({ key: 'lastUser' })
-    if (lastUser) {
-      console.log(`Last user: ${lastUser.value}`)
-      return lastUser.value
-    } else {
-      return 'anonymous'
-    }
+    return lastUser?.value ?? 'anonymous'
   } catch (error) {
-    console.log(`error`)
-    console.log(error)
+    logger(`error`)
+    logger(error)
     return 'anonymous'
   }
 }

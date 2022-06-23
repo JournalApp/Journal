@@ -3,6 +3,7 @@ import styled, { keyframes } from 'styled-components'
 import { theme } from 'themes'
 import dayjs from 'dayjs'
 import { useUserContext } from 'context'
+import { logger } from 'utils'
 
 const ScrollToTodayButton = styled.button`
   position: fixed;
@@ -33,7 +34,7 @@ function ScrollToToday() {
     let today = dayjs().format('YYYY-MM-DD')
     let entry = document.getElementById(`${today}-entry`)
     if (entry) {
-      console.log('scrollToToday')
+      logger('scrollToToday')
       entry.scrollIntoView()
     }
     window.electronAPI.capture({

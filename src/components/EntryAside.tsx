@@ -3,7 +3,7 @@ import { useEntriesContext } from 'context'
 import { theme } from 'themes'
 import styled from 'styled-components'
 import dayjs from 'dayjs'
-import { ordinal, breakpoints } from 'utils'
+import { ordinal, breakpoints, logger } from 'utils'
 import { Icon } from 'components'
 import { useUserContext } from 'context'
 
@@ -153,7 +153,7 @@ function EntryAside({ date, wordCount }: EntryAsideProps) {
   const { session } = useUserContext()
 
   const removeDay = (date: string) => {
-    console.log(`removeDay ${date}`)
+    logger(`removeDay ${date}`)
     removeCachedDay(date)
     window.electronAPI.capture({
       distinctId: session.user.id,

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react'
-import { createCssVars, supabase, supabaseUrl, supabaseAnonKey } from 'utils'
+import { logger, supabase, supabaseUrl, supabaseAnonKey } from 'utils'
 import { Login } from 'components'
 import { Session } from '@supabase/supabase-js'
 import dayjs from 'dayjs'
@@ -21,7 +21,7 @@ export function UserProvider({ children }: any) {
   const secretKey = useRef(null)
   const serverClientTimeDelta = useRef(0) //  server time - client time = delta
 
-  console.log('UserProvider re-render')
+  logger('UserProvider re-render')
 
   window.electronAPI.handleOpenUrl(async (event: any, value: any) => {
     const url = new URL(value)
@@ -29,7 +29,7 @@ export function UserProvider({ children }: any) {
     if (!session && refresh_token) {
       const { error } = await supabase.auth.signIn({ refreshToken: refresh_token })
       if (error && error.status == 400) {
-        console.log(error)
+        logger(error)
         setAuthError('Expired link, please login again')
       } else {
         setAuthError('Error, please try again.')
@@ -48,10 +48,10 @@ export function UserProvider({ children }: any) {
     fetchServerTimeDelta()
 
     supabase.auth.onAuthStateChange((_event, session) => {
-      console.log('Auth event:')
-      console.log(_event)
-      console.log(session)
-      console.log('Session:')
+      logger('Auth event:')
+      logger(_event)
+      logger(session)
+      logger('Session:')
       setSession(session)
 
       if (_event == 'SIGNED_IN') {
@@ -101,13 +101,13 @@ export function UserProvider({ children }: any) {
       const dateServerTime = dayjs(new Date(headerDate))
       const dateClientTime = dayjs(new Date())
       const diff = dateServerTime.diff(dateClientTime, 'ms')
-      console.log(`Delta (ms): ${diff}`)
+      logger(`Delta (ms): ${diff}`)
       serverClientTimeDelta.current = diff
       // TODO save delta to SQLite
     } catch (error) {
       // TODO (error = offline) read delta from SQLite
       // save delta in serverClientTimeDelta.current
-      console.log(error)
+      logger(error)
     }
   }
 
@@ -115,21 +115,21 @@ export function UserProvider({ children }: any) {
     const delta = serverClientTimeDelta.current
     const dateClientTime = dayjs(new Date())
     const computedServerTime = dateClientTime.add(delta, 'ms').toISOString()
-    console.log(`Using delta(ms) of: ${delta}, to compute: ${computedServerTime}`)
+    logger(`Using delta(ms) of: ${delta}, to compute: ${computedServerTime}`)
     return computedServerTime
   }
 
   const signOut = () => {
-    console.log('signOut')
+    logger('signOut')
     supabase.auth.signOut()
-    window.electronAPI.app.setKey({ lastUser: null })
+    // window.electronAPI.app.setKey({ lastUser: null })
     window.electronAPI.cache.deleteAll(session.user.id)
     window.electronAPI.preferences.deleteAll(session.user.id)
     window.electronAPI.reloadWindow()
   }
 
   const quitAndInstall = () => {
-    console.log('quitAndInstall')
+    logger('quitAndInstall')
     window.electronAPI.quitAndInstall()
   }
 

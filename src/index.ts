@@ -6,6 +6,7 @@ import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-insta
 require('./services/autoUpdater')
 import { getLastUser } from './services/sqlite'
 import { capture, client } from './services/analytics'
+import { logger } from './utils'
 
 const lastUser = getLastUser()
 capture({
@@ -13,6 +14,8 @@ capture({
   event: 'app launched',
   properties: {
     appVersion: app.getVersion(),
+    appPlatform: process.platform,
+    appArch: process.arch,
   },
 })
 
@@ -61,7 +64,7 @@ const createWindow = (): void => {
   })
 
   mainWindow.on('resized', () => {
-    console.log('resized')
+    logger('resized')
     capture({
       distinctId: getLastUser(),
       event: 'app resized',
@@ -70,7 +73,7 @@ const createWindow = (): void => {
   })
 
   mainWindow.on('maximize', () => {
-    console.log('maximize')
+    logger('maximize')
     capture({
       distinctId: getLastUser(),
       event: 'app maximize',
@@ -78,7 +81,7 @@ const createWindow = (): void => {
   })
 
   mainWindow.on('minimize', () => {
-    console.log('minimize')
+    logger('minimize')
     capture({
       distinctId: getLastUser(),
       event: 'app minimize',
@@ -86,7 +89,7 @@ const createWindow = (): void => {
   })
 
   mainWindow.on('enter-full-screen', () => {
-    console.log('enter-full-screen')
+    logger('enter-full-screen')
     capture({
       distinctId: getLastUser(),
       event: 'app enter-full-screen',
@@ -104,7 +107,7 @@ const createWindow = (): void => {
 
     // Handle Update downloaded
     autoUpdater.on('update-downloaded', () => {
-      console.log('update-downloaded')
+      logger('update-downloaded')
       log.info('update-downloaded')
       mainWindow.webContents.send('update-downloaded')
     })
@@ -120,7 +123,7 @@ const createWindow = (): void => {
     .catch((err) => console.log('An error occurred: ', err))
 
   mainWindow.webContents.on('context-menu', (event: any, params: any) => {
-    console.log('context-menu event')
+    logger('context-menu event')
 
     mainWindow.webContents.send('electron-handleSpellCheck', params)
     // const menu = new Menu()
@@ -165,7 +168,7 @@ app.on('window-all-closed', () => {
 })
 
 app.on('before-quit', () => {
-  console.log('before-quit')
+  logger('before-quit')
   capture({
     distinctId: getLastUser(),
     event: 'app close',

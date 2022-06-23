@@ -1,5 +1,5 @@
 import PostHog, { EventMessage } from 'posthog-node'
-import { isDev } from '../utils/misc'
+import { isDev, logger } from '../utils'
 import { ipcMain } from 'electron'
 
 const client = new PostHog('phc_71spBFzoqqePdAa4wpRxNAMxdkMyKdwHkdeMvnQ6wup', {
@@ -7,15 +7,6 @@ const client = new PostHog('phc_71spBFzoqqePdAa4wpRxNAMxdkMyKdwHkdeMvnQ6wup', {
 })
 
 const capture = ({ distinctId, event, properties }: EventMessage) => {
-  client.capture({
-    distinctId,
-    event,
-    properties,
-  })
-}
-
-ipcMain.handle('analytics-capture', async (e, { distinctId, event, properties }: EventMessage) => {
-  console.log('analytics-capture')
   try {
     client.capture({
       distinctId,
@@ -23,8 +14,22 @@ ipcMain.handle('analytics-capture', async (e, { distinctId, event, properties }:
       properties,
     })
   } catch (error) {
-    console.log(`error`)
-    console.log(error)
+    logger(`error`)
+    logger(error)
+  }
+}
+
+ipcMain.handle('analytics-capture', async (e, { distinctId, event, properties }: EventMessage) => {
+  logger('analytics-capture')
+  try {
+    client.capture({
+      distinctId,
+      event,
+      properties,
+    })
+  } catch (error) {
+    logger(`error`)
+    logger(error)
   }
 })
 

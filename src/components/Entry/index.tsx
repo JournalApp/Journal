@@ -8,7 +8,7 @@ import { Transforms, Node, Editor as SlateEditor } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { CONFIG, defaultContent } from 'config'
 import { countWords, isUnauthorized, encryptEntry, decryptEntry } from 'utils'
-import { supabase } from 'utils'
+import { supabase, logger } from 'utils'
 import { useUserContext } from 'context'
 import { Container, MainWrapper, MiniDate } from './styled'
 import { electronAPIType } from '../../preload'
@@ -93,7 +93,7 @@ const EntryComponent = ({
   const { session, signOut, getSecretKey, serverTimeNow } = useUserContext()
   const saveTimer = useRef<NodeJS.Timeout | null>(null)
 
-  console.log(`Entry render`)
+  logger(`Entry render`)
 
   const setContextMenuVisible = (val: boolean) => {
     contextMenuVisible.current = val
@@ -137,7 +137,7 @@ const EntryComponent = ({
             ])
             .single()
           if (error) {
-            console.log(error)
+            logger(error)
             if (isUnauthorized(error)) signOut()
             throw new Error(error.message)
           }
@@ -147,7 +147,7 @@ const EntryComponent = ({
         }
       }
       if (error) {
-        console.log(error)
+        logger(error)
         if (isUnauthorized(error)) signOut()
         throw new Error(error.message)
       }
@@ -156,12 +156,12 @@ const EntryComponent = ({
       data.content = JSON.parse(contentDecrypted)
       return data
     } catch (err) {
-      console.log(err)
+      logger(err)
     }
   }
 
   const saveEntry = async (day: string, content: any, modified_at: string) => {
-    console.log(`Save entry day: ${day}, modified_at: ${modified_at}`)
+    logger(`Save entry day: ${day}, modified_at: ${modified_at}`)
     cacheAddOrUpdateEntry({
       user_id: session.user.id,
       day,
@@ -171,7 +171,7 @@ const EntryComponent = ({
     })
 
     if (content == undefined) {
-      console.log(`Undefined content on day: ${day}`)
+      logger(`Undefined content on day: ${day}`)
     }
 
     try {
@@ -193,27 +193,27 @@ const EntryComponent = ({
         .single()
 
       if (error) {
-        console.log(error)
+        logger(error)
         if (isUnauthorized(error)) signOut()
         throw new Error(error.message)
       }
 
       setNeedsSavingToServer(false)
       cacheUpdateEntryProperty({ needs_saving_to_server: 0 }, { day, user_id: session.user.id })
-      console.log('saved')
+      logger('saved')
     } catch (err) {
       if (!needsSavingToServerModifiedAt) {
         setNeedsSavingToServerModifiedAt(modified_at)
       }
       setNeedsSavingToServer(true)
       cacheUpdateEntryProperty({ needs_saving_to_server: 1 }, { day, user_id: session.user.id })
-      console.log(err)
+      logger(err)
     }
   }
 
   // const resizeObserver = new ResizeObserver((entries) => {
   //   for (let entry of entries) {
-  //     console.log(`scrollIntoView ${entryDay}`)
+  //     logger(`scrollIntoView ${entryDay}`)
   //     // setEntryHeight()
   //   }
   // })
@@ -240,11 +240,11 @@ const EntryComponent = ({
       setInitialValue([...init.content])
     }
     if (cachedEntry && init && !dayjs(init.modified_at).isSame(cachedEntry.modified_at)) {
-      console.log(`${init.modified_at} != ${cachedEntry.modified_at}`)
+      logger(`${init.modified_at} != ${cachedEntry.modified_at}`)
 
       if (dayjs(init.modified_at).isAfter(dayjs(cachedEntry.modified_at))) {
         // Server entry is newer, save it to cache
-        console.log('Server entry is newer, updating cache')
+        logger('Server entry is newer, updating cache')
 
         const { user_id, day, modified_at, content } = init
         let set = { modified_at, content: JSON.stringify(content) }
@@ -254,7 +254,7 @@ const EntryComponent = ({
         setInitialValue([...init.content])
       } else {
         // Cached entry is newer, push it to server
-        console.log('Cached entry is newer, updating on server')
+        logger('Cached entry is newer, updating on server')
         saveEntry(entryDay, cachedEntry.content, cachedEntry.modified_at)
       }
     }
@@ -266,13 +266,13 @@ const EntryComponent = ({
     useEffect(() => {
       ReactEditor.focus(editor)
       setShouldFocus(false)
-      console.log(`Focus set to ${entryDay}`)
+      logger(`Focus set to ${entryDay}`)
     }, [])
     return <></>
   }
 
   useEffect(() => {
-    console.log(`Entry mounted`)
+    logger(`Entry mounted`)
     initialFetch()
 
     entriesObserver.observe(editorRef.current)
@@ -284,7 +284,7 @@ const EntryComponent = ({
 
     // Remove observers
     return () => {
-      console.log('Entry unmounted')
+      logger('Entry unmounted')
       if (editorRef.current) {
         entriesObserver.unobserve(editorRef.current)
         // resizeObserver.unobserve(editorRef.current)
@@ -300,7 +300,7 @@ const EntryComponent = ({
     if (initialFetchDone) {
       setTimeout(() => {
         if (editorRef.current) {
-          console.log(`----> unobserve ${entryDay}`)
+          logger(`----> unobserve ${entryDay}`)
           // resizeObserver.unobserve(editorRef.current)
         }
       }, 2000)
@@ -308,7 +308,7 @@ const EntryComponent = ({
   }, [setInitialFetchDone])
 
   useEffect(() => {
-    // console.log(`needsSaving: ${needsSavingToServer}`)
+    // logger(`needsSaving: ${needsSavingToServer}`)
     if (needsSavingToServer) {
       saveTimer.current = setTimeout(() => {
         setNeedsSavingToServer(false)
@@ -333,7 +333,7 @@ const EntryComponent = ({
     key: 'events-editor-for-toolbar',
     handlers: {
       onFocus: (editor) => () => {
-        console.log('Focus')
+        logger('Focus')
         // Set cursor at the end, as a fix to multiple clicks
         if (!editor.selection) {
           Transforms.select(editor, SlateEditor.end(editor, []))
@@ -341,22 +341,22 @@ const EntryComponent = ({
         setFocused(true)
       },
       onBlur: (editor) => () => {
-        console.log('Blur')
+        logger('Blur')
         // Transforms.deselect(editor)
         // Transforms.select(editor, SlateEditor.end(editor, []))
         // editor.selection = null
         setFocused(false)
       },
       onChange: (editor) => () => {
-        console.log('Change')
+        logger('Change')
         const isContentChange = editor.operations.some((op) => 'set_selection' !== op.type)
         if (isContentChange) {
-          // console.log('isContentChange')
+          // logger('isContentChange')
           // Needs saving as it's an actual content change
           setNeedsSavingToServerModifiedAt(serverTimeNow())
           setNeedsSavingToServer(true)
           // Another way to access editor value:
-          // console.log(editor.children)
+          // logger(editor.children)
         }
       },
       onContextMenu: () => (e) => {
@@ -365,9 +365,9 @@ const EntryComponent = ({
       },
       // onPaste: () => (e) => {
       //   // navigator.clipboard.read().then((result) => {
-      //   //   console.log(result)
+      //   //   logger(result)
       //   // })
-      //   // console.log(e.clipboardData)
+      //   // logger(e.clipboardData)
       // },
     },
   })
@@ -479,7 +479,7 @@ const EntryComponent = ({
 }
 
 function areEqual(prevProps: any, nextProps: any) {
-  console.log(`Comparing memo`)
+  logger(`Comparing memo`)
   return true
 }
 

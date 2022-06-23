@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Entry } from 'components'
 import { useEventEditorSelectors } from '@udecode/plate'
-import { supabase, arrayEquals, isUnauthorized } from 'utils'
+import { supabase, arrayEquals, isUnauthorized, logger } from 'utils'
 import { useEntriesContext, useUserContext } from 'context'
 import dayjs from 'dayjs'
 import { BeforeEntries, PostEntries, Wrapper } from './styled'
@@ -106,12 +106,12 @@ function EntryList() {
   }, [])
 
   useEffect(() => {
-    console.log('Entries updated')
+    logger('Entries updated')
   }, [entries])
 
   useEffect(() => {
     // e.g. user has added a day
-    console.log('daysCache have changed')
+    logger('daysCache have changed')
     setEntries([...daysCache])
   }, [daysCache])
 
@@ -132,12 +132,12 @@ function EntryList() {
   const initialFetch = async () => {
     let cached = daysCache
     if (cached.length) {
-      console.log('---> Cached entries')
-      console.log(cached)
+      logger('---> Cached entries')
+      logger(cached)
       setEntries([...cached])
       setInitialFetchDone(true)
     } else {
-      console.log('---> No cached entries')
+      logger('---> No cached entries')
     }
 
     try {
@@ -148,7 +148,7 @@ function EntryList() {
         .order('day', { ascending: true })
 
       if (error) {
-        console.log(error)
+        logger(error)
         if (isUnauthorized(error)) signOut()
         throw new Error(error.message)
       }
@@ -162,14 +162,14 @@ function EntryList() {
       })
       if (!todayExists) {
         days.push(today)
-        console.log(`Added ${today} to server Days`)
+        logger(`Added ${today} to server Days`)
       }
       if (!areDaysEqual(cached, days)) {
         // Merge two arrays if not equal?
-        console.log('Cached days not equal to server days, merging...')
-        console.log(cached)
-        console.log(days)
-        // console.log(days)
+        logger('Cached days not equal to server days, merging...')
+        logger(cached)
+        logger(days)
+        // logger(days)
         if (!Array.isArray(cached)) cached = []
         if (!Array.isArray(days)) days = []
 
@@ -178,11 +178,11 @@ function EntryList() {
         // setEntries([...merged])
         setDaysCache([...merged])
       } else {
-        console.log('Cached days equal')
+        logger('Cached days equal')
       }
       setInitialFetchDone(true)
     } catch (err) {
-      console.log(err)
+      logger(err)
     }
   }
 

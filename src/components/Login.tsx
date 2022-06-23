@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { theme } from 'themes'
 import { useUserContext } from 'context'
 import { Splash } from 'components'
-import { supabase, isDev } from 'utils'
+import { supabase, isDev, logger } from 'utils'
 import logo from '../../assets/icons/journaldo-logo@2x.png'
 
 const Container = styled.div`
@@ -93,7 +93,7 @@ const LoginWithToken = () => {
       let refreshToken = rt.current.value
       const { error } = await supabase.auth.signIn({ refreshToken })
       if (error) {
-        console.log(error)
+        logger(error)
         setAuthError(error.message)
       }
     } else {

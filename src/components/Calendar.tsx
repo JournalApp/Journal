@@ -4,7 +4,7 @@ import dayjs from 'dayjs'
 import { theme } from 'themes'
 import { useAppearanceContext, useEntriesContext, AppearanceContextInterface } from 'context'
 import { CalendarOpen, getCalendarIsOpen } from 'config'
-import { createDays, getYearsSince } from 'utils'
+import { createDays, getYearsSince, logger } from 'utils'
 import { useUserContext } from 'context'
 
 interface ContainerProps {
@@ -229,7 +229,7 @@ const Calendar = () => {
         event: 'calendar scroll-to-day',
       })
     } else {
-      console.log('no such day, adding...')
+      logger('no such day, adding...')
       await cacheCreateNewEntry(day)
       setScrollToDay(day)
       window.electronAPI.capture({
