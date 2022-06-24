@@ -19,13 +19,6 @@ if (!isDev()) {
     log.info('update-not-available')
   })
 
-  autoUpdater.on('error', (error) => {
-    logger('Error:')
-    logger(error)
-    log.info('Error:')
-    log.info(error)
-  })
-
   setInterval(() => {
     logger('autoUpdater.checkForUpdates()')
     log.info('autoUpdater.checkForUpdates()')

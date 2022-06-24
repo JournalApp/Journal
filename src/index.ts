@@ -6,7 +6,7 @@ import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-insta
 require('./services/autoUpdater')
 import { getLastUser } from './services/sqlite'
 import { capture, client } from './services/analytics'
-import { logger } from './utils'
+import { isDev, logger } from './utils'
 
 const lastUser = getLastUser()
 capture({
@@ -115,16 +115,32 @@ const createWindow = (): void => {
       log.info('update-downloaded')
       mainWindow.webContents.send('update-downloaded')
     })
+
+    autoUpdater.on('error', (error) => {
+      logger('Error:')
+      logger(error)
+      log.info('Error:')
+      log.info(error)
+      capture({
+        distinctId: getLastUser(),
+        event: 'error auto-updater',
+        properties: {
+          error,
+        },
+      })
+    })
   })
 
   // and load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY)
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
-  installExtension(REACT_DEVELOPER_TOOLS)
-    .then((name) => console.log(`Added Extension:  ${name}`))
-    .catch((err) => console.log('An error occurred: ', err))
+  if (isDev()) {
+    mainWindow.webContents.openDevTools()
+    installExtension(REACT_DEVELOPER_TOOLS)
+      .then((name) => console.log(`Added Extension:  ${name}`))
+      .catch((err) => console.log('An error occurred: ', err))
+  }
 
   mainWindow.webContents.on('context-menu', (event: any, params: any) => {
     logger('context-menu event')

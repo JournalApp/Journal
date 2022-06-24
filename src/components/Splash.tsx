@@ -3,9 +3,9 @@ import styled, { keyframes } from 'styled-components'
 import { theme } from 'themes'
 
 const hide = keyframes`
- 0% {
+  0% {
   opacity: 1;
-}
+  }
   90% {
     opacity: 0;
   }
@@ -25,7 +25,7 @@ const Splash = styled.div`
   pointer-events: none;
   background-color: ${theme('color.primary.surface')};
   animation-name: ${hide};
-  animation-duration: ${theme('animation.time.normal')};
+  animation-duration: ${theme('animation.time.long')};
   animation-timing-function: cubic-bezier(0.17, 0.18, 0.41, 0.99);
   animation-fill-mode: forwards;
   animation-delay: ${theme('animation.time.long')};
