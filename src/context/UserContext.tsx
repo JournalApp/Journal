@@ -47,16 +47,26 @@ export function UserProvider({ children }: any) {
 
     fetchServerTimeDelta()
 
-    supabase.auth.onAuthStateChange((_event, session) => {
-      logger('Auth event:')
-      logger(_event)
-      logger(session)
-      logger('Session:')
-      setSession(session)
+    supabase.auth.onAuthStateChange((_event, newSession) => {
+      logger(`Auth event: ${_event}`)
+      setSession((prevSession) => {
+        if (
+          prevSession?.access_token == newSession?.access_token &&
+          prevSession?.expires_at == newSession?.expires_at &&
+          prevSession?.refresh_token &&
+          newSession?.refresh_token
+        ) {
+          logger('Session the same')
+          return prevSession
+        } else {
+          logger('Session is new')
+          return newSession
+        }
+      })
 
       if (_event == 'SIGNED_IN') {
-        window.electronAPI.cache.addUser(session.user.id)
-        window.electronAPI.app.setKey({ lastUser: session.user.id })
+        window.electronAPI.cache.addUser(newSession.user.id)
+        window.electronAPI.app.setKey({ lastUser: newSession.user.id })
       }
     })
   }, [])
