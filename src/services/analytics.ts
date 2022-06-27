@@ -7,29 +7,33 @@ const client = new PostHog('phc_71spBFzoqqePdAa4wpRxNAMxdkMyKdwHkdeMvnQ6wup', {
 })
 
 const capture = ({ distinctId, event, properties }: EventMessage) => {
-  try {
-    client.capture({
-      distinctId,
-      event,
-      properties,
-    })
-  } catch (error) {
-    logger(`error`)
-    logger(error)
+  if (!isDev()) {
+    try {
+      client.capture({
+        distinctId,
+        event,
+        properties,
+      })
+    } catch (error) {
+      logger(`error`)
+      logger(error)
+    }
   }
 }
 
 ipcMain.handle('analytics-capture', async (e, { distinctId, event, properties }: EventMessage) => {
   logger('analytics-capture')
-  try {
-    client.capture({
-      distinctId,
-      event,
-      properties,
-    })
-  } catch (error) {
-    logger(`error`)
-    logger(error)
+  if (!isDev()) {
+    try {
+      client.capture({
+        distinctId,
+        event,
+        properties,
+      })
+    } catch (error) {
+      logger(`error`)
+      logger(error)
+    }
   }
 })
 
