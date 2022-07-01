@@ -1,9 +1,8 @@
-import { app, BrowserWindow, autoUpdater, ipcMain, shell } from 'electron'
+import { app, BrowserWindow, autoUpdater, ipcMain, shell, dialog } from 'electron'
 import path from 'path'
 import url from 'url'
 import log from 'electron-log'
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer'
-require('./services/autoUpdater')
 import { getLastUser } from './services/sqlite'
 import { capture, client } from './services/analytics'
 import { isDev, logger } from './utils'
@@ -98,7 +97,6 @@ const createWindow = (): void => {
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show()
-
     // Handle open from url when app was closed
     if (openUrl) {
       mainWindow.webContents.send('open-url', openUrl)
@@ -116,7 +114,8 @@ const createWindow = (): void => {
       mainWindow.webContents.send('update-downloaded')
     })
 
-    autoUpdater.on('error', (error) => {
+    // Handle errors
+    autoUpdater.on('error', (error: any) => {
       logger('Error:')
       logger(error)
       log.info('Error:')
@@ -128,7 +127,21 @@ const createWindow = (): void => {
           error,
         },
       })
+      if (error?.domain == 'SQRLUpdaterErrorDomain' && error?.code == 8) {
+        logger('Read-only volume')
+        log.info('Read-only volume')
+        dialog.showMessageBoxSync({
+          message:
+            "You've launched Journal on a read-only volume. Please move Journal to Applications folder and try again.",
+          title: 'read-only volume',
+          type: 'warning',
+        })
+        app.quit()
+      }
     })
+
+    // Rest of autoUpdate logic
+    require('./services/autoUpdater')
   })
 
   // and load the index.html of the app.
@@ -233,5 +246,17 @@ app.on('web-contents-created', (event, contents) => {
 
 app.commandLine.appendSwitch('ignore-certificate-errors')
 
+if (!isDev()) {
+  process.on('uncaughtException', (error) => {
+    log.error(error)
+    capture({
+      distinctId: getLastUser(),
+      event: 'error uncaughtException',
+      properties: {
+        error,
+      },
+    })
+  })
+}
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.

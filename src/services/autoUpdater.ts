@@ -23,7 +23,7 @@ if (!isDev()) {
     logger('autoUpdater.checkForUpdates()')
     log.info('autoUpdater.checkForUpdates()')
     autoUpdater.checkForUpdates()
-  }, 60000)
+  }, 5 * 60 * 1000)
 
   autoUpdater.checkForUpdates()
 

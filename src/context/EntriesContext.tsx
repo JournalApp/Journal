@@ -7,8 +7,10 @@ import { supabase, isUnauthorized, logger } from 'utils'
 
 interface EntriesContextInterface {
   initialCache: any
-  daysCache: String[]
-  setDaysCache: (days: String[]) => void
+  daysCache: string[]
+  setDaysCache: (days: string[]) => void
+  daysWithNoContent: string[]
+  setDaysWithNoContent: any // TODO better type
   cacheCreateNewEntry: (day: string) => Promise<void>
   removeCachedDay: (day: string) => Promise<void>
   setScrollToDay: (day: string) => void
@@ -29,11 +31,17 @@ export function EntriesProvider({ children }: any) {
   const [pendingDeletedEntries, setPendingDeletedEntries] = useState(false)
   const today = useRef(dayjs().format('YYYY-MM-DD'))
   const [daysCache, setDaysCache] = useState([])
+  const [daysWithNoContent, setDaysWithNoContent] = useState<string[]>([])
 
   useEffect(() => {
     logger('daysCache updated:')
     logger(daysCache)
   }, [daysCache])
+
+  useEffect(() => {
+    logger('daysWithNoContent updated:')
+    logger(daysWithNoContent)
+  }, [daysWithNoContent])
 
   const syncPendingDeletedEntries = async () => {
     const days = await window.electronAPI.cache.getDeletedDays(session.user.id)
@@ -151,6 +159,11 @@ export function EntriesProvider({ children }: any) {
     setDaysCache([...days])
     // setDaysCache((prev) => prev.filter((d) => d !== day))
     logger(`Removed day ${day}`)
+
+    window.electronAPI.capture({
+      distinctId: session.user.id,
+      event: 'entry remove',
+    })
   }
 
   const setScrollToDay = (day: string) => {
@@ -169,6 +182,8 @@ export function EntriesProvider({ children }: any) {
     initialCache,
     daysCache,
     setDaysCache,
+    daysWithNoContent,
+    setDaysWithNoContent,
     cacheCreateNewEntry,
     removeCachedDay,
     setScrollToDay,

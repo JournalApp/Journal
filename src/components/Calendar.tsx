@@ -2,10 +2,15 @@ import React, { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import dayjs from 'dayjs'
 import { theme } from 'themes'
-import { useAppearanceContext, useEntriesContext, AppearanceContextInterface } from 'context'
+import {
+  useAppearanceContext,
+  useEntriesContext,
+  useUserContext,
+  AppearanceContextInterface,
+} from 'context'
 import { CalendarOpen, getCalendarIsOpen } from 'config'
 import { createDays, getYearsSince, logger } from 'utils'
-import { useUserContext } from 'context'
+import { Icon } from 'components'
 
 interface ContainerProps {
   isOpen: CalendarOpen
@@ -37,7 +42,12 @@ interface DayProps {
   hasEntry: boolean
 }
 
-const Day = styled.button<DayProps>`
+const Day = styled.div`
+  height: 30px;
+`
+
+const DayButton = styled.button<DayProps>`
+  display: block;
   background-color: ${(props) => (props.isToday ? theme('color.primary.main') : 'transparent')};
   padding: 5px 12px;
   width: fit-content;
@@ -175,13 +185,27 @@ const RangeVisible = styled.div`
   opacity: 0.3;
 `
 
+const Remove = styled((props) => <Icon {...props} />)`
+  position: relative;
+  top: -27px;
+  -webkit-app-region: no-drag;
+  cursor: pointer;
+  right: -24px;
+  opacity: 0.5;
+  transition: opacity ${theme('animation.time.normal')};
+  &:hover {
+    opacity: 0.8;
+  }
+`
+
 const withLeadingZero = (num: number) => {
   return (num < 10 ? '0' : '') + num
 }
 
 const Calendar = () => {
   const { isCalendarOpen } = useAppearanceContext()
-  const { daysCache, cacheCreateNewEntry, setScrollToDay } = useEntriesContext()
+  const { daysCache, cacheCreateNewEntry, removeCachedDay, setScrollToDay, daysWithNoContent } =
+    useEntriesContext()
   const { session } = useUserContext()
   const today = new Date()
 
@@ -259,44 +283,35 @@ const Calendar = () => {
                       <MonthLabelYear>{year}</MonthLabelYear>
                     </MonthLabel>
                     <Days>
-                      {createDays(year, month + 1).map(
-                        (day) =>
+                      {createDays(year, month + 1).map((day) => {
+                        const today = `${year}-${withLeadingZero(month + 1)}-${withLeadingZero(
+                          day
+                        )}`
+                        return (
                           isBeforeToday(year, month, day) && (
-                            <Day
-                              key={
-                                year +
-                                '-' +
-                                withLeadingZero(month + 1) +
-                                '-' +
-                                withLeadingZero(day) +
-                                '-calendar'
-                              }
-                              id={
-                                year +
-                                '-' +
-                                withLeadingZero(month + 1) +
-                                '-' +
-                                withLeadingZero(day) +
-                                '-calendar'
-                              }
-                              onClick={() =>
-                                scrollToDay(
-                                  year +
-                                    '-' +
-                                    withLeadingZero(month + 1) +
-                                    '-' +
-                                    withLeadingZero(day)
-                                )
-                              }
-                              isToday={isToday(year, month, day)}
-                              hasEntry={hasEntry(
-                                year + '-' + withLeadingZero(month + 1) + '-' + withLeadingZero(day)
-                              )}
-                            >
-                              <DayLabel>{day}</DayLabel>
+                            <Day key={`${today}-wrapper`}>
+                              <DayButton
+                                key={`${today}-calendar`}
+                                id={`${today}-calendar`}
+                                onClick={() => scrollToDay(today)}
+                                isToday={isToday(year, month, day)}
+                                hasEntry={hasEntry(today)}
+                              >
+                                <DayLabel>{day}</DayLabel>
+                              </DayButton>
+                              {daysWithNoContent.some((el) => el == today) &&
+                                !isToday(year, month, day) &&
+                                hasEntry(today) && (
+                                  <Remove
+                                    name='Cross'
+                                    size={16}
+                                    onClick={() => removeCachedDay(today)}
+                                  />
+                                )}
                             </Day>
                           )
-                      )}
+                        )
+                      })}
                     </Days>
                   </Month>
                 )

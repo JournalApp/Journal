@@ -1,11 +1,10 @@
-import React from 'react'
-import { useEntriesContext } from 'context'
+import React, { useEffect, useRef } from 'react'
 import { theme } from 'themes'
 import styled from 'styled-components'
 import dayjs from 'dayjs'
-import { ordinal, breakpoints, logger } from 'utils'
+import { ordinal, breakpoints, logger, arrayEquals } from 'utils'
 import { Icon } from 'components'
-import { useUserContext } from 'context'
+import { useUserContext, useEntriesContext } from 'context'
 
 const AsideItem = styled.p`
   margin: 0;
@@ -149,17 +148,35 @@ type EntryAsideProps = {
 }
 
 function EntryAside({ date, wordCount }: EntryAsideProps) {
-  const { daysCache, removeCachedDay } = useEntriesContext()
+  const { daysCache, removeCachedDay, setDaysWithNoContent } = useEntriesContext()
   const { session } = useUserContext()
+  const lastWordCount = useRef(0)
 
-  const removeDay = (date: string) => {
-    logger(`removeDay ${date}`)
-    removeCachedDay(date)
-    window.electronAPI.capture({
-      distinctId: session.user.id,
-      event: 'entry remove',
-    })
-  }
+  useEffect(() => {
+    if (wordCount == 0) {
+      logger(`No content on ${date}`)
+      setDaysWithNoContent((prev: string[]) => {
+        return [...prev, date]
+      })
+    }
+  }, [])
+
+  useEffect(() => {
+    if (lastWordCount.current == 0 && wordCount != 0) {
+      logger('changed to has content')
+      setDaysWithNoContent((prev: string[]) => {
+        return prev.filter((day: string) => {
+          return day != date
+        })
+      })
+    } else if (lastWordCount.current != 0 && wordCount == 0) {
+      logger('changed to has no content')
+      setDaysWithNoContent((prev: string[]) => {
+        return [...new Set([...prev, date])]
+      })
+    }
+    lastWordCount.current = wordCount
+  }, [wordCount])
 
   const dayCountOrdinar = () => {
     let count = daysCache.findIndex((d: any) => d == date) + 1
@@ -182,7 +199,7 @@ function EntryAside({ date, wordCount }: EntryAsideProps) {
       <AsideMenu>
         <AsideMenuStickyContainer>
           {wordCount == 0 && !isToday(date) && (
-            <Remove name='Cross' size={16} onClick={() => removeDay(date)} />
+            <Remove name='Cross' size={16} onClick={() => removeCachedDay(date)} />
           )}
         </AsideMenuStickyContainer>
       </AsideMenu>
