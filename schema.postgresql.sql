@@ -63,6 +63,22 @@ create policy "Anyone can read content" on website_pages
   for select using (true);
 
 
+-- Create a table for Public Website changelog
+create table releases (
+  version varchar(50),
+  pub_date timestamp with time zone not null,
+  notes text,
+
+  primary key (version)
+);
+
+alter table releases
+  enable row level security;
+
+create policy "Anyone can read content" on releases
+  for select using (true);
+
+
   -- Create a table for user feedback
 create table feedback (
   id serial unique not null,
