@@ -136,7 +136,7 @@ ipcMain.handle('cache-get-days', async (event, user_id) => {
     const stmt = db.prepare(
       'SELECT day FROM journals WHERE user_id = @user_id AND deleted = FALSE ORDER BY day ASC'
     )
-    const result = stmt.all({ user_id })
+    const result = stmt.all({ user_id }) as any[]
     var days = result.map((entry: any) => entry.day)
     let today = dayjs().format('YYYY-MM-DD')
     let todayExists = days.some((el: any) => {
@@ -203,7 +203,7 @@ ipcMain.handle('cache-delete-all', async (event, user_id) => {
 
 // Preferences
 
-ipcMain.on('preferences-get-all', (event) => {
+ipcMain.on('preferences-get-all', (event, user_id?) => {
   interface prefMap {
     [key: string]: string
   }
@@ -214,9 +214,8 @@ ipcMain.on('preferences-get-all', (event) => {
     const stmt1 = db.prepare('SELECT value FROM app WHERE key = @key')
     const lastUser = stmt1.get({ key: 'lastUser' })
     if (lastUser) {
-      const user_id = lastUser.value
       const stmt2 = db.prepare('SELECT * FROM preferences WHERE user_id = @user_id')
-      let prefs = stmt2.all({ user_id })
+      let prefs = stmt2.all({ user_id: user_id || lastUser.value })
       if (prefs.length) {
         let prettyPrefs = {} as prefMap
         for (let i = 0; i < prefs.length; i++) {

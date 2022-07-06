@@ -32,11 +32,11 @@ const calendarOpenMap = {
 type CalendarOpen = keyof typeof calendarOpenMap
 
 const defaultUserPreferences = {
-  fontSize: 'normal',
-  fontFace: 'inter',
-  theme: 'light',
-  calendarOpen: 'closed',
-  spellCheckEnabled: 'true',
+  fontSize: 'normal' as FontSize,
+  fontFace: 'inter' as FontFace,
+  theme: 'light' as ColorTheme,
+  calendarOpen: 'closed' as CalendarOpen,
+  spellCheckEnabled: 'true' as SpellCheckEnabled,
 }
 
 const baseTheme = {

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react'
-import { setCssVars } from 'utils'
+import { logger, setCssVars } from 'utils'
 import {
+  defaultUserPreferences,
   getFontSize,
   getFontFace,
   getColorTheme,
@@ -139,7 +140,59 @@ export function AppearanceProvider({
   }
 
   useEffect(() => {
-    setSpellCheck(spellCheckIsEnabled)
+    const userPreferences = window.electronAPI.preferences.getAll(session.user.id)
+    console.log(`Get preferences for userid: ${session.user.id}`)
+    console.log(userPreferences)
+
+    if (userPreferences?.theme) {
+      if (colorTheme != userPreferences.theme) {
+        setColorTheme(userPreferences.theme)
+        logger(`-----> Setting theme to ${userPreferences?.theme}`)
+      }
+    } else if (defaultUserPreferences.theme != colorTheme) {
+      setColorTheme(defaultUserPreferences.theme)
+      logger(`-----> Setting theme to ${defaultUserPreferences.theme}`)
+    }
+
+    if (userPreferences?.fontFace) {
+      if (fontFace != userPreferences.fontFace) {
+        setFontFace(userPreferences.fontFace)
+        logger(`-----> Setting fontFace to ${userPreferences?.fontFace}`)
+      }
+    } else if (defaultUserPreferences.fontFace != fontFace) {
+      setFontFace(defaultUserPreferences.fontFace)
+      logger(`-----> Setting fontFace to ${defaultUserPreferences.fontFace}`)
+    }
+
+    if (userPreferences?.fontSize) {
+      if (fontSize != userPreferences.fontSize) {
+        setFontSize(userPreferences.fontSize)
+        logger(`-----> Setting fontSize to ${userPreferences?.fontSize}`)
+      }
+    } else if (defaultUserPreferences.fontSize != fontSize) {
+      setFontSize(defaultUserPreferences.fontSize)
+      logger(`-----> Setting fontFace to ${defaultUserPreferences.fontSize}`)
+    }
+
+    if (userPreferences?.calendarOpen) {
+      if (isCalendarOpen != userPreferences.calendarOpen) {
+        toggleIsCalendarOpen()
+        logger(`-----> Setting toggleIsCalendarOpen`)
+      }
+    } else if (defaultUserPreferences.calendarOpen != isCalendarOpen) {
+      toggleIsCalendarOpen()
+      logger(`-----> Setting toggleIsCalendarOpen`)
+    }
+
+    if (userPreferences?.spellCheckEnabled) {
+      if (spellCheckIsEnabled != userPreferences.spellCheckEnabled) {
+        setSpellCheck(userPreferences.spellCheckEnabled)
+        logger(`-----> Setting setSpellCheck to ${userPreferences.spellCheckEnabled}`)
+      }
+    } else if (defaultUserPreferences.spellCheckEnabled != spellCheckIsEnabled) {
+      setSpellCheck(defaultUserPreferences.spellCheckEnabled)
+      logger(`-----> Setting setSpellCheck to ${defaultUserPreferences.spellCheckEnabled}`)
+    }
   }, [])
 
   let state = {

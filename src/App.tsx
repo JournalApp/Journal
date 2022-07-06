@@ -12,7 +12,7 @@ import {
 } from 'components'
 import { AppearanceProvider, EntriesProvider, UserProvider } from 'context'
 import { theme } from 'themes'
-import { createCssVars, supabase } from 'utils'
+import { createCssVars, logger } from 'utils'
 import {
   defaultUserPreferences,
   getColorTheme,

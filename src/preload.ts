@@ -47,8 +47,8 @@ const electronAPI = {
     async deleteAll(user_id: string) {
       await ipcRenderer.invoke('preferences-delete-all', user_id)
     },
-    getAll() {
-      return ipcRenderer.sendSync('preferences-get-all')
+    getAll(user_id?: string) {
+      return ipcRenderer.sendSync('preferences-get-all', user_id)
     },
   },
   app: {

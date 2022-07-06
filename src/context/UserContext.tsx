@@ -134,7 +134,7 @@ export function UserProvider({ children }: any) {
     supabase.auth.signOut()
     // window.electronAPI.app.setKey({ lastUser: null })
     window.electronAPI.cache.deleteAll(session.user.id)
-    window.electronAPI.preferences.deleteAll(session.user.id)
+    // window.electronAPI.preferences.deleteAll(session.user.id)
     window.electronAPI.reloadWindow()
   }
 
