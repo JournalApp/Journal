@@ -60,6 +60,12 @@ const electronAPI = {
     },
   },
   handleSpellCheck: (callback: any) => ipcRenderer.once('electron-handleSpellCheck', callback),
+  disableSpellCheck: async () => {
+    await ipcRenderer.invoke('electron-disableSpellCheck')
+  },
+  enableSpellCheck: async () => {
+    await ipcRenderer.invoke('electron-enableSpellCheck')
+  },
   handleOpenUrl: (callback: any) => ipcRenderer.on('open-url', callback),
   reloadWindow() {
     ipcRenderer.send('electron-reload')

@@ -4,11 +4,13 @@ import {
   getFontSize,
   getFontFace,
   getColorTheme,
+  getCalendarIsOpen,
+  getSpellCheckIsEnabled,
   ColorTheme,
   FontSize,
   FontFace,
   CalendarOpen,
-  getCalendarIsOpen,
+  SpellCheckEnabled,
 } from 'config'
 import { useUserContext } from 'context'
 
@@ -17,10 +19,12 @@ interface AppearanceContextInterface {
   fontFace: FontFace
   fontSize: FontSize
   isCalendarOpen: CalendarOpen
+  spellCheckIsEnabled: SpellCheckEnabled
   setColorTheme: (theme: ColorTheme) => void
   setFontSize: (size: FontSize) => void
   setFontFace: (size: FontFace) => void
   toggleIsCalendarOpen: () => void
+  setSpellCheck: (spellCheckEnabled: SpellCheckEnabled) => void
 }
 
 const AppearanceContext = createContext<AppearanceContextInterface | null>(null)
@@ -30,6 +34,7 @@ type AppearanceProviderProps = {
   initialFontSize: FontSize
   initialFontFace: FontFace
   initialCalendarOpen: CalendarOpen
+  initialSpellCheckEnabled: SpellCheckEnabled
   children: any
 }
 
@@ -38,12 +43,15 @@ export function AppearanceProvider({
   initialFontSize,
   initialFontFace,
   initialCalendarOpen,
+  initialSpellCheckEnabled,
   children,
 }: AppearanceProviderProps) {
   const [colorTheme, setColorThemeInternal] = useState<ColorTheme>(initialColorTheme)
   const [fontFace, setFontFaceInternal] = useState<FontFace>(initialFontFace)
   const [fontSize, setFontSizeInternal] = useState<FontSize>(initialFontSize)
   const [isCalendarOpen, setIsCalendarOpenInternal] = useState<CalendarOpen>(initialCalendarOpen)
+  const [spellCheckIsEnabled, setSpellCheckIsEnabled] =
+    useState<SpellCheckEnabled>(initialSpellCheckEnabled)
   const { session } = useUserContext()
 
   const setFontFace = (face: FontFace) => {
@@ -76,6 +84,21 @@ export function AppearanceProvider({
       distinctId: session.user.id,
       event: 'appearance set-theme',
       properties: { theme },
+    })
+  }
+
+  const setSpellCheck = (spellCheckEnabled: SpellCheckEnabled) => {
+    if (spellCheckEnabled == 'false') {
+      window.electronAPI.disableSpellCheck()
+    } else {
+      window.electronAPI.enableSpellCheck()
+    }
+    setSpellCheckIsEnabled(spellCheckEnabled)
+    window.electronAPI.preferences.set(session.user.id, { spellCheckEnabled })
+    window.electronAPI.capture({
+      distinctId: session.user.id,
+      event: 'entry spell-check',
+      properties: { spellCheckEnabled },
     })
   }
 
@@ -115,15 +138,21 @@ export function AppearanceProvider({
     }
   }
 
+  useEffect(() => {
+    setSpellCheck(spellCheckIsEnabled)
+  }, [])
+
   let state = {
     colorTheme,
     fontFace,
     fontSize,
     isCalendarOpen,
+    spellCheckIsEnabled,
     setColorTheme,
     setFontFace,
     setFontSize,
     toggleIsCalendarOpen,
+    setSpellCheck,
   }
   return <AppearanceContext.Provider value={state}>{children}</AppearanceContext.Provider>
 }

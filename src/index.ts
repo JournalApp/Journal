@@ -155,6 +155,18 @@ const createWindow = (): void => {
       .catch((err) => console.log('An error occurred: ', err))
   }
 
+  ipcMain.handle('electron-disableSpellCheck', async () => {
+    logger('electron-disableSpellCheck')
+    mainWindow.webContents.session.setSpellCheckerLanguages([])
+  })
+
+  ipcMain.handle('electron-enableSpellCheck', async () => {
+    logger('electron-enableSpellCheck')
+    mainWindow.webContents.session.setSpellCheckerLanguages(
+      mainWindow.webContents.session.availableSpellCheckerLanguages
+    )
+  })
+
   mainWindow.webContents.on('context-menu', (event: any, params: any) => {
     logger('context-menu event')
 

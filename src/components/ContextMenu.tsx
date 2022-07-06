@@ -15,7 +15,7 @@ import { getSelectionText } from '@udecode/plate'
 import { usePlateEditorState, useEventPlateId } from '@udecode/plate-core'
 import { Transforms, Editor as SlateEditor } from 'slate'
 import styled, { keyframes } from 'styled-components'
-import * as Menu from '@radix-ui/react-context-menu'
+import { useAppearanceContext } from 'context'
 
 const showDropdown = keyframes`
   0% {
@@ -101,13 +101,12 @@ export const ContextMenu = ({
     placement: 'right-start',
     middleware: [offset({ mainAxis: 5, alignmentAxis: 4 }), flip(), shift()],
   })
+  const { setSpellCheck, spellCheckIsEnabled } = useAppearanceContext()
 
   const setOpen = (e: any) => {
     logger('onContextMenu')
     if (!visible) {
       window.electronAPI.handleSpellCheck((event: any, value: any) => {
-        logger('handleSpellCheck')
-        logger(value)
         if (!!value.dictionarySuggestions) {
           setSpellSuggections([...value.dictionarySuggestions])
         }
@@ -214,6 +213,15 @@ export const ContextMenu = ({
               </Item>
             ))}
           {spellSuggections.length > 0 ? <Divider /> : ''}
+          {spellCheckIsEnabled == 'true' && (
+            <>
+              <Item onMouseDown={(e) => setSpellCheck('false')}>
+                <ItemTitle>Disable spell check</ItemTitle>
+                <ItemShortcut></ItemShortcut>
+              </Item>
+              <Divider />
+            </>
+          )}
           {selectionText && (
             <Item onMouseDown={(e) => clipboardCommand(e, 'cut')}>
               <ItemTitle>Cut</ItemTitle>
@@ -230,6 +238,15 @@ export const ContextMenu = ({
             <ItemTitle>Paste</ItemTitle>
             <ItemShortcut>⌘V</ItemShortcut>
           </Item>
+          {spellCheckIsEnabled == 'false' && (
+            <>
+              <Divider />
+              <Item onMouseDown={(e) => setSpellCheck('true')}>
+                <ItemTitle>Enable spell check</ItemTitle>
+                <ItemShortcut></ItemShortcut>
+              </Item>
+            </>
+          )}
         </Dropdown>
       )}
     </FloatingPortal>

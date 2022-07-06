@@ -20,6 +20,7 @@ import {
   FontFace,
   FontSize,
   CalendarOpen,
+  SpellCheckEnabled,
   getBaseThemeWithOverrides,
 } from 'config'
 import { electronAPIType } from './preload'
@@ -37,6 +38,8 @@ const initialFontFace: FontFace = userPreferences?.fontFace || defaultUserPrefer
 const initialFontSize: FontSize = userPreferences?.fontSize || defaultUserPreferences.fontSize
 const initialCalendarOpen: CalendarOpen =
   userPreferences?.calendarOpen || defaultUserPreferences.calendarOpen
+const initialSpellCheckEnabled: SpellCheckEnabled =
+  userPreferences?.spellCheckEnabled || defaultUserPreferences.spellCheckEnabled
 
 const GlobalStyle = createGlobalStyle`
 :root {
@@ -93,6 +96,7 @@ function App() {
             initialFontFace={initialFontFace}
             initialFontSize={initialFontSize}
             initialCalendarOpen={initialCalendarOpen}
+            initialSpellCheckEnabled={initialSpellCheckEnabled}
           >
             <FadeOut />
             <Menu />
@@ -100,11 +104,11 @@ function App() {
             <Calendar />
             <ScrollToToday />
             <FeedbackWidget />
+            <NoDragScrollBars />
+            <Container>
+              <EntryList />
+            </Container>
           </AppearanceProvider>
-          <NoDragScrollBars />
-          <Container>
-            <EntryList />
-          </Container>
         </EntriesProvider>
       </UserProvider>
     </>

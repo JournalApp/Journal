@@ -19,6 +19,12 @@ const colorThemeMap = {
 }
 type ColorTheme = keyof typeof colorThemeMap
 
+const spellCheckMap = {
+  true: 'true',
+  false: 'false',
+}
+type SpellCheckEnabled = keyof typeof spellCheckMap
+
 const calendarOpenMap = {
   opened: { entriesOffset: 200, miniDatesVisibility: 'visible' },
   closed: { entriesOffset: 0, miniDatesVisibility: 'hidden' },
@@ -30,6 +36,7 @@ const defaultUserPreferences = {
   fontFace: 'inter',
   theme: 'light',
   calendarOpen: 'closed',
+  spellCheckEnabled: 'true',
 }
 
 const baseTheme = {
@@ -61,6 +68,10 @@ const getFontFace = (name: FontFace) => {
 
 const getColorTheme = (name: ColorTheme) => {
   return colorThemeMap[name] ? colorThemeMap[name] : colorThemeMap['light']
+}
+
+const getSpellCheckIsEnabled = (name: SpellCheckEnabled) => {
+  return spellCheckMap[name] ? spellCheckMap[name] : spellCheckMap['true']
 }
 
 const getCalendarIsOpen = (state: CalendarOpen) => {
@@ -95,9 +106,11 @@ export {
   getFontFace,
   getColorTheme,
   getCalendarIsOpen,
+  getSpellCheckIsEnabled,
   defaultUserPreferences,
   ColorTheme,
   FontSize,
   FontFace,
   CalendarOpen,
+  SpellCheckEnabled,
 }
