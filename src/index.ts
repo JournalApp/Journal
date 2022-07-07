@@ -3,7 +3,7 @@ import path from 'path'
 import url from 'url'
 import log from 'electron-log'
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer'
-import { getLastUser } from './services/sqlite'
+import { getLastUser, getAppBounds, setAppBounds } from './services/sqlite'
 import { capture, client } from './services/analytics'
 import { isDev, logger } from './utils'
 
@@ -45,9 +45,9 @@ if (require('electron-squirrel-startup')) {
 
 const createWindow = (): void => {
   // Create the browser window.
+  const bounds = getAppBounds(1200, 800)
   const mainWindow = new BrowserWindow({
-    height: 1600,
-    width: 1800,
+    ...bounds,
     titleBarStyle: 'customButtonsOnHover',
     trafficLightPosition: { x: 16, y: 16 },
     show: false,
@@ -64,11 +64,17 @@ const createWindow = (): void => {
 
   mainWindow.on('resized', () => {
     logger('resized')
+    setAppBounds(mainWindow.getBounds())
     capture({
       distinctId: getLastUser(),
       event: 'app resized',
       properties: mainWindow.getBounds(),
     })
+  })
+
+  mainWindow.on('moved', () => {
+    logger('moved')
+    setAppBounds(mainWindow.getBounds())
   })
 
   mainWindow.on('maximize', () => {

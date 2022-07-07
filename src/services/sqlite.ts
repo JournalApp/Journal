@@ -258,7 +258,7 @@ ipcMain.handle('preferences-delete-all', async (event, user_id) => {
   try {
     const db = getDB()
     const stmt = db.prepare('DELETE FROM preferences WHERE user_id = @user_id')
-    const result = stmt.run({ user_id })
+    const result = stmt.run({ user_id }) as any[]
     return result
   } catch (error) {
     logger(`error`)
@@ -302,6 +302,37 @@ ipcMain.handle('app-set-key', async (event, set) => {
 
 // functions
 
+const getAppBounds = (defaultWidth: number, defaultHeight: number) => {
+  try {
+    const db = getDB()
+    const stmt = db.prepare("SELECT value FROM app WHERE key = 'windowBounds'")
+    let res = stmt.get()
+    if (res?.value) {
+      return JSON.parse(res.value)
+    } else {
+      return { width: defaultWidth, height: defaultHeight }
+    }
+  } catch (error) {
+    logger(`error`)
+    logger(error)
+    return { width: defaultWidth, height: defaultHeight }
+  }
+}
+
+const setAppBounds = (value: Electron.Rectangle) => {
+  try {
+    const db = getDB()
+    const stmt = db.prepare(
+      `INSERT INTO app (key, value) VALUES (\'windowBounds\', @value)
+      ON CONFLICT(key) DO UPDATE SET value = excluded.value`
+    )
+    stmt.run({ value: JSON.stringify(value) })
+  } catch (error) {
+    logger(`error`)
+    logger(error)
+  }
+}
+
 const getLastUser = () => {
   logger('getLastUser')
   try {
@@ -316,4 +347,4 @@ const getLastUser = () => {
   }
 }
 
-export { getLastUser }
+export { getLastUser, getAppBounds, setAppBounds }
