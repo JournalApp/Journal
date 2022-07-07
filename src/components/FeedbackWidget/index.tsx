@@ -25,6 +25,7 @@ const Label = styled.label`
   font-style: normal;
   line-height: 16px;
   white-space: nowrap;
+  pointer-events: none;
 `
 
 const LabelOptional = styled.label`
@@ -43,11 +44,26 @@ const LabelOptional = styled.label`
   white-space: nowrap;
 `
 
-const LabelError = styled.label`
+const LabelErrorRating = styled.label`
   position: absolute;
   padding: 4px 8px;
   border-radius: 12px;
   margin: 2px ​8px;
+  top: 0;
+  right: 0;
+  color: ${theme('color.error.main')};
+  font-size: 12px;
+  font-weight: 600;
+  font-style: normal;
+  line-height: 16px;
+  white-space: nowrap;
+`
+
+const LabelError = styled.label`
+  position: absolute;
+  padding: 4px 8px;
+  border-radius: 12px;
+  margin: 8px;
   top: 0;
   right: 0;
   color: ${theme('color.error.main')};
@@ -73,6 +89,48 @@ interface TextAreaProps {
 }
 
 const TextArea = styled.textarea<TextAreaProps>`
+  padding: 37px 16px 13px 16px;
+  background-color: ${theme('color.popper.surface')};
+  color: ${theme('color.primary.main')};
+  resize: vertical;
+  border: 0;
+  border-radius: 8px;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0 0 1px 0;
+  font-size: 16px;
+  line-height: 28px;
+  font-weight: 400;
+  resize: none;
+  transition: all ${theme('animation.time.normal')};
+  &:focus {
+    border: 0;
+    background-color: ${theme('color.popper.hover')};
+    outline: 0;
+    transition: all ${theme('animation.time.normal')};
+    & + label {
+      opacity: 1;
+      transition: all ${theme('animation.time.normal')};
+    }
+  }
+  &:active {
+    border: 0;
+    transition: all ${theme('animation.time.normal')};
+  }
+  &:hover {
+    transition: all ${theme('animation.time.normal')};
+    background-color: ${theme('color.popper.hover')};
+    & + label {
+      color: ${theme('color.primary.main')};
+      transition: all ${theme('animation.time.normal')};
+    }
+  }
+  &::placeholder {
+    opacity: 0.6;
+  }
+`
+
+const Input = styled.input`
   padding: 37px 16px 13px 16px;
   background-color: ${theme('color.popper.surface')};
   color: ${theme('color.primary.main')};
@@ -350,6 +408,7 @@ type FormData = {
   feedbackType: Keys
   rating: string
   feedback: string
+  email: string
 }
 
 function FeedbackWidget() {
@@ -357,19 +416,22 @@ function FeedbackWidget() {
   const [formMessage, setFormMessage] = useState([])
   const [formSubmitted, setFormSubmitted] = useState(false)
   const [formSubmitting, setFormSubmitting] = useState(false)
+  const { session, signOut } = useUserContext()
   const {
     register,
     handleSubmit,
     setValue,
     setError,
+    setFocus,
     resetField,
     reset,
     control,
     clearErrors,
     watch,
     formState: { errors, isDirty },
-  } = useForm<FormData>({ defaultValues: { feedbackType: 'experience' } })
-  const { session, signOut } = useUserContext()
+  } = useForm<FormData>({
+    defaultValues: { feedbackType: 'experience', email: session.user.email },
+  })
 
   const watchFeedbackType = watch('feedbackType')
 
@@ -388,6 +450,7 @@ function FeedbackWidget() {
             user_id: session.user.id,
             rating,
             feedback: data.feedback,
+            email: data.email,
           },
         ],
         { returning: 'minimal' }
@@ -447,7 +510,12 @@ function FeedbackWidget() {
   }, [watchFeedbackType])
 
   useEffect(() => {
-    setTimeout(() => reset(), 200)
+    setTimeout(() => {
+      reset()
+      if (formVisible) {
+        setFocus('feedback', { shouldSelect: true })
+      }
+    }, 200)
     setFormMessage([])
   }, [formVisible])
 
@@ -477,7 +545,9 @@ function FeedbackWidget() {
                 })
               }
             />
-            {errors.rating && <LabelError htmlFor='rating'>{errors.rating.message}</LabelError>}
+            {errors.rating && (
+              <LabelErrorRating htmlFor='rating'>{errors.rating.message}</LabelErrorRating>
+            )}
           </InputContainerAnimated>
           <InputContainer>
             <TextArea
@@ -497,6 +567,23 @@ function FeedbackWidget() {
               !feedbackTypeMap[watchFeedbackType].isInputRequired && (
                 <LabelOptional>(optional)</LabelOptional>
               )
+            )}
+          </InputContainer>
+          <InputContainer>
+            <Input
+              {...register('email', {
+                pattern: {
+                  value: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g,
+                  message: 'Check format',
+                },
+                onBlur: (e) => setValue('email', e.target.value.trim(), { shouldValidate: true }),
+              })}
+            ></Input>
+            <Label htmlFor='email'>Follow-up email:</Label>
+            {errors.email ? (
+              <LabelError htmlFor='email'>{errors.email.message}</LabelError>
+            ) : (
+              <LabelOptional>(optional)</LabelOptional>
             )}
           </InputContainer>
         </FormFieldsContainer>

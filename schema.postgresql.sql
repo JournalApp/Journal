@@ -79,7 +79,7 @@ create policy "Anyone can read content" on releases
   for select using (true);
 
 
-  -- Create a table for user feedback
+-- Create a table for user feedback
 create table feedback (
   id serial unique not null,
   user_id uuid references auth.users(id) not null,
@@ -87,6 +87,7 @@ create table feedback (
   check(rating >=1 and rating <= 5),
   feedback text,
   created_at timestamp with time zone default now(),
+  email varchar(100),
 
   primary key (id)
 );
