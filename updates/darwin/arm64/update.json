@@ -1,12 +1,22 @@
 {
-  "currentRelease": "1.0.0-beta.2",
+  "currentRelease": "1.0.0-beta.3",
   "releases": [
+    {
+      "version": "1.0.0-beta.3",
+      "updateTo": {
+        "version": "1.0.0-beta.3",
+        "pub_date": "2022-07-07T22:00:00+00:00",
+        "notes": "https://desktop.journal.do/darwin/arm64/Journal-1.0.0-beta.3-arm64.dmg",
+        "name": "1.0.0-beta.3",
+        "url": "https://desktop.journal.do/darwin/arm64/Journal-darwin-arm64-1.0.0-beta.3.zip"
+      }
+    },
     {
       "version": "1.0.0-beta.2",
       "updateTo": {
         "version": "1.0.0-beta.2",
         "pub_date": "2022-07-01T20:00:00+00:00",
-        "notes": "Added option to remove empty entries from calendar view",
+        "notes": "https://desktop.journal.do/darwin/arm64/Journal-1.0.0-beta.2-arm64.dmg",
         "name": "1.0.0-beta.2",
         "url": "https://desktop.journal.do/darwin/arm64/Journal-darwin-arm64-1.0.0-beta.2.zip"
       }
@@ -16,7 +26,7 @@
       "updateTo": {
         "version": "1.0.0-beta.1",
         "pub_date": "2022-06-24T20:00:00+00:00",
-        "notes": "First beta release",
+        "notes": "https://desktop.journal.do/darwin/arm64/Journal-1.0.0-beta.1-arm64.dmg",
         "name": "1.0.0-beta.1",
         "url": "https://desktop.journal.do/darwin/arm64/Journal-darwin-arm64-1.0.0-beta.1.zip"
       }

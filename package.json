@@ -1,7 +1,7 @@
 {
   "name": "journal",
   "productName": "Journal",
-  "version": "1.0.0-beta.2",
+  "version": "1.0.0-beta.3",
   "description": "Beautiful journal app",
   "main": ".webpack/main",
   "scripts": {
