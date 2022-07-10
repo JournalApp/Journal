@@ -3,6 +3,7 @@ import { logger, supabase, supabaseUrl, supabaseAnonKey } from 'utils'
 import { Login } from 'components'
 import { Session } from '@supabase/supabase-js'
 import dayjs from 'dayjs'
+import { isDev } from 'utils'
 
 interface UserContextInterface {
   session: Session
@@ -77,7 +78,8 @@ export function UserProvider({ children }: any) {
     if (secretKey.current) {
       return secretKey.current
     } else {
-      const response = await fetch('https://kms.journal.do/key', {
+      const kmsUrl = isDev() ? 'https://kms.journal.local/key' : 'https://kms.journal.do/key'
+      const response = await fetch(kmsUrl, {
         headers: { Authorization: `Bearer ${session.access_token}` },
       })
       const { key } = await response.json()

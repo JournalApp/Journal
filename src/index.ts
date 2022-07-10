@@ -53,7 +53,8 @@ const createWindow = (): void => {
     show: false,
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
-      nodeIntegration: true,
+      nodeIntegration: false,
+      sandbox: true,
       spellcheck: true,
     },
   })
@@ -260,13 +261,18 @@ app.on('web-contents-created', (event, contents) => {
       shell.openExternal(navigationUrl)
     }
   })
+  contents.setWindowOpenHandler(({ url }) => {
+    return { action: 'deny' }
+  })
 })
 
 app.commandLine.appendSwitch('ignore-certificate-errors')
 
-if (!isDev()) {
-  process.on('uncaughtException', (error) => {
-    log.error(error)
+process.on('uncaughtException', (error) => {
+  logger('uncaughtException')
+  logger(error)
+  log.error(error)
+  if (!isDev()) {
     capture({
       distinctId: getLastUser(),
       event: 'error uncaughtException',
@@ -274,7 +280,8 @@ if (!isDev()) {
         error,
       },
     })
-  })
-}
+  }
+})
+
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.

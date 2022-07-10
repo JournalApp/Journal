@@ -3,13 +3,14 @@ import Database from 'better-sqlite3'
 import log from 'electron-log'
 import initializeSql from '../sql/schema.sqlite.sql'
 import dayjs from 'dayjs'
-import { logger } from '../utils'
+import { logger, isDev } from '../utils'
 
 var database: any
 
 const getDB = () => {
   if (!database) {
-    database = new Database(app.getPath('userData') + '/cache.db')
+    const dbName = isDev() ? 'cache-dev.db' : 'cache.db'
+    database = new Database(app.getPath('userData') + '/' + dbName)
     // database = new Database(app.getPath('userData') + '/cache.db', { verbose: logger })
   }
   return database
