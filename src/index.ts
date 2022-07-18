@@ -4,18 +4,14 @@ import url from 'url'
 import log from 'electron-log'
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer'
 import { getLastUser, getAppBounds, setAppBounds } from './services/sqlite'
-import { capture, client } from './services/analytics'
+import { capture } from './services/analytics'
 import { isDev, logger } from './utils'
+import { serializeError, deserializeError } from 'serialize-error'
 
 const lastUser = getLastUser()
 capture({
   distinctId: lastUser,
   event: 'app launched',
-  properties: {
-    appVersion: app.getVersion(),
-    appPlatform: process.platform,
-    appArch: process.arch,
-  },
 })
 
 var openUrl = ''
@@ -48,6 +44,8 @@ const createWindow = (): void => {
   const bounds = getAppBounds(1200, 800)
   const mainWindow = new BrowserWindow({
     ...bounds,
+    minWidth: 640,
+    minHeight: 480,
     titleBarStyle: 'customButtonsOnHover',
     trafficLightPosition: { x: 16, y: 16 },
     show: false,
@@ -128,11 +126,10 @@ const createWindow = (): void => {
       log.info('Error:')
       log.info(error)
       capture({
+        type: 'error',
         distinctId: getLastUser(),
         event: 'error auto-updater',
-        properties: {
-          error,
-        },
+        properties: serializeError(error),
       })
       if (error?.domain == 'SQRLUpdaterErrorDomain' && error?.code == 8) {
         logger('Read-only volume')
@@ -227,10 +224,6 @@ app.on('before-quit', () => {
   })
 })
 
-app.on('will-quit', () => {
-  client.shutdown()
-})
-
 app.on('activate', () => {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
@@ -266,7 +259,7 @@ app.on('web-contents-created', (event, contents) => {
   })
 })
 
-app.commandLine.appendSwitch('ignore-certificate-errors')
+// app.commandLine.appendSwitch('ignore-certificate-errors')
 
 process.on('uncaughtException', (error) => {
   logger('uncaughtException')
@@ -274,11 +267,10 @@ process.on('uncaughtException', (error) => {
   log.error(error)
   if (!isDev()) {
     capture({
+      type: 'error',
       distinctId: getLastUser(),
       event: 'error uncaughtException',
-      properties: {
-        error,
-      },
+      properties: serializeError(error),
     })
   }
 })

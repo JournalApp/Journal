@@ -121,7 +121,7 @@ const Login = () => {
   const log = () => {
     let lastUser = window.electronAPI.app.getKey('lastUser')
     window.electronAPI.capture({
-      distinctId: lastUser || 'anonymous',
+      distinctId: lastUser,
       event: 'user login-with-browser',
     })
   }

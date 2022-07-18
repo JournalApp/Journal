@@ -1,7 +1,7 @@
 {
   "name": "journal",
   "productName": "Journal",
-  "version": "1.0.0-beta.3",
+  "version": "1.0.0-beta.4",
   "description": "Beautiful journal app",
   "main": ".webpack/main",
   "scripts": {
@@ -27,14 +27,14 @@
             ]
           }
         ],
-        "osxSign": {
+        "_osxSign": {
           "identity": "Developer ID Application: Jarek Ceborski (74KJSS44RR)",
           "hardened-runtime": true,
           "entitlements": "entitlements.plist",
           "entitlements-inherit": "entitlements.plist",
           "signature-flags": "library"
         },
-        "osxNotarize": {
+        "_osxNotarize": {
           "appleId": "support@journal.do",
           "appleIdPassword": "bnfe-dcsa-ewhr-vemk"
         }
@@ -78,7 +78,7 @@
           "@electron-forge/plugin-webpack",
           {
             "mainConfig": "./webpack.main.config.js",
-            "devContentSecurityPolicy": "connect-src 'self' https://hsbagpjhlxzabpiitqjw.supabase.co https://tnfdauoowyrpxqodomqn.supabase.co https://kms.journal.do https://kms.journal.local 'unsafe-eval'",
+            "devContentSecurityPolicy": "connect-src 'self' https://hsbagpjhlxzabpiitqjw.supabase.co https://tnfdauoowyrpxqodomqn.supabase.co https://kms.journal.do https://kms.journal.local https://capture.journal.local https://capture.journal.do 'unsafe-eval'",
             "renderer": {
               "config": "./webpack.renderer.config.js",
               "entryPoints": [
@@ -139,7 +139,7 @@
     "@styled-icons/boxicons-regular": "^10.38.0",
     "@styled-icons/foundation": "^10.34.0",
     "@styled-icons/material": "^10.34.0",
-    "@supabase/supabase-js": "^1.35.3",
+    "@supabase/supabase-js": "^1.35.4",
     "@types/better-sqlite3": "^7.5.0",
     "@udecode/plate": "^10.5.3",
     "@udecode/plate-autoformat": "^10.5.3",
@@ -156,11 +156,12 @@
     "markdown-it": "^12.3.2",
     "marked": "^4.0.12",
     "nanoid": "^3.3.4",
-    "posthog-node": "^1.3.0",
+    "node-fetch": "^3.2.8",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-hook-form": "^7.31.3",
     "remarkable": "^2.0.1",
+    "serialize-error": "^11.0.0",
     "slate": "^0.76.1",
     "slate-history": "^0.66.0",
     "slate-hyperscript": "^0.67.0",

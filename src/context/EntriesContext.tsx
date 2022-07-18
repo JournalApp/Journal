@@ -90,6 +90,7 @@ export function EntriesProvider({ children }: any) {
         today.current = realToday
         window.electronAPI.cache.getDays(session.user.id).then((days) => setDaysCache([...days]))
         window.electronAPI.capture({
+          type: 'system',
           distinctId: session.user.id,
           event: 'entry new-day-overnight',
         })

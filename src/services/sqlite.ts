@@ -340,11 +340,11 @@ const getLastUser = () => {
     const db = getDB()
     const stmt = db.prepare('SELECT value FROM app WHERE key = @key')
     const lastUser = stmt.get({ key: 'lastUser' })
-    return lastUser?.value ?? 'anonymous'
+    return lastUser?.value ?? null
   } catch (error) {
     logger(`error`)
     logger(error)
-    return 'anonymous'
+    return null
   }
 }
 

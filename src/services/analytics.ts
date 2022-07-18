@@ -1,40 +1,61 @@
-import PostHog, { EventMessage } from 'posthog-node'
 import { isDev, logger } from '../utils'
-import { ipcMain } from 'electron'
+import { ipcMain, app } from 'electron'
+import fetch from 'node-fetch'
 
-const client = new PostHog('phc_71spBFzoqqePdAa4wpRxNAMxdkMyKdwHkdeMvnQ6wup', {
-  host: 'https://app.posthog.com',
-})
+if (isDev()) {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+  app.commandLine.appendSwitch('ignore-certificate-errors')
+  app.commandLine.appendSwitch('allow-insecure-localhost', 'true')
+}
 
-const capture = ({ distinctId, event, properties }: EventMessage) => {
-  if (!isDev()) {
-    try {
-      client.capture({
-        distinctId,
-        event,
-        properties,
-      })
-    } catch (error) {
-      logger(`error`)
-      logger(error)
-    }
+interface EventMessage {
+  distinctId: string
+  event: string
+  type?: 'event' | 'system' | 'error'
+  properties?: Record<string | number, any>
+}
+
+const capture = async ({ distinctId, event, properties, type }: EventMessage) => {
+  // if (!isDev()) {
+  logger(`capture ${event}${type ? ' of type' + type : ''}`)
+
+  let appInfo = {
+    version: app.getVersion(),
+    platform: process.platform,
+    arch: process.arch,
+    locale: app.getLocale(),
+  }
+
+  try {
+    const body = JSON.stringify({
+      user_id: distinctId,
+      app: appInfo,
+      event,
+      properties,
+      ...(type && { type }),
+    })
+    const url = isDev() ? 'https://capture.journal.local' : 'https://capture.journal.do'
+    // const url = 'https://capture.journal.do'
+    const headers = { 'Content-Type': 'application/json', 'x-api-key': 'o4dqm2yb' }
+    await fetch(url, { method: 'post', body, headers })
+  } catch (error) {
+    logger(`error`)
+    logger(error)
   }
 }
 
-ipcMain.handle('analytics-capture', async (e, { distinctId, event, properties }: EventMessage) => {
-  logger('analytics-capture')
-  if (!isDev()) {
-    try {
-      client.capture({
-        distinctId,
-        event,
-        properties,
-      })
-    } catch (error) {
-      logger(`error`)
-      logger(error)
-    }
+ipcMain.handle(
+  'analytics-capture',
+  async (e, { distinctId, event, properties, type }: EventMessage) => {
+    capture({ distinctId, event, properties, type })
   }
-})
+)
 
-export { capture, client }
+ipcMain.handle(
+  'analytics-capture-error',
+  async (e, { distinctId, event, properties }: EventMessage) => {
+    capture({ distinctId, event, properties })
+  }
+)
+
+export { capture, EventMessage }

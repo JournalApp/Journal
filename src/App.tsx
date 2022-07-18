@@ -24,6 +24,7 @@ import {
   getBaseThemeWithOverrides,
 } from 'config'
 import { electronAPIType } from './preload'
+import { serializeError } from 'serialize-error'
 
 declare global {
   interface Window {
@@ -85,6 +86,18 @@ const NoDragScrollBars = styled.div`
 `
 
 function App() {
+  window.onerror = function (message, source, lineno, colno, error) {
+    let lastUser = window.electronAPI.app.getKey('lastUser')
+    let serialized = serializeError(error)
+    let name = serialized?.name ? ` ${serialized.name}` : ''
+    window.electronAPI.capture({
+      distinctId: lastUser,
+      type: 'error',
+      event: name,
+      properties: serialized,
+    })
+  }
+
   return (
     <>
       <GlobalStyle />
