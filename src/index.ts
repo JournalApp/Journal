@@ -94,6 +94,23 @@ const createWindow = (): void => {
     })
   })
 
+  // Session time
+  var start: [number, number]
+  mainWindow.on('focus', () => {
+    start = process.hrtime()
+    logger('Focus')
+  })
+  mainWindow.on('blur', () => {
+    logger('Blur')
+    let sessionTime = process.hrtime(start)[0]
+    logger(`Session: ${sessionTime}sec.`)
+    capture({
+      distinctId: getLastUser(),
+      event: 'session',
+      properties: { sessionTime },
+    })
+  })
+
   mainWindow.once('ready-to-show', () => {
     mainWindow.show()
 
