@@ -8,12 +8,6 @@ import { capture } from './services/analytics'
 import { isDev, logger } from './utils'
 import { serializeError, deserializeError } from 'serialize-error'
 
-const lastUser = getLastUser()
-capture({
-  distinctId: lastUser,
-  event: 'app launched',
-})
-
 var openUrl = ''
 
 if (process.defaultApp) {
@@ -102,6 +96,12 @@ const createWindow = (): void => {
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show()
+
+    capture({
+      distinctId: getLastUser(),
+      event: 'app launched',
+    })
+
     // Handle open from url when app was closed
     if (openUrl) {
       mainWindow.webContents.send('open-url', openUrl)
