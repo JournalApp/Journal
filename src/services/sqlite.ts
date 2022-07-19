@@ -1,29 +1,75 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain, dialog } from 'electron'
 import Database from 'better-sqlite3'
 import log from 'electron-log'
-import initializeSql from '../sql/schema.sqlite.sql'
+import schema_1 from '../sql/schema.1.sqlite.sql'
+import migration_0to1 from '../sql/migration.0-to-1.sql'
 import dayjs from 'dayjs'
 import { logger, isDev } from '../utils'
 
 var database: any
+const migrations = [{ name: 'migration.0-to-1.sql', sql: migration_0to1, finalVersion: 1 }]
+
+const schemaVersions = {
+  '1.0.0-beta.1': 0,
+  '1.0.0-beta.2': 0,
+  '1.0.0-beta.3': 0,
+  '1.0.0-beta.4': 1,
+}
 
 const getDB = () => {
   if (!database) {
     const dbName = isDev() ? 'cache-dev.db' : 'cache.db'
-    database = new Database(app.getPath('userData') + '/' + dbName)
-    // database = new Database(app.getPath('userData') + '/cache.db', { verbose: logger })
+    try {
+      database = new Database(app.getPath('userData') + '/' + dbName, { fileMustExist: true })
+      logger('Database already exists')
+    } catch {
+      logger('No database found, creating new and running schema_1')
+      database = new Database(app.getPath('userData') + '/' + dbName)
+      // Run Current Schema, no migrations needed
+      database.exec(schema_1)
+      database.pragma('user_version = 1')
+    }
   }
   return database
 }
 
-const initializeDB = () => {
+const runMigrations = () => {
   const db = getDB()
-  db.exec(initializeSql)
+
+  // Run migrations:
+  const appVersion = app.getVersion() as keyof typeof schemaVersions
+  const currentSchemaVersion = db.pragma('user_version', { simple: true })
+  const desiredSchemaVersion = schemaVersions[appVersion]
+
+  if (currentSchemaVersion > desiredSchemaVersion) {
+    dialog.showMessageBoxSync({
+      message:
+        "Can't run this version as newer versions was used before. Download latest version from www.journal.do",
+      title: 'Version outdated',
+      type: 'warning',
+    })
+    app.quit()
+  }
+
+  const migrationQueue = migrations.filter(
+    (m, i) => i >= currentSchemaVersion && i < desiredSchemaVersion
+  )
+
+  if (migrationQueue.length == 0) {
+    logger(`No migrations to run. Current schema version is ${currentSchemaVersion}`)
+  }
+
+  migrationQueue.forEach((migration) => {
+    logger(`Running ${migration.name}`)
+    db.exec(migration.sql)
+    logger(`Setting pragma user_version = ${migration.finalVersion}`)
+    db.pragma(`user_version = ${migration.finalVersion}`)
+  })
 }
 
 try {
   getDB()
-  initializeDB()
+  runMigrations()
 } catch (error) {
   logger(error)
   log.error(error)

@@ -87,9 +87,10 @@ const NoDragScrollBars = styled.div`
 
 function App() {
   window.onerror = function (message, source, lineno, colno, error) {
+    logger('window.onerror')
     let lastUser = window.electronAPI.app.getKey('lastUser')
     let serialized = serializeError(error)
-    let name = serialized?.name ? ` ${serialized.name}` : ''
+    let name = serialized?.name ? ` ${serialized.name}` : 'error'
     window.electronAPI.capture({
       distinctId: lastUser,
       type: 'error',

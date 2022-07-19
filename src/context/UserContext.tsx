@@ -78,12 +78,16 @@ export function UserProvider({ children }: any) {
     if (secretKey.current) {
       return secretKey.current
     } else {
+      //
+
       const kmsUrl = isDev() ? 'https://kms.journal.local/key' : 'https://kms.journal.do/key'
       const response = await fetch(kmsUrl, {
         headers: { Authorization: `Bearer ${session.access_token}` },
       })
       const { key } = await response.json()
       if (!key) throw new Error("Can't fetch key")
+
+      //
 
       let utf8Encoder = new TextEncoder()
       const aesKey = await window.crypto.subtle.importKey(
