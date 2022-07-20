@@ -103,6 +103,18 @@ const createWindow = (): void => {
   mainWindow.on('blur', () => {
     logger('Blur')
     let sessionTime = process.hrtime(start)[0]
+    start = process.hrtime()
+    logger(`Session: ${sessionTime} seconds`)
+    capture({
+      distinctId: getLastUser(),
+      event: 'session',
+      properties: { sessionTime },
+    })
+  })
+
+  mainWindow.on('close', () => {
+    logger('Close')
+    let sessionTime = process.hrtime(start)[0]
     logger(`Session: ${sessionTime} seconds`)
     capture({
       distinctId: getLastUser(),
