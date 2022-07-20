@@ -17,7 +17,7 @@ interface EventMessage {
 
 const capture = async ({ distinctId, event, properties, type }: EventMessage) => {
   // if (!isDev()) {
-  logger(`capture ${event}${type ? ' of type' + type : ''}`)
+  logger(`capture ${event}${type ? ' of type ' + type : ''}`)
 
   let appInfo = {
     version: app.getVersion(),

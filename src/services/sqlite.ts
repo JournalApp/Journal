@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog } from 'electron'
+import { app, safeStorage, ipcMain, dialog } from 'electron'
 import Database from 'better-sqlite3'
 import log from 'electron-log'
 import schema_1 from '../sql/schema.1.sqlite.sql'
@@ -344,6 +344,39 @@ ipcMain.handle('app-set-key', async (event, set) => {
   } catch (error) {
     logger(`error`)
     logger(error)
+  }
+})
+
+// User
+
+ipcMain.handle('user-save-secret-key', async (event, user_id, secretKey) => {
+  logger('user-save-secret-key')
+  try {
+    const encryptedSecreyKey = safeStorage.encryptString(secretKey)
+    const db = getDB()
+    const stmt = db.prepare('UPDATE users SET secret_key = @encryptedSecreyKey WHERE id = @user_id')
+    stmt.run({ encryptedSecreyKey, user_id })
+  } catch (error) {
+    logger(`error`)
+    logger(error)
+  }
+})
+
+ipcMain.handle('app-get-secret-key', async (event, user_id) => {
+  logger('app-get-secret-key')
+  try {
+    const db = getDB()
+    const stmt = db.prepare('SELECT secret_key FROM users WHERE id = @user_id')
+    let res = stmt.get({ user_id })
+    if (res?.secret_key) {
+      return safeStorage.decryptString(res.secret_key)
+    } else {
+      return null
+    }
+  } catch (error) {
+    logger(`error`)
+    logger(error)
+    return null
   }
 })
 

@@ -59,6 +59,14 @@ const electronAPI = {
       return ipcRenderer.sendSync('app-get-key', key)
     },
   },
+  user: {
+    async saveSecretKey(user_id: string, secretKey: object) {
+      await ipcRenderer.invoke('user-save-secret-key', user_id, secretKey)
+    },
+    async getSecretKey(user_id: string) {
+      return await ipcRenderer.invoke('app-get-secret-key', user_id)
+    },
+  },
   handleSpellCheck: (callback: any) => ipcRenderer.once('electron-handleSpellCheck', callback),
   disableSpellCheck: async () => {
     await ipcRenderer.invoke('electron-disableSpellCheck')

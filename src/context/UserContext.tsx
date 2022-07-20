@@ -72,22 +72,27 @@ export function UserProvider({ children }: any) {
     })
   }, [])
 
-  // TODO on app lauch this function is called for each entry
-  // consider saving secretKey in SQLite
   const getSecretKey = async () => {
     if (secretKey.current) {
+      logger('🔑 Using key from Ref')
       return secretKey.current
     } else {
-      //
-
-      const kmsUrl = isDev() ? 'https://kms.journal.local/key' : 'https://kms.journal.do/key'
-      const response = await fetch(kmsUrl, {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      })
-      const { key } = await response.json()
-      if (!key) throw new Error("Can't fetch key")
-
-      //
+      let key: string
+      const cachedSecretKey = await window.electronAPI.user.getSecretKey(session.user.id)
+      if (cachedSecretKey) {
+        logger('🔑 Using key from SQLite')
+        key = cachedSecretKey
+      } else {
+        logger('🔑 Fetching key from KMS')
+        const kmsUrl = isDev() ? 'https://kms.journal.local/key' : 'https://kms.journal.do/key'
+        const response = await fetch(kmsUrl, {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        })
+        const { key: fetchedKey } = await response.json()
+        if (!fetchedKey) throw new Error("Can't fetch key")
+        window.electronAPI.user.saveSecretKey(session.user.id, fetchedKey)
+        key = fetchedKey
+      }
 
       let utf8Encoder = new TextEncoder()
       const aesKey = await window.crypto.subtle.importKey(
