@@ -1,10 +1,8 @@
-import { AutoformatPlugin, ResetNodePlugin, PlatePlugin } from '@udecode/plate'
+import { AutoformatPlugin, PlatePlugin } from '@udecode/plate'
 import { autoformatRules } from './autoformat/autoformatRules'
-import { resetNodeRules } from './resetnode/resetNodeRules'
 
 interface Config {
-  autoformat: Partial<PlatePlugin<{}, AutoformatPlugin>>
-  resetNode: Partial<PlatePlugin<{}, ResetNodePlugin>>
+  autoformat: Partial<PlatePlugin<AutoformatPlugin>>
 }
 
 export const defaultContent = [
@@ -23,7 +21,6 @@ export const CONFIG: Config = {
       rules: autoformatRules,
     },
   },
-  resetNode: resetNodeRules,
 }
 
 export * from './UserPreferences'

@@ -12,8 +12,9 @@ import {
   useClick,
 } from '@floating-ui/react-dom-interactions'
 import { getSelectionText } from '@udecode/plate'
-import { usePlateEditorState, useEventPlateId } from '@udecode/plate-core'
-import { Transforms, Editor as SlateEditor } from 'slate'
+import { usePlateEditorState, useEventPlateId } from '@udecode/plate'
+import { insertText } from '@udecode/plate'
+import { Editor as SlateEditor } from 'slate'
 import styled, { keyframes } from 'styled-components'
 import { useAppearanceContext } from 'context'
 
@@ -131,7 +132,7 @@ export const ContextMenu = ({
   }
 
   const replaceWithSuggestion = (e: any, suggestion: string) => {
-    Transforms.insertText(editor, suggestion)
+    insertText(editor, suggestion)
     setVisible(false)
     e.preventDefault()
   }
@@ -164,7 +165,7 @@ export const ContextMenu = ({
             } else if (result[i].types.includes('text/plain')) {
               result[i].getType('text/plain').then((blob) => {
                 blob.text().then((res) => {
-                  Transforms.insertText(editor, res)
+                  insertText(editor, res)
                 })
               })
             }

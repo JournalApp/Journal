@@ -31,7 +31,7 @@ import {
   usePlateEditorState,
   withPlateEventProvider,
   isMarkActive,
-} from '@udecode/plate-core'
+} from '@udecode/plate'
 import styled, { keyframes } from 'styled-components'
 
 const MARK_HAND_STRIKETHROUGH = 'hand-strikethrough'

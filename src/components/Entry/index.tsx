@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react'
 import styled, { css } from 'styled-components'
 import dayjs from 'dayjs'
-import { usePlateEditorState, useEventPlateId } from '@udecode/plate-core'
+import { usePlateEditorState, useEventPlateId } from '@udecode/plate'
 import { ContextMenu, FormatToolbar, EntryAside } from 'components'
 import { createPluginFactory } from '@udecode/plate'
-import { Transforms, Node, Editor as SlateEditor } from 'slate'
-import { ReactEditor } from 'slate-react'
+import { select, getNodeString } from '@udecode/plate'
+// import { Node} from 'slate'
+import { focusEditor, getEndPoint } from '@udecode/plate'
 import { CONFIG, defaultContent } from 'config'
 import { countWords, isUnauthorized, encryptEntry, decryptEntry } from 'utils'
 import { supabase, logger } from 'utils'
@@ -13,6 +14,7 @@ import { useUserContext } from 'context'
 import { Container, MainWrapper, MiniDate } from './styled'
 import { electronAPIType } from '../../preload'
 import { theme } from 'themes'
+import { resetBlockTypePlugin } from '../../config/resetBlockTypePlugin'
 
 import {
   createPlateUI,
@@ -60,7 +62,7 @@ const isToday = (day: any) => {
 
 const countEntryWords = (content: any) => {
   if (Array.isArray(content)) {
-    return countWords(content.map((n: any) => Node.string(n)).join(' '))
+    return countWords(content.map((n: any) => getNodeString(n)).join(' '))
   } else {
     return 0
   }
@@ -264,7 +266,7 @@ const EntryComponent = ({
   const ShouldFocus = () => {
     const editor = usePlateEditorState(useEventPlateId())
     useEffect(() => {
-      ReactEditor.focus(editor)
+      focusEditor(editor)
       setShouldFocus(false)
       logger(`Focus set to ${entryDay}`)
     }, [])
@@ -332,13 +334,17 @@ const EntryComponent = ({
   const createEventEditorPlugin = createPluginFactory({
     key: 'events-editor-for-toolbar',
     handlers: {
-      onFocus: (editor) => () => {
+      onFocus: (editor) => (e) => {
         logger('Focus')
         // Set cursor at the end, as a fix to multiple clicks
         if (!editor.selection) {
-          Transforms.select(editor, SlateEditor.end(editor, []))
+          // NOTE I commented out:
+          select(editor, getEndPoint(editor, []))
+          // focusEditor(editor)
         }
+        // TODO setFocused is needed for format toolabr to show
         setFocused(true)
+        return false
       },
       onBlur: (editor) => () => {
         logger('Blur')
@@ -391,7 +397,7 @@ const EntryComponent = ({
       createCodePlugin(), // code mark
       createEventEditorPlugin(),
       createAutoformatPlugin(CONFIG.autoformat),
-      createResetNodePlugin(CONFIG.resetNode),
+      createResetNodePlugin(resetBlockTypePlugin),
       createHighlightPlugin(),
       createHandStrikethroughPlugin({
         key: MARK_HAND_STRIKETHROUGH,

@@ -14,7 +14,7 @@ import {
   ELEMENT_UL,
   usePlateEditorRef,
   getPluginType,
-  getParent,
+  getParentNode,
   getListItemEntry,
   toggleList,
 } from '@udecode/plate'
@@ -24,7 +24,7 @@ import {
   toggleNodeType,
   useEventPlateId,
   usePlateEditorState,
-} from '@udecode/plate-core'
+} from '@udecode/plate'
 import { useUserContext } from 'context'
 
 interface BlockTypeSelectButtonProps {
@@ -84,7 +84,7 @@ export const BlockTypeSelect = () => {
   })
   const { session } = useUserContext()
 
-  const parent = getParent(editor, editor?.selection?.anchor)
+  const parent = getParentNode(editor, editor?.selection?.anchor)
   const node = parent && Array.isArray(parent) ? parent[0] : null
 
   const res = !!editor?.selection && getListItemEntry(editor)
@@ -169,7 +169,7 @@ export const BlockTypeSelect = () => {
   return (
     <>
       <BlockTypeSelectButton onMouseDown={toggleDropdown} ref={sel.reference} isHidden={isHidden}>
-        {nodeFullName(node?.type)}
+        {nodeFullName(node.type as string)}
         <Icon name='Chevron' type={isHidden ? 'down' : 'up'} />
       </BlockTypeSelectButton>
       {!isHidden && (

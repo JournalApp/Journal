@@ -34,4 +34,10 @@ module.exports = [
     test: /\.sql/,
     type: 'asset/source',
   },
+  {
+    test: /\.m?js/,
+    resolve: {
+      fullySpecified: false,
+    },
+  },
 ]
