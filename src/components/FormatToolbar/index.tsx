@@ -1,8 +1,6 @@
-import React, { ReactPortal, useState, useEffect, useLayoutEffect, forwardRef } from 'react'
+import React, { ReactPortal, useState, useEffect, useLayoutEffect, forwardRef, useRef } from 'react'
 import * as Toolbar from '@radix-ui/react-toolbar'
-import * as Toggle from '@radix-ui/react-toggle'
 import { offset, shift, useFloating, FloatingPortal } from '@floating-ui/react-dom-interactions'
-import { BaseRange, BasePoint, Transforms, Editor as SlateEditor } from 'slate'
 import { Icon } from 'components'
 import { BlockTypeSelect } from './BlockTypeSelect'
 import { theme } from 'themes'
@@ -33,6 +31,7 @@ import {
   isMarkActive,
 } from '@udecode/plate'
 import styled, { keyframes } from 'styled-components'
+import { logger } from 'src/utils'
 
 const MARK_HAND_STRIKETHROUGH = 'hand-strikethrough'
 
@@ -121,14 +120,15 @@ const options = [
 ]
 
 interface FormatToolbarProps {
-  focused: boolean
+  setIsEditorFocused: any
   isContextMenuVisible: any
 }
 
-export const FormatToolbar = ({ focused, isContextMenuVisible }: FormatToolbarProps) => {
+export const FormatToolbar = ({ setIsEditorFocused, isContextMenuVisible }: FormatToolbarProps) => {
   const editorRef = usePlateEditorRef()
   const editor = usePlateEditorState(useEventPlateId())
   const [isHidden, setIsHidden] = useState(true)
+  const [editorFocused, setEditorFocused] = useState(false)
   const selectionExpanded = editor && isSelectionExpanded(editor)
   const selectionText = editor && getSelectionText(editor)
   const { x, y, reference, floating, strategy } = useFloating({
@@ -144,18 +144,24 @@ export const FormatToolbar = ({ focused, isContextMenuVisible }: FormatToolbarPr
   //   }
   // }, [editor])
 
+  useEffect(() => {
+    setIsEditorFocused.current = setEditorFocused
+  }, [])
+
   useLayoutEffect(() => {
-    reference({
-      getBoundingClientRect() {
-        const { top, right, bottom, left, width, height, x, y } = getSelectionBoundingClientRect()
-        return { top, right, bottom, left, width, height, x, y }
-      },
-    })
-    // logger('useLayoutEffect')
+    const select = getSelectionBoundingClientRect()
+    if (select) {
+      reference({
+        getBoundingClientRect() {
+          const { top, right, bottom, left, width, height, x, y } = select
+          return { top, right, bottom, left, width, height, x, y }
+        },
+      })
+    }
   }, [reference, selectionExpanded, selectionText, editor.children])
 
   useEffect(() => {
-    if (!focused) {
+    if (!editorFocused) {
       setIsHidden(true)
     } else {
       if (!selectionText) {
@@ -164,7 +170,7 @@ export const FormatToolbar = ({ focused, isContextMenuVisible }: FormatToolbarPr
         setIsHidden(false)
       }
     }
-  }, [selectionExpanded, selectionText, focused])
+  }, [selectionExpanded, selectionText, editorFocused])
 
   const Toggle = withPlateEventProvider(({ markType, iconName }: any) => {
     const id = useEventPlateId()

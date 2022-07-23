@@ -2,12 +2,8 @@ import React, { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import dayjs from 'dayjs'
 import { theme } from 'themes'
-import {
-  useAppearanceContext,
-  useEntriesContext,
-  useUserContext,
-  AppearanceContextInterface,
-} from 'context'
+import { select, focusEditor } from '@udecode/plate'
+import { useAppearanceContext, useEntriesContext, useUserContext } from 'context'
 import { CalendarOpen, getCalendarIsOpen } from 'config'
 import { createDays, getYearsSince, logger } from 'utils'
 import { Icon } from 'components'
@@ -44,6 +40,7 @@ interface DayProps {
 
 const Day = styled.div`
   height: 30px;
+  -webkit-app-region: no-drag;
 `
 
 const DayButton = styled.button<DayProps>`
@@ -147,6 +144,7 @@ const FadeTop = styled.div<ContainerProps>`
   width: 200px;
   height: 64px;
   z-index: 10;
+  transition: left ${theme('animation.time.normal')};
   background: linear-gradient(
     180deg,
     ${theme('color.primary.surface')} 0%,
@@ -164,6 +162,7 @@ const FadeDown = styled.div<ContainerProps>`
   width: 200px;
   height: 48px;
   z-index: 10;
+  transition: left ${theme('animation.time.normal')};
   background: linear-gradient(
     0deg,
     ${theme('color.primary.surface')} 0%,
@@ -204,8 +203,14 @@ const withLeadingZero = (num: number) => {
 
 const Calendar = () => {
   const { isCalendarOpen } = useAppearanceContext()
-  const { daysCache, cacheCreateNewEntry, removeCachedDay, setScrollToDay, daysWithNoContent } =
-    useEntriesContext()
+  const {
+    daysCache,
+    cacheCreateNewEntry,
+    removeCachedDay,
+    setScrollToDay,
+    daysWithNoContent,
+    editorsRef,
+  } = useEntriesContext()
   const { session } = useUserContext()
   const today = new Date()
 
@@ -245,9 +250,18 @@ const Calendar = () => {
   }
 
   const scrollToDay = async (day: string) => {
+    // TODO set focus on editor
     let element = document.getElementById(`${day}-entry`)
     if (element) {
       element.scrollIntoView()
+      const editor = editorsRef.current[day]
+      if (editor) {
+        focusEditor(editor)
+        select(editor, {
+          path: [0, 0],
+          offset: 0,
+        })
+      }
       window.electronAPI.capture({
         distinctId: session.user.id,
         event: 'calendar scroll-to-day',

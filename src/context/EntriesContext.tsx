@@ -4,6 +4,8 @@ import { useUserContext } from 'context'
 import { electronAPIType } from '../preload'
 import { defaultContent } from 'config'
 import { supabase, isUnauthorized, logger } from 'utils'
+import { PlateEditor } from '@udecode/plate'
+import { Entry } from 'components'
 
 interface EntriesContextInterface {
   initialCache: any
@@ -19,6 +21,7 @@ interface EntriesContextInterface {
   cacheAddOrUpdateEntry: electronAPIType['cache']['addOrUpdateEntry']
   cacheUpdateEntry: electronAPIType['cache']['updateEntry']
   cacheUpdateEntryProperty: electronAPIType['cache']['updateEntryProperty']
+  editorsRef: any
 }
 
 const EntriesContext = createContext<EntriesContextInterface | null>(null)
@@ -32,6 +35,7 @@ export function EntriesProvider({ children }: any) {
   const today = useRef(dayjs().format('YYYY-MM-DD'))
   const [daysCache, setDaysCache] = useState([])
   const [daysWithNoContent, setDaysWithNoContent] = useState<string[]>([])
+  const editorsRef = useRef<Array<PlateEditor | null>>([])
 
   useEffect(() => {
     logger('daysCache updated:')
@@ -193,6 +197,7 @@ export function EntriesProvider({ children }: any) {
     cacheAddOrUpdateEntry,
     cacheUpdateEntry,
     cacheUpdateEntryProperty,
+    editorsRef,
   }
   return (
     <EntriesContext.Provider value={state}>

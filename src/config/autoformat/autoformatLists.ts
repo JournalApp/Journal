@@ -8,7 +8,6 @@ import {
   TElement,
   TTodoListItemElement,
 } from '@udecode/plate'
-import { Editor } from 'slate'
 import { clearBlockFormat, formatList } from './autoformatUtils'
 
 export const autoformatLists: AutoformatRule[] = [

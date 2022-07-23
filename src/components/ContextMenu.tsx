@@ -14,7 +14,6 @@ import {
 import { getSelectionText } from '@udecode/plate'
 import { usePlateEditorState, useEventPlateId } from '@udecode/plate'
 import { insertText } from '@udecode/plate'
-import { Editor as SlateEditor } from 'slate'
 import styled, { keyframes } from 'styled-components'
 import { useAppearanceContext } from 'context'
 
@@ -84,18 +83,19 @@ const Divider = styled.div`
 `
 
 interface ContextMenuProps {
-  focused: boolean
+  setIsEditorFocused: any
   setContextMenuVisible: (val: any) => void
   toggleContextMenu: any
 }
 
 export const ContextMenu = ({
-  focused,
+  setIsEditorFocused,
   setContextMenuVisible,
   toggleContextMenu,
 }: ContextMenuProps) => {
   const editor = usePlateEditorState(useEventPlateId())
   const [spellSuggections, setSpellSuggections] = useState([])
+  const [editorFocused, setEditorFocused] = useState(false)
   const [visible, setVisible] = useState(false)
   const selectionText = editor && getSelectionText(editor)
   const { x, y, reference, floating, strategy, refs } = useFloating({
@@ -182,6 +182,7 @@ export const ContextMenu = ({
   useEffect(() => {
     // Assign function to parent's Ref
     toggleContextMenu.current = setOpen
+    setIsEditorFocused.current = setEditorFocused
   }, [])
 
   useEffect(() => {
@@ -193,10 +194,10 @@ export const ContextMenu = ({
   }, [visible])
 
   useEffect(() => {
-    if (!focused) {
+    if (!editorFocused) {
       setVisible(false)
     }
-  }, [focused])
+  }, [editorFocused])
 
   return (
     <FloatingPortal>
@@ -216,7 +217,12 @@ export const ContextMenu = ({
           {spellSuggections.length > 0 ? <Divider /> : ''}
           {spellCheckIsEnabled == 'true' && (
             <>
-              <Item onMouseDown={(e) => setSpellCheck('false')}>
+              <Item
+                onMouseDown={(e) => {
+                  setSpellCheck('false')
+                  setVisible(false)
+                }}
+              >
                 <ItemTitle>Disable spell check</ItemTitle>
                 <ItemShortcut></ItemShortcut>
               </Item>
@@ -242,7 +248,12 @@ export const ContextMenu = ({
           {spellCheckIsEnabled == 'false' && (
             <>
               <Divider />
-              <Item onMouseDown={(e) => setSpellCheck('true')}>
+              <Item
+                onMouseDown={(e) => {
+                  setSpellCheck('true')
+                  setVisible(false)
+                }}
+              >
                 <ItemTitle>Enable spell check</ItemTitle>
                 <ItemShortcut></ItemShortcut>
               </Item>

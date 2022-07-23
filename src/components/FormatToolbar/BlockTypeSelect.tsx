@@ -169,7 +169,7 @@ export const BlockTypeSelect = () => {
   return (
     <>
       <BlockTypeSelectButton onMouseDown={toggleDropdown} ref={sel.reference} isHidden={isHidden}>
-        {nodeFullName(node.type as string)}
+        {nodeFullName((node?.type as string) || '')}
         <Icon name='Chevron' type={isHidden ? 'down' : 'up'} />
       </BlockTypeSelectButton>
       {!isHidden && (

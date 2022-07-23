@@ -96,14 +96,16 @@ const createWindow = (): void => {
 
   // Session time
   var start: [number, number]
+  var sessionActive = false
   mainWindow.on('focus', () => {
     start = process.hrtime()
+    sessionActive = true
     logger('Focus')
   })
   mainWindow.on('blur', () => {
     logger('Blur')
     let sessionTime = process.hrtime(start)[0]
-    start = process.hrtime()
+    sessionActive = false
     logger(`Session: ${sessionTime} seconds`)
     capture({
       distinctId: getLastUser(),
@@ -114,13 +116,15 @@ const createWindow = (): void => {
 
   mainWindow.on('close', () => {
     logger('Close')
-    let sessionTime = process.hrtime(start)[0]
-    logger(`Session: ${sessionTime} seconds`)
-    capture({
-      distinctId: getLastUser(),
-      event: 'session',
-      properties: { sessionTime },
-    })
+    if (sessionActive) {
+      let sessionTime = process.hrtime(start)[0]
+      logger(`Session: ${sessionTime} seconds`)
+      capture({
+        distinctId: getLastUser(),
+        event: 'session',
+        properties: { sessionTime },
+      })
+    }
   })
 
   mainWindow.once('ready-to-show', () => {

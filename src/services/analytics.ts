@@ -16,31 +16,32 @@ interface EventMessage {
 }
 
 const capture = async ({ distinctId, event, properties, type }: EventMessage) => {
-  // if (!isDev()) {
-  logger(`capture ${event}${type ? ' of type ' + type : ''}`)
+  if (!isDev()) {
+    logger(`capture ${event}${type ? ' of type ' + type : ''}`)
 
-  let appInfo = {
-    version: app.getVersion(),
-    platform: process.platform,
-    arch: process.arch,
-    locale: app.getLocale(),
-  }
+    let appInfo = {
+      version: app.getVersion(),
+      platform: process.platform,
+      arch: process.arch,
+      locale: app.getLocale(),
+    }
 
-  try {
-    const body = JSON.stringify({
-      user_id: distinctId,
-      app: appInfo,
-      event,
-      properties,
-      ...(type && { type }),
-    })
-    const url = isDev() ? 'https://capture.journal.local' : 'https://capture.journal.do'
-    // const url = 'https://capture.journal.do'
-    const headers = { 'Content-Type': 'application/json', 'x-api-key': 'o4dqm2yb' }
-    await fetch(url, { method: 'post', body, headers })
-  } catch (error) {
-    logger(`error`)
-    logger(error)
+    try {
+      const body = JSON.stringify({
+        user_id: distinctId,
+        app: appInfo,
+        event,
+        properties,
+        ...(type && { type }),
+      })
+      const url = isDev() ? 'https://capture.journal.local' : 'https://capture.journal.do'
+      // const url = 'https://capture.journal.do'
+      const headers = { 'Content-Type': 'application/json', 'x-api-key': 'o4dqm2yb' }
+      await fetch(url, { method: 'post', body, headers })
+    } catch (error) {
+      logger(`error`)
+      logger(error)
+    }
   }
 }
 

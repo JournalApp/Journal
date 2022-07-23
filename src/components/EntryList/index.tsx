@@ -83,6 +83,14 @@ type myref = {
   [id: string]: number
 }
 
+const EntryMemo = React.memo(Entry, (prevProps, nextProps) => {
+  console.info('New memo compare')
+  if (prevProps.entryDay === nextProps.entryDay) {
+    return true
+  }
+  return false
+})
+
 function EntryList() {
   const [entries, setEntries] = useState([])
   const [initialFetchDone, setInitialFetchDone] = useState(false)
@@ -100,6 +108,8 @@ function EntryList() {
   const itemsRef = useRef<Array<HTMLDivElement | null>>([])
   var element: HTMLElement | null
   const { session, signOut } = useUserContext()
+
+  logger(`EntryList render`)
 
   useEffect(() => {
     initialFetch()
@@ -121,7 +131,7 @@ function EntryList() {
 
   const setEntryHeight = () => {
     if (element) {
-      element.scrollIntoView({ inline: 'center' })
+      element.scrollIntoView({ block: 'start' })
       // element.scrollTop = 0
     } else {
       let today = dayjs().format('YYYY-MM-DD')
@@ -194,7 +204,7 @@ function EntryList() {
           .slice(0)
           .reverse()
           .map((day, i) => (
-            <Entry
+            <EntryMemo
               key={day}
               entryDay={day}
               entriesObserver={entriesObserver}

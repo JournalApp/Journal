@@ -2,7 +2,8 @@ import React from 'react'
 import styled, { keyframes } from 'styled-components'
 import { theme } from 'themes'
 import dayjs from 'dayjs'
-import { useUserContext } from 'context'
+import { useUserContext, useEntriesContext } from 'context'
+import { select, focusEditor } from '@udecode/plate'
 import { logger } from 'utils'
 
 const ScrollToTodayButton = styled.button`
@@ -29,13 +30,21 @@ const ScrollToTodayButton = styled.button`
 
 function ScrollToToday() {
   const { session } = useUserContext()
-
+  const { editorsRef } = useEntriesContext()
   const scrollToToday = () => {
     let today = dayjs().format('YYYY-MM-DD')
     let entry = document.getElementById(`${today}-entry`)
     if (entry) {
       logger('scrollToToday')
       entry.scrollIntoView()
+      const editor = editorsRef.current[today]
+      if (editor) {
+        focusEditor(editor)
+        select(editor, {
+          path: [0, 0],
+          offset: 0,
+        })
+      }
     }
     window.electronAPI.capture({
       distinctId: session.user.id,

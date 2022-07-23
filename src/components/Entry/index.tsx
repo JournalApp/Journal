@@ -3,14 +3,13 @@ import styled, { css } from 'styled-components'
 import dayjs from 'dayjs'
 import { usePlateEditorState, useEventPlateId } from '@udecode/plate'
 import { ContextMenu, FormatToolbar, EntryAside } from 'components'
-import { createPluginFactory } from '@udecode/plate'
-import { select, getNodeString } from '@udecode/plate'
-// import { Node} from 'slate'
-import { focusEditor, getEndPoint } from '@udecode/plate'
+import { createPluginFactory, useOnClickOutside, deselectEditor } from '@udecode/plate'
+import { select, deselect, getNodeString } from '@udecode/plate'
+import { focusEditor, usePlateEditorRef } from '@udecode/plate'
 import { CONFIG, defaultContent } from 'config'
 import { countWords, isUnauthorized, encryptEntry, decryptEntry } from 'utils'
 import { supabase, logger } from 'utils'
-import { useUserContext } from 'context'
+import { useUserContext, useEntriesContext } from 'context'
 import { Container, MainWrapper, MiniDate } from './styled'
 import { electronAPIType } from '../../preload'
 import { theme } from 'themes'
@@ -68,7 +67,7 @@ const countEntryWords = (content: any) => {
   }
 }
 
-const EntryComponent = ({
+const Entry = ({
   entryDay,
   cachedEntry,
   setEntryHeight,
@@ -85,17 +84,28 @@ const EntryComponent = ({
   const [needsSavingToServer, setNeedsSavingToServer] = useState(false)
   const [needsSavingToServerModifiedAt, setNeedsSavingToServerModifiedAt] = useState('')
   const [initialValue, setInitialValue] = useState(cachedEntry?.content ?? [])
-  const [focused, setFocused] = useState(false)
   const [shouldFocus, setShouldFocus] = useState(isToday(entryDay))
   const contextMenuVisible = useRef(false)
   const toggleContextMenu = useRef(null)
+  const setEditorFocusedContextMenu = useRef(null)
+  const setEditorFocusedFormatToolbar = useRef(null)
   const [initialFetchDone, setInitialFetchDone] = useState(false)
   const debugValue = useRef(cachedEntry?.content ?? [])
   const editorRef = useRef(null)
   const { session, signOut, getSecretKey, serverTimeNow } = useUserContext()
+  const { editorsRef } = useEntriesContext()
   const saveTimer = useRef<NodeJS.Timeout | null>(null)
 
   logger(`Entry render`)
+
+  const setEditorFocused = (focused: boolean) => {
+    if (setEditorFocusedContextMenu.current) {
+      setEditorFocusedContextMenu.current(focused)
+    }
+    if (setEditorFocusedFormatToolbar.current) {
+      setEditorFocusedFormatToolbar.current(focused)
+    }
+  }
 
   const setContextMenuVisible = (val: boolean) => {
     contextMenuVisible.current = val
@@ -267,9 +277,21 @@ const EntryComponent = ({
     const editor = usePlateEditorState(useEventPlateId())
     useEffect(() => {
       focusEditor(editor)
+      select(editor, {
+        path: [0, 0],
+        offset: 0,
+      })
       setShouldFocus(false)
       logger(`Focus set to ${entryDay}`)
     }, [])
+    return <></>
+  }
+
+  const EditorRefAssign = () => {
+    const editor = usePlateEditorState(useEventPlateId())
+    if (editor) {
+      editorsRef.current[entryDay] = editor
+    }
     return <></>
   }
 
@@ -336,22 +358,14 @@ const EntryComponent = ({
     handlers: {
       onFocus: (editor) => (e) => {
         logger('Focus')
-        // Set cursor at the end, as a fix to multiple clicks
-        if (!editor.selection) {
-          // NOTE I commented out:
-          select(editor, getEndPoint(editor, []))
-          // focusEditor(editor)
-        }
-        // TODO setFocused is needed for format toolabr to show
-        setFocused(true)
-        return false
+        setEditorFocused(true)
       },
       onBlur: (editor) => () => {
         logger('Blur')
-        // Transforms.deselect(editor)
-        // Transforms.select(editor, SlateEditor.end(editor, []))
-        // editor.selection = null
-        setFocused(false)
+        setEditorFocused(false)
+        // Deselect to avoid 2 context menus visible on separate entries
+        deselectEditor(editor)
+        // deselect(editor)
       },
       onChange: (editor) => () => {
         logger('Change')
@@ -369,12 +383,6 @@ const EntryComponent = ({
         // Invoke function in ContextMenu using Ref
         toggleContextMenu.current(e)
       },
-      // onPaste: () => (e) => {
-      //   // navigator.clipboard.read().then((result) => {
-      //   //   logger(result)
-      //   // })
-      //   // logger(e.clipboardData)
-      // },
     },
   })
 
@@ -450,7 +458,7 @@ const EntryComponent = ({
     if (isToday(day)) {
       return 'Today'
     } else {
-      return dayjs(dayjs(day.toString(), 'YYYY-MM-DD')).format('D MMM YYYY')
+      return dayjs(dayjs(day.toString(), 'YYYY-MM-DD')).format('D MMMM YYYY')
     }
   }
 
@@ -468,13 +476,17 @@ const EntryComponent = ({
             onChange={onChangeDebug}
             plugins={plugins}
           >
-            {shouldFocus && <ShouldFocus />}
             <ContextMenu
-              focused={focused}
+              setIsEditorFocused={setEditorFocusedContextMenu}
               setContextMenuVisible={setContextMenuVisible}
               toggleContextMenu={toggleContextMenu}
             />
-            <FormatToolbar focused={focused} isContextMenuVisible={isContextMenuVisible} />
+            <FormatToolbar
+              setIsEditorFocused={setEditorFocusedFormatToolbar}
+              isContextMenuVisible={isContextMenuVisible}
+            />
+            {shouldFocus && <ShouldFocus />}
+            <EditorRefAssign />
           </Plate>
         )}
       </MainWrapper>
@@ -484,9 +496,11 @@ const EntryComponent = ({
   )
 }
 
-function areEqual(prevProps: any, nextProps: any) {
-  logger(`Comparing memo`)
-  return true
-}
+// function areEqual(prevProps: any, nextProps: any) {
+//   logger(`Comparing memo`)
+//   return true
+// }
 
-export const Entry = React.memo(EntryComponent, areEqual)
+// export const Entry = React.memo(EntryComponent, areEqual)
+
+export { Entry }
