@@ -149,13 +149,12 @@ type EntryAsideProps = {
 
 function EntryAside({ date, wordCount }: EntryAsideProps) {
   const { daysCache, removeCachedDay, setDaysWithNoContent } = useEntriesContext()
-  const { session } = useUserContext()
   const lastWordCount = useRef(0)
 
   useEffect(() => {
     if (wordCount == 0) {
       logger(`No content on ${date}`)
-      setDaysWithNoContent((prev: string[]) => {
+      setDaysWithNoContent.current((prev: string[]) => {
         return [...prev, date]
       })
     }
@@ -164,14 +163,14 @@ function EntryAside({ date, wordCount }: EntryAsideProps) {
   useEffect(() => {
     if (lastWordCount.current == 0 && wordCount != 0) {
       logger('changed to has content')
-      setDaysWithNoContent((prev: string[]) => {
+      setDaysWithNoContent.current((prev: string[]) => {
         return prev.filter((day: string) => {
           return day != date
         })
       })
     } else if (lastWordCount.current != 0 && wordCount == 0) {
       logger('changed to has no content')
-      setDaysWithNoContent((prev: string[]) => {
+      setDaysWithNoContent.current((prev: string[]) => {
         return [...new Set([...prev, date])]
       })
     }

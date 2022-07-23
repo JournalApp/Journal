@@ -208,19 +208,26 @@ const Calendar = () => {
     cacheCreateNewEntry,
     removeCachedDay,
     setScrollToDay,
-    daysWithNoContent,
+    setDaysWithNoContent,
     editorsRef,
   } = useEntriesContext()
+  const [daysWithNoContent, setDaysWithNoContentInternal] = useState<string[]>([])
   const { session } = useUserContext()
   const today = new Date()
 
   useEffect(() => {
+    setDaysWithNoContent.current = setDaysWithNoContentInternal
     let today = dayjs().format('YYYY-MM-DD')
     let element = document.getElementById(`${today}-calendar`)
     if (element) {
       element.scrollIntoView({ block: 'center' })
     }
   }, [])
+
+  useEffect(() => {
+    logger('daysWithNoContent updated:')
+    logger(daysWithNoContent)
+  }, [daysWithNoContent])
 
   const hasEntry = (date: string) => {
     if (daysCache && Array.isArray(daysCache)) {

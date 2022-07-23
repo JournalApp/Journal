@@ -11,7 +11,6 @@ interface EntriesContextInterface {
   initialCache: any
   daysCache: string[]
   setDaysCache: (days: string[]) => void
-  daysWithNoContent: string[]
   setDaysWithNoContent: any // TODO better type
   cacheCreateNewEntry: (day: string) => Promise<void>
   removeCachedDay: (day: string) => Promise<void>
@@ -34,18 +33,13 @@ export function EntriesProvider({ children }: any) {
   const [pendingDeletedEntries, setPendingDeletedEntries] = useState(false)
   const today = useRef(dayjs().format('YYYY-MM-DD'))
   const [daysCache, setDaysCache] = useState([])
-  const [daysWithNoContent, setDaysWithNoContent] = useState<string[]>([])
+  const setDaysWithNoContent = useRef(null)
   const editorsRef = useRef<Array<PlateEditor | null>>([])
 
   useEffect(() => {
     logger('daysCache updated:')
     logger(daysCache)
   }, [daysCache])
-
-  useEffect(() => {
-    logger('daysWithNoContent updated:')
-    logger(daysWithNoContent)
-  }, [daysWithNoContent])
 
   const syncPendingDeletedEntries = async () => {
     const days = await window.electronAPI.cache.getDeletedDays(session.user.id)
@@ -187,7 +181,6 @@ export function EntriesProvider({ children }: any) {
     initialCache,
     daysCache,
     setDaysCache,
-    daysWithNoContent,
     setDaysWithNoContent,
     cacheCreateNewEntry,
     removeCachedDay,
