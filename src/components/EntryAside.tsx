@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { theme } from 'themes'
 import styled from 'styled-components'
 import dayjs from 'dayjs'
@@ -148,10 +148,12 @@ type EntryAsideProps = {
 }
 
 function EntryAside({ date, wordCount }: EntryAsideProps) {
-  const { daysCache, removeCachedDay, setDaysWithNoContent } = useEntriesContext()
+  const { setDaysCacheStreak, removeCachedDay, setDaysWithNoContent } = useEntriesContext()
+  const [streak, setStreak] = useState(0)
   const lastWordCount = useRef(0)
 
   useEffect(() => {
+    setDaysCacheStreak.current[date] = setStreak
     if (wordCount == 0) {
       logger(`No content on ${date}`)
       setDaysWithNoContent.current((prev: string[]) => {
@@ -177,18 +179,13 @@ function EntryAside({ date, wordCount }: EntryAsideProps) {
     lastWordCount.current = wordCount
   }, [wordCount])
 
-  const dayCountOrdinar = () => {
-    let count = daysCache.findIndex((d: any) => d == date) + 1
-    return ordinal(count)
-  }
-
   return (
     <>
       <Aside>
         <AsideStickyContainer>
           <AsideMain>{showDate(date)}</AsideMain>
           <AsideMeta>
-            <AsideItem>{dayCountOrdinar()}</AsideItem>
+            <AsideItem>{ordinal(streak)}</AsideItem>
             <AsideItemLabel>day</AsideItemLabel>
             <AsideItem>{wordCount}</AsideItem>
             <AsideItemLabel>{wordCount == 1 ? 'word' : 'words'}</AsideItemLabel>

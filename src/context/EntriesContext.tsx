@@ -9,8 +9,11 @@ import { Entry } from 'components'
 
 interface EntriesContextInterface {
   initialCache: any
-  daysCache: string[]
+  initialDaysCache: any
   setDaysCache: (days: string[]) => void
+  setDaysCacheEntriesList: any // TODO better type
+  setDaysCacheCalendar: any // TODO better type
+  setDaysCacheStreak: any // TODO better type
   setDaysWithNoContent: any // TODO better type
   cacheCreateNewEntry: (day: string) => Promise<void>
   removeCachedDay: (day: string) => Promise<void>
@@ -28,24 +31,62 @@ const EntriesContext = createContext<EntriesContextInterface | null>(null)
 export function EntriesProvider({ children }: any) {
   const { session, serverTimeNow, signOut } = useUserContext()
   const initialCache = useRef([])
+  const initialDaysCache = useRef([])
   const scrollToDay = useRef('')
   const [initialCacheFetchDone, setInitialCacheFetchDone] = useState(false)
-  const [pendingDeletedEntries, setPendingDeletedEntries] = useState(false)
+  const pendingDeletedEntries = useRef(false)
+  const pendingDeletedEntriesInterval = useRef<NodeJS.Timeout | null>(null)
   const today = useRef(dayjs().format('YYYY-MM-DD'))
-  const [daysCache, setDaysCache] = useState([])
+  const setDaysCacheEntriesList = useRef(null)
+  const setDaysCacheCalendar = useRef(null)
+  const setDaysCacheStreak = useRef<Array<any | null>>([])
   const setDaysWithNoContent = useRef(null)
   const editorsRef = useRef<Array<PlateEditor | null>>([])
 
-  useEffect(() => {
-    logger('daysCache updated:')
-    logger(daysCache)
-  }, [daysCache])
+  const setDaysCache = (days: any) => {
+    initialDaysCache.current = days
+    if (setDaysCacheEntriesList.current) {
+      logger(`invoking setDaysCacheEntriesList.current`)
+      setDaysCacheEntriesList.current(days)
+    } else {
+      logger(`no setDaysCacheEntriesList in ref yet`)
+    }
+    if (setDaysCacheCalendar.current) {
+      logger(`invoking setDaysCacheCalendar.current`)
+      setDaysCacheCalendar.current(days)
+    } else {
+      logger(`no setDaysCacheCalendar in ref yet`)
+    }
+    setTimeout(() => {
+      days.forEach((day: any, i: number) => {
+        if (setDaysCacheStreak.current[day]) {
+          setDaysCacheStreak.current[day](i + 1)
+        }
+      })
+    }, 5000)
+  }
+
+  const setPendingDeletedEntries = (setAs: boolean) => {
+    logger(`setPendingDeletedEntries -> ${setAs}`)
+    pendingDeletedEntries.current = setAs
+    if (setAs == true) {
+      if (!pendingDeletedEntriesInterval.current) {
+        pendingDeletedEntriesInterval.current = setInterval(syncPendingDeletedEntries, 5000)
+      }
+    }
+    if (setAs == false) {
+      if (pendingDeletedEntriesInterval.current) {
+        clearInterval(pendingDeletedEntriesInterval.current)
+        pendingDeletedEntriesInterval.current = null
+      }
+    }
+  }
 
   const syncPendingDeletedEntries = async () => {
     const days = await window.electronAPI.cache.getDeletedDays(session.user.id)
     logger(`Days to delete:`)
     logger(days)
-    if (days) {
+    if (days.length) {
       await Promise.all(
         days.map(async (day: string) => {
           // TODO check if local modified_at > server modified_at
@@ -73,8 +114,9 @@ export function EntriesProvider({ children }: any) {
       const entries = await window.electronAPI.cache.getEntries(session.user.id)
       const days = await window.electronAPI.cache.getDays(session.user.id)
       initialCache.current = entries
-      setDaysCache([...days])
+      initialDaysCache.current = days
       setInitialCacheFetchDone(true)
+      setDaysCache([...days])
     }
 
     cacheFetch()
@@ -97,17 +139,11 @@ export function EntriesProvider({ children }: any) {
 
     return () => {
       clearInterval(hasNewDayCome)
+      if (pendingDeletedEntriesInterval.current) {
+        clearInterval(pendingDeletedEntriesInterval.current)
+      }
     }
   }, [])
-
-  useEffect(() => {
-    if (pendingDeletedEntries) {
-      setTimeout(() => {
-        setPendingDeletedEntries(false)
-        syncPendingDeletedEntries()
-      }, 5000)
-    }
-  }, [pendingDeletedEntries])
 
   const cacheAddOrUpdateEntry = async (query: any) => {
     await window.electronAPI.cache.addOrUpdateEntry(query)
@@ -179,8 +215,11 @@ export function EntriesProvider({ children }: any) {
 
   let state = {
     initialCache,
-    daysCache,
+    initialDaysCache,
     setDaysCache,
+    setDaysCacheEntriesList,
+    setDaysCacheCalendar,
+    setDaysCacheStreak,
     setDaysWithNoContent,
     cacheCreateNewEntry,
     removeCachedDay,

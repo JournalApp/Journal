@@ -94,10 +94,12 @@ const EntryMemo = React.memo(Entry, (prevProps, nextProps) => {
 function EntryList() {
   const [entries, setEntries] = useState([])
   const [initialFetchDone, setInitialFetchDone] = useState(false)
+  const [daysCache, setDaysCacheInternal] = useState([])
   const {
     initialCache,
-    daysCache,
+    initialDaysCache,
     setDaysCache,
+    setDaysCacheEntriesList,
     shouldScrollToDay,
     clearScrollToDay,
     cacheAddOrUpdateEntry,
@@ -112,6 +114,7 @@ function EntryList() {
   logger(`EntryList render`)
 
   useEffect(() => {
+    setDaysCacheEntriesList.current = setDaysCacheInternal
     initialFetch()
   }, [])
 
@@ -140,7 +143,11 @@ function EntryList() {
   }
 
   const initialFetch = async () => {
-    let cached = daysCache
+    let cached = initialDaysCache.current
+    logger('initialDaysCache.current:')
+    logger(initialDaysCache.current)
+    logger('daysCache:')
+    logger(daysCache)
     if (cached.length) {
       logger('---> Cached entries')
       logger(cached)

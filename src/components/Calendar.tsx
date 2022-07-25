@@ -204,18 +204,22 @@ const withLeadingZero = (num: number) => {
 const Calendar = () => {
   const { isCalendarOpen } = useAppearanceContext()
   const {
-    daysCache,
     cacheCreateNewEntry,
+    setDaysCacheCalendar,
     removeCachedDay,
     setScrollToDay,
     setDaysWithNoContent,
     editorsRef,
   } = useEntriesContext()
+  const [daysCache, setDaysCacheInternal] = useState([])
   const [daysWithNoContent, setDaysWithNoContentInternal] = useState<string[]>([])
   const { session } = useUserContext()
   const today = new Date()
 
+  logger('Caledar render')
+
   useEffect(() => {
+    setDaysCacheCalendar.current = setDaysCacheInternal
     setDaysWithNoContent.current = setDaysWithNoContentInternal
     let today = dayjs().format('YYYY-MM-DD')
     let element = document.getElementById(`${today}-calendar`)
