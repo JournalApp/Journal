@@ -281,6 +281,20 @@ const Calendar = () => {
       logger('no such day, adding...')
       await cacheCreateNewEntry(day)
       setScrollToDay(day)
+      const focusInterval = setInterval(() => {
+        const editor = editorsRef.current[day]
+        if (editor) {
+          clearInterval(focusInterval)
+          logger('Found editor for added day')
+          focusEditor(editor)
+          select(editor, {
+            path: [0, 0],
+            offset: 0,
+          })
+        } else {
+          logger('No editor for added day yet')
+        }
+      }, 100)
       window.electronAPI.capture({
         distinctId: session.user.id,
         event: 'calendar add-day',
