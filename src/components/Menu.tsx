@@ -8,6 +8,7 @@ import * as Toolbar from '@radix-ui/react-toolbar'
 import * as Dialog from '@radix-ui/react-dialog'
 import { isDev } from 'utils'
 import { useUserContext } from 'context'
+import { breakpoints } from 'utils'
 
 const showDropdown = keyframes`
   0% {
@@ -42,6 +43,14 @@ const AppearanceToolbarWrapper = styled(Dialog.Content)`
   display: flex;
   justify-content: center;
   z-index: 9999;
+  @media ${breakpoints.s} {
+    transform: scale(0.9);
+    bottom: 60px;
+  }
+  @media ${breakpoints.xs} {
+    transform: scale(0.7);
+    bottom: 40px;
+  }
 `
 
 const DialogTrigger = styled(Dialog.Trigger)`

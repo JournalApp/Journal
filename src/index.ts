@@ -38,8 +38,8 @@ const createWindow = (): void => {
   const bounds = getAppBounds(1200, 800)
   const mainWindow = new BrowserWindow({
     ...bounds,
-    minWidth: 640,
-    minHeight: 480,
+    minWidth: 400,
+    minHeight: 300,
     titleBarStyle: 'customButtonsOnHover',
     trafficLightPosition: { x: 16, y: 16 },
     show: false,
