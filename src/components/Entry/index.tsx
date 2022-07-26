@@ -43,6 +43,7 @@ const MARK_HAND_STRIKETHROUGH = 'hand-strikethrough'
 
 type EntryBlockProps = {
   entryDay: string
+  invokeEntriesInitialFetch: any // TODO better type
   entryDayCount?: number
   entriesObserver: IntersectionObserver
   cachedEntry?: any
@@ -69,6 +70,7 @@ const countEntryWords = (content: any) => {
 
 const Entry = ({
   entryDay,
+  invokeEntriesInitialFetch,
   cachedEntry,
   setEntryHeight,
   entriesObserver,
@@ -230,8 +232,8 @@ const Entry = ({
   //   }
   // })
 
-  const initialFetch = async () => {
-    // resizeObserver.observe(editorRef.current)
+  const initialFetch = async (entryModifiedAt: string) => {
+    logger(`Initial fetch ${entryDay}`)
 
     if (cachedEntry) {
       if (cachedEntry.needs_saving_to_server) {
@@ -239,38 +241,43 @@ const Entry = ({
       }
     }
 
-    const init = await fetchEntry(entryDay)
-    if (!cachedEntry && init) {
-      const { user_id, day, created_at, modified_at, content } = init
-      cacheAddOrUpdateEntry({
-        user_id,
-        day,
-        created_at,
-        modified_at,
-        content: JSON.stringify(content),
-      })
-      setInitialValue([...init.content])
-    }
-    if (cachedEntry && init && !dayjs(init.modified_at).isSame(cachedEntry.modified_at)) {
-      logger(`${init.modified_at} != ${cachedEntry.modified_at}`)
-
-      if (dayjs(init.modified_at).isAfter(dayjs(cachedEntry.modified_at))) {
-        // Server entry is newer, save it to cache
-        logger('Server entry is newer, updating cache')
-
-        const { user_id, day, modified_at, content } = init
-        let set = { modified_at, content: JSON.stringify(content) }
-        let where = { day, user_id }
-        cacheUpdateEntry(set, where)
-
+    if (dayjs(entryModifiedAt).isSame(cachedEntry?.modified_at)) {
+      logger('ModifiedAt the same, not fetching')
+    } else {
+      logger('ModifiedAt not the same, fetching from server')
+      const init = await fetchEntry(entryDay)
+      if (!cachedEntry && init) {
+        const { user_id, day, created_at, modified_at, content } = init
+        cacheAddOrUpdateEntry({
+          user_id,
+          day,
+          created_at,
+          modified_at,
+          content: JSON.stringify(content),
+        })
         setInitialValue([...init.content])
-      } else {
-        // Cached entry is newer, push it to server
-        logger('Cached entry is newer, updating on server')
-        saveEntry(entryDay, cachedEntry.content, cachedEntry.modified_at)
       }
+      if (cachedEntry && init && !dayjs(init.modified_at).isSame(cachedEntry.modified_at)) {
+        logger(`${init.modified_at} != ${cachedEntry.modified_at}`)
+
+        if (dayjs(init.modified_at).isAfter(dayjs(cachedEntry.modified_at))) {
+          // Server entry is newer, save it to cache
+          logger('Server entry is newer, updating cache')
+
+          const { user_id, day, modified_at, content } = init
+          let set = { modified_at, content: JSON.stringify(content) }
+          let where = { day, user_id }
+          cacheUpdateEntry(set, where)
+
+          setInitialValue([...init.content])
+        } else {
+          // Cached entry is newer, push it to server
+          logger('Cached entry is newer, updating on server')
+          saveEntry(entryDay, cachedEntry.content, cachedEntry.modified_at)
+        }
+      }
+      setInitialFetchDone(true)
     }
-    setInitialFetchDone(true)
   }
 
   const ShouldFocus = () => {
@@ -297,7 +304,7 @@ const Entry = ({
 
   useEffect(() => {
     logger(`Entry mounted`)
-    initialFetch()
+    invokeEntriesInitialFetch.current[entryDay] = initialFetch
 
     entriesObserver.observe(editorRef.current)
 
@@ -466,7 +473,7 @@ const Entry = ({
     <Container ref={editorRef} id={`${entryDay}-entry`}>
       <MainWrapper>
         <MiniDate>{showMiniDate(entryDay)}</MiniDate>
-        {(initialFetchDone || cachedEntry) && (
+        {(initialFetchDone || cachedEntry || isToday(entryDay)) && (
           <Plate
             id={`${entryDay}-editor`}
             editableProps={editableProps}
