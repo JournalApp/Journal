@@ -14,6 +14,7 @@ const schemaVersions = {
   '1.0.0-beta.2': 0,
   '1.0.0-beta.3': 0,
   '1.0.0-beta.4': 1,
+  '1.0.0-beta.5': 1,
 }
 
 const getDB = () => {
