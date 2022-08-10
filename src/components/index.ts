@@ -1,5 +1,6 @@
 export * from './Entry'
 export * from './EntryAside'
+export * from './EntryTags'
 export * from './Icon'
 export * from './Calendar'
 export * from './FormatToolbar'

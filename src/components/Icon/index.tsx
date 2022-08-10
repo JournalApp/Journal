@@ -23,6 +23,7 @@ import { RisedHands } from './RisedHands'
 import { UpdateNow } from './UpdateNow'
 import { FormatMark } from './FormatMark'
 import { FormatHandStriketrough } from './FormatHandStriketrough'
+import { Plus } from './Plus'
 
 type IconMapType = {
   [key: string]: any
@@ -63,6 +64,7 @@ const IconMap: IconMapType = {
   RisedHands,
   UpdateNow,
   FormatMark,
+  Plus,
 }
 
 const Icon = function (props: IconProps) {

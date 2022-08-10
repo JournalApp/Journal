@@ -6,7 +6,7 @@ import { useAppearanceContext, AppearanceContextInterface } from 'context'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import * as Toolbar from '@radix-ui/react-toolbar'
 import * as Dialog from '@radix-ui/react-dialog'
-import { isDev } from 'utils'
+import { isDev, logger } from 'utils'
 import { useUserContext } from 'context'
 import { breakpoints } from 'utils'
 
@@ -150,10 +150,8 @@ const HorizontalDivider = styled(Toolbar.Separator)`
   margin: 4px 8px;
 `
 
-const Dropdown = styled(DropdownMenu.Content)<MenuProps>`
-  position: ${(props) => (props.pos ? props.pos : 'absolute')};
-  top: ${(props) => (props.posY ? props.posY : '')};
-  left: ${(props) => (props.posX ? props.posX : '')};
+const Dropdown = styled(DropdownMenu.Content)`
+  z-index: 9999;
   padding: 4px;
   border-radius: 12px;
   box-shadow: ${theme('style.shadow')};
@@ -274,13 +272,19 @@ const Menu = () => {
           <Icon name='Menu' />
           {updateDownloaded && <Badge />}
         </MenuButton>
-        <Dropdown side='left' sideOffset={-40} align='end' alignOffset={30}>
-          <DialogTrigger>
-            <Item>
+        <Dropdown
+          side='left'
+          sideOffset={-40}
+          align='start'
+          alignOffset={30}
+          avoidCollisions={false}
+        >
+          <Item asChild>
+            <DialogTrigger>
               <Icon name='Bucket' />
               <ItemTitle>Appearance</ItemTitle>
-            </Item>
-          </DialogTrigger>
+            </DialogTrigger>
+          </Item>
           <Divider />
           <Item onSelect={() => signOutAndCapture()}>
             <Icon name='Exit' />

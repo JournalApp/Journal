@@ -3,7 +3,7 @@ import { theme } from 'themes'
 import styled from 'styled-components'
 import dayjs from 'dayjs'
 import { ordinal, breakpoints, logger, arrayEquals } from 'utils'
-import { Icon } from 'components'
+import { Icon, EntryTags } from 'components'
 import { useUserContext, useEntriesContext } from 'context'
 
 const AsideItem = styled.p`
@@ -45,10 +45,9 @@ const AsideYear = styled.p`
 `
 
 const AsideMeta = styled.div`
-  opacity: 0;
+  opacity: 0.5;
   top: 0;
   right: 0;
-  position: absolute;
   transition: ${theme('animation.time.normal')};
 `
 
@@ -63,12 +62,12 @@ const AsideStickyContainer = styled.div`
 `
 
 const Aside = styled.div`
-  width: 200px;
+  width: 170px;
   padding-top: 24px;
   display: flex;
   flex-direction: column;
   & ${AsideMeta} {
-    opacity: 0;
+    opacity: 0.5;
     right: 8px;
   }
   & ${AsideMain} {
@@ -79,10 +78,6 @@ const Aside = styled.div`
     & ${AsideMeta} {
       opacity: 1;
       right: 0;
-    }
-    & ${AsideMain} {
-      opacity: 0;
-      margin-right: 8px;
     }
   }
   @media ${breakpoints.s} {
@@ -185,10 +180,11 @@ function EntryAside({ date, wordCount }: EntryAsideProps) {
         <AsideStickyContainer>
           <AsideMain>{showDate(date)}</AsideMain>
           <AsideMeta>
-            <AsideItem>{ordinal(streak)}</AsideItem>
+            <EntryTags date={date} />
+            {/* <AsideItem>{ordinal(streak)}</AsideItem>
             <AsideItemLabel>day</AsideItemLabel>
             <AsideItem>{wordCount}</AsideItem>
-            <AsideItemLabel>{wordCount == 1 ? 'word' : 'words'}</AsideItemLabel>
+            <AsideItemLabel>{wordCount == 1 ? 'word' : 'words'}</AsideItemLabel> */}
           </AsideMeta>
         </AsideStickyContainer>
       </Aside>
