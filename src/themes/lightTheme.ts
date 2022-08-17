@@ -3,6 +3,7 @@ import beginningImage from '../../assets/images/beginning-light@2x.png'
 
 const lightPalette = {
   neutral: {
+    '0': '#FFFFFF',
     '10': '#F9F9F9', // popper
     '15': '#F3F3F3', // hover, inverted, toggle group bg
     '20': '#E9E9E9', // hover on inverted, border
@@ -23,6 +24,7 @@ const lightPalette = {
 
 const lightTheme = {
   color: {
+    pure: lightPalette.neutral[0],
     primary: {
       // base colors
       main: lightPalette.neutral[100],

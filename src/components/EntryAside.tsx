@@ -45,7 +45,6 @@ const AsideYear = styled.p`
 `
 
 const AsideMeta = styled.div`
-  opacity: 0.5;
   top: 0;
   right: 0;
   transition: ${theme('animation.time.normal')};
@@ -66,20 +65,6 @@ const Aside = styled.div`
   padding-top: 24px;
   display: flex;
   flex-direction: column;
-  & ${AsideMeta} {
-    opacity: 0.5;
-    right: 8px;
-  }
-  & ${AsideMain} {
-    opacity: 1;
-    right: 0;
-  }
-  &:hover {
-    & ${AsideMeta} {
-      opacity: 1;
-      right: 0;
-    }
-  }
   @media ${breakpoints.s} {
     display: none;
   }

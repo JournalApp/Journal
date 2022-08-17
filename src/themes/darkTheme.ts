@@ -3,6 +3,7 @@ import beginningImage from '../../assets/images/beginning-dark@2x.png'
 
 const darkPalette = {
   neutral: {
+    '0': '#000000',
     '10': '#3A3A3A', // popper
     '15': '#464646', // hover, inverted, toggle group bg
     '20': '#4C4C4C', // hover on inverted, border
@@ -23,6 +24,7 @@ const darkPalette = {
 
 const darkTheme = {
   color: {
+    pure: darkPalette.neutral[0],
     primary: {
       // base colors
       main: darkPalette.neutral[100],
