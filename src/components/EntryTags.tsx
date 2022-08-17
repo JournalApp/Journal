@@ -49,6 +49,7 @@ const StyledPopover = styled.div`
 
 interface StyledItemProps {
   isActive?: boolean
+  isAnyActiveIndex?: boolean
 }
 
 const StyledItem = styled.div<StyledItemProps>`
@@ -62,11 +63,11 @@ const StyledItem = styled.div<StyledItemProps>`
     props.isActive ? theme('color.popper.hover') : theme('color.popper.surface')};
   align-items: center;
   transition: ${theme('animation.time.normal')};
-  &:focus,
   &:hover {
     border: 0;
     outline: none;
-    background-color: ${theme('color.popper.hover')};
+    ${(props) =>
+      props.isAnyActiveIndex ? '' : 'background-color:' + theme('color.popper.hover') + ';'};
   }
 `
 
@@ -136,7 +137,7 @@ function EntryTags({ date }: EntryTagsProps) {
     open,
     onOpenChange: setOpen,
     // whileElementsMounted: autoUpdate,
-    // middleware: [shift(), offset({ crossAxis: -4, mainAxis: 8 })],
+    middleware: [offset({ crossAxis: 0, mainAxis: 4 })],
   })
   const [controlledScrolling, setControlledScrolling] = useState(false)
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
@@ -250,6 +251,7 @@ function EntryTags({ date }: EntryTagsProps) {
                   listIndexToId.current[i] = tag.id
                 }}
                 isActive={activeIndex == i}
+                isAnyActiveIndex={activeIndex != null}
                 {...getItemProps({
                   onMouseDown(e) {
                     handleSelect(e, tag.id)
