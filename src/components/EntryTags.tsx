@@ -27,7 +27,7 @@ interface EditModeProps {
 }
 
 const Wrapper = styled.div<EditModeProps>`
-  opacity: ${(props) => (props.editMode ? 1 : 0.8)};
+  opacity: ${(props) => (props.editMode ? 1 : 0.85)};
   transition: opacity ${theme('animation.time.normal')};
   cursor: ${(props) => (props.editMode ? 'auto' : 'pointer')};
   &:hover {
@@ -171,7 +171,7 @@ const Tag = styled.div<EditModeProps>`
   padding: 0px 8px;
   margin: 2px 0;
   gap: 4px;
-  background-color: ${(props) => (props.editMode ? theme('color.pure') : theme('color.pure50'))};
+  background-color: ${(props) => (props.editMode ? theme('color.pure') : theme('color.pure40'))};
   border-radius: 100px;
   animation-name: ${showTag};
   animation-duration: ${theme('animation.time.long')};

@@ -37,8 +37,8 @@ const lightPalette = {
 const lightTheme = {
   color: {
     pure: lightPalette.neutral[0],
-    get pure50() {
-      return this.pure + alphaToHex(50)
+    get pure40() {
+      return this.pure + alphaToHex(40)
     },
     primary: {
       // base colors
