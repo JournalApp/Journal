@@ -48,6 +48,7 @@ const baseTheme = {
   },
   animation: {
     time: {
+      veryFast: '50ms',
       fast: '100ms',
       normal: '200ms',
       long: '400ms',

@@ -70,6 +70,9 @@ hr {
   background-repeat: repeat-x;
   
 }
+
+/* * { border: 1px solid red} */
+
 `
 
 const Container = styled.div`

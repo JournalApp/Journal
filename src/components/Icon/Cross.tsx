@@ -3,6 +3,18 @@ import { theme } from 'themes'
 
 export function Cross({ tintColor, size, ...props }: any) {
   switch (size) {
+    case 12:
+      return (
+        <svg width={12} height={12} fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
+          <path
+            d='M2.5 2.5l7 7M9.5 2.5l-7 7'
+            stroke={tintColor || theme('color.primary.main')}
+            strokeLinecap='round'
+            strokeLinejoin='round'
+          />
+        </svg>
+      )
+
     case 16:
       return (
         <svg width={16} height={16} fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>

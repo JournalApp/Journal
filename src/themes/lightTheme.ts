@@ -1,3 +1,4 @@
+import { Bluetooth } from '@styled-icons/boxicons-regular'
 import { alphaToHex } from 'utils'
 import beginningImage from '../../assets/images/beginning-light@2x.png'
 
@@ -19,6 +20,18 @@ const lightPalette = {
   highlight: {
     main: '#104B00',
     surface: '#EDF56E',
+  },
+  tags: {
+    pink: '#F05BCA',
+    green: '#10AA99',
+    orange: '#FF7B49',
+    yellow: '#FFCC5E',
+    blue: '#41AAEB',
+    violet: '#C08ADF',
+    lime: '#84DD5A',
+    red: '#FF535D',
+    brown: '#845D49',
+    navy: '#5667DA',
   },
 }
 
@@ -62,6 +75,18 @@ const lightTheme = {
       main: lightPalette.highlight['main'],
       surface: lightPalette.highlight['surface'],
       blendMode: 'darken',
+    },
+    tags: {
+      pink: lightPalette.tags['pink'],
+      green: lightPalette.tags['green'],
+      orange: lightPalette.tags['orange'],
+      yellow: lightPalette.tags['yellow'],
+      blue: lightPalette.tags['blue'],
+      violet: lightPalette.tags['violet'],
+      lime: lightPalette.tags['lime'],
+      red: lightPalette.tags['red'],
+      brown: lightPalette.tags['brown'],
+      navy: lightPalette.tags['navy'],
     },
   },
   style: {

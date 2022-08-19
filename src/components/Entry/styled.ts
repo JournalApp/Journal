@@ -12,7 +12,8 @@ const Container = styled.div`
 `
 
 const MainWrapper = styled.div`
-  width: 100%;
+  width: min-content;
+  flex-grow: 1;
   padding: 0 80px 0 0;
   font-size: ${theme('appearance.fontSize')};
   font-family: ${theme('appearance.fontFace')};

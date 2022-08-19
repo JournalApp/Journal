@@ -47,7 +47,9 @@ const AsideYear = styled.p`
 const AsideMeta = styled.div`
   top: 0;
   right: 0;
+  text-align: -webkit-right;
   transition: ${theme('animation.time.normal')};
+  padding-top: 8px;
 `
 
 const AsideMain = styled.div`
@@ -61,7 +63,7 @@ const AsideStickyContainer = styled.div`
 `
 
 const Aside = styled.div`
-  width: 170px;
+  width: 160px;
   padding-top: 24px;
   display: flex;
   flex-direction: column;
