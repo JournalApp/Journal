@@ -171,8 +171,7 @@ const Tag = styled.div<EditModeProps>`
   padding: 0px 8px;
   margin: 2px 0;
   gap: 4px;
-  background-color: ${(props) =>
-    props.editMode ? theme('color.pure') : theme('color.popper.inverted')};
+  background-color: ${(props) => (props.editMode ? theme('color.pure') : theme('color.pure50'))};
   border-radius: 100px;
   animation-name: ${showTag};
   animation-duration: ${theme('animation.time.long')};

@@ -1,4 +1,3 @@
-import { Bluetooth } from '@styled-icons/boxicons-regular'
 import { alphaToHex } from 'utils'
 import beginningImage from '../../assets/images/beginning-light@2x.png'
 
@@ -38,6 +37,9 @@ const lightPalette = {
 const lightTheme = {
   color: {
     pure: lightPalette.neutral[0],
+    get pure50() {
+      return this.pure + alphaToHex(50)
+    },
     primary: {
       // base colors
       main: lightPalette.neutral[100],

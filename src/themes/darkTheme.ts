@@ -20,11 +20,26 @@ const darkPalette = {
     main: '#F0F59B',
     surface: '#595530',
   },
+  tags: {
+    pink: '#F05BCA',
+    green: '#10AA99',
+    orange: '#FF7B49',
+    yellow: '#FFCC5E',
+    blue: '#41AAEB',
+    violet: '#C08ADF',
+    lime: '#84DD5A',
+    red: '#FF535D',
+    brown: '#845D49',
+    navy: '#5667DA',
+  },
 }
 
 const darkTheme = {
   color: {
     pure: darkPalette.neutral[0],
+    get pure50() {
+      return this.pure + alphaToHex(50)
+    },
     primary: {
       // base colors
       main: darkPalette.neutral[100],
@@ -62,6 +77,18 @@ const darkTheme = {
       main: darkPalette.highlight['main'],
       surface: darkPalette.highlight['surface'],
       blendMode: 'lighten',
+    },
+    tags: {
+      pink: darkPalette.tags['pink'],
+      green: darkPalette.tags['green'],
+      orange: darkPalette.tags['orange'],
+      yellow: darkPalette.tags['yellow'],
+      blue: darkPalette.tags['blue'],
+      violet: darkPalette.tags['violet'],
+      lime: darkPalette.tags['lime'],
+      red: darkPalette.tags['red'],
+      brown: darkPalette.tags['brown'],
+      navy: darkPalette.tags['navy'],
     },
   },
   style: {
