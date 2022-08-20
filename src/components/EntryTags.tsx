@@ -21,6 +21,7 @@ import {
   ContextData,
   useFocus,
 } from '@floating-ui/react-dom-interactions'
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
 
 interface EditModeProps {
   editMode: boolean
@@ -60,10 +61,10 @@ const StyledPopover = styled.div`
   animation-duration: ${theme('animation.time.normal')};
   -webkit-app-region: no-drag;
   position: absolute;
-  width: -webkit-fill-available;
   overflow-x: hidden;
   max-height: calc(8 * 36px);
   overflow-y: scroll;
+  max-width: 400px;
 `
 
 const Divider = styled.div`
@@ -75,18 +76,21 @@ type TagIsAddedProps = {
   current: boolean
 }
 
-const TagIsAdded = styled(({ current, ...props }) => (
+const TagListItemIsAdded = styled(({ current, ...props }) => (
   <Icon name='Check' {...props} />
 ))<TagIsAddedProps>`
   visibility: ${(props) => (props.current ? 'visible' : 'hidden')};
 `
 
-const TagTitle = styled.span<TagIsAddedProps>`
+const TagListItemTitle = styled.span<TagIsAddedProps>`
   font-size: 14px;
   color: ${theme('color.popper.main')};
   font-weight: ${(props) => (props.current ? '700' : 'normal')};
   flex-grow: 1;
   text-align: left;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 `
 
 interface StyledItemProps {
@@ -158,11 +162,13 @@ const hideTag = keyframes`
   }
 `
 
-const Tag = styled.div<EditModeProps>`
-  white-space: nowrap;
-  font-size: 14px;
-  line-height: 24px;
+interface TagProps extends EditModeProps {
+  maxWidth?: number
+}
+
+const Tag = styled.div<TagProps>`
   -webkit-app-region: no-drag;
+  max-width: ${(props) => (props.maxWidth ? props.maxWidth + 'px' : '-webkit-fill-available')};
   display: flex;
   width: fit-content;
   flex-direction: row;
@@ -178,6 +184,15 @@ const Tag = styled.div<EditModeProps>`
   animation-fill-mode: both;
 `
 
+const TagTitle = styled.span`
+  font-size: 14px;
+  line-height: 24px;
+  color: ${theme('color.primary.main')};
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+`
+
 interface TagColorDotProps {
   fillColor: string
 }
@@ -185,6 +200,7 @@ interface TagColorDotProps {
 const TagColorDot = styled.div<TagColorDotProps>`
   height: 6px;
   width: 6px;
+  min-width: 6px;
   border-radius: 100px;
   background-color: ${(props) => props.fillColor};
 `
@@ -199,6 +215,7 @@ const PlusIcon = styled((props) => <Icon {...props} />)`
 
 const RemoveTagIcon = styled((props) => <Icon name='Cross' size={12} {...props} />)`
   opacity: 0.5;
+  min-width: 12px;
   transition: opacity ${theme('animation.time.normal')};
   cursor: pointer;
   &:hover {
@@ -220,11 +237,11 @@ function EntryTags({ date }: EntryTagsProps) {
   const allTags = useRef<Tag[]>([
     { id: '123', name: 'Vacation', color: 'pink' },
     { id: '456', name: 'Work', color: 'green' },
-    { id: '789', name: 'Workout', color: 'yellow' },
+    { id: '789', name: '100daysofcodetoday', color: 'yellow' },
   ])
   const [editMode, setEditMode] = useState(false)
   const [term, setTerm] = useState<string>('')
-  const [tags, setTags] = useState<Tag[]>([])
+  const [tags, setTags] = useState<Tag[]>([...allTags.current])
   const results = useRef<Tag[]>([])
   const listRef = useRef([])
   const listIndexToId = useRef([])
@@ -270,7 +287,7 @@ function EntryTags({ date }: EntryTagsProps) {
     if (open) {
       sel.update()
     }
-  }, [tags])
+  }, [tags, term])
 
   const clearInput = () => {
     sel.refs.reference.current.value = ''
@@ -335,6 +352,37 @@ function EntryTags({ date }: EntryTagsProps) {
     setEditMode(true)
   }
 
+  const reorder = (list: Tag[], startIndex: any, endIndex: any) => {
+    const result = Array.from(list)
+    const [removed] = result.splice(startIndex, 1)
+    result.splice(endIndex, 0, removed)
+
+    return result
+  }
+
+  const onDragEnd = (result: any) => {
+    // dropped outside the list
+    if (!result.destination) {
+      return
+    }
+    if (result.destination.index === result.source.index) {
+      return
+    }
+    const reordered = reorder(tags, result.source.index, result.destination.index)
+    setTags([...reordered])
+  }
+
+  const getItemStyle = (isDragging: any, draggableStyle: any) => ({
+    // some basic styles to make the items look a bit nicer
+    userSelect: 'none',
+
+    // change background colour if dragging
+    // background: isDragging ? 'lightgreen' : 'grey',
+
+    // styles we need to apply on draggables
+    ...draggableStyle,
+  })
+
   return (
     <Wrapper
       editMode={editMode}
@@ -343,19 +391,42 @@ function EntryTags({ date }: EntryTagsProps) {
         ref: tagWrapper.reference,
       })}
     >
-      {tags.map((tag) => (
-        <Tag key={tag.id} editMode={editMode}>
-          <TagColorDot fillColor={theme(`color.tags.${tag.color}`)} />
-          {tag.name}
-          {editMode && <RemoveTagIcon onClick={(e: any) => handleRemoveTag(e, tag.id)} />}
-        </Tag>
-      ))}
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Droppable droppableId={`${date}-droppable`}>
+          {(provided) => (
+            <div ref={provided.innerRef} {...provided.droppableProps}>
+              {tags.map((tag: Tag, i) => (
+                <Draggable key={`${date}-${tag.id}`} draggableId={`${date}-${tag.id}`} index={i}>
+                  {(provided) => (
+                    <Tag
+                      key={tag.id}
+                      editMode={editMode}
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      // style={getItemStyle(snapshot.isDragging, provided.draggableProps.style)}
+                    >
+                      <TagColorDot fillColor={theme(`color.tags.${tag.color}`)} />
+                      <TagTitle>{tag.name}</TagTitle>
+                      {editMode && (
+                        <RemoveTagIcon onClick={(e: any) => handleRemoveTag(e, tag.id)} />
+                      )}
+                    </Tag>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
       <TagsInputWrapper ref={positioningRef} editMode={editMode}>
         <PlusIcon name='Plus' />
         <TagsInput
           editMode={editMode}
           onChange={handleChange}
           tabIndex={-1}
+          maxLength={50}
           placeholder='Tag'
           {...getReferenceProps({
             ref: sel.reference,
@@ -364,7 +435,6 @@ function EntryTags({ date }: EntryTagsProps) {
             },
             onBlur() {
               clearInput()
-              // setEditMode(false)
             },
             onKeyDown(e) {
               logger('onKeyDown')
@@ -413,8 +483,10 @@ function EntryTags({ date }: EntryTagsProps) {
                 })}
               >
                 <TagColorDot fillColor={theme(`color.tags.${tag.color}`)} />
-                <TagTitle current={!!tags.find((t) => t.id == tag.id)}>{tag.name}</TagTitle>
-                <TagIsAdded current={!!tags.find((t) => t.id == tag.id)} />
+                <TagListItemTitle current={!!tags.find((t) => t.id == tag.id)}>
+                  {tag.name}
+                </TagListItemTitle>
+                <TagListItemIsAdded current={!!tags.find((t) => t.id == tag.id)} />
               </StyledItem>
             ))}
           </StyledPopover>
@@ -456,8 +528,10 @@ function EntryTags({ date }: EntryTagsProps) {
                 })}
               >
                 <TagColorDot fillColor={theme(`color.tags.${tag.color}`)} />
-                <TagTitle current={!!tags.find((t) => t.id == tag.id)}>{tag.name}</TagTitle>
-                <TagIsAdded current={!!tags.find((t) => t.id == tag.id)} />
+                <TagListItemTitle current={!!tags.find((t) => t.id == tag.id)}>
+                  {tag.name}
+                </TagListItemTitle>
+                <TagListItemIsAdded current={!!tags.find((t) => t.id == tag.id)} />
               </StyledItem>
             ))}
             {!!results.current.length &&
@@ -486,12 +560,11 @@ function EntryTags({ date }: EntryTagsProps) {
                 })}
               >
                 Create{' '}
-                <Tag editMode={false}>
+                <Tag editMode={false} maxWidth={200}>
                   <TagColorDot fillColor={theme(`color.tags.red`)} />
-                  {sel.refs.reference.current.value}
+                  <TagTitle>{sel.refs.reference.current.value}</TagTitle>
                 </Tag>
               </StyledItem>
-              // >{`Create "${sel.refs.reference.current.value}"`}</StyledItem>
             )}
           </StyledPopover>
         </FloatingFocusManager>

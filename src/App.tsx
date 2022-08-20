@@ -76,7 +76,8 @@ hr {
 `
 
 const Container = styled.div`
-  contain: paint;
+  /* contain: paint; */
+  overflow-x: clip;
 `
 
 const NoDragScrollBars = styled.div`
