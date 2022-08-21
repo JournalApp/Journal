@@ -8,7 +8,7 @@ interface EditModeProps {
 }
 
 const Wrapper = styled.div<EditModeProps>`
-  opacity: ${(props) => (props.editMode ? 1 : 0.85)};
+  opacity: ${(props) => (props.editMode ? 1 : 0.8)};
   transition: opacity ${theme('animation.time.normal')};
   cursor: ${(props) => (props.editMode ? 'auto' : 'pointer')};
   &:hover {
@@ -45,6 +45,64 @@ const StyledPopover = styled.div`
   max-height: calc(8 * 36px);
   overflow-y: scroll;
   max-width: 400px;
+  min-width: 150px;
+`
+
+const hide = keyframes`
+  0% {
+    opacity: 0.5;
+  }
+  100% {
+    visibility: hidden;
+    opacity: 0;
+  }
+`
+
+const show = keyframes`
+  0% {
+    opacity: 0;
+  }
+  100% {
+    visibility: visible;
+    opacity: 0.5;
+  }
+`
+
+const ScrollDownIcon = styled((props) => <Icon name='Chevron' type='down' size={8} {...props} />)`
+  cursor: pointer;
+  position: sticky;
+  margin-block-start: -8px;
+  display: block;
+  animation-name: ${(props) => (props.isVisible ? show : hide)};
+  animation-duration: ${theme('animation.time.long')};
+  animation-timing-function: cubic-bezier(0.17, 0.18, 0.41, 0.99);
+  animation-fill-mode: both;
+  bottom: 2px;
+  visibility: hidden;
+  opacity: 0;
+  right: calc(50% - 4px);
+  z-index: 1;
+  &:hover {
+    opacity: 0.8;
+  }
+`
+const ScrollUpIcon = styled((props) => <Icon name='Chevron' size={8} type='up' {...props} />)`
+  cursor: pointer;
+  position: sticky;
+  margin-block-end: -8px;
+  display: block;
+  animation-name: ${(props) => (props.isVisible ? show : hide)};
+  animation-duration: ${theme('animation.time.long')};
+  animation-timing-function: cubic-bezier(0.17, 0.18, 0.41, 0.99);
+  animation-fill-mode: both;
+  top: 2px;
+  visibility: hidden;
+  opacity: 0;
+  right: calc(50% - 4px);
+  z-index: 1;
+  &:hover {
+    opacity: 0.8;
+  }
 `
 
 const Divider = styled.div`
@@ -217,4 +275,6 @@ export {
   TagColorDot,
   PlusIcon,
   RemoveTagIcon,
+  ScrollDownIcon,
+  ScrollUpIcon,
 }

@@ -26,6 +26,8 @@ import {
   TagColorDot,
   PlusIcon,
   RemoveTagIcon,
+  ScrollDownIcon,
+  ScrollUpIcon,
 } from './styled'
 
 type Tag = {
@@ -43,10 +45,25 @@ function EntryTags({ date }: EntryTagsProps) {
     { id: '123', name: 'Vacation', color: 'pink' },
     { id: '456', name: 'Work', color: 'green' },
     { id: '789', name: '100daysofcodetoday', color: 'yellow' },
+    { id: 'qwe', name: 'Health', color: 'pink' },
+    { id: 'rty', name: 'School', color: 'lime' },
+    { id: 'uio', name: 'Summer', color: 'brown' },
+    { id: 'asd', name: 'Electronics', color: 'pink' },
+    { id: 'fgh', name: 'Books', color: 'yellow' },
+    { id: 'ghj', name: 'Family time', color: 'violet' },
+    { id: 'fgh1', name: 'Books1', color: 'yellow' },
+    { id: 'fgh2', name: 'Books2', color: 'green' },
+    { id: 'fgh3', name: 'Books3', color: 'yellow' },
+    { id: 'fgh4', name: 'Books4', color: 'navy' },
+    { id: 'fgh5', name: 'Books5', color: 'navy' },
   ])
   const [editMode, setEditMode] = useState(false)
   const [term, setTerm] = useState<string>('')
-  const [tags, setTags] = useState<Tag[]>([...allTags.current])
+  const [tags, setTags] = useState<Tag[]>([
+    allTags.current[0],
+    allTags.current[1],
+    allTags.current[2],
+  ])
   const results = useRef<Tag[]>([])
   const listRef = useRef([])
   const listIndexToId = useRef([])
@@ -54,6 +71,8 @@ function EntryTags({ date }: EntryTagsProps) {
   const [open, setOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
   const [selectedIndex, setSelectedIndex] = useState(Math.max(0, listRef.current.indexOf(term)))
+  const [popoverScrollDownArrow, setPopoverScrollDownArrow] = useState(false)
+  const [popoverScrollUpArrow, setPopoverScrollUpArrow] = useState(false)
   const tagWrapper = useFloating({
     open: editMode,
     onOpenChange: setEditMode,
@@ -84,15 +103,22 @@ function EntryTags({ date }: EntryTagsProps) {
 
   // logger('Rerender EntryTags')
 
-  useEffect(() => {
-    logger(`activeIndex: ${activeIndex}`)
-  }, [activeIndex])
-
   useLayoutEffect(() => {
     if (open) {
       sel.update()
     }
   }, [tags, term])
+
+  useEffect(() => {
+    if (open) {
+      const { clientHeight, scrollHeight } = sel.refs.floating.current
+      logger(clientHeight)
+      logger(scrollHeight)
+      if (scrollHeight > clientHeight) {
+        setPopoverScrollDownArrow(true)
+      }
+    }
+  }, [open])
 
   const clearInput = () => {
     sel.refs.reference.current.value = ''
@@ -188,6 +214,31 @@ function EntryTags({ date }: EntryTagsProps) {
     ...draggableStyle,
   })
 
+  const handleOnScroll = (event: any) => {
+    const { scrollTop, clientHeight, scrollHeight } = event.target
+    if (scrollHeight > clientHeight) {
+      if (scrollTop + clientHeight < scrollHeight) {
+        setPopoverScrollDownArrow(true)
+      } else {
+        setPopoverScrollDownArrow(false)
+      }
+      if (scrollTop > 0) {
+        setPopoverScrollUpArrow(true)
+      } else {
+        setPopoverScrollUpArrow(false)
+      }
+    }
+  }
+
+  const handleScroll = (e: any, dir: string) => {
+    e.preventDefault()
+    sel.refs.floating.current.scrollBy({
+      top: dir == 'up' ? -36 : 36,
+      left: 0,
+      behavior: 'smooth',
+    })
+  }
+
   return (
     <Wrapper
       editMode={editMode}
@@ -255,6 +306,7 @@ function EntryTags({ date }: EntryTagsProps) {
       {open && !term && (
         <FloatingFocusManager context={sel.context} preventTabbing>
           <StyledPopover
+            onScroll={handleOnScroll}
             {...getFloatingProps({
               ref: sel.floating,
               style: {
@@ -264,6 +316,10 @@ function EntryTags({ date }: EntryTagsProps) {
               },
             })}
           >
+            <ScrollUpIcon
+              isVisible={popoverScrollUpArrow}
+              onMouseDown={(e: any) => handleScroll(e, 'up')}
+            />
             {allTags.current.map((tag, i) => (
               <StyledItem
                 key={`${date}-${tag.name}-${tag.id}`}
@@ -294,6 +350,10 @@ function EntryTags({ date }: EntryTagsProps) {
                 <TagListItemIsAdded current={!!tags.find((t) => t.id == tag.id)} />
               </StyledItem>
             ))}
+            <ScrollDownIcon
+              isVisible={popoverScrollDownArrow}
+              onMouseDown={(e: any) => handleScroll(e, 'down')}
+            />
           </StyledPopover>
         </FloatingFocusManager>
       )}
@@ -309,7 +369,7 @@ function EntryTags({ date }: EntryTagsProps) {
               },
             })}
           >
-            {results.current.map((tag, i) => (
+            {results.current.slice(0, 5).map((tag, i) => (
               <StyledItem
                 key={`${date}-${tag.name}-${tag.id}`}
                 id={`${date}-${tag.name}-${tag.id}`}
