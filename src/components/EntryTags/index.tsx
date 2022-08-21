@@ -206,12 +206,12 @@ function EntryTags({ date }: EntryTagsProps) {
 
   const getItemStyle = (isDragging: any, draggableStyle: any) => ({
     // some basic styles to make the items look a bit nicer
-    userSelect: 'none',
-
+    // userSelect: 'none',
     // change background colour if dragging
     // background: isDragging ? 'lightgreen' : 'grey',
-
     // styles we need to apply on draggables
+    border: 0,
+    outline: 0,
     ...draggableStyle,
   })
 
@@ -248,35 +248,47 @@ function EntryTags({ date }: EntryTagsProps) {
         ref: tagWrapper.reference,
       })}
     >
-      <DragDropContext onDragEnd={onDragEnd}>
-        <Droppable droppableId={`${date}-droppable`}>
-          {(provided) => (
-            <div ref={provided.innerRef} {...provided.droppableProps}>
-              {tags.map((tag: Tag, i) => (
-                <Draggable key={`${date}-${tag.id}`} draggableId={`${date}-${tag.id}`} index={i}>
-                  {(provided) => (
-                    <TagHandle
-                      key={tag.id}
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                    >
-                      <Tag editMode={editMode}>
-                        <TagColorDot fillColor={theme(`color.tags.${tag.color}`)} />
-                        <TagTitle>{tag.name}</TagTitle>
-                        {editMode && (
-                          <RemoveTagIcon onClick={(e: any) => handleRemoveTag(e, tag.id)} />
-                        )}
-                      </Tag>
-                    </TagHandle>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-      </DragDropContext>
+      {editMode && (
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Droppable droppableId={`${date}-droppable`}>
+            {(provided) => (
+              <div ref={provided.innerRef} {...provided.droppableProps}>
+                {tags.map((tag: Tag, i) => (
+                  <Draggable key={`${date}-${tag.id}`} draggableId={`${date}-${tag.id}`} index={i}>
+                    {(provided) => (
+                      <TagHandle
+                        key={tag.id}
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        // style={getItemStyle(snapshot.isDragging, provided.draggableProps.style)}
+                      >
+                        <Tag editMode={editMode}>
+                          <TagColorDot fillColor={theme(`color.tags.${tag.color}`)} />
+                          <TagTitle>{tag.name}</TagTitle>
+                          {editMode && (
+                            <RemoveTagIcon onClick={(e: any) => handleRemoveTag(e, tag.id)} />
+                          )}
+                        </Tag>
+                      </TagHandle>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
+      )}
+      {!editMode &&
+        tags.map((tag: Tag) => (
+          <TagHandle key={`${date}-${tag.id}`}>
+            <Tag editMode={editMode}>
+              <TagColorDot fillColor={theme(`color.tags.${tag.color}`)} />
+              <TagTitle>{tag.name}</TagTitle>
+            </Tag>
+          </TagHandle>
+        ))}
       <TagsInputWrapper ref={positioningRef} editMode={editMode}>
         <PlusIcon name='Plus' />
         <TagsInput

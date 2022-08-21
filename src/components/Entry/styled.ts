@@ -4,10 +4,10 @@ import { breakpoints } from 'utils'
 
 const Container = styled.div`
   display: flex;
-  padding: 40px 0 40px 40px;
+  padding: 32px 0 32px 40px;
   word-break: break-word;
   @media ${breakpoints.s} {
-    padding: 40px;
+    padding: 16px 24px;
   }
 `
 

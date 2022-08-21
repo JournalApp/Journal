@@ -188,26 +188,6 @@ const TagsInput = styled.input<EditModeProps>`
   }
 `
 
-const showTag = keyframes`
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-`
-
-const hideTag = keyframes`
- 0% {
-
-  opacity: 1;
-}
-  100% {
-
-    opacity: 0;
-  }
-`
-
 interface TagProps extends EditModeProps {
   maxWidth?: number
 }
@@ -221,17 +201,16 @@ const Tag = styled.div<TagProps>`
   justify-content: center;
   align-items: center;
   padding: 0px 8px;
-  margin: 2px 0;
   gap: 4px;
   background-color: ${(props) => (props.editMode ? theme('color.pure') : theme('color.pure40'))};
   border-radius: 100px;
-  animation-name: ${showTag};
-  animation-duration: ${theme('animation.time.long')};
-  animation-fill-mode: both;
 `
 
 const TagHandle = styled.div`
   -webkit-app-region: no-drag;
+  border: 0;
+  outline: 0;
+  margin-bottom: 2px;
 `
 
 const TagTitle = styled.span`

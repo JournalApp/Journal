@@ -49,7 +49,7 @@ const AsideMeta = styled.div`
   right: 0;
   text-align: -webkit-right;
   transition: ${theme('animation.time.normal')};
-  padding-top: 8px;
+  padding-top: 24px;
 `
 
 const AsideMain = styled.div`
@@ -63,6 +63,7 @@ const AsideStickyContainer = styled.div`
 `
 
 const Aside = styled.div`
+  -webkit-app-region: no-drag;
   width: 160px;
   padding-top: 24px;
   display: flex;
