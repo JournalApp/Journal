@@ -22,6 +22,7 @@ import {
   TagsInput,
   TagListItemTitle,
   Tag,
+  TagHandle,
   TagTitle,
   TagColorDot,
   PlusIcon,
@@ -254,20 +255,20 @@ function EntryTags({ date }: EntryTagsProps) {
               {tags.map((tag: Tag, i) => (
                 <Draggable key={`${date}-${tag.id}`} draggableId={`${date}-${tag.id}`} index={i}>
                   {(provided) => (
-                    <Tag
+                    <TagHandle
                       key={tag.id}
-                      editMode={editMode}
                       ref={provided.innerRef}
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}
-                      // style={getItemStyle(snapshot.isDragging, provided.draggableProps.style)}
                     >
-                      <TagColorDot fillColor={theme(`color.tags.${tag.color}`)} />
-                      <TagTitle>{tag.name}</TagTitle>
-                      {editMode && (
-                        <RemoveTagIcon onClick={(e: any) => handleRemoveTag(e, tag.id)} />
-                      )}
-                    </Tag>
+                      <Tag editMode={editMode}>
+                        <TagColorDot fillColor={theme(`color.tags.${tag.color}`)} />
+                        <TagTitle>{tag.name}</TagTitle>
+                        {editMode && (
+                          <RemoveTagIcon onClick={(e: any) => handleRemoveTag(e, tag.id)} />
+                        )}
+                      </Tag>
+                    </TagHandle>
                   )}
                 </Draggable>
               ))}

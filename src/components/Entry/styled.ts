@@ -13,6 +13,7 @@ const Container = styled.div`
 
 const MainWrapper = styled.div`
   width: min-content;
+  contain: layout;
   flex-grow: 1;
   padding: 0 80px 0 0;
   font-size: ${theme('appearance.fontSize')};

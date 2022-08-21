@@ -1,6 +1,13 @@
 import React, { ReactPortal, useState, useEffect, useLayoutEffect, forwardRef, useRef } from 'react'
 import * as Toolbar from '@radix-ui/react-toolbar'
-import { offset, shift, useFloating, FloatingPortal } from '@floating-ui/react-dom-interactions'
+import {
+  offset,
+  shift,
+  useFloating,
+  FloatingPortal,
+  useDismiss,
+  useInteractions,
+} from '@floating-ui/react-dom-interactions'
 import { Icon } from 'components'
 import { BlockTypeSelect } from './BlockTypeSelect'
 import { theme } from 'themes'
@@ -127,14 +134,17 @@ interface FormatToolbarProps {
 export const FormatToolbar = ({ setIsEditorFocused, isContextMenuVisible }: FormatToolbarProps) => {
   const editorRef = usePlateEditorRef()
   const editor = usePlateEditorState(useEventPlateId())
-  const [isHidden, setIsHidden] = useState(true)
+  const [open, setOpen] = useState(true)
   const [editorFocused, setEditorFocused] = useState(false)
   const selectionExpanded = editor && isSelectionExpanded(editor)
   const selectionText = editor && getSelectionText(editor)
-  const { x, y, reference, floating, strategy } = useFloating({
+  const { x, y, reference, floating, strategy, context } = useFloating({
     placement: 'top-start',
     middleware: [shift(), offset({ mainAxis: 8 })],
+    open,
+    onOpenChange: setOpen,
   })
+  const { getReferenceProps, getFloatingProps } = useInteractions([useDismiss(context)])
   const { session } = useUserContext()
 
   // https://github.com/udecode/plate/issues/1352#issuecomment-1056975461
@@ -162,12 +172,12 @@ export const FormatToolbar = ({ setIsEditorFocused, isContextMenuVisible }: Form
 
   useEffect(() => {
     if (!editorFocused) {
-      setIsHidden(true)
+      setOpen(false)
     } else {
       if (!selectionText) {
-        setIsHidden(true)
+        setOpen(false)
       } else if (selectionText && selectionExpanded) {
-        setIsHidden(false)
+        setOpen(true)
       }
     }
   }, [selectionExpanded, selectionText, editorFocused])
@@ -203,12 +213,13 @@ export const FormatToolbar = ({ setIsEditorFocused, isContextMenuVisible }: Form
 
   return (
     <FloatingPortal>
-      {!isContextMenuVisible() && !isHidden && (
+      {!isContextMenuVisible() && open && (
         <Wrapper
           ref={floating}
           posX={`${Math.floor(x)}px`}
           posY={`${Math.floor(y)}px`}
           pos={strategy}
+          {...getFloatingProps()}
         >
           <StyledToolbar>
             <BlockTypeSelect />

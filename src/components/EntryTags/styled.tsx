@@ -68,7 +68,13 @@ const show = keyframes`
   }
 `
 
-const ScrollDownIcon = styled((props) => <Icon name='Chevron' type='down' size={8} {...props} />)`
+type ScrollIconProps = {
+  isVisible: boolean
+}
+
+const ScrollDownIcon = styled(({ isVisible, ...rest }) => (
+  <Icon name='Chevron' type='down' size={8} {...rest} />
+))<ScrollIconProps>`
   cursor: pointer;
   position: sticky;
   margin-block-start: -8px;
@@ -86,7 +92,9 @@ const ScrollDownIcon = styled((props) => <Icon name='Chevron' type='down' size={
     opacity: 0.8;
   }
 `
-const ScrollUpIcon = styled((props) => <Icon name='Chevron' size={8} type='up' {...props} />)`
+const ScrollUpIcon = styled(({ isVisible, ...rest }) => (
+  <Icon name='Chevron' size={8} type='up' {...rest} />
+))<ScrollIconProps>`
   cursor: pointer;
   position: sticky;
   margin-block-end: -8px;
@@ -222,6 +230,10 @@ const Tag = styled.div<TagProps>`
   animation-fill-mode: both;
 `
 
+const TagHandle = styled.div`
+  -webkit-app-region: no-drag;
+`
+
 const TagTitle = styled.span`
   font-size: 14px;
   line-height: 24px;
@@ -271,6 +283,7 @@ export {
   TagsInput,
   TagListItemTitle,
   Tag,
+  TagHandle,
   TagTitle,
   TagColorDot,
   PlusIcon,
