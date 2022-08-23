@@ -13,29 +13,25 @@ import {
 } from '@floating-ui/react-dom-interactions'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
 import {
-  Wrapper,
-  TagsInputWrapper,
+  StyledWrapper,
+  StyledTagsInputWrapper,
   StyledPopover,
-  Divider,
-  TagListItemIsAdded,
+  StyledDivider,
+  StyledTagListItemIsAdded,
   StyledItem,
-  TagsInput,
-  TagListItemTitle,
-  Tag,
-  TagHandle,
-  TagTitle,
-  TagColorDot,
-  PlusIcon,
-  RemoveTagIcon,
-  ScrollDownIcon,
-  ScrollUpIcon,
+  StyledTagsInput,
+  StyledTagListItemTitle,
+  StyledTag,
+  StyledTagHandle,
+  StyledTagTitle,
+  StyledTagColorDot,
+  StyledPlusIcon,
+  StyledRemoveTagIcon,
+  StyledScrollDownIcon,
+  StyledScrollUpIcon,
 } from './styled'
-
-type Tag = {
-  id: string
-  name: string
-  color: keyof typeof lightTheme.color.tags
-}
+import { ListItemTag } from './ListItemTag'
+import { Tag } from './types'
 
 type EntryTagsProps = {
   date: string
@@ -204,17 +200,6 @@ function EntryTags({ date }: EntryTagsProps) {
     setTags([...reordered])
   }
 
-  const getItemStyle = (isDragging: any, draggableStyle: any) => ({
-    // some basic styles to make the items look a bit nicer
-    // userSelect: 'none',
-    // change background colour if dragging
-    // background: isDragging ? 'lightgreen' : 'grey',
-    // styles we need to apply on draggables
-    border: 0,
-    outline: 0,
-    ...draggableStyle,
-  })
-
   const handleOnScroll = (event: any) => {
     const { scrollTop, clientHeight, scrollHeight } = event.target
     if (scrollHeight > clientHeight) {
@@ -241,7 +226,7 @@ function EntryTags({ date }: EntryTagsProps) {
   }
 
   return (
-    <Wrapper
+    <StyledWrapper
       editMode={editMode}
       onClick={handleEnableEditMode}
       {...getReferencePropsTagWrapper({
@@ -256,21 +241,20 @@ function EntryTags({ date }: EntryTagsProps) {
                 {tags.map((tag: Tag, i) => (
                   <Draggable key={`${date}-${tag.id}`} draggableId={`${date}-${tag.id}`} index={i}>
                     {(provided) => (
-                      <TagHandle
+                      <StyledTagHandle
                         key={tag.id}
                         ref={provided.innerRef}
                         {...provided.draggableProps}
                         {...provided.dragHandleProps}
-                        // style={getItemStyle(snapshot.isDragging, provided.draggableProps.style)}
                       >
-                        <Tag editMode={editMode}>
-                          <TagColorDot fillColor={theme(`color.tags.${tag.color}`)} />
-                          <TagTitle>{tag.name}</TagTitle>
+                        <StyledTag editMode={editMode}>
+                          <StyledTagColorDot fillColor={theme(`color.tags.${tag.color}`)} />
+                          <StyledTagTitle>{tag.name}</StyledTagTitle>
                           {editMode && (
-                            <RemoveTagIcon onClick={(e: any) => handleRemoveTag(e, tag.id)} />
+                            <StyledRemoveTagIcon onClick={(e: any) => handleRemoveTag(e, tag.id)} />
                           )}
-                        </Tag>
-                      </TagHandle>
+                        </StyledTag>
+                      </StyledTagHandle>
                     )}
                   </Draggable>
                 ))}
@@ -282,16 +266,16 @@ function EntryTags({ date }: EntryTagsProps) {
       )}
       {!editMode &&
         tags.map((tag: Tag) => (
-          <TagHandle key={`${date}-${tag.id}`}>
-            <Tag editMode={editMode}>
-              <TagColorDot fillColor={theme(`color.tags.${tag.color}`)} />
-              <TagTitle>{tag.name}</TagTitle>
-            </Tag>
-          </TagHandle>
+          <StyledTagHandle key={`${date}-${tag.id}`}>
+            <StyledTag editMode={editMode}>
+              <StyledTagColorDot fillColor={theme(`color.tags.${tag.color}`)} />
+              <StyledTagTitle>{tag.name}</StyledTagTitle>
+            </StyledTag>
+          </StyledTagHandle>
         ))}
-      <TagsInputWrapper ref={positioningRef} editMode={editMode}>
-        <PlusIcon name='Plus' />
-        <TagsInput
+      <StyledTagsInputWrapper ref={positioningRef} editMode={editMode}>
+        <StyledPlusIcon name='Plus' />
+        <StyledTagsInput
           editMode={editMode}
           onChange={handleChange}
           tabIndex={-1}
@@ -314,8 +298,8 @@ function EntryTags({ date }: EntryTagsProps) {
               }
             },
           })}
-        ></TagsInput>
-      </TagsInputWrapper>
+        ></StyledTagsInput>
+      </StyledTagsInputWrapper>
       {open && !term && (
         <FloatingFocusManager context={sel.context} preventTabbing>
           <StyledPopover
@@ -329,41 +313,25 @@ function EntryTags({ date }: EntryTagsProps) {
               },
             })}
           >
-            <ScrollUpIcon
+            <StyledScrollUpIcon
               isVisible={popoverScrollUpArrow}
               onMouseDown={(e: any) => handleScroll(e, 'up')}
             />
             {allTags.current.map((tag, i) => (
-              <StyledItem
-                key={`${date}-${tag.name}-${tag.id}`}
-                id={`${date}-${tag.name}-${tag.id}`}
-                ref={(node) => {
-                  listRef.current[i] = node
-                  listIndexToId.current[i] = tag.id
-                }}
-                isActive={activeIndex == i}
-                isAnyActiveIndex={activeIndex != null}
-                {...getItemProps({
-                  onMouseDown(e) {
-                    handleSelect(e, tag.id)
-                  },
-                  onFocus() {
-                    logger('StyledItem sel.refs.reference.current.focus()')
-                    sel.refs.reference.current.focus()
-                  },
-                  onKeyDown(e) {
-                    logger('onKeyDown StyledItem')
-                  },
-                })}
-              >
-                <TagColorDot fillColor={theme(`color.tags.${tag.color}`)} />
-                <TagListItemTitle current={!!tags.find((t) => t.id == tag.id)}>
-                  {tag.name}
-                </TagListItemTitle>
-                <TagListItemIsAdded current={!!tags.find((t) => t.id == tag.id)} />
-              </StyledItem>
+              <ListItemTag
+                i={i}
+                date={date}
+                tag={tag}
+                tags={tags}
+                listRef={listRef}
+                listIndexToId={listIndexToId}
+                activeIndex={activeIndex}
+                handleSelect={handleSelect}
+                tagsInputRef={sel.refs.reference}
+                getItemProps={getItemProps}
+              />
             ))}
-            <ScrollDownIcon
+            <StyledScrollDownIcon
               isVisible={popoverScrollDownArrow}
               onMouseDown={(e: any) => handleScroll(e, 'down')}
             />
@@ -383,38 +351,22 @@ function EntryTags({ date }: EntryTagsProps) {
             })}
           >
             {results.current.slice(0, 5).map((tag, i) => (
-              <StyledItem
-                key={`${date}-${tag.name}-${tag.id}`}
-                id={`${date}-${tag.name}-${tag.id}`}
-                ref={(node) => {
-                  listRef.current[i] = node
-                  listIndexToId.current[i] = tag.id
-                }}
-                isActive={activeIndex == i}
-                isAnyActiveIndex={activeIndex != null}
-                {...getItemProps({
-                  onMouseDown(e) {
-                    handleSelect(e, tag.id)
-                  },
-                  onFocus() {
-                    logger('StyledItem sel.refs.reference.current.focus()')
-                    sel.refs.reference.current.focus()
-                  },
-                  onKeyDown(e) {
-                    logger('onKeyDown StyledItem')
-                  },
-                })}
-              >
-                <TagColorDot fillColor={theme(`color.tags.${tag.color}`)} />
-                <TagListItemTitle current={!!tags.find((t) => t.id == tag.id)}>
-                  {tag.name}
-                </TagListItemTitle>
-                <TagListItemIsAdded current={!!tags.find((t) => t.id == tag.id)} />
-              </StyledItem>
+              <ListItemTag
+                i={i}
+                date={date}
+                tag={tag}
+                tags={tags}
+                listRef={listRef}
+                listIndexToId={listIndexToId}
+                activeIndex={activeIndex}
+                handleSelect={handleSelect}
+                tagsInputRef={sel.refs.reference}
+                getItemProps={getItemProps}
+              />
             ))}
             {!!results.current.length &&
               !results.current.some((t) => t.name == sel.refs.reference.current.value) && (
-                <Divider />
+                <StyledDivider />
               )}
             {!results.current.some((t) => t.name == sel.refs.reference.current.value) && (
               <StyledItem
@@ -438,16 +390,16 @@ function EntryTags({ date }: EntryTagsProps) {
                 })}
               >
                 Create{' '}
-                <Tag editMode={false} maxWidth={200}>
-                  <TagColorDot fillColor={theme(`color.tags.red`)} />
-                  <TagTitle>{sel.refs.reference.current.value}</TagTitle>
-                </Tag>
+                <StyledTag editMode={false} maxWidth={200}>
+                  <StyledTagColorDot fillColor={theme(`color.tags.red`)} />
+                  <StyledTagTitle>{sel.refs.reference.current.value}</StyledTagTitle>
+                </StyledTag>
               </StyledItem>
             )}
           </StyledPopover>
         </FloatingFocusManager>
       )}
-    </Wrapper>
+    </StyledWrapper>
   )
 }
 

@@ -7,7 +7,7 @@ interface EditModeProps {
   editMode: boolean
 }
 
-const Wrapper = styled.div<EditModeProps>`
+const StyledWrapper = styled.div<EditModeProps>`
   opacity: ${(props) => (props.editMode ? 1 : 0.8)};
   transition: opacity ${theme('animation.time.normal')};
   cursor: ${(props) => (props.editMode ? 'auto' : 'pointer')};
@@ -16,7 +16,7 @@ const Wrapper = styled.div<EditModeProps>`
   }
 `
 
-const TagsInputWrapper = styled.div<EditModeProps>`
+const StyledTagsInputWrapper = styled.div<EditModeProps>`
   padding: 4px 0 8px 0;
   position: relative;
   width: ${(props) => (props.editMode ? '100%' : '16px')};
@@ -72,7 +72,7 @@ type ScrollIconProps = {
   isVisible: boolean
 }
 
-const ScrollDownIcon = styled(({ isVisible, ...rest }) => (
+const StyledScrollDownIcon = styled(({ isVisible, ...rest }) => (
   <Icon name='Chevron' type='down' size={8} {...rest} />
 ))<ScrollIconProps>`
   cursor: pointer;
@@ -92,7 +92,7 @@ const ScrollDownIcon = styled(({ isVisible, ...rest }) => (
     opacity: 0.8;
   }
 `
-const ScrollUpIcon = styled(({ isVisible, ...rest }) => (
+const StyledScrollUpIcon = styled(({ isVisible, ...rest }) => (
   <Icon name='Chevron' size={8} type='up' {...rest} />
 ))<ScrollIconProps>`
   cursor: pointer;
@@ -113,7 +113,7 @@ const ScrollUpIcon = styled(({ isVisible, ...rest }) => (
   }
 `
 
-const Divider = styled.div`
+const StyledDivider = styled.div`
   background-color: ${theme('color.popper.border')};
   height: 1px;
   margin: 4px 12px;
@@ -122,13 +122,13 @@ type TagIsAddedProps = {
   current: boolean
 }
 
-const TagListItemIsAdded = styled(({ current, ...props }) => (
+const StyledTagListItemIsAdded = styled(({ current, ...props }) => (
   <Icon name='Check' {...props} />
 ))<TagIsAddedProps>`
   visibility: ${(props) => (props.current ? 'visible' : 'hidden')};
 `
 
-const TagListItemTitle = styled.span<TagIsAddedProps>`
+const StyledTagListItemTitle = styled.span<TagIsAddedProps>`
   font-size: 14px;
   color: ${theme('color.popper.main')};
   font-weight: ${(props) => (props.current ? '700' : 'normal')};
@@ -165,7 +165,7 @@ const StyledItem = styled.div<StyledItemProps>`
   }
 `
 
-const TagsInput = styled.input<EditModeProps>`
+const StyledTagsInput = styled.input<EditModeProps>`
   font-size: 14px;
   padding: 3px 3px 3px 20px;
   width: 100%;
@@ -192,7 +192,7 @@ interface TagProps extends EditModeProps {
   maxWidth?: number
 }
 
-const Tag = styled.div<TagProps>`
+const StyledTag = styled.div<TagProps>`
   -webkit-app-region: no-drag;
   max-width: ${(props) => (props.maxWidth ? props.maxWidth + 'px' : '-webkit-fill-available')};
   display: flex;
@@ -206,14 +206,14 @@ const Tag = styled.div<TagProps>`
   border-radius: 100px;
 `
 
-const TagHandle = styled.div`
+const StyledTagHandle = styled.div`
   -webkit-app-region: no-drag;
   border: 0;
   outline: 0;
   margin-bottom: 2px;
 `
 
-const TagTitle = styled.span`
+const StyledTagTitle = styled.span`
   font-size: 14px;
   line-height: 24px;
   color: ${theme('color.primary.main')};
@@ -226,7 +226,7 @@ interface TagColorDotProps {
   fillColor: string
 }
 
-const TagColorDot = styled.div<TagColorDotProps>`
+const StyledTagColorDot = styled.div<TagColorDotProps>`
   height: 6px;
   width: 6px;
   min-width: 6px;
@@ -234,7 +234,7 @@ const TagColorDot = styled.div<TagColorDotProps>`
   background-color: ${(props) => props.fillColor};
 `
 
-const PlusIcon = styled((props) => <Icon {...props} />)`
+const StyledPlusIcon = styled((props) => <Icon {...props} />)`
   position: absolute;
   opacity: 0.3;
   margin-top: 5px;
@@ -242,7 +242,7 @@ const PlusIcon = styled((props) => <Icon {...props} />)`
   z-index: 1;
 `
 
-const RemoveTagIcon = styled((props) => <Icon name='Cross' size={12} {...props} />)`
+const StyledRemoveTagIcon = styled((props) => <Icon name='Cross' size={12} {...props} />)`
   opacity: 0.5;
   min-width: 12px;
   transition: opacity ${theme('animation.time.normal')};
@@ -253,20 +253,20 @@ const RemoveTagIcon = styled((props) => <Icon name='Cross' size={12} {...props} 
 `
 
 export {
-  Wrapper,
-  TagsInputWrapper,
+  StyledWrapper,
+  StyledTagsInputWrapper,
   StyledPopover,
-  Divider,
-  TagListItemIsAdded,
+  StyledDivider,
+  StyledTagListItemIsAdded,
   StyledItem,
-  TagsInput,
-  TagListItemTitle,
-  Tag,
-  TagHandle,
-  TagTitle,
-  TagColorDot,
-  PlusIcon,
-  RemoveTagIcon,
-  ScrollDownIcon,
-  ScrollUpIcon,
+  StyledTagsInput,
+  StyledTagListItemTitle,
+  StyledTag,
+  StyledTagHandle,
+  StyledTagTitle,
+  StyledTagColorDot,
+  StyledPlusIcon,
+  StyledRemoveTagIcon,
+  StyledScrollDownIcon,
+  StyledScrollUpIcon,
 }
