@@ -1,26 +1,28 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react'
 import { lightTheme, theme } from 'themes'
 import { ordinal, breakpoints, logger, arrayEquals } from 'utils'
 import { matchSorter } from 'match-sorter'
 import {
   useFloating,
   offset,
+  FloatingTree,
   useListNavigation,
   useInteractions,
   useDismiss,
   FloatingFocusManager,
   useFocus,
+  useFloatingNodeId,
+  FloatingNode,
+  FloatingPortal,
 } from '@floating-ui/react-dom-interactions'
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
+import { DragDropContext, Droppable, Draggable, resetServerContext } from 'react-beautiful-dnd'
 import {
   StyledWrapper,
   StyledTagsInputWrapper,
   StyledPopover,
   StyledDivider,
-  StyledTagListItemIsAdded,
   StyledItem,
   StyledTagsInput,
-  StyledTagListItemTitle,
   StyledTag,
   StyledTagHandle,
   StyledTagTitle,
@@ -54,7 +56,8 @@ function EntryTags({ date }: EntryTagsProps) {
     { id: 'fgh4', name: 'Books4', color: 'navy' },
     { id: 'fgh5', name: 'Books5', color: 'navy' },
   ])
-  const [editMode, setEditMode] = useState(false)
+  const [editMode, setEditMode] = useState(false) // 1. edit mode
+  const [tagIndexEditing, setTagIndexEditing] = useState<number | null>(null) // 3. Tag editing
   const [term, setTerm] = useState<string>('')
   const [tags, setTags] = useState<Tag[]>([
     allTags.current[0],
@@ -65,34 +68,32 @@ function EntryTags({ date }: EntryTagsProps) {
   const listRef = useRef([])
   const listIndexToId = useRef([])
   const positioningRef = useRef(null)
-  const [open, setOpen] = useState(false)
+  const tagWrapperRef = useRef<HTMLDivElement>(null)
+  const tagEditingRef = useRef<HTMLDivElement>(null)
+  const [open, setOpen] = useState(false) // 2. popver
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
   const [selectedIndex, setSelectedIndex] = useState(Math.max(0, listRef.current.indexOf(term)))
   const [popoverScrollDownArrow, setPopoverScrollDownArrow] = useState(false)
   const [popoverScrollUpArrow, setPopoverScrollUpArrow] = useState(false)
-  const tagWrapper = useFloating({
-    open: editMode,
-    onOpenChange: setEditMode,
-  })
+
   const sel = useFloating<HTMLInputElement>({
     placement: 'bottom-end',
     open,
     onOpenChange: setOpen,
     middleware: [offset({ crossAxis: 0, mainAxis: 4 })],
   })
-  const { getReferenceProps: getReferencePropsTagWrapper } = useInteractions([
-    useDismiss(tagWrapper.context),
-  ])
+
   const { getReferenceProps, getFloatingProps, getItemProps } = useInteractions([
-    useFocus(sel.context, { keyboardOnly: false }),
-    useDismiss(sel.context),
+    // useFocus(sel.context, { keyboardOnly: false }),
+    // useDismiss(sel.context, { escapeKey: false }),
     useListNavigation(sel.context, {
       listRef,
       activeIndex,
       selectedIndex,
       onNavigate: setActiveIndex,
       loop: true,
-      allowEscape: true,
+      allowEscape: false,
+      openOnArrowKeyDown: true,
       virtual: true,
       focusItemOnOpen: true,
     }),
@@ -104,18 +105,26 @@ function EntryTags({ date }: EntryTagsProps) {
     if (open) {
       sel.update()
     }
-  }, [tags, term])
+  }, [tags, term, tagIndexEditing])
 
   useEffect(() => {
     if (open) {
       const { clientHeight, scrollHeight } = sel.refs.floating.current
-      logger(clientHeight)
-      logger(scrollHeight)
       if (scrollHeight > clientHeight) {
         setPopoverScrollDownArrow(true)
       }
     }
   }, [open])
+
+  useEffect(() => {
+    logger(`${editMode ? '✔' : '-'} Edit mode`)
+    logger(`${open ? '✔' : '-'} Popover`)
+    logger(`${tagIndexEditing != null ? '✔' : '-'} Tag edit`)
+  }, [open, editMode, tagIndexEditing])
+
+  // useEffect(() => {
+  //   if(tagIndexEditing == null)
+  // }, [tagIndexEditing])
 
   const clearInput = () => {
     sel.refs.reference.current.value = ''
@@ -174,10 +183,13 @@ function EntryTags({ date }: EntryTagsProps) {
   }
 
   const handleEnableEditMode = () => {
-    if (!tags.length) {
-      setTimeout(() => sel.refs.reference.current.focus(), 100)
+    logger('onClick StyledWrapper')
+    if (!editMode) {
+      if (!tags.length) {
+        setTimeout(() => sel.refs.reference.current.focus(), 100)
+      }
+      setEditMode(true)
     }
-    setEditMode(true)
   }
 
   const reorder = (list: Tag[], startIndex: any, endIndex: any) => {
@@ -225,44 +237,125 @@ function EntryTags({ date }: EntryTagsProps) {
     })
   }
 
+  const EditMode = ({ children }: any) => {
+    logger('EditMode rerender')
+    const handleCloseEsc = (e: any) => {
+      logger('🚪 ESC')
+      logger(`${editMode ? '✔' : '-'} Edit mode`)
+      logger(`${open ? '✔' : '-'} Popover`)
+      logger(`${tagIndexEditing != null ? '✔' : '-'} Tag edit`)
+      if (e.key == 'Escape') {
+        if (tagIndexEditing != null) {
+          logger('close Tag editing')
+          sel.refs.reference.current.focus()
+          setTagIndexEditing(null)
+          return
+        }
+        if (open) {
+          logger('close popover')
+          setOpen(false)
+          return
+        }
+        if (editMode) {
+          logger('close editMode')
+          setEditMode(false)
+          clearInput()
+          return
+        }
+      }
+    }
+
+    const handleCloseMouse = (e: any) => {
+      logger('🖱 Mouse')
+      logger(`${editMode ? '✔' : '-'} Edit mode`)
+      logger(`${open ? '✔' : '-'} Popover`)
+      logger(`${tagIndexEditing != null ? '✔' : '-'} Tag edit`)
+
+      if (!tagWrapperRef.current.contains(e.target)) {
+        logger('🖱 click outside tagWrapper')
+        logger(e.target)
+        setTagIndexEditing(null)
+        setOpen(false)
+        setEditMode(false)
+        clearInput()
+        return
+      }
+
+      if (!!sel.refs.floating.current && !sel.refs.floating.current.contains(e.target)) {
+        logger('🖱 click outside popover')
+        setTagIndexEditing(null)
+        setOpen(false)
+        return
+      }
+
+      if (
+        !!tagEditingRef.current &&
+        !tagEditingRef.current.contains(e.target) &&
+        tagIndexEditing != null
+      ) {
+        logger('🖱 click outside tagEditingRef')
+        sel.refs.reference.current.focus()
+        setTagIndexEditing(null)
+
+        return
+      }
+    }
+
+    useEffect(() => {
+      // logger('✅ addEventListener')
+      document.addEventListener('keydown', handleCloseEsc)
+      document.addEventListener('mousedown', handleCloseMouse)
+
+      return () => {
+        // logger('❌ removeEventListener')
+        document.removeEventListener('keydown', handleCloseEsc)
+        document.removeEventListener('mousedown', handleCloseMouse)
+      }
+    }, [])
+
+    return <>{children}</>
+  }
+
   return (
-    <StyledWrapper
-      editMode={editMode}
-      onClick={handleEnableEditMode}
-      {...getReferencePropsTagWrapper({
-        ref: tagWrapper.reference,
-      })}
-    >
+    <StyledWrapper editMode={editMode} onClick={handleEnableEditMode} ref={tagWrapperRef}>
       {editMode && (
-        <DragDropContext onDragEnd={onDragEnd}>
-          <Droppable droppableId={`${date}-droppable`}>
-            {(provided) => (
-              <div ref={provided.innerRef} {...provided.droppableProps}>
-                {tags.map((tag: Tag, i) => (
-                  <Draggable key={`${date}-${tag.id}`} draggableId={`${date}-${tag.id}`} index={i}>
-                    {(provided) => (
-                      <StyledTagHandle
-                        key={tag.id}
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                      >
-                        <StyledTag editMode={editMode}>
-                          <StyledTagColorDot fillColor={theme(`color.tags.${tag.color}`)} />
-                          <StyledTagTitle>{tag.name}</StyledTagTitle>
-                          {editMode && (
-                            <StyledRemoveTagIcon onClick={(e: any) => handleRemoveTag(e, tag.id)} />
-                          )}
-                        </StyledTag>
-                      </StyledTagHandle>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>
+        <EditMode>
+          <DragDropContext onDragEnd={onDragEnd}>
+            <Droppable droppableId={`${date}-droppable`}>
+              {(provided) => (
+                <div ref={provided.innerRef} {...provided.droppableProps}>
+                  {tags.map((tag: Tag, i) => (
+                    <Draggable
+                      key={`${date}-${tag.id}`}
+                      draggableId={`${date}-${tag.id}`}
+                      index={i}
+                    >
+                      {(provided) => (
+                        <StyledTagHandle
+                          key={tag.id}
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                        >
+                          <StyledTag editMode={editMode}>
+                            <StyledTagColorDot fillColor={theme(`color.tags.${tag.color}`)} />
+                            <StyledTagTitle>{tag.name}</StyledTagTitle>
+                            {editMode && (
+                              <StyledRemoveTagIcon
+                                onClick={(e: any) => handleRemoveTag(e, tag.id)}
+                              />
+                            )}
+                          </StyledTag>
+                        </StyledTagHandle>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
+        </EditMode>
       )}
       {!editMode &&
         tags.map((tag: Tag) => (
@@ -284,11 +377,20 @@ function EntryTags({ date }: EntryTagsProps) {
           {...getReferenceProps({
             ref: sel.reference,
             onFocus: () => {
+              if (editMode) {
+                setOpen(true)
+              }
               logger(`onFocus ${date}`)
+              logger(`editMode = ${editMode}`)
             },
-            onBlur() {
-              clearInput()
+            onClick() {
+              if (editMode) {
+                setOpen(true)
+              }
             },
+            // onBlur() {
+            //   clearInput()
+            // },
             onKeyDown(e) {
               logger('onKeyDown')
               if (e.key === 'Enter') {
@@ -319,13 +421,17 @@ function EntryTags({ date }: EntryTagsProps) {
             />
             {allTags.current.map((tag, i) => (
               <ListItemTag
+                key={`${date}-${tag.name}-${tag.id}`}
                 i={i}
                 date={date}
                 tag={tag}
                 tags={tags}
                 listRef={listRef}
                 listIndexToId={listIndexToId}
+                tagEditingRef={tagEditingRef}
                 activeIndex={activeIndex}
+                tagIndexEditing={tagIndexEditing}
+                setTagIndexEditing={setTagIndexEditing}
                 handleSelect={handleSelect}
                 tagsInputRef={sel.refs.reference}
                 getItemProps={getItemProps}
@@ -352,13 +458,17 @@ function EntryTags({ date }: EntryTagsProps) {
           >
             {results.current.slice(0, 5).map((tag, i) => (
               <ListItemTag
+                key={`${date}-${tag.name}-${tag.id}`}
                 i={i}
                 date={date}
                 tag={tag}
                 tags={tags}
                 listRef={listRef}
                 listIndexToId={listIndexToId}
+                tagEditingRef={tagEditingRef}
                 activeIndex={activeIndex}
+                tagIndexEditing={tagIndexEditing}
+                setTagIndexEditing={setTagIndexEditing}
                 handleSelect={handleSelect}
                 tagsInputRef={sel.refs.reference}
                 getItemProps={getItemProps}

@@ -242,6 +242,7 @@ const Entry = ({
     }
 
     if (dayjs(entryModifiedAt).isSame(cachedEntry?.modified_at)) {
+      // TODO If Today is not on server, it falls here because entryModifiedAt is empty
       logger('ModifiedAt the same, not fetching')
     } else {
       logger('ModifiedAt not the same, fetching from server')

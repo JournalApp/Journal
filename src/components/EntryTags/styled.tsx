@@ -128,6 +128,21 @@ const StyledTagListItemIsAdded = styled(({ current, ...props }) => (
   visibility: ${(props) => (props.current ? 'visible' : 'hidden')};
 `
 
+const StyledEditTag = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  border-radius: 6px;
+  padding: 2px;
+  margin: -2px;
+  transition: opacity ${theme('animation.time.normal')};
+  &:hover {
+    opacity: 1 !important;
+    background-color: ${theme('color.popper.border')};
+  }
+`
+
 const StyledTagListItemTitle = styled.span<TagIsAddedProps>`
   font-size: 14px;
   color: ${theme('color.popper.main')};
@@ -142,6 +157,8 @@ const StyledTagListItemTitle = styled.span<TagIsAddedProps>`
 interface StyledItemProps {
   isActive?: boolean
   isAnyActiveIndex?: boolean
+  isDisabled?: boolean
+  isHidden?: boolean
 }
 
 const StyledItem = styled.div<StyledItemProps>`
@@ -157,11 +174,16 @@ const StyledItem = styled.div<StyledItemProps>`
     props.isActive ? theme('color.popper.hover') : theme('color.popper.surface')};
   align-items: center;
   transition: ${theme('animation.time.normal')};
+  /* ${(props) => (props.isDisabled ? 'pointer-events: none; opacity: 0.5;' : '')}; */
+  ${(props) => (props.isHidden ? 'display: none;' : '')}
   &:hover {
     border: 0;
     outline: none;
     ${(props) =>
       props.isAnyActiveIndex ? '' : 'background-color:' + theme('color.popper.hover') + ';'};
+    & #editButton {
+      opacity: 0.5;
+    }
   }
 `
 
@@ -269,4 +291,5 @@ export {
   StyledRemoveTagIcon,
   StyledScrollDownIcon,
   StyledScrollUpIcon,
+  StyledEditTag,
 }

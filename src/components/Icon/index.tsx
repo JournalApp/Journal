@@ -24,12 +24,13 @@ import { UpdateNow } from './UpdateNow'
 import { FormatMark } from './FormatMark'
 import { FormatHandStriketrough } from './FormatHandStriketrough'
 import { Plus } from './Plus'
+import { Edit } from './Edit'
 
 type IconMapType = {
   [key: string]: any
 }
 
-type IconProps = {
+interface IconProps extends React.HTMLAttributes<SVGElement> {
   name: keyof IconMapType
   size?: number
   scale?: number
@@ -65,6 +66,7 @@ const IconMap: IconMapType = {
   UpdateNow,
   FormatMark,
   Plus,
+  Edit,
 }
 
 const Icon = function (props: IconProps) {
