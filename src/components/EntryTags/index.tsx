@@ -64,7 +64,7 @@ function EntryTags({ date }: EntryTagsProps) {
     allTags.current[1],
     allTags.current[2],
   ])
-  const results = useRef<Tag[]>([])
+  const [results, setResults] = useState<Tag[]>([])
   const listRef = useRef([])
   const listIndexToId = useRef([])
   const positioningRef = useRef(null)
@@ -135,7 +135,7 @@ function EntryTags({ date }: EntryTagsProps) {
     logger('onChange')
     setTerm(event.target.value)
     setActiveIndex(0)
-    results.current = searchTag(event.target.value)
+    setResults([...searchTag(event.target.value)])
   }
 
   function searchTag(term: string) {
@@ -145,11 +145,12 @@ function EntryTags({ date }: EntryTagsProps) {
   }
 
   const addTag = (tagId: string) => {
-    logger(`adding tag ${tagId}`)
     setTags((prev: Tag[]) => {
       if (prev.find((el) => el.id == tagId)) {
+        logger(`- removing tag ${tagId}`)
         return prev.filter((el) => el.id != tagId)
       } else {
+        logger(`+ adding tag ${tagId}`)
         return [...prev, allTags.current.find((t) => t.id == tagId)]
       }
     })
@@ -167,7 +168,9 @@ function EntryTags({ date }: EntryTagsProps) {
     logger(`uuid: ${uuid}`)
     allTags.current = [...allTags.current, { id: uuid, name, color: 'red' }]
     addTag(uuid)
-    clearInput()
+    // setTerm(name)
+    setResults([...searchTag(name)])
+    // clearInput()
   }
 
   const handleSelect = (e: any, tagId: string) => {
@@ -342,7 +345,7 @@ function EntryTags({ date }: EntryTagsProps) {
                             <StyledTagTitle>{tag.name}</StyledTagTitle>
                             {editMode && (
                               <StyledRemoveTagIcon
-                                onClick={(e: any) => handleRemoveTag(e, tag.id)}
+                                onMouseUp={(e: any) => handleRemoveTag(e, tag.id)}
                               />
                             )}
                           </StyledTag>
@@ -456,7 +459,7 @@ function EntryTags({ date }: EntryTagsProps) {
               },
             })}
           >
-            {results.current.slice(0, 5).map((tag, i) => (
+            {results.slice(0, 5).map((tag, i) => (
               <ListItemTag
                 key={`${date}-${tag.name}-${tag.id}`}
                 i={i}
@@ -474,20 +477,22 @@ function EntryTags({ date }: EntryTagsProps) {
                 getItemProps={getItemProps}
               />
             ))}
-            {!!results.current.length &&
-              !results.current.some((t) => t.name == sel.refs.reference.current.value) && (
-                <StyledDivider />
-              )}
-            {!results.current.some((t) => t.name == sel.refs.reference.current.value) && (
+            {!!results.length &&
+              !results.some((t) => t.name == sel.refs.reference.current.value) && <StyledDivider />}
+            {!results.some((t) => t.name == sel.refs.reference.current.value) && (
               <StyledItem
                 ref={(node) => {
-                  listRef.current[results.current.length] = node
-                  listIndexToId.current[results.current.length] = 'CREATE'
+                  listRef.current[results.length] = node
+                  listIndexToId.current[results.length] = 'CREATE'
                 }}
-                isActive={activeIndex == results.current.length}
+                id={`${date}-CREATE`}
+                isActive={activeIndex == results.length}
                 isAnyActiveIndex={activeIndex != null}
                 {...getItemProps({
                   onMouseDown(e) {
+                    e.stopPropagation()
+                    sel.refs.reference.current.focus()
+                    setTagIndexEditing(null)
                     handleCreateTag(e, sel.refs.reference.current.value)
                   },
                   onFocus() {
