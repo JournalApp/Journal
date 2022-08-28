@@ -5,7 +5,13 @@ import { usePlateEditorState, useEventPlateId } from '@udecode/plate'
 import { ContextMenu, FormatToolbar, EntryAside } from 'components'
 import { createPluginFactory, useOnClickOutside, deselectEditor } from '@udecode/plate'
 import { select, deselect, getNodeString } from '@udecode/plate'
-import { focusEditor, usePlateEditorRef } from '@udecode/plate'
+import {
+  focusEditor,
+  usePlateEditorRef,
+  getPlateActions,
+  withPlate,
+  createTEditor,
+} from '@udecode/plate'
 import { CONFIG, defaultContent } from 'config'
 import { countWords, isUnauthorized, encryptEntry, decryptEntry } from 'utils'
 import { supabase, logger } from 'utils'
@@ -49,8 +55,6 @@ type EntryBlockProps = {
   cachedEntry?: any
   ref?: any
   setEntryHeight: () => void
-  shouldScrollToDay: (day: string) => boolean
-  clearScrollToDay: () => void
   cacheAddOrUpdateEntry: electronAPIType['cache']['addOrUpdateEntry']
   cacheUpdateEntry: electronAPIType['cache']['updateEntry']
   cacheUpdateEntryProperty: electronAPIType['cache']['updateEntryProperty']
@@ -74,8 +78,6 @@ const Entry = ({
   cachedEntry,
   setEntryHeight,
   entriesObserver,
-  shouldScrollToDay,
-  clearScrollToDay,
   cacheAddOrUpdateEntry,
   cacheUpdateEntry,
   cacheUpdateEntryProperty,
@@ -85,18 +87,19 @@ const Entry = ({
   )
   const [needsSavingToServer, setNeedsSavingToServer] = useState(false)
   const [needsSavingToServerModifiedAt, setNeedsSavingToServerModifiedAt] = useState('')
-  const [initialValue, setInitialValue] = useState(cachedEntry?.content ?? [])
+  const [initialValue, setInitialValue] = useState(cachedEntry?.content ?? defaultContent)
   const [shouldFocus, setShouldFocus] = useState(isToday(entryDay))
+  const firstRender = useRef(true)
   const contextMenuVisible = useRef(false)
   const toggleContextMenu = useRef(null)
   const setEditorFocusedContextMenu = useRef(null)
   const setEditorFocusedFormatToolbar = useRef(null)
-  const [initialFetchDone, setInitialFetchDone] = useState(false)
   const debugValue = useRef(cachedEntry?.content ?? [])
   const editorRef = useRef(null)
   const { session, signOut, getSecretKey, serverTimeNow } = useUserContext()
   const { editorsRef } = useEntriesContext()
   const saveTimer = useRef<NodeJS.Timeout | null>(null)
+  const id = `${entryDay}-editor`
 
   logger(`Entry render`)
 
@@ -225,13 +228,6 @@ const Entry = ({
     }
   }
 
-  // const resizeObserver = new ResizeObserver((entries) => {
-  //   for (let entry of entries) {
-  //     logger(`scrollIntoView ${entryDay}`)
-  //     // setEntryHeight()
-  //   }
-  // })
-
   const initialFetch = async (entryModifiedAt: string) => {
     logger(`Initial fetch ${entryDay}`)
 
@@ -242,7 +238,8 @@ const Entry = ({
     }
 
     if (dayjs(entryModifiedAt).isSame(cachedEntry?.modified_at)) {
-      // TODO If Today is not on server, it falls here because entryModifiedAt is empty
+      // If Today is not on server and not in cache it falls
+      // here because comparing two undefined using isSame() returns true
       logger('ModifiedAt the same, not fetching')
     } else {
       logger('ModifiedAt not the same, fetching from server')
@@ -277,7 +274,6 @@ const Entry = ({
           saveEntry(entryDay, cachedEntry.content, cachedEntry.modified_at)
         }
       }
-      setInitialFetchDone(true)
     }
   }
 
@@ -309,9 +305,14 @@ const Entry = ({
 
     entriesObserver.observe(editorRef.current)
 
-    if (shouldScrollToDay(entryDay)) {
-      editorRef.current.scrollIntoView()
-      clearScrollToDay()
+    // Scroll to entry if Today
+    if (entryDay == dayjs().format('YYYY-MM-DD')) {
+      editorRef.current.scrollIntoView({ block: 'start' })
+      // setTimeout(() => {
+      //   document.activeElement.scrollIntoView({ block: 'start' })
+      // }, 300)
+      // window.scrollTo(0, editorRef.current.getBoundingClientRect().top)
+      // window.scrollBy(0, -50)
     }
 
     // Remove observers
@@ -328,18 +329,6 @@ const Entry = ({
   }, [])
 
   useEffect(() => {
-    setEntryHeight()
-    if (initialFetchDone) {
-      setTimeout(() => {
-        if (editorRef.current) {
-          logger(`----> unobserve ${entryDay}`)
-          // resizeObserver.unobserve(editorRef.current)
-        }
-      }, 2000)
-    }
-  }, [setInitialFetchDone])
-
-  useEffect(() => {
     // logger(`needsSaving: ${needsSavingToServer}`)
     if (needsSavingToServer) {
       saveTimer.current = setTimeout(() => {
@@ -348,11 +337,6 @@ const Entry = ({
       }, 5000)
     }
   }, [needsSavingToServer])
-
-  useEffect(() => {
-    debugValue.current = initialValue
-    setWordCount(countEntryWords(initialValue))
-  }, [initialValue])
 
   const editableProps = {
     placeholder: "What's on your mind…",
@@ -462,6 +446,23 @@ const Entry = ({
     }
   )
 
+  const updateEditorValue = (value: any) => {
+    const newEditor = withPlate(createTEditor(), { id, plugins })
+    getPlateActions(id).value(value)
+    getPlateActions(id).editor(newEditor)
+    editorsRef.current[entryDay] = newEditor
+  }
+
+  useEffect(() => {
+    if (firstRender.current == false) {
+      updateEditorValue(initialValue)
+    } else {
+      firstRender.current = false
+    }
+    debugValue.current = initialValue
+    setWordCount(countEntryWords(initialValue))
+  }, [initialValue])
+
   const showMiniDate = (day: any) => {
     if (isToday(day)) {
       return 'Today'
@@ -474,41 +475,29 @@ const Entry = ({
     <Container ref={editorRef} id={`${entryDay}-entry`}>
       <MainWrapper>
         <MiniDate>{showMiniDate(entryDay)}</MiniDate>
-        {(initialFetchDone || cachedEntry || isToday(entryDay)) && (
-          <Plate
-            id={`${entryDay}-editor`}
-            editableProps={editableProps}
-            initialValue={
-              initialValue.length ? initialValue : cachedEntry?.content || defaultContent
-            }
-            onChange={onChangeDebug}
-            plugins={plugins}
-          >
-            <ContextMenu
-              setIsEditorFocused={setEditorFocusedContextMenu}
-              setContextMenuVisible={setContextMenuVisible}
-              toggleContextMenu={toggleContextMenu}
-            />
-            <FormatToolbar
-              setIsEditorFocused={setEditorFocusedFormatToolbar}
-              isContextMenuVisible={isContextMenuVisible}
-            />
-            {shouldFocus && <ShouldFocus />}
-            <EditorRefAssign />
-          </Plate>
-        )}
+        <Plate
+          id={id}
+          editableProps={editableProps}
+          initialValue={initialValue}
+          onChange={onChangeDebug}
+          plugins={plugins}
+        >
+          <ContextMenu
+            setIsEditorFocused={setEditorFocusedContextMenu}
+            setContextMenuVisible={setContextMenuVisible}
+            toggleContextMenu={toggleContextMenu}
+          />
+          <FormatToolbar
+            setIsEditorFocused={setEditorFocusedFormatToolbar}
+            isContextMenuVisible={isContextMenuVisible}
+          />
+          {shouldFocus && <ShouldFocus />}
+          <EditorRefAssign />
+        </Plate>
       </MainWrapper>
-
       <EntryAside wordCount={wordCount} date={entryDay} />
     </Container>
   )
 }
-
-// function areEqual(prevProps: any, nextProps: any) {
-//   logger(`Comparing memo`)
-//   return true
-// }
-
-// export const Entry = React.memo(EntryComponent, areEqual)
 
 export { Entry }

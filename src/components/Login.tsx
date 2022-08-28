@@ -101,6 +101,22 @@ const LoginWithToken = () => {
     }
   }
 
+  const change = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    logger(e.target.value)
+    try {
+      const url = new URL(e.target.value)
+      console.log(url.host)
+      const refreshToken = url.searchParams.get('refresh_token')
+      const { error } = await supabase.auth.signIn({ refreshToken })
+      if (error) {
+        logger(error)
+        setAuthError(error.message)
+      }
+    } catch {
+      logger('no refresh_token found')
+    }
+  }
+
   return (
     <RTForm onSubmit={(e) => e.preventDefault()}>
       <RTError>{authError}</RTError>
@@ -110,6 +126,7 @@ const LoginWithToken = () => {
         name='refresh_token'
         ref={rt}
         onKeyDown={(e) => keyPress(e)}
+        onChange={(e) => change(e)}
       ></RTInput>
     </RTForm>
   )

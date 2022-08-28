@@ -207,7 +207,6 @@ const Calendar = () => {
     cacheCreateNewEntry,
     setDaysCacheCalendar,
     removeCachedDay,
-    setScrollToDay,
     setDaysWithNoContent,
     editorsRef,
   } = useEntriesContext()
@@ -216,7 +215,7 @@ const Calendar = () => {
   const { session } = useUserContext()
   const today = new Date()
 
-  logger('Caledar render')
+  logger('Calendar render')
 
   useEffect(() => {
     setDaysCacheCalendar.current = setDaysCacheInternal
@@ -280,12 +279,19 @@ const Calendar = () => {
     } else {
       logger('no such day, adding...')
       await cacheCreateNewEntry(day)
-      setScrollToDay(day)
+
       const focusInterval = setInterval(() => {
         const editor = editorsRef.current[day]
         if (editor) {
-          clearInterval(focusInterval)
           logger('Found editor for added day')
+          clearInterval(focusInterval)
+
+          // Scroll to new entry
+          const editorRef = document.getElementById(`${day}-entry`)
+          editorRef.scrollIntoView()
+
+          // Set focus
+
           focusEditor(editor)
           select(editor, {
             path: [0, 0],

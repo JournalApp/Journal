@@ -100,8 +100,6 @@ function EntryList() {
     initialDaysCache,
     setDaysCache,
     setDaysCacheEntriesList,
-    shouldScrollToDay,
-    clearScrollToDay,
     cacheAddOrUpdateEntry,
     cacheUpdateEntry,
     cacheUpdateEntryProperty,
@@ -109,7 +107,7 @@ function EntryList() {
   const invokeEntriesInitialFetch = useRef<any | null>({})
   const entriesHeight: myref = {}
   const itemsRef = useRef<Array<HTMLDivElement | null>>([])
-  var element: HTMLElement | null
+  const element = useRef<HTMLElement | null>(null)
   const { session, signOut } = useUserContext()
   const daysFetchInterval = useRef<NodeJS.Timeout | null>(null)
 
@@ -140,12 +138,12 @@ function EntryList() {
   }
 
   const setEntryHeight = () => {
-    if (element) {
-      element.scrollIntoView({ block: 'start' })
+    if (element.current) {
+      element.current.scrollIntoView({ block: 'start' })
       // element.scrollTop = 0
     } else {
       let today = dayjs().format('YYYY-MM-DD')
-      element = document.getElementById(`${today}-entry`)
+      element.current = document.getElementById(`${today}-entry`)
     }
   }
 
@@ -247,8 +245,6 @@ function EntryList() {
               cacheAddOrUpdateEntry={cacheAddOrUpdateEntry}
               cacheUpdateEntry={cacheUpdateEntry}
               cacheUpdateEntryProperty={cacheUpdateEntryProperty}
-              shouldScrollToDay={shouldScrollToDay}
-              clearScrollToDay={clearScrollToDay}
             />
           ))}
       <BeforeEntries></BeforeEntries>

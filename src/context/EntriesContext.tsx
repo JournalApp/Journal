@@ -17,9 +17,6 @@ interface EntriesContextInterface {
   setDaysWithNoContent: any // TODO better type
   cacheCreateNewEntry: (day: string) => Promise<void>
   removeCachedDay: (day: string) => Promise<void>
-  setScrollToDay: (day: string) => void
-  clearScrollToDay: () => void
-  shouldScrollToDay: (day: string) => boolean
   cacheAddOrUpdateEntry: electronAPIType['cache']['addOrUpdateEntry']
   cacheUpdateEntry: electronAPIType['cache']['updateEntry']
   cacheUpdateEntryProperty: electronAPIType['cache']['updateEntryProperty']
@@ -201,18 +198,6 @@ export function EntriesProvider({ children }: any) {
     })
   }
 
-  const setScrollToDay = (day: string) => {
-    scrollToDay.current = day
-  }
-
-  const shouldScrollToDay = (day: string) => {
-    return scrollToDay.current == day
-  }
-
-  const clearScrollToDay = () => {
-    scrollToDay.current = ''
-  }
-
   let state = {
     initialCache,
     initialDaysCache,
@@ -223,9 +208,6 @@ export function EntriesProvider({ children }: any) {
     setDaysWithNoContent,
     cacheCreateNewEntry,
     removeCachedDay,
-    setScrollToDay,
-    clearScrollToDay,
-    shouldScrollToDay,
     cacheAddOrUpdateEntry,
     cacheUpdateEntry,
     cacheUpdateEntryProperty,
