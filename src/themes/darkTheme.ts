@@ -69,6 +69,7 @@ const darkTheme = {
       hover: darkPalette.neutral[15],
       hoverInverted: darkPalette.neutral[20],
       disabled: darkPalette.neutral[40],
+      input: darkPalette.neutral[40],
     },
     error: {
       main: darkPalette.red[100],

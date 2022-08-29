@@ -9,6 +9,13 @@ import {
   StyledTagListItemTitle,
   StyledTagListItemIsAdded,
   StyledEditTag,
+  StyledEditTagInput,
+  StyledOKIcon,
+  StyledEditTagButtonsContainer,
+  StyledEditTagColorPickerContainer,
+  StyledColorPickerChevronIcon,
+  StyledCancelIcon,
+  StyledTrashIcon,
 } from './styled'
 import {
   useFloating,
@@ -22,6 +29,7 @@ import {
   FloatingNode,
   FloatingPortal,
 } from '@floating-ui/react-dom-interactions'
+import { ListItemTagColorPicker } from './ListItemTagColorPicker'
 import { Tag } from './types'
 
 const StyledWrapper = styled.div``
@@ -62,12 +70,31 @@ function ListItemTag({
 
   // logger('ListItemTag rerender')
 
-  let isDisabled = tagIndexEditing != null && tagIndexEditing != i
+  const exitTagEditing = () => {
+    setTagIndexEditing(null)
+  }
+
+  const updateTag = () => {
+    setTagIndexEditing(null)
+  }
+
+  const deleteTag = () => {
+    setTagIndexEditing(null)
+  }
+
+  let isEditingOtherTag = tagIndexEditing != null && tagIndexEditing != i
+  let isInTags = !!tags.find((t) => t.id == tag.id)
   return (
     <>
       {tagIndexEditing == i && (
         <StyledWrapper ref={tagEditingRef}>
-          <input ref={inputRef} defaultValue={tag.name}></input>
+          <StyledEditTagInput ref={inputRef} defaultValue={tag.name} size={10}></StyledEditTagInput>
+          <ListItemTagColorPicker tag={tag} />
+          <StyledEditTagButtonsContainer>
+            <StyledTrashIcon />
+            <StyledCancelIcon onClick={() => exitTagEditing()} />
+            <StyledOKIcon onClick={() => updateTag()} />
+          </StyledEditTagButtonsContainer>
         </StyledWrapper>
       )}
       <StyledItem
@@ -77,7 +104,7 @@ function ListItemTag({
           listIndexToId.current[i] = tag.id
         }}
         isActive={activeIndex == i}
-        isDisabled={isDisabled}
+        isDisabled={isEditingOtherTag}
         isHidden={tagIndexEditing == i}
         isAnyActiveIndex={activeIndex != null}
         {...getItemProps({
@@ -106,22 +133,18 @@ function ListItemTag({
         })}
       >
         <StyledTagColorDot fillColor={theme(`color.tags.${tag.color}`)} />
-        <StyledTagListItemTitle current={!!tags.find((t) => t.id == tag.id)}>
-          {tag.name}
-        </StyledTagListItemTitle>
-        <StyledEditTag id='editButton' ref={editButtonRef}>
-          <Icon name='Edit' />
-        </StyledEditTag>
-        {!isDisabled && <StyledTagListItemIsAdded current={!!tags.find((t) => t.id == tag.id)} />}
+        <StyledTagListItemTitle current={isInTags}>{tag.name}</StyledTagListItemTitle>
+        {activeIndex == i && !isEditingOtherTag && (
+          <StyledEditTag id='editButton' ref={editButtonRef}>
+            <Icon name='Edit' />
+          </StyledEditTag>
+        )}
+        {(activeIndex != i || isEditingOtherTag) && (
+          <StyledTagListItemIsAdded current={!isEditingOtherTag && isInTags} />
+        )}
       </StyledItem>
     </>
   )
 }
 
-// function areEqual(prevProps: any, nextProps: any) {
-//   logger(`Comparing memo`)
-//   return true
-// }
-
-// export const ListItemTag = React.memo(ListItemTagInternal)
 export { ListItemTag }

@@ -48,6 +48,18 @@ const StyledPopover = styled.div`
   min-width: 150px;
 `
 
+const StyledEditTagColorPickerPopover = styled.div`
+  padding: 4px;
+  border-radius: 12px;
+  border: 0;
+  box-shadow: ${theme('style.shadow')};
+  background-color: ${theme('color.popper.surface')};
+  animation-name: ${showDropdown};
+  animation-duration: ${theme('animation.time.normal')};
+  -webkit-app-region: no-drag;
+  position: absolute;
+`
+
 const hide = keyframes`
   0% {
     opacity: 0.5;
@@ -125,14 +137,13 @@ type TagIsAddedProps = {
 const StyledTagListItemIsAdded = styled(({ current, ...props }) => (
   <Icon name='Check' {...props} />
 ))<TagIsAddedProps>`
-  visibility: ${(props) => (props.current ? 'visible' : 'hidden')};
+  visibility: ${(props) => (props.current ? 'inherit' : 'hidden')};
 `
 
 const StyledEditTag = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  opacity: 0;
   border-radius: 6px;
   padding: 2px;
   margin: -2px;
@@ -140,6 +151,80 @@ const StyledEditTag = styled.div`
   &:hover {
     opacity: 1 !important;
     background-color: ${theme('color.popper.border')};
+  }
+`
+
+const StyledEditTagInput = styled.input`
+  font-size: 14px;
+  height: 26px;
+  width: -webkit-fill-available;
+  outline: 0;
+  padding: 4px 80px 4px 40px;
+  border-radius: 8px;
+  border: 1px solid ${theme('color.popper.input')};
+  background-color: ${theme('color.popper.surface')};
+  color: ${theme('color.primary.main')};
+  &:focus {
+    box-shadow: 0 0 0 3px ${theme('color.popper.border')};
+    transition: box-shadow ${theme('animation.time.normal')} ease;
+  }
+`
+
+const StyledEditTagButtonsContainer = styled.div`
+  display: inline-flex;
+  position: absolute;
+  margin-top: 6px;
+  right: 8px;
+  z-index: 1;
+`
+
+const StyledEditTagColorPickerContainer = styled.div`
+  display: inline-flex;
+  gap: 2px;
+  position: absolute;
+  height: 36px;
+  left: 16px;
+  z-index: 1;
+  align-items: center;
+`
+
+const StyledColorPickerChevronIcon = styled((props) => (
+  <Icon name='Chevron' type='down' size={16} {...props} />
+))`
+  opacity: 0.8;
+  cursor: pointer;
+  &:hover {
+    opacity: 1;
+    color: ${theme('color.primary.main')};
+  }
+`
+
+const StyledOKIcon = styled((props) => <Icon name='Check' {...props} />)`
+  opacity: 0.8;
+  cursor: pointer;
+  &:hover {
+    opacity: 1;
+    color: ${theme('color.primary.main')};
+  }
+`
+
+const StyledCancelIcon = styled((props) => <Icon name='Cross' {...props} />)`
+  opacity: 0.8;
+  cursor: pointer;
+  &:hover {
+    opacity: 1;
+    color: ${theme('color.primary.main')};
+  }
+`
+
+const StyledTrashIcon = styled((props) => <Icon name='Trash' {...props} />)`
+  opacity: 0.5;
+  cursor: pointer;
+  &:hover {
+    opacity: 1;
+    * {
+      stroke: ${theme('color.error.main')};
+    }
   }
 `
 
@@ -173,9 +258,9 @@ const StyledItem = styled.div<StyledItemProps>`
   background-color: ${(props) =>
     props.isActive ? theme('color.popper.hover') : theme('color.popper.surface')};
   align-items: center;
-  transition: ${theme('animation.time.normal')};
-  /* ${(props) => (props.isDisabled ? 'pointer-events: none; opacity: 0.5;' : '')}; */
-  ${(props) => (props.isHidden ? 'display: none;' : '')}
+  /* transition: ${theme('animation.time.normal')}; */
+  ${(props) => (props.isDisabled ? 'pointer-events: none; opacity: 0.5;' : '')}
+  ${(props) => (props.isHidden ? 'visibility: hidden; height: 0; padding: 0 12px;' : '')}
   &:hover {
     border: 0;
     outline: none;
@@ -292,4 +377,12 @@ export {
   StyledScrollDownIcon,
   StyledScrollUpIcon,
   StyledEditTag,
+  StyledEditTagInput,
+  StyledEditTagButtonsContainer,
+  StyledEditTagColorPickerContainer,
+  StyledColorPickerChevronIcon,
+  StyledOKIcon,
+  StyledCancelIcon,
+  StyledTrashIcon,
+  StyledEditTagColorPickerPopover,
 }

@@ -83,6 +83,10 @@ function EntryTags({ date }: EntryTagsProps) {
     middleware: [offset({ crossAxis: 0, mainAxis: 4 })],
   })
 
+  useEffect(() => {
+    logger(`activeIndex: ${activeIndex}`)
+  }, [activeIndex])
+
   const { getReferenceProps, getFloatingProps, getItemProps } = useInteractions([
     // useFocus(sel.context, { keyboardOnly: false }),
     // useDismiss(sel.context, { escapeKey: false }),
@@ -241,7 +245,7 @@ function EntryTags({ date }: EntryTagsProps) {
   }
 
   const EditMode = ({ children }: any) => {
-    logger('EditMode rerender')
+    // logger('EditMode rerender')
     const handleCloseEsc = (e: any) => {
       logger('🚪 ESC')
       logger(`${editMode ? '✔' : '-'} Edit mode`)
@@ -409,6 +413,7 @@ function EntryTags({ date }: EntryTagsProps) {
         <FloatingFocusManager context={sel.context} preventTabbing>
           <StyledPopover
             onScroll={handleOnScroll}
+            onFocus={() => sel.refs.reference.current.focus()}
             {...getFloatingProps({
               ref: sel.floating,
               style: {
