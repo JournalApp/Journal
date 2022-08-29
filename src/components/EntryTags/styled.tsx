@@ -49,9 +49,13 @@ const StyledPopover = styled.div`
 `
 
 const StyledEditTagColorPickerPopover = styled.div`
-  padding: 4px;
+  padding: 8px;
   border-radius: 12px;
   border: 0;
+  display: flex;
+  flex-wrap: wrap;
+  width: 50px;
+  gap: 2px;
   box-shadow: ${theme('style.shadow')};
   background-color: ${theme('color.popper.surface')};
   animation-name: ${showDropdown};
@@ -159,7 +163,7 @@ const StyledEditTagInput = styled.input`
   height: 26px;
   width: -webkit-fill-available;
   outline: 0;
-  padding: 4px 80px 4px 40px;
+  padding: 3px 80px 5px 40px;
   border-radius: 8px;
   border: 1px solid ${theme('color.popper.input')};
   background-color: ${theme('color.popper.surface')};
@@ -189,7 +193,7 @@ const StyledEditTagColorPickerContainer = styled.div`
 `
 
 const StyledColorPickerChevronIcon = styled((props) => (
-  <Icon name='Chevron' type='down' size={16} {...props} />
+  <Icon name='Chevron' size={16} {...props} />
 ))`
   opacity: 0.8;
   cursor: pointer;
@@ -244,6 +248,8 @@ interface StyledItemProps {
   isAnyActiveIndex?: boolean
   isDisabled?: boolean
   isHidden?: boolean
+  padding?: string
+  borderRadius?: number
 }
 
 const StyledItem = styled.div<StyledItemProps>`
@@ -258,7 +264,6 @@ const StyledItem = styled.div<StyledItemProps>`
   background-color: ${(props) =>
     props.isActive ? theme('color.popper.hover') : theme('color.popper.surface')};
   align-items: center;
-  /* transition: ${theme('animation.time.normal')}; */
   ${(props) => (props.isDisabled ? 'pointer-events: none; opacity: 0.5;' : '')}
   ${(props) => (props.isHidden ? 'visibility: hidden; height: 0; padding: 0 12px;' : '')}
   &:hover {
@@ -269,6 +274,23 @@ const StyledItem = styled.div<StyledItemProps>`
     & #editButton {
       opacity: 0.5;
     }
+  }
+`
+
+const StyledItemColorPicker = styled.div<StyledItemProps>`
+  white-space: nowrap;
+  border: ${(props) =>
+    props.isActive ? `1px solid ${theme('color.popper.main')}` : `1px solid transparent`};
+  padding: 3px;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: border ${theme('animation.time.normal')};
+  &:hover {
+    border: ${(props) =>
+      props.isActive
+        ? `1px solid ${theme('color.popper.main')}`
+        : `1px solid ${theme('color.popper.input')}`};
+    outline: none;
   }
 `
 
@@ -331,12 +353,13 @@ const StyledTagTitle = styled.span`
 
 interface TagColorDotProps {
   fillColor: string
+  size?: number
 }
 
 const StyledTagColorDot = styled.div<TagColorDotProps>`
-  height: 6px;
-  width: 6px;
-  min-width: 6px;
+  height: ${(props) => (props.size ? `${props.size}px` : '6px')};
+  width: ${(props) => (props.size ? `${props.size}px` : '6px')};
+  min-width: ${(props) => (props.size ? `${props.size}px` : '6px')};
   border-radius: 100px;
   background-color: ${(props) => props.fillColor};
 `
@@ -385,4 +408,5 @@ export {
   StyledCancelIcon,
   StyledTrashIcon,
   StyledEditTagColorPickerPopover,
+  StyledItemColorPicker,
 }

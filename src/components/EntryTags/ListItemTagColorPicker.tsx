@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { theme } from 'themes'
+import { theme, lightTheme } from 'themes'
 import {
   useFloating,
   offset,
@@ -18,8 +18,11 @@ import {
   StyledEditTagColorPickerContainer,
   StyledColorPickerChevronIcon,
   StyledTagColorDot,
+  StyledItem,
+  StyledItemColorPicker,
 } from './styled'
 import type { Tag } from './types'
+import { logger } from 'src/utils'
 
 type ListItemTagColorPickerProps = {
   tag: Tag
@@ -35,11 +38,17 @@ function ListItemTagColorPicker({ tag }: ListItemTagColorPickerProps) {
     middleware: [offset({ crossAxis: 0, mainAxis: 20 })],
   })
 
+  const handleColorSelect = (e: any) => {
+    e.preventDefault()
+    e.stopPropagation()
+    logger('handleColorSelect')
+  }
+
   return (
     <>
       <StyledEditTagColorPickerContainer ref={reference}>
         <StyledTagColorDot fillColor={theme(`color.tags.${tag.color}`)} />
-        <StyledColorPickerChevronIcon onClick={() => setOpen(true)} />
+        <StyledColorPickerChevronIcon type={open ? 'up' : 'down'} onClick={() => setOpen(!open)} />
       </StyledEditTagColorPickerContainer>
       <FloatingPortal>
         {open && (
@@ -52,7 +61,17 @@ function ListItemTagColorPicker({ tag }: ListItemTagColorPickerProps) {
                 left: x ?? 0,
               }}
             >
-              123
+              {Object.keys(lightTheme.color.tags).map(
+                (color: keyof typeof lightTheme.color.tags, i) => (
+                  <StyledItemColorPicker
+                    key={`${i}-${color}`}
+                    onMouseDown={(e) => handleColorSelect(e)}
+                    isActive={color == tag.color}
+                  >
+                    <StyledTagColorDot size={16} fillColor={theme(`color.tags.${color}`)} />
+                  </StyledItemColorPicker>
+                )
+              )}
             </StyledEditTagColorPickerPopover>
           </FloatingFocusManager>
         )}
