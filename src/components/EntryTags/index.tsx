@@ -58,6 +58,7 @@ function EntryTags({ date }: EntryTagsProps) {
   ])
   const [editMode, setEditMode] = useState(false) // 1. edit mode
   const [tagIndexEditing, setTagIndexEditing] = useState<number | null>(null) // 3. Tag editing
+  const [colorPickerOpen, setColorPickerOpen] = useState(false)
   const [term, setTerm] = useState<string>('')
   const [tags, setTags] = useState<Tag[]>([
     allTags.current[0],
@@ -70,6 +71,7 @@ function EntryTags({ date }: EntryTagsProps) {
   const positioningRef = useRef(null)
   const tagWrapperRef = useRef<HTMLDivElement>(null)
   const tagEditingRef = useRef<HTMLDivElement>(null)
+  const tagEditingInputRef = useRef<HTMLInputElement>(null)
   const [open, setOpen] = useState(false) // 2. popver
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
   const [selectedIndex, setSelectedIndex] = useState(Math.max(0, listRef.current.indexOf(term)))
@@ -252,6 +254,13 @@ function EntryTags({ date }: EntryTagsProps) {
       logger(`${open ? '✔' : '-'} Popover`)
       logger(`${tagIndexEditing != null ? '✔' : '-'} Tag edit`)
       if (e.key == 'Escape') {
+        if (colorPickerOpen) {
+          if (!!tagEditingInputRef.current) {
+            tagEditingInputRef.current.focus()
+          }
+          setColorPickerOpen(false)
+          return
+        }
         if (tagIndexEditing != null) {
           logger('close Tag editing')
           sel.refs.reference.current.focus()
@@ -281,6 +290,7 @@ function EntryTags({ date }: EntryTagsProps) {
       if (!tagWrapperRef.current.contains(e.target)) {
         logger('🖱 click outside tagWrapper')
         logger(e.target)
+        setColorPickerOpen(false)
         setTagIndexEditing(null)
         setOpen(false)
         setEditMode(false)
@@ -290,6 +300,7 @@ function EntryTags({ date }: EntryTagsProps) {
 
       if (!!sel.refs.floating.current && !sel.refs.floating.current.contains(e.target)) {
         logger('🖱 click outside popover')
+        setColorPickerOpen(false)
         setTagIndexEditing(null)
         setOpen(false)
         return
@@ -301,9 +312,25 @@ function EntryTags({ date }: EntryTagsProps) {
         tagIndexEditing != null
       ) {
         logger('🖱 click outside tagEditingRef')
-        sel.refs.reference.current.focus()
+        setColorPickerOpen(false)
         setTagIndexEditing(null)
+        setTimeout(() => {
+          sel.refs.reference.current.focus()
+        }, 100)
+        return
+      }
 
+      if (
+        !!tagEditingRef.current &&
+        tagEditingRef.current.contains(e.target) &&
+        tagIndexEditing != null &&
+        colorPickerOpen
+      ) {
+        logger('🖱 click inside tagEditingRef while colorPickerOpen')
+        if (!!tagEditingInputRef.current) {
+          tagEditingInputRef.current.focus()
+        }
+        setColorPickerOpen(false)
         return
       }
     }
@@ -387,8 +414,11 @@ function EntryTags({ date }: EntryTagsProps) {
               if (editMode) {
                 setOpen(true)
               }
-              logger(`onFocus ${date}`)
+              logger(`onFocus StyledTagsInput`)
               logger(`editMode = ${editMode}`)
+            },
+            onBlur() {
+              logger(`onBlur StyledTagsInput`)
             },
             onClick() {
               if (editMode) {
@@ -413,7 +443,7 @@ function EntryTags({ date }: EntryTagsProps) {
         <FloatingFocusManager context={sel.context} preventTabbing>
           <StyledPopover
             onScroll={handleOnScroll}
-            onFocus={() => sel.refs.reference.current.focus()}
+            // onFocus={() => sel.refs.reference.current.focus()}
             {...getFloatingProps({
               ref: sel.floating,
               style: {
@@ -437,9 +467,12 @@ function EntryTags({ date }: EntryTagsProps) {
                 listRef={listRef}
                 listIndexToId={listIndexToId}
                 tagEditingRef={tagEditingRef}
+                tagEditingInputRef={tagEditingInputRef}
                 activeIndex={activeIndex}
                 tagIndexEditing={tagIndexEditing}
                 setTagIndexEditing={setTagIndexEditing}
+                colorPickerOpen={colorPickerOpen}
+                setColorPickerOpen={setColorPickerOpen}
                 handleSelect={handleSelect}
                 tagsInputRef={sel.refs.reference}
                 getItemProps={getItemProps}
@@ -474,9 +507,12 @@ function EntryTags({ date }: EntryTagsProps) {
                 listRef={listRef}
                 listIndexToId={listIndexToId}
                 tagEditingRef={tagEditingRef}
+                tagEditingInputRef={tagEditingInputRef}
                 activeIndex={activeIndex}
                 tagIndexEditing={tagIndexEditing}
                 setTagIndexEditing={setTagIndexEditing}
+                colorPickerOpen={colorPickerOpen}
+                setColorPickerOpen={setColorPickerOpen}
                 handleSelect={handleSelect}
                 tagsInputRef={sel.refs.reference}
                 getItemProps={getItemProps}

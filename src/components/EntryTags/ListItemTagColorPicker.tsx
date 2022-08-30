@@ -26,15 +26,21 @@ import { logger } from 'src/utils'
 
 type ListItemTagColorPickerProps = {
   tag: Tag
+  inputRef: React.MutableRefObject<HTMLInputElement>
+  colorPickerOpen: boolean
+  setColorPickerOpen: any
 }
 
-function ListItemTagColorPicker({ tag }: ListItemTagColorPickerProps) {
-  const [open, setOpen] = useState(false)
-
+function ListItemTagColorPicker({
+  tag,
+  inputRef,
+  colorPickerOpen,
+  setColorPickerOpen,
+}: ListItemTagColorPickerProps) {
   const { floating, strategy, reference, x, y, context } = useFloating<HTMLInputElement>({
     placement: 'left-start',
-    open,
-    onOpenChange: setOpen,
+    open: colorPickerOpen,
+    onOpenChange: setColorPickerOpen,
     middleware: [offset({ crossAxis: 0, mainAxis: 20 })],
   })
 
@@ -44,14 +50,29 @@ function ListItemTagColorPicker({ tag }: ListItemTagColorPickerProps) {
     logger('handleColorSelect')
   }
 
+  const toggleOpen = (e: any) => {
+    e.stopPropagation()
+    if (colorPickerOpen) {
+      setColorPickerOpen(false)
+      setTimeout(() => {
+        inputRef.current.focus()
+      }, 100)
+    } else {
+      setColorPickerOpen(true)
+    }
+  }
+
   return (
     <>
       <StyledEditTagColorPickerContainer ref={reference}>
         <StyledTagColorDot fillColor={theme(`color.tags.${tag.color}`)} />
-        <StyledColorPickerChevronIcon type={open ? 'up' : 'down'} onClick={() => setOpen(!open)} />
+        <StyledColorPickerChevronIcon
+          type={colorPickerOpen ? 'up' : 'down'}
+          onMouseDown={(e: any) => toggleOpen(e)}
+        />
       </StyledEditTagColorPickerContainer>
       <FloatingPortal>
-        {open && (
+        {colorPickerOpen && (
           <FloatingFocusManager context={context} preventTabbing>
             <StyledEditTagColorPickerPopover
               ref={floating}

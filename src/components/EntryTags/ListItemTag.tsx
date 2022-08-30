@@ -42,9 +42,12 @@ type ListItemTagProps = {
   listRef: React.MutableRefObject<any[]>
   listIndexToId: React.MutableRefObject<any[]>
   tagEditingRef: React.MutableRefObject<HTMLDivElement>
+  tagEditingInputRef: React.MutableRefObject<HTMLInputElement>
   activeIndex: number
   tagIndexEditing: number | null
   setTagIndexEditing: any
+  colorPickerOpen: boolean
+  setColorPickerOpen: any
   handleSelect: (e: any, tagId: string) => void
   tagsInputRef: React.MutableRefObject<HTMLInputElement>
   getItemProps: any
@@ -58,19 +61,23 @@ function ListItemTag({
   listRef,
   listIndexToId,
   tagEditingRef,
+  tagEditingInputRef,
   activeIndex,
   tagIndexEditing,
   setTagIndexEditing,
+  colorPickerOpen,
+  setColorPickerOpen,
   handleSelect,
   tagsInputRef,
   getItemProps,
 }: ListItemTagProps) {
   const editButtonRef = useRef<HTMLInputElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  // const inputRef = useRef<HTMLInputElement>(null)
 
   // logger('ListItemTag rerender')
 
   const exitTagEditing = () => {
+    tagsInputRef.current.focus()
     setTagIndexEditing(null)
   }
 
@@ -87,9 +94,18 @@ function ListItemTag({
   return (
     <>
       {tagIndexEditing == i && (
-        <StyledWrapper ref={tagEditingRef}>
-          <StyledEditTagInput ref={inputRef} defaultValue={tag.name} size={10}></StyledEditTagInput>
-          <ListItemTagColorPicker tag={tag} />
+        <StyledWrapper ref={tagEditingRef} id={`${date}-${tag.name}-${tag.id}-editing`}>
+          <StyledEditTagInput
+            ref={tagEditingInputRef}
+            defaultValue={tag.name}
+            size={10}
+          ></StyledEditTagInput>
+          <ListItemTagColorPicker
+            inputRef={tagEditingInputRef}
+            colorPickerOpen={colorPickerOpen}
+            setColorPickerOpen={setColorPickerOpen}
+            tag={tag}
+          />
           <StyledEditTagButtonsContainer>
             <StyledTrashIcon />
             <StyledCancelIcon onClick={() => exitTagEditing()} />
@@ -114,8 +130,8 @@ function ListItemTag({
               e.preventDefault()
               setTagIndexEditing(i)
               setTimeout(() => {
-                if (!!inputRef.current) {
-                  inputRef.current.select()
+                if (!!tagEditingInputRef.current) {
+                  tagEditingInputRef.current.select()
                 }
               }, 100)
               logger('onMouseDown StyledEditTag')
