@@ -7,19 +7,24 @@ import { supabase, isUnauthorized, logger } from 'utils'
 import { PlateEditor } from '@udecode/plate'
 import { Entry } from 'components'
 
+import type { Tag } from '../components/EntryTags/types'
+
 interface EntriesContextInterface {
   initialCache: any
   initialDaysCache: any
+  userTags: React.MutableRefObject<Tag[]>
   setDaysCache: (days: string[]) => void
   setDaysCacheEntriesList: any // TODO better type
   setDaysCacheCalendar: any // TODO better type
   setDaysCacheStreak: any // TODO better type
   setDaysWithNoContent: any // TODO better type
+  syncPendingDeletedTags: (serverTags: Tag[]) => Promise<void>
   cacheCreateNewEntry: (day: string) => Promise<void>
   removeCachedDay: (day: string) => Promise<void>
   cacheAddOrUpdateEntry: electronAPIType['cache']['addOrUpdateEntry']
   cacheUpdateEntry: electronAPIType['cache']['updateEntry']
   cacheUpdateEntryProperty: electronAPIType['cache']['updateEntryProperty']
+  cacheAddOrUpdateTag: electronAPIType['cache']['addOrUpdateTag']
   editorsRef: any
 }
 
@@ -29,10 +34,14 @@ export function EntriesProvider({ children }: any) {
   const { session, serverTimeNow, signOut } = useUserContext()
   const initialCache = useRef([])
   const initialDaysCache = useRef([])
-  const scrollToDay = useRef('')
+  const userTags = useRef<Tag[]>([])
   const [initialCacheFetchDone, setInitialCacheFetchDone] = useState(false)
   const pendingDeletedEntries = useRef(false)
   const pendingDeletedEntriesInterval = useRef<NodeJS.Timeout | null>(null)
+  const pendingDeletedTags = useRef(false)
+  const pendingDeletedTagsInterval = useRef<NodeJS.Timeout | null>(null)
+  const pendingUpdateTags = useRef(false)
+  const pendingUpdateTagsInterval = useRef<NodeJS.Timeout | null>(null)
   const today = useRef(dayjs().format('YYYY-MM-DD'))
   const setDaysCacheEntriesList = useRef(null)
   const setDaysCacheCalendar = useRef(null)
@@ -106,17 +115,86 @@ export function EntriesProvider({ children }: any) {
     }
   }
 
+  const setPendingDeletedTags = (setAs: boolean) => {
+    logger(`setPendingDeletedTags -> ${setAs}`)
+    pendingDeletedTags.current = setAs
+    if (setAs == true) {
+      if (!pendingDeletedTagsInterval.current) {
+        pendingDeletedTagsInterval.current = setInterval(syncPendingDeletedTags, 5000)
+      }
+    }
+    if (setAs == false) {
+      if (pendingDeletedTagsInterval.current) {
+        clearInterval(pendingDeletedTagsInterval.current)
+        pendingDeletedTagsInterval.current = null
+      }
+    }
+  }
+
+  const syncPendingDeletedTags = async (serverTags: Tag[]) => {
+    const tags = await window.electronAPI.cache.getDeletedTags(session.user.id)
+    logger(`Tags to delete:`)
+    logger(tags)
+    if (tags.length) {
+      await Promise.all(
+        tags.map(async (tag: Tag) => {
+          let serverTag = serverTags.find((t) => t.id == tag.id)
+          if (tag.revision == serverTag?.revision) {
+            // Check if user had current revision when trying to delete tag
+            let { error } = await supabase
+              .from('tags')
+              .delete({ returning: 'minimal' })
+              .match({ id: tag.id })
+            if (error) {
+              logger(error)
+              setPendingDeletedTags(true)
+              if (isUnauthorized(error)) signOut()
+            } else {
+              logger(`Deleting: ${tag.name}`)
+              await window.electronAPI.cache.deleteTag(tag.id)
+            }
+          } else {
+            // Revert, user tried to delete tag while its newer revision was in supabase
+            logger(`Reverting deletion of: ${tag.name}`)
+            await cacheAddOrUpdateTag(serverTag)
+            await cacheUpdateTagProperty({ sync_status: 'synced' }, tag.id)
+            await cacheFetchTags()
+          }
+        })
+      )
+    } else {
+      setPendingDeletedTags(false)
+      logger('No tags to delete')
+    }
+  }
+
+  const cacheFetchTags = async () => {
+    const tags = await window.electronAPI.cache.getTags(session.user.id)
+    userTags.current = tags
+    logger('Cached Tags:')
+    logger(tags)
+  }
+
+  const cacheFetchEntries = async () => {
+    const entries = await window.electronAPI.cache.getEntries(session.user.id)
+    initialCache.current = entries
+  }
+
+  const cacheFetchDays = async () => {
+    const days = await window.electronAPI.cache.getDays(session.user.id)
+    initialDaysCache.current = days
+    setInitialCacheFetchDone(true) // Fires render of EntryList
+    setDaysCache([...days])
+  }
+
   useEffect(() => {
-    const cacheFetch = async () => {
-      const entries = await window.electronAPI.cache.getEntries(session.user.id)
-      const days = await window.electronAPI.cache.getDays(session.user.id)
-      initialCache.current = entries
-      initialDaysCache.current = days
-      setInitialCacheFetchDone(true)
-      setDaysCache([...days])
+    const cacheFetchAll = async () => {
+      await cacheFetchTags()
+      await cacheFetchEntries()
+      await cacheFetchDays()
     }
 
-    cacheFetch()
+    cacheFetchAll()
     syncPendingDeletedEntries()
 
     const hasNewDayCome = setInterval(() => {
@@ -198,19 +276,30 @@ export function EntriesProvider({ children }: any) {
     })
   }
 
+  const cacheAddOrUpdateTag = async (query: any) => {
+    await window.electronAPI.cache.addOrUpdateTag(query)
+  }
+
+  const cacheUpdateTagProperty = async (set: any, tag_id: string) => {
+    await window.electronAPI.cache.updateTagProperty(set, tag_id)
+  }
+
   let state = {
     initialCache,
     initialDaysCache,
+    userTags,
     setDaysCache,
     setDaysCacheEntriesList,
     setDaysCacheCalendar,
     setDaysCacheStreak,
     setDaysWithNoContent,
+    syncPendingDeletedTags,
     cacheCreateNewEntry,
     removeCachedDay,
     cacheAddOrUpdateEntry,
     cacheUpdateEntry,
     cacheUpdateEntryProperty,
+    cacheAddOrUpdateTag,
     editorsRef,
   }
   return (

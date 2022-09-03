@@ -49,7 +49,8 @@ const MARK_HAND_STRIKETHROUGH = 'hand-strikethrough'
 
 type EntryBlockProps = {
   entryDay: string
-  invokeEntriesInitialFetch: any // TODO better type
+  invokeEntriesInitialFetch: React.MutableRefObject<any>
+  invokeEntriesTagsInitialFetch: React.MutableRefObject<any>
   entryDayCount?: number
   entriesObserver: IntersectionObserver
   cachedEntry?: any
@@ -75,6 +76,7 @@ const countEntryWords = (content: any) => {
 const Entry = ({
   entryDay,
   invokeEntriesInitialFetch,
+  invokeEntriesTagsInitialFetch,
   cachedEntry,
   setEntryHeight,
   entriesObserver,
@@ -168,7 +170,6 @@ const Entry = ({
         if (isUnauthorized(error)) signOut()
         throw new Error(error.message)
       }
-      // TODO if modified_at is the same is in cache skip decryption
       const { contentDecrypted } = await decryptEntry(data.content, data.iv, secretKey)
       data.content = JSON.parse(contentDecrypted)
       return data
@@ -302,7 +303,6 @@ const Entry = ({
   useEffect(() => {
     logger(`Entry mounted`)
     invokeEntriesInitialFetch.current[entryDay] = initialFetch
-
     entriesObserver.observe(editorRef.current)
 
     // Scroll to entry if Today
@@ -495,7 +495,11 @@ const Entry = ({
           <EditorRefAssign />
         </Plate>
       </MainWrapper>
-      <EntryAside wordCount={wordCount} date={entryDay} />
+      <EntryAside
+        wordCount={wordCount}
+        date={entryDay}
+        invokeEntriesTagsInitialFetch={invokeEntriesTagsInitialFetch}
+      />
     </Container>
   )
 }

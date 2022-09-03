@@ -7,6 +7,7 @@ create table tags (
   color varchar(50),
   created_at timestamp with time zone default now(),
   modified_at timestamp with time zone default now(),
+  revision int not null default 0,
 
   primary key (id)
 );
@@ -21,12 +22,16 @@ create policy "Users can manipulate only their own tags" on tags
 -- Create a table for Public Journal Tags
 
 create table journals_tags (
-  user_id uuid references auth.users(id) not null,
+  user_id uuid not null,
   day date not null,
-  tag uuid references tags(id) not null,
+  tag uuid references tags(id) on delete cascade not null,
+  order_no smallint not null default 0,
   created_at timestamp with time zone default now(),
+  modified_at timestamp with time zone default now(),
+  revision int not null default 0,
 
-  primary key (user_id, day, tag)
+  primary key (user_id, day, tag),
+  constraint fk_journals foreign key (user_id, day) references journals (user_id, day) on delete cascade
 ) PARTITION BY LIST(user_id);
 
 alter table journals_tags
@@ -62,3 +67,19 @@ CREATE OR REPLACE FUNCTION create_existing_user_partition_on_journals_tags(arg u
 $$ LANGUAGE plpgsql;
 
 SELECT create_existing_user_partition_on_journals_tags(array_agg(id)) FROM auth.users;
+
+-- SCRATCH PAD -- SCRATCH PAD -- SCRATCH PAD -- SCRATCH PAD -- SCRATCH PAD -- SCRATCH PAD -- SCRATCH PAD --
+
+insert into tags values ('12345678-dbdc-45b1-ba77-7dcad9d612c3', '1a8368c9-dbdc-45b1-ba77-7dcad9d612c3', 'Holiday', 'blue', now(), now());
+insert into tags values ('123abc66-dbdc-45b1-ba77-7dcad9d612c3', '1a8368c9-dbdc-45b1-ba77-7dcad9d612c3', 'Vacation', 'red', now(), now());
+insert into tags values ('111222ab-dbdc-45b1-ba77-7dcad9d612c3', '1a8368c9-dbdc-45b1-ba77-7dcad9d612c3', 'Health', 'yellow', now(), now());
+insert into tags values ('431700ab-dbdc-45b1-ba77-7dcad9d612c3', '1a8368c9-dbdc-45b1-ba77-7dcad9d612c3', '100daysofmarketing', 'pink', now(), now());
+insert into tags values ('00aabbcc-dbdc-45b1-ba77-7dcad9d612c3', '1a8368c9-dbdc-45b1-ba77-7dcad9d612c3', 'Family stuff', 'brown', now(), now());
+
+insert into journals_tags values ('1a8368c9-dbdc-45b1-ba77-7dcad9d612c3', '2022-09-01', '12345678-dbdc-45b1-ba77-7dcad9d612c3', 0, now(), now(), 0);
+insert into journals_tags values ('1a8368c9-dbdc-45b1-ba77-7dcad9d612c3', '2022-09-01', '123abc66-dbdc-45b1-ba77-7dcad9d612c3', 1, now(), now(), 0);
+
+select * from journals
+  inner join journals_tags_test
+    on journals_tags_test.user_id = journals.user_id
+  where journals.user_id = '1a8368c9-dbdc-45b1-ba77-7dcad9d612c3' and journals.day = '2022-08-29'

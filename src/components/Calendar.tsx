@@ -260,7 +260,6 @@ const Calendar = () => {
   }
 
   const scrollToDay = async (day: string) => {
-    // TODO set focus on editor
     let element = document.getElementById(`${day}-entry`)
     if (element) {
       element.scrollIntoView()

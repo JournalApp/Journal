@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer, clipboard } from 'electron'
 import { EventMessage } from './services/analytics'
+import type { Tag } from './components/EntryTags/types'
 
 const electronAPI = {
   onPaste: (callback: any) => ipcRenderer.on('paste', callback),
@@ -38,6 +39,21 @@ const electronAPI = {
     },
     async getDeletedDays(user_id: string) {
       return await ipcRenderer.invoke('cache-get-deleted-days', user_id)
+    },
+    async getTags(user_id: string) {
+      return await ipcRenderer.invoke('cache-get-tags', user_id)
+    },
+    async getDeletedTags(user_id: string) {
+      return await ipcRenderer.invoke('cache-get-deleted-tags', user_id)
+    },
+    async deleteTag(tag_id: string) {
+      await ipcRenderer.invoke('cache-delete-tag', tag_id)
+    },
+    async addOrUpdateTag(tag: Tag) {
+      await ipcRenderer.invoke('cache-add-or-update-tag', tag)
+    },
+    async updateTagProperty(set: any, tag_id: string) {
+      await ipcRenderer.invoke('cache-update-tag-property', set, tag_id)
     },
   },
   preferences: {

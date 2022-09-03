@@ -4,25 +4,7 @@ import styled from 'styled-components'
 import dayjs from 'dayjs'
 import { ordinal, breakpoints, logger, arrayEquals } from 'utils'
 import { Icon, EntryTags } from 'components'
-import { useUserContext, useEntriesContext } from 'context'
-
-const AsideItem = styled.p`
-  margin: 0;
-  color: ${theme('color.primary.main')};
-  opacity: 0.3;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 16px;
-`
-const AsideItemLabel = styled.p`
-  padding: 0 0 16px 0;
-  margin: 0;
-  color: ${theme('color.primary.main')};
-  opacity: 0.3;
-  font-size: 12px;
-  font-weight: 300;
-  line-height: 16px;
-`
+import { useEntriesContext } from 'context'
 
 const AsideDay = styled.p`
   padding: 0;
@@ -128,9 +110,10 @@ const showDate = (day: any) => {
 type EntryAsideProps = {
   date: string
   wordCount: number
+  invokeEntriesTagsInitialFetch: React.MutableRefObject<any>
 }
 
-function EntryAside({ date, wordCount }: EntryAsideProps) {
+function EntryAside({ date, wordCount, invokeEntriesTagsInitialFetch }: EntryAsideProps) {
   const { setDaysCacheStreak, removeCachedDay, setDaysWithNoContent } = useEntriesContext()
   const [streak, setStreak] = useState(0)
   const lastWordCount = useRef(0)
@@ -168,7 +151,7 @@ function EntryAside({ date, wordCount }: EntryAsideProps) {
         <AsideStickyContainer>
           <AsideMain>{showDate(date)}</AsideMain>
           <AsideMeta>
-            <EntryTags date={date} />
+            <EntryTags date={date} invokeEntriesTagsInitialFetch={invokeEntriesTagsInitialFetch} />
             {/* <AsideItem>{ordinal(streak)}</AsideItem>
             <AsideItemLabel>day</AsideItemLabel>
             <AsideItem>{wordCount}</AsideItem>

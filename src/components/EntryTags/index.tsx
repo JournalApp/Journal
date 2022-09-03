@@ -1,5 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react'
 import { lightTheme, theme } from 'themes'
+import { useEntriesContext } from 'context'
 import { ordinal, breakpoints, logger, arrayEquals } from 'utils'
 import { matchSorter } from 'match-sorter'
 import {
@@ -37,33 +38,35 @@ import { Tag } from './types'
 
 type EntryTagsProps = {
   date: string
+  invokeEntriesTagsInitialFetch: React.MutableRefObject<any>
 }
 
-function EntryTags({ date }: EntryTagsProps) {
-  const allTags = useRef<Tag[]>([
-    { id: '123', name: 'Vacation', color: 'pink' },
-    { id: '456', name: 'Work', color: 'green' },
-    { id: '789', name: '100daysofcodetoday', color: 'yellow' },
-    { id: 'qwe', name: 'Health', color: 'pink' },
-    { id: 'rty', name: 'School', color: 'lime' },
-    { id: 'uio', name: 'Summer', color: 'brown' },
-    { id: 'asd', name: 'Electronics', color: 'pink' },
-    { id: 'fgh', name: 'Books', color: 'yellow' },
-    { id: 'ghj', name: 'Family time', color: 'violet' },
-    { id: 'fgh1', name: 'Books1', color: 'yellow' },
-    { id: 'fgh2', name: 'Books2', color: 'green' },
-    { id: 'fgh3', name: 'Books3', color: 'yellow' },
-    { id: 'fgh4', name: 'Books4', color: 'navy' },
-    { id: 'fgh5', name: 'Books5', color: 'navy' },
-  ])
+function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
+  // const allTags = useRef<Tag[]>([
+  //   { id: '123', name: 'Vacation', color: 'pink' },
+  //   { id: '456', name: 'Work', color: 'green' },
+  //   { id: '789', name: '100daysofcodetoday', color: 'yellow' },
+  //   { id: 'qwe', name: 'Health', color: 'pink' },
+  //   { id: 'rty', name: 'School', color: 'lime' },
+  //   { id: 'uio', name: 'Summer', color: 'brown' },
+  //   { id: 'asd', name: 'Electronics', color: 'pink' },
+  //   { id: 'fgh', name: 'Books', color: 'yellow' },
+  //   { id: 'ghj', name: 'Family time', color: 'violet' },
+  //   { id: 'fgh1', name: 'Books1', color: 'yellow' },
+  //   { id: 'fgh2', name: 'Books2', color: 'green' },
+  //   { id: 'fgh3', name: 'Books3', color: 'yellow' },
+  //   { id: 'fgh4', name: 'Books4', color: 'navy' },
+  //   { id: 'fgh5', name: 'Books5', color: 'navy' },
+  // ])
+  const { userTags } = useEntriesContext()
   const [editMode, setEditMode] = useState(false) // 1. edit mode
   const [tagIndexEditing, setTagIndexEditing] = useState<number | null>(null) // 3. Tag editing
   const [colorPickerOpen, setColorPickerOpen] = useState(false)
   const [term, setTerm] = useState<string>('')
   const [tags, setTags] = useState<Tag[]>([
-    allTags.current[0],
-    allTags.current[1],
-    allTags.current[2],
+    userTags.current[0],
+    userTags.current[1],
+    userTags.current[2],
   ])
   const [results, setResults] = useState<Tag[]>([])
   const listRef = useRef([])
@@ -78,12 +81,23 @@ function EntryTags({ date }: EntryTagsProps) {
   const [popoverScrollDownArrow, setPopoverScrollDownArrow] = useState(false)
   const [popoverScrollUpArrow, setPopoverScrollUpArrow] = useState(false)
 
+  const initialFetchEntryTags = async (entryModifiedAt: string) => {
+    logger(`initialFetchEntryTags ${entryModifiedAt}`)
+    // TODO
+    // compare witch cached Tags
+    // ferch from supabase if needed + update cache
+  }
+
   const sel = useFloating<HTMLInputElement>({
     placement: 'bottom-end',
     open,
     onOpenChange: setOpen,
     middleware: [offset({ crossAxis: 0, mainAxis: 4 })],
   })
+
+  useEffect(() => {
+    invokeEntriesTagsInitialFetch.current[date] = initialFetchEntryTags
+  }, [])
 
   useEffect(() => {
     logger(`activeIndex: ${activeIndex}`)
@@ -145,7 +159,7 @@ function EntryTags({ date }: EntryTagsProps) {
   }
 
   function searchTag(term: string) {
-    let result = term.trim() === '' ? [] : matchSorter(allTags.current, term, { keys: ['name'] })
+    let result = term.trim() === '' ? [] : matchSorter(userTags.current, term, { keys: ['name'] })
     logger(result)
     return result
   }
@@ -157,7 +171,7 @@ function EntryTags({ date }: EntryTagsProps) {
         return prev.filter((el) => el.id != tagId)
       } else {
         logger(`+ adding tag ${tagId}`)
-        return [...prev, allTags.current.find((t) => t.id == tagId)]
+        return [...prev, userTags.current.find((t) => t.id == tagId)]
       }
     })
   }
@@ -172,7 +186,7 @@ function EntryTags({ date }: EntryTagsProps) {
     let uuid = self.crypto.randomUUID()
     logger(`Create tag: ${name}`)
     logger(`uuid: ${uuid}`)
-    allTags.current = [...allTags.current, { id: uuid, name, color: 'red' }]
+    userTags.current = [...userTags.current, { id: uuid, name, color: 'red' }]
     addTag(uuid)
     // setTerm(name)
     setResults([...searchTag(name)])
@@ -457,7 +471,7 @@ function EntryTags({ date }: EntryTagsProps) {
               isVisible={popoverScrollUpArrow}
               onMouseDown={(e: any) => handleScroll(e, 'up')}
             />
-            {allTags.current.map((tag, i) => (
+            {userTags.current.map((tag, i) => (
               <ListItemTag
                 key={`${date}-${tag.name}-${tag.id}`}
                 i={i}

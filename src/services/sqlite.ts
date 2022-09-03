@@ -5,6 +5,7 @@ import schema_1 from '../sql/schema.1.sqlite.sql'
 import migration_0to1 from '../sql/migration.0-to-1.sql'
 import dayjs from 'dayjs'
 import { logger, isDev } from '../utils'
+import type { Tag } from '../components/EntryTags/types'
 
 var database: any
 const migrations = [{ name: 'migration.0-to-1.sql', sql: migration_0to1, finalVersion: 1 }]
@@ -242,6 +243,88 @@ ipcMain.handle('cache-delete-all', async (event, user_id) => {
     const db = getDB()
     const stmt = db.prepare('DELETE FROM journals WHERE user_id = @user_id')
     return stmt.run({ user_id })
+  } catch (error) {
+    logger(`error`)
+    logger(error)
+    return error
+  }
+})
+
+// Tags
+
+ipcMain.handle('cache-add-or-update-tag', async (event, val: Tag) => {
+  logger('cache-add-or-update-tag')
+  try {
+    const db = getDB()
+    const { id, user_id, name, color, created_at, modified_at, revision } = val
+    const stmt = db.prepare(
+      `INSERT INTO tags (id, user_id, name, color, created_at, modified_at, revision ) VALUES (@id, @user_id, @name, @color, @created_at, @modified_at, @revision )
+      ON CONFLICT(id) DO UPDATE SET name = excluded.name, color = excluded.color, modified_at = excluded.modified_at, revision = excluded.revision`
+    )
+    return stmt.run({ id, user_id, name, color, created_at, modified_at, revision })
+  } catch (error) {
+    logger(`error`)
+    logger(error)
+    return error
+  }
+})
+
+ipcMain.handle('cache-update-tag-property', async (event, set, tag_id) => {
+  logger('cache-update-tag-property')
+  try {
+    const db = getDB()
+    const property = Object.keys(set)[0] as string
+    const value = Object.values(set)[0]
+    const stmt = db.prepare(`UPDATE tags SET ${property} = @value WHERE id = @tag_id`)
+    return stmt.run({ tag_id, value })
+  } catch (error) {
+    logger(`error`)
+    logger(error)
+    return error
+  }
+})
+
+ipcMain.handle('cache-get-tags', async (event, user_id) => {
+  logger('cache-get-tags')
+  try {
+    const db = getDB()
+    const stmt = db.prepare(
+      "SELECT * FROM tags WHERE user_id = @user_id AND sync_status != 'pending_delete'"
+    )
+    const result = stmt.all({ user_id }) as any[]
+    return result
+  } catch (error) {
+    logger(`error`)
+    logger(error)
+    return error
+  }
+})
+
+ipcMain.handle('cache-get-deleted-tags', async (event, user_id) => {
+  logger('cache-get-deleted-tags')
+  try {
+    const db = getDB()
+    const stmt = db.prepare(
+      "SELECT * FROM tags WHERE user_id = @user_id AND sync_status = 'pending_delete'"
+    )
+    const result = stmt.all({ user_id })
+    logger('Deleted tags:')
+    logger(result)
+    return result
+  } catch (error) {
+    logger(`error`)
+    logger(error)
+    return error
+  }
+})
+
+ipcMain.handle('cache-delete-tag', async (event, tag_id) => {
+  logger('cache-delete-tag')
+  try {
+    const db = getDB()
+    const stmt = db.prepare('DELETE FROM tags WHERE id = @tag_id')
+    const result = stmt.run({ tag_id })
+    return result
   } catch (error) {
     logger(`error`)
     logger(error)

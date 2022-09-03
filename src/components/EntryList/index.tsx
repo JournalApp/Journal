@@ -5,6 +5,7 @@ import { supabase, arrayEquals, isUnauthorized, logger } from 'utils'
 import { useEntriesContext, useUserContext } from 'context'
 import dayjs from 'dayjs'
 import { BeforeEntries, PostEntries, Wrapper } from './styled'
+import type { Tag } from '../EntryTags/types'
 
 var visibleSections: String[] = []
 var rangeMarker: any
@@ -100,16 +101,20 @@ function EntryList() {
     initialDaysCache,
     setDaysCache,
     setDaysCacheEntriesList,
+    syncPendingDeletedTags,
     cacheAddOrUpdateEntry,
     cacheUpdateEntry,
     cacheUpdateEntryProperty,
+    cacheAddOrUpdateTag,
   } = useEntriesContext()
   const invokeEntriesInitialFetch = useRef<any | null>({})
+  const invokeEntriesTagsInitialFetch = useRef<any | null>({})
   const entriesHeight: myref = {}
   const itemsRef = useRef<Array<HTMLDivElement | null>>([])
   const element = useRef<HTMLElement | null>(null)
   const { session, signOut } = useUserContext()
   const daysFetchInterval = useRef<NodeJS.Timeout | null>(null)
+  const tagsFetchInterval = useRef<NodeJS.Timeout | null>(null)
 
   logger(`EntryList render`)
 
@@ -119,6 +124,9 @@ function EntryList() {
     return () => {
       if (daysFetchInterval.current) {
         clearInterval(daysFetchInterval.current)
+      }
+      if (tagsFetchInterval.current) {
+        clearInterval(tagsFetchInterval.current)
       }
     }
   }, [])
@@ -148,6 +156,8 @@ function EntryList() {
   }
 
   const initialFetch = async () => {
+    // TODO
+    // Get cached Tags
     let cached = initialDaysCache.current
     logger('initialDaysCache.current:')
     logger(initialDaysCache.current)
@@ -167,10 +177,13 @@ function EntryList() {
       try {
         let { data: days, error } = await supabase
           .from('journals')
-          .select('day, modified_at')
+          .select('day, modified_at, tags_last_modified_at:journals_tags(modified_at)')
           .eq('user_id', session.user.id)
           .order('day', { ascending: true })
-
+          .order('modified_at', { ascending: false, foreignTable: 'journals_tags' })
+          .limit(1, { foreignTable: 'journals_tags' })
+        logger('Days:')
+        logger(days)
         if (error) {
           logger(error)
           if (isUnauthorized(error)) signOut()
@@ -218,12 +231,54 @@ function EntryList() {
           invokeEntriesInitialFetch.current[day](
             entriesModifiedAt.find((item: any) => item.day == day)?.modified_at
           )
+          invokeEntriesTagsInitialFetch.current[day](
+            entriesModifiedAt.find((item: any) => item.day == day)?.tags_last_modified_at[0]
+              ?.modified_at
+          )
         }
       } catch (err) {
         logger(err)
       }
     }
+
+    const tagsFetch = async () => {
+      logger('🏃 🏃 🏃 fetchTags starts')
+      try {
+        let { data: tags, error } = await supabase
+          .from<Tag>('tags')
+          .select()
+          .eq('user_id', session.user.id)
+
+        if (error) {
+          logger(error)
+          if (isUnauthorized(error)) signOut()
+          throw new Error(error.message)
+        }
+
+        logger(tags)
+        // TODO
+        // 1. Delete cached tags that are not present supabase
+        // await ...
+        // 2. Sync pending_update + or revert and update cache
+        // await ...
+        // 3. Sync pendgin_delete + or revert and update cache
+        await syncPendingDeletedTags(tags)
+        // 4. Update local state with tags (userTags.current)
+        // ...
+        // 5. Notify EntryTags to update state
+        // ...
+        // tags.forEach((tag) => cacheAddOrUpdateTag(tag))
+
+        logger('✋🏻 ✋🏻 ✋🏻 tagsFetchInterval stop')
+        if (tagsFetchInterval.current) clearInterval(tagsFetchInterval.current)
+      } catch (err) {
+        logger(err)
+      }
+    }
     daysFetchInterval.current = setInterval(daysFetch, 5000)
+    tagsFetchInterval.current = setInterval(tagsFetch, 5000)
+    // TODO feature flag check
+    await tagsFetch()
     await daysFetch()
   }
 
@@ -239,6 +294,7 @@ function EntryList() {
               key={day}
               entryDay={day}
               invokeEntriesInitialFetch={invokeEntriesInitialFetch}
+              invokeEntriesTagsInitialFetch={invokeEntriesTagsInitialFetch}
               entriesObserver={entriesObserver}
               cachedEntry={initialCache.current.find((item: any) => item.day == day)}
               setEntryHeight={setEntryHeight}
