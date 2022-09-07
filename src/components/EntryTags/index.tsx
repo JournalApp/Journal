@@ -64,9 +64,9 @@ function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
   const [colorPickerOpen, setColorPickerOpen] = useState(false)
   const [term, setTerm] = useState<string>('')
   const [tags, setTags] = useState<Tag[]>([
-    userTags.current[0],
-    userTags.current[1],
-    userTags.current[2],
+    // userTags.current[0],
+    // userTags.current[1],
+    // userTags.current[2],
   ])
   const [results, setResults] = useState<Tag[]>([])
   const listRef = useRef([])

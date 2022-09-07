@@ -144,6 +144,7 @@ export function UserProvider({ children }: any) {
     logger('signOut')
     supabase.auth.signOut()
     window.electronAPI.cache.deleteAll(session.user.id)
+    // TODO detete tags
     window.electronAPI.reloadWindow()
   }
 

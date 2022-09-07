@@ -139,7 +139,7 @@ export function EntriesProvider({ children }: any) {
       await Promise.all(
         tags.map(async (tag: Tag) => {
           let serverTag = serverTags.find((t) => t.id == tag.id)
-          if (tag.revision == serverTag?.revision) {
+          if (tag.revision >= serverTag?.revision) {
             // Check if user had current revision when trying to delete tag
             let { error } = await supabase
               .from('tags')

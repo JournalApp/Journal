@@ -257,7 +257,7 @@ function EntryList() {
 
         logger(tags)
         // TODO
-        // 1. Delete cached tags that are not present supabase
+        // 1. Delete cached tags not present in supabase and add not present in cache
         // await ...
         // 2. Sync pending_update + or revert and update cache
         // await ...
@@ -267,7 +267,7 @@ function EntryList() {
         // ...
         // 5. Notify EntryTags to update state
         // ...
-        // tags.forEach((tag) => cacheAddOrUpdateTag(tag))
+        tags.forEach((tag) => cacheAddOrUpdateTag(tag))
 
         logger('✋🏻 ✋🏻 ✋🏻 tagsFetchInterval stop')
         if (tagsFetchInterval.current) clearInterval(tagsFetchInterval.current)
