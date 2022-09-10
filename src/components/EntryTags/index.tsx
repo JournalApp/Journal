@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react'
 import { lightTheme, theme } from 'themes'
 import { useEntriesContext, useUserContext } from 'context'
-import { supabase, ordinal, breakpoints, logger, arrayEquals } from 'utils'
+import { supabase, ordinal, breakpoints, logger, arrayEquals, randomInt } from 'utils'
 import { matchSorter } from 'match-sorter'
 import {
   useFloating,
@@ -75,6 +75,7 @@ function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
   const tagWrapperRef = useRef<HTMLDivElement>(null)
   const tagEditingRef = useRef<HTMLDivElement>(null)
   const tagEditingInputRef = useRef<HTMLInputElement>(null)
+  const newTagColor = useRef<keyof typeof lightTheme['color']['tags']>('red')
   const [open, setOpen] = useState(false) // 2. popver
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
   const [selectedIndex, setSelectedIndex] = useState(Math.max(0, listRef.current.indexOf(term)))
@@ -95,6 +96,12 @@ function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
     onOpenChange: setOpen,
     middleware: [offset({ crossAxis: 0, mainAxis: 4 })],
   })
+
+  const generateRandomTagColor = () => {
+    let keys = Object.keys(lightTheme.color.tags)
+    newTagColor.current = keys[randomInt(keys.length)] as keyof typeof lightTheme['color']['tags']
+    logger(`New random color ${newTagColor.current}`)
+  }
 
   useEffect(() => {
     invokeEntriesTagsInitialFetch.current[date] = initialFetchEntryTags
@@ -134,6 +141,7 @@ function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
       if (scrollHeight > clientHeight) {
         setPopoverScrollDownArrow(true)
       }
+      generateRandomTagColor()
     }
   }, [open])
 
@@ -193,7 +201,7 @@ function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
       user_id: session.user.id,
       id: uuid,
       name,
-      color: 'red',
+      color: newTagColor.current,
       created_at: timeNow,
       modified_at: timeNow,
       revision: 0,
@@ -212,7 +220,7 @@ function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
     await cacheAddOrUpdateTag(tagToCreate)
 
     // Local state: fetch all tags
-    userTags.current = [...userTags.current, { id: uuid, name, color: 'red' }]
+    userTags.current = [...userTags.current, { id: uuid, name, color: newTagColor.current }]
 
     // Supabase: save
     // TODO check what is returned
@@ -235,6 +243,8 @@ function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
 
     // Add to search results
     setResults([...searchTag(name)])
+
+    generateRandomTagColor()
   }
 
   const handleSelect = (e: any, tagId: string) => {
@@ -605,7 +615,7 @@ function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
               >
                 Create{' '}
                 <StyledTag editMode={false} maxWidth={200}>
-                  <StyledTagColorDot fillColor={theme(`color.tags.red`)} />
+                  <StyledTagColorDot fillColor={theme(`color.tags.${newTagColor.current}`)} />
                   <StyledTagTitle>{sel.refs.reference.current.value}</StyledTagTitle>
                 </StyledTag>
               </StyledItem>

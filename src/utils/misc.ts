@@ -81,6 +81,12 @@ function isUnauthorized(error: PostgrestError) {
   }
 }
 
+function randomInt(max: number) {
+  // max number (exclusive)
+  // e.g. max=3 -> 0,1,2
+  return (max * Math.random()) << 0
+}
+
 export {
   shallowEqual,
   arrayEquals,
@@ -91,4 +97,5 @@ export {
   ordinal,
   isDev,
   isUnauthorized,
+  randomInt,
 }
