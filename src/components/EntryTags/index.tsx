@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react'
 import { lightTheme, theme } from 'themes'
-import { useEntriesContext } from 'context'
-import { ordinal, breakpoints, logger, arrayEquals } from 'utils'
+import { useEntriesContext, useUserContext } from 'context'
+import { supabase, ordinal, breakpoints, logger, arrayEquals } from 'utils'
 import { matchSorter } from 'match-sorter'
 import {
   useFloating,
@@ -34,7 +34,7 @@ import {
   StyledScrollUpIcon,
 } from './styled'
 import { ListItemTag } from './ListItemTag'
-import { Tag } from './types'
+import { Tag, EntryTag } from './types'
 
 type EntryTagsProps = {
   date: string
@@ -58,7 +58,7 @@ function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
   //   { id: 'fgh4', name: 'Books4', color: 'navy' },
   //   { id: 'fgh5', name: 'Books5', color: 'navy' },
   // ])
-  const { userTags } = useEntriesContext()
+  const { userTags, cacheAddOrUpdateTag, cacheAddOrUpdateEntryTag } = useEntriesContext()
   const [editMode, setEditMode] = useState(false) // 1. edit mode
   const [tagIndexEditing, setTagIndexEditing] = useState<number | null>(null) // 3. Tag editing
   const [colorPickerOpen, setColorPickerOpen] = useState(false)
@@ -80,6 +80,7 @@ function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
   const [selectedIndex, setSelectedIndex] = useState(Math.max(0, listRef.current.indexOf(term)))
   const [popoverScrollDownArrow, setPopoverScrollDownArrow] = useState(false)
   const [popoverScrollUpArrow, setPopoverScrollUpArrow] = useState(false)
+  const { session, signOut, getSecretKey, serverTimeNow } = useUserContext()
 
   const initialFetchEntryTags = async (entryModifiedAt: string) => {
     logger(`initialFetchEntryTags ${entryModifiedAt}`)
@@ -180,17 +181,60 @@ function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
     addTag(tagId)
   }
 
-  const handleCreateTag = (e: any, name: string) => {
-    // TODO create tag, generate color etc.
+  const handleCreateTag = async (e: any, name: string) => {
+    // TODO generate color etc.
     e.preventDefault()
+
+    // 1. Create tag
     let uuid = self.crypto.randomUUID()
-    logger(`Create tag: ${name}`)
-    logger(`uuid: ${uuid}`)
+    logger(`Create tag: ${name} (${uuid})`)
+    const timeNow = serverTimeNow()
+    const tagToCreate: Tag = {
+      user_id: session.user.id,
+      id: uuid,
+      name,
+      color: 'red',
+      created_at: timeNow,
+      modified_at: timeNow,
+      revision: 0,
+    }
+
+    const entryTagToCreate: EntryTag = {
+      user_id: session.user.id,
+      day: date,
+      tag_id: uuid,
+      order_no: tags.length,
+      created_at: timeNow,
+      modified_at: timeNow,
+      revision: 0,
+    }
+    // Cache: save
+    await cacheAddOrUpdateTag(tagToCreate)
+
+    // Local state: fetch all tags
     userTags.current = [...userTags.current, { id: uuid, name, color: 'red' }]
+
+    // Supabase: save
+    // TODO check what is returned
+    const { error } = await supabase.from<Tag>('tags').upsert(tagToCreate).single()
+
+    // // TODO Make separate function for 2.
+    // 2. Add tag to this entry
+    // Cache: save
+    await cacheAddOrUpdateEntryTag(entryTagToCreate)
+
+    // Save in local state
     addTag(uuid)
-    // setTerm(name)
+
+    // Supabase: save
+    // TODO check what is returned
+    const { error: err2 } = await supabase
+      .from<EntryTag>('entries_tags')
+      .upsert(entryTagToCreate)
+      .single()
+
+    // Add to search results
     setResults([...searchTag(name)])
-    // clearInput()
   }
 
   const handleSelect = (e: any, tagId: string) => {

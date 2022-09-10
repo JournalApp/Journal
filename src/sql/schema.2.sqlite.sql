@@ -1,4 +1,13 @@
- -- Create a table for journals_catalog
+ -- Create a table for Users
+create table
+  users (
+    id text,
+    full_name text,
+    secret_key blob,
+    primary key (id)
+  );
+
+-- Create a table for journals_catalog
 create table
   journals_catalog (
     user_id text,
@@ -11,31 +20,7 @@ create table
     foreign key (user_id) references users (id) on delete cascade on update no action
   );
 
--- Create default journal catalog (journal_id=0) for existing users
-insert into
-  journals_catalog (user_id)
-select
-  id
-from
-  users
-where
-  true on conflict (user_id, journal_id)
-do
-  nothing;
-
--- update table journals to enable multiple journals per user
--- In SQLite, you can not use the ALTER TABLE statement to drop a primary key.
--- Instead, you must create a new table with the primary key removed and copy the data into this new table.
-pragma foreign_keys = off;
-
-begin
-  transaction;
-
-alter table
-  journals
-rename to
-  old_journals;
-
+-- Create a table for Journals
 create table
   journals (
     user_id text,
@@ -50,25 +35,6 @@ create table
     foreign key (user_id) references users (id) on delete cascade on update no action,
     foreign key (user_id, journal_id) references journals_catalog (user_id, journal_id) on delete cascade on update no action
   );
-
-insert into
-  journals (
-    user_id,
-    day,
-    created_at,
-    modified_at,
-    content,
-    deleted,
-    needs_saving_to_server
-  )
-select
-  *
-from
-  old_journals;
-
-commit;
-
-pragma foreign_keys = on;
 
 -- Create a table for Tags
 create table
@@ -102,3 +68,17 @@ create table
     foreign key (tag_id) references tags (id) on delete cascade on update no action,
     foreign key (user_id, day, journal_id) references journals (user_id, day, journal_id) on delete cascade on update no action
   );
+
+-- Create a table for user Preferences
+create table
+  preferences (
+    user_id text,
+    item text,
+    value text,
+    primary key (user_id, item),
+    foreign key (user_id) references users (id) on delete cascade on update no action
+  );
+
+-- Create a table for app
+create table
+  app (key text not null, value text, primary key (key));

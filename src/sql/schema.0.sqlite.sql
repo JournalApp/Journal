@@ -37,11 +37,3 @@ create table if not exists app (
 
   PRIMARY KEY (key)
 );
-
--- Create a table for app version on which db was last used
--- create table if not exists version (
---   version_id int primary key not null,
---   version int
--- );
-
--- insert into journals values('123-abc', '2022-06-15', '2022-06-13T16:52:55.144701+00:00', '2022-06-13T16:52:55.144701+00:00','[{children:[{text:'',},],},]');

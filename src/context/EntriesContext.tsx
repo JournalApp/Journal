@@ -7,7 +7,7 @@ import { supabase, isUnauthorized, logger } from 'utils'
 import { PlateEditor } from '@udecode/plate'
 import { Entry } from 'components'
 
-import type { Tag } from '../components/EntryTags/types'
+import type { Tag, EntryTag } from '../components/EntryTags/types'
 
 interface EntriesContextInterface {
   initialCache: any
@@ -25,6 +25,7 @@ interface EntriesContextInterface {
   cacheUpdateEntry: electronAPIType['cache']['updateEntry']
   cacheUpdateEntryProperty: electronAPIType['cache']['updateEntryProperty']
   cacheAddOrUpdateTag: electronAPIType['cache']['addOrUpdateTag']
+  cacheAddOrUpdateEntryTag: electronAPIType['cache']['addOrUpdateEntryTag']
   editorsRef: any
 }
 
@@ -276,8 +277,12 @@ export function EntriesProvider({ children }: any) {
     })
   }
 
-  const cacheAddOrUpdateTag = async (query: any) => {
+  const cacheAddOrUpdateTag = async (query: Tag) => {
     await window.electronAPI.cache.addOrUpdateTag(query)
+  }
+
+  const cacheAddOrUpdateEntryTag = async (query: EntryTag) => {
+    await window.electronAPI.cache.addOrUpdateEntryTag(query)
   }
 
   const cacheUpdateTagProperty = async (set: any, tag_id: string) => {
@@ -300,6 +305,7 @@ export function EntriesProvider({ children }: any) {
     cacheUpdateEntry,
     cacheUpdateEntryProperty,
     cacheAddOrUpdateTag,
+    cacheAddOrUpdateEntryTag,
     editorsRef,
   }
   return (

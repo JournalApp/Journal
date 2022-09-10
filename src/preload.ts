@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer, clipboard } from 'electron'
 import { EventMessage } from './services/analytics'
-import type { Tag } from './components/EntryTags/types'
+import type { Tag, EntryTag } from './components/EntryTags/types'
 
 const electronAPI = {
   onPaste: (callback: any) => ipcRenderer.on('paste', callback),
@@ -51,6 +51,9 @@ const electronAPI = {
     },
     async addOrUpdateTag(tag: Tag) {
       await ipcRenderer.invoke('cache-add-or-update-tag', tag)
+    },
+    async addOrUpdateEntryTag(tag: EntryTag) {
+      await ipcRenderer.invoke('cache-add-or-update-entry-tag', tag)
     },
     async updateTagProperty(set: any, tag_id: string) {
       await ipcRenderer.invoke('cache-update-tag-property', set, tag_id)

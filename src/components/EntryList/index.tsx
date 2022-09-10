@@ -177,11 +177,11 @@ function EntryList() {
       try {
         let { data: days, error } = await supabase
           .from('journals')
-          .select('day, modified_at, tags_last_modified_at:journals_tags(modified_at)')
+          .select('day, modified_at, tags_last_modified_at:entries_tags(modified_at)')
           .eq('user_id', session.user.id)
           .order('day', { ascending: true })
-          .order('modified_at', { ascending: false, foreignTable: 'journals_tags' })
-          .limit(1, { foreignTable: 'journals_tags' })
+          .order('modified_at', { ascending: false, foreignTable: 'entries_tags' })
+          .limit(1, { foreignTable: 'entries_tags' })
         logger('Days:')
         logger(days)
         if (error) {

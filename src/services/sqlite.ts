@@ -2,13 +2,18 @@ import { app, safeStorage, ipcMain, dialog } from 'electron'
 import Database from 'better-sqlite3'
 import log from 'electron-log'
 import schema_1 from '../sql/schema.1.sqlite.sql'
+import schema_2 from '../sql/schema.2.sqlite.sql'
 import migration_0to1 from '../sql/migration.0-to-1.sql'
+import migration_1to2 from '../sql/migration.1-to-2.sql'
 import dayjs from 'dayjs'
 import { logger, isDev } from '../utils'
-import type { Tag } from '../components/EntryTags/types'
+import type { Tag, EntryTag } from '../components/EntryTags/types'
 
 var database: any
-const migrations = [{ name: 'migration.0-to-1.sql', sql: migration_0to1, finalVersion: 1 }]
+const migrations = [
+  { name: 'migration.0-to-1.sql', sql: migration_0to1, sqlFinal: schema_1, finalVersion: 1 },
+  { name: 'migration.1-to-2.sql', sql: migration_1to2, sqlFinal: schema_2, finalVersion: 2 },
+]
 
 const schemaVersions = {
   '1.0.0-beta.1': 0,
@@ -16,6 +21,7 @@ const schemaVersions = {
   '1.0.0-beta.3': 0,
   '1.0.0-beta.4': 1,
   '1.0.0-beta.5': 1,
+  '1.0.0-beta.6': 2,
 }
 
 const getDB = () => {
@@ -25,11 +31,16 @@ const getDB = () => {
       database = new Database(app.getPath('userData') + '/' + dbName, { fileMustExist: true })
       logger('Database already exists')
     } catch {
-      logger('No database found, creating new and running schema_1')
+      logger('No database found, creating new')
       database = new Database(app.getPath('userData') + '/' + dbName)
-      // Run Current Schema, no migrations needed
-      database.exec(schema_1)
-      database.pragma('user_version = 1')
+      // Run Final Schema, no migrations needed
+      // TODO make it automatic
+      const appVersion = app.getVersion() as keyof typeof schemaVersions
+      const desiredSchemaVersion = schemaVersions[appVersion]
+      const migration = migrations.find((m) => m.finalVersion == desiredSchemaVersion)
+      logger(`Running final schema for version ${migration.finalVersion}`)
+      database.exec(migration.sqlFinal)
+      database.pragma(`user_version = ${migration.finalVersion}`)
     }
   }
   return database
@@ -84,7 +95,12 @@ ipcMain.handle('cache-add-user', async (event, id) => {
   try {
     const db = getDB()
     const stmt = db.prepare('INSERT INTO users (id) VALUES (@id) ON CONFLICT (id) DO NOTHING')
-    return stmt.run({ id })
+    stmt.run({ id })
+    // TODO create default journal_catalog for the user
+    const create_journal = db.prepare(
+      'INSERT INTO journals_catalog (user_id) VALUES (@id) ON CONFLICT (user_id, journal_id) DO NOTHING'
+    )
+    return create_journal.run({ id })
   } catch (error) {
     logger(`error`)
     logger(error)
@@ -99,7 +115,7 @@ ipcMain.handle('cache-add-or-update-entry', async (event, val) => {
     const { user_id, day, created_at, modified_at, content } = val
     const stmt = db.prepare(
       `INSERT INTO journals (user_id, day, created_at, modified_at, content) VALUES (@user_id, @day, @created_at, @modified_at, @content)
-      ON CONFLICT(user_id, day) DO UPDATE SET content = excluded.content, modified_at = excluded.modified_at`
+      ON CONFLICT(user_id, journal_id, day) DO UPDATE SET content = excluded.content, modified_at = excluded.modified_at`
     )
     return stmt.run({ user_id, day, created_at, modified_at, content })
   } catch (error) {
@@ -262,6 +278,23 @@ ipcMain.handle('cache-add-or-update-tag', async (event, val: Tag) => {
       ON CONFLICT(id) DO UPDATE SET name = excluded.name, color = excluded.color, modified_at = excluded.modified_at, revision = excluded.revision`
     )
     return stmt.run({ id, user_id, name, color, created_at, modified_at, revision })
+  } catch (error) {
+    logger(`error`)
+    logger(error)
+    return error
+  }
+})
+
+ipcMain.handle('cache-add-or-update-entry-tag', async (event, val: EntryTag) => {
+  logger('cache-add-or-update-entry-tag')
+  try {
+    const db = getDB()
+    const { user_id, day, tag_id, order_no, created_at, modified_at, revision } = val
+    const stmt = db.prepare(
+      `INSERT INTO entries_tags (user_id, day, tag_id, order_no, created_at, modified_at, revision ) VALUES (@user_id, @day, @tag_id, @order_no, @created_at, @modified_at, @revision )
+      ON CONFLICT(user_id, day, journal_id, tag_id) DO UPDATE SET order_no = excluded.order_no, modified_at = excluded.modified_at, revision = excluded.revision`
+    )
+    return stmt.run({ user_id, day, tag_id, order_no, created_at, modified_at, revision })
   } catch (error) {
     logger(`error`)
     logger(error)
