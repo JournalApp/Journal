@@ -189,8 +189,7 @@ function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
     addTag(tagId)
   }
 
-  const handleCreateTag = async (e: any, name: string) => {
-    // TODO generate color etc.
+  const handleCreateAndAddTag = async (e: any, name: string) => {
     e.preventDefault()
 
     // 1. Create tag
@@ -219,7 +218,7 @@ function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
     // Cache: save
     await cacheAddOrUpdateTag(tagToCreate)
 
-    // Local state: fetch all tags
+    // Local state: add tag
     userTags.current = [...userTags.current, { id: uuid, name, color: newTagColor.current }]
 
     // Supabase: save
@@ -251,7 +250,7 @@ function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
     e.preventDefault()
     if (activeIndex !== null) {
       if (tagId == 'CREATE') {
-        handleCreateTag(e, sel.refs.reference.current.value)
+        handleCreateAndAddTag(e, sel.refs.reference.current.value)
       } else {
         addTag(tagId)
       }
@@ -602,7 +601,7 @@ function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
                     e.stopPropagation()
                     sel.refs.reference.current.focus()
                     setTagIndexEditing(null)
-                    handleCreateTag(e, sel.refs.reference.current.value)
+                    handleCreateAndAddTag(e, sel.refs.reference.current.value)
                   },
                   onFocus() {
                     logger('StyledItem sel.refs.reference.current.focus()')

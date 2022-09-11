@@ -192,11 +192,13 @@ const createWindow = (): void => {
       .catch((err) => console.log('An error occurred: ', err))
   }
 
+  ipcMain.removeHandler('electron-disableSpellCheck')
   ipcMain.handle('electron-disableSpellCheck', async () => {
     logger('electron-disableSpellCheck')
     mainWindow.webContents.session.setSpellCheckerLanguages([])
   })
 
+  ipcMain.removeHandler('electron-enableSpellCheck')
   ipcMain.handle('electron-enableSpellCheck', async () => {
     logger('electron-enableSpellCheck')
     mainWindow.webContents.session.setSpellCheckerLanguages(
