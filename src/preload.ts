@@ -6,6 +6,7 @@ const electronAPI = {
   onPaste: (callback: any) => ipcRenderer.on('paste', callback),
   onCopy: (callback: any) => ipcRenderer.on('copy', callback),
   onUpdateDownloaded: (callback: any) => ipcRenderer.on('update-downloaded', callback),
+  onTagUpdated: (callback: any) => ipcRenderer.on('sqlite-tag-updated', callback),
   async capture({ distinctId, event, properties, type }: EventMessage) {
     await ipcRenderer.invoke('analytics-capture', { distinctId, event, properties, type })
   },

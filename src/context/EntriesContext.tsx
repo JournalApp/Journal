@@ -213,6 +213,12 @@ export function EntriesProvider({ children }: any) {
       }
     }, 1000)
 
+    // TODO monifor if listener is not added more than once
+    // if so, remove listener in useEffect return()
+    window.electronAPI.onTagUpdated((event: any, tag: Tag) => {
+      syncTag('updated', tag)
+    })
+
     return () => {
       clearInterval(hasNewDayCome)
       if (pendingDeletedEntriesInterval.current) {
@@ -287,6 +293,10 @@ export function EntriesProvider({ children }: any) {
 
   const cacheUpdateTagProperty = async (set: any, tag_id: string) => {
     await window.electronAPI.cache.updateTagProperty(set, tag_id)
+  }
+
+  const syncTag = (action: 'updated' | 'inserted' | 'deleted', tag: Tag) => {
+    logger(`tag ${tag.id} ${action}`)
   }
 
   let state = {

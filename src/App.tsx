@@ -103,6 +103,9 @@ function App() {
     })
   }
 
+  window.addEventListener('online', () => logger('online'))
+  window.addEventListener('offline', () => logger('offline'))
+
   return (
     <>
       <GlobalStyle />

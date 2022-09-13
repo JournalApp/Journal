@@ -3,10 +3,11 @@ import path from 'path'
 import url from 'url'
 import log from 'electron-log'
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer'
-import { getLastUser, getAppBounds, setAppBounds } from './services/sqlite'
+import { getLastUser, getAppBounds, setAppBounds, sqliteEvents } from './services/sqlite'
 import { capture } from './services/analytics'
 import { isDev, logger } from './utils'
 import { serializeError, deserializeError } from 'serialize-error'
+import type { Tag, EntryTag } from './components/EntryTags/types'
 
 var openUrl = ''
 
@@ -150,6 +151,12 @@ const createWindow = (): void => {
       logger('update-downloaded')
       log.info('update-downloaded')
       mainWindow.webContents.send('update-downloaded')
+    })
+
+    // Handle events from SQLIte
+    sqliteEvents.on('sqlite-tag-updated', (tag: Tag) => {
+      logger('sqliteEvents.on sqlite-tag-updated')
+      mainWindow.webContents.send('sqlite-tag-updated', tag)
     })
 
     // Handle errors

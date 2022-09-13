@@ -1,5 +1,6 @@
 import { app, safeStorage, ipcMain, dialog } from 'electron'
 import Database from 'better-sqlite3'
+import type BetterSqlite3 from 'better-sqlite3'
 import log from 'electron-log'
 import schema_1 from '../sql/schema.1.sqlite.sql'
 import schema_2 from '../sql/schema.2.sqlite.sql'
@@ -9,7 +10,11 @@ import dayjs from 'dayjs'
 import { logger, isDev } from '../utils'
 import type { Tag, EntryTag } from '../components/EntryTags/types'
 
-var database: any
+import { EventEmitter } from 'events'
+const sqliteEvents = new EventEmitter()
+
+var database: BetterSqlite3.Database
+var databaseReadOnly: BetterSqlite3.Database
 const migrations = [
   { name: 'migration.0-to-1.sql', sql: migration_0to1, sqlFinal: schema_1, finalVersion: 1 },
   { name: 'migration.1-to-2.sql', sql: migration_1to2, sqlFinal: schema_2, finalVersion: 2 },
@@ -24,15 +29,18 @@ const schemaVersions = {
   '1.0.0-beta.6': 2,
 }
 
-const getDB = () => {
+const getDB = (type?: 'readOnly') => {
   if (!database) {
     const dbName = isDev() ? 'cache-dev.db' : 'cache.db'
+    const dbPath = app.getPath('userData') + '/' + dbName
     try {
-      database = new Database(app.getPath('userData') + '/' + dbName, { fileMustExist: true })
+      database = new Database(dbPath, { fileMustExist: true })
+      databaseReadOnly = new Database(dbPath, { readonly: true })
       logger('Database already exists')
     } catch {
       logger('No database found, creating new')
-      database = new Database(app.getPath('userData') + '/' + dbName)
+      database = new Database(dbPath)
+      databaseReadOnly = new Database(dbPath, { readonly: true })
       // Run Final Schema, no migrations needed
       // TODO make it automatic
       const appVersion = app.getVersion() as keyof typeof schemaVersions
@@ -43,7 +51,12 @@ const getDB = () => {
       database.pragma(`user_version = ${migration.finalVersion}`)
     }
   }
-  return database
+  switch (type) {
+    case 'readOnly':
+      return databaseReadOnly
+    default:
+      return database
+  }
 }
 
 const runMigrations = () => {
@@ -80,9 +93,24 @@ const runMigrations = () => {
   })
 }
 
+const addTriggers = () => {
+  const db = getDB()
+
+  db.function('emitTagUpdated', (id: string) => {
+    const dbReadOnly = getDB('readOnly')
+    const data = dbReadOnly.prepare(`SELECT * FROM tags where id = '${id}'`).get()
+    sqliteEvents.emit('sqlite-tag-updated', data)
+  })
+  db.prepare('DROP TRIGGER IF EXISTS tag_updated;').run()
+  db.prepare(
+    'CREATE TRIGGER tag_updated AFTER UPDATE ON tags BEGIN SELECT emitTagUpdated(NEW.id); END'
+  ).run()
+}
+
 try {
   getDB()
   runMigrations()
+  addTriggers()
 } catch (error) {
   logger(error)
   log.error(error)
@@ -422,7 +450,7 @@ ipcMain.handle('preferences-delete-all', async (event, user_id) => {
   try {
     const db = getDB()
     const stmt = db.prepare('DELETE FROM preferences WHERE user_id = @user_id')
-    const result = stmt.run({ user_id }) as any[]
+    const result = stmt.run({ user_id })
     return result
   } catch (error) {
     logger(`error`)
@@ -544,4 +572,4 @@ const getLastUser = () => {
   }
 }
 
-export { getLastUser, getAppBounds, setAppBounds }
+export { getLastUser, getAppBounds, setAppBounds, sqliteEvents }
