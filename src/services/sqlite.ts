@@ -9,7 +9,6 @@ import migration_1to2 from '../sql/migration.1-to-2.sql'
 import dayjs from 'dayjs'
 import { logger, isDev } from '../utils'
 import type { Tag, EntryTag } from '../components/EntryTags/types'
-
 import { EventEmitter } from 'events'
 const sqliteEvents = new EventEmitter()
 
@@ -96,14 +95,20 @@ const runMigrations = () => {
 const addTriggers = () => {
   const db = getDB()
 
-  db.function('emitTagUpdated', (id: string) => {
-    const dbReadOnly = getDB('readOnly')
-    const data = dbReadOnly.prepare(`SELECT * FROM tags where id = '${id}'`).get()
-    sqliteEvents.emit('sqlite-tag-updated', data)
+  db.function('emitTagEvent', () => {
+    sqliteEvents.emit('sqlite-tag-event')
   })
+
+  // Tag updated
   db.prepare('DROP TRIGGER IF EXISTS tag_updated;').run()
   db.prepare(
-    'CREATE TRIGGER tag_updated AFTER UPDATE ON tags BEGIN SELECT emitTagUpdated(NEW.id); END'
+    "CREATE TRIGGER tag_updated AFTER UPDATE ON tags WHEN NEW.sync_status = 'pending_update' or NEW.sync_status = 'pending_delete' BEGIN SELECT emitTagEvent(); END"
+  ).run()
+
+  // Tag inserted
+  db.prepare('DROP TRIGGER IF EXISTS tag_inserted;').run()
+  db.prepare(
+    "CREATE TRIGGER tag_inserted AFTER INSERT ON tags WHEN NEW.sync_status = 'pending_create' BEGIN SELECT emitTagEvent(); END"
   ).run()
 }
 
@@ -124,7 +129,7 @@ ipcMain.handle('cache-add-user', async (event, id) => {
     const db = getDB()
     const stmt = db.prepare('INSERT INTO users (id) VALUES (@id) ON CONFLICT (id) DO NOTHING')
     stmt.run({ id })
-    // TODO create default journal_catalog for the user
+    // Create default journal_catalog for the user
     const create_journal = db.prepare(
       'INSERT INTO journals_catalog (user_id) VALUES (@id) ON CONFLICT (user_id, journal_id) DO NOTHING'
     )
@@ -300,12 +305,12 @@ ipcMain.handle('cache-add-or-update-tag', async (event, val: Tag) => {
   logger('cache-add-or-update-tag')
   try {
     const db = getDB()
-    const { id, user_id, name, color, created_at, modified_at, revision } = val
+    const { id, user_id, name, color, created_at, modified_at, revision, sync_status } = val
     const stmt = db.prepare(
-      `INSERT INTO tags (id, user_id, name, color, created_at, modified_at, revision ) VALUES (@id, @user_id, @name, @color, @created_at, @modified_at, @revision )
-      ON CONFLICT(id) DO UPDATE SET name = excluded.name, color = excluded.color, modified_at = excluded.modified_at, revision = excluded.revision`
+      `INSERT INTO tags (id, user_id, name, color, created_at, modified_at, revision, sync_status ) VALUES (@id, @user_id, @name, @color, @created_at, @modified_at, @revision, @sync_status )
+      ON CONFLICT(id) DO UPDATE SET name = excluded.name, color = excluded.color, modified_at = excluded.modified_at, revision = excluded.revision, sync_status = excluded.sync_status`
     )
-    return stmt.run({ id, user_id, name, color, created_at, modified_at, revision })
+    return stmt.run({ id, user_id, name, color, created_at, modified_at, revision, sync_status })
   } catch (error) {
     logger(`error`)
     logger(error)
@@ -361,15 +366,63 @@ ipcMain.handle('cache-get-tags', async (event, user_id) => {
   }
 })
 
-ipcMain.handle('cache-get-deleted-tags', async (event, user_id) => {
-  logger('cache-get-deleted-tags')
+ipcMain.handle('cache-get-tag', async (event, id) => {
+  logger('cache-get-tag')
+  try {
+    const db = getDB()
+    return db.prepare('SELECT * FROM tags WHERE id = @id').get({ id })
+  } catch (error) {
+    logger(`error`)
+    logger(error)
+    return error
+  }
+})
+
+ipcMain.handle('cache-get-pending-delete-tags', async (event, user_id) => {
+  logger('cache-get-pending-delete-tags')
   try {
     const db = getDB()
     const stmt = db.prepare(
       "SELECT * FROM tags WHERE user_id = @user_id AND sync_status = 'pending_delete'"
     )
     const result = stmt.all({ user_id })
-    logger('Deleted tags:')
+    logger('Pending delete tags:')
+    logger(result)
+    return result
+  } catch (error) {
+    logger(`error`)
+    logger(error)
+    return error
+  }
+})
+
+ipcMain.handle('cache-get-pending-update-tags', async (event, user_id) => {
+  logger('cache-get-pending-update-tags')
+  try {
+    const db = getDB()
+    const stmt = db.prepare(
+      "SELECT * FROM tags WHERE user_id = @user_id AND sync_status = 'pending_update'"
+    )
+    const result = stmt.all({ user_id })
+    logger('Pending update tags:')
+    logger(result)
+    return result
+  } catch (error) {
+    logger(`error`)
+    logger(error)
+    return error
+  }
+})
+
+ipcMain.handle('cache-get-pending-create-tags', async (event, user_id) => {
+  logger('cache-get-pending-create-tags')
+  try {
+    const db = getDB()
+    const stmt = db.prepare(
+      "SELECT * FROM tags WHERE user_id = @user_id AND sync_status = 'pending_create'"
+    )
+    const result = stmt.all({ user_id })
+    logger('Pending create tags:')
     logger(result)
     return result
   } catch (error) {

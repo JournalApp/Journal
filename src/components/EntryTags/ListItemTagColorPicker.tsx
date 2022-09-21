@@ -29,6 +29,7 @@ type ListItemTagColorPickerProps = {
   inputRef: React.MutableRefObject<HTMLInputElement>
   colorPickerOpen: boolean
   setColorPickerOpen: any
+  tagEditColorRef: React.MutableRefObject<Tag['color']>
 }
 
 function ListItemTagColorPicker({
@@ -36,7 +37,9 @@ function ListItemTagColorPicker({
   inputRef,
   colorPickerOpen,
   setColorPickerOpen,
+  tagEditColorRef,
 }: ListItemTagColorPickerProps) {
+  const [selectedColor, setSelectedColor] = useState<Tag['color']>(tagEditColorRef.current)
   const { floating, strategy, reference, x, y, context } = useFloating<HTMLInputElement>({
     placement: 'left-start',
     open: colorPickerOpen,
@@ -44,9 +47,11 @@ function ListItemTagColorPicker({
     middleware: [offset({ crossAxis: 0, mainAxis: 20 })],
   })
 
-  const handleColorSelect = (e: any) => {
+  const handleColorSelect = (e: any, color: Tag['color']) => {
     e.preventDefault()
     e.stopPropagation()
+    tagEditColorRef.current = color
+    setSelectedColor(color)
     logger('handleColorSelect')
   }
 
@@ -65,7 +70,7 @@ function ListItemTagColorPicker({
   return (
     <>
       <StyledEditTagColorPickerContainer ref={reference}>
-        <StyledTagColorDot fillColor={theme(`color.tags.${tag.color}`)} />
+        <StyledTagColorDot fillColor={theme(`color.tags.${selectedColor}`)} />
         <StyledColorPickerChevronIcon
           type={colorPickerOpen ? 'up' : 'down'}
           onMouseDown={(e: any) => toggleOpen(e)}
@@ -86,8 +91,8 @@ function ListItemTagColorPicker({
                 (color: keyof typeof lightTheme.color.tags, i) => (
                   <StyledItemColorPicker
                     key={`${i}-${color}`}
-                    onMouseDown={(e) => handleColorSelect(e)}
-                    isActive={color == tag.color}
+                    onMouseDown={(e) => handleColorSelect(e, color)}
+                    isActive={color == selectedColor}
                   >
                     <StyledTagColorDot size={16} fillColor={theme(`color.tags.${color}`)} />
                   </StyledItemColorPicker>

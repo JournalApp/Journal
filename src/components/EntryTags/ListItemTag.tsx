@@ -29,6 +29,7 @@ import {
   FloatingNode,
   FloatingPortal,
 } from '@floating-ui/react-dom-interactions'
+import { useEntriesContext, useUserContext } from 'context'
 import { ListItemTagColorPicker } from './ListItemTagColorPicker'
 import { Tag } from './types'
 
@@ -72,6 +73,9 @@ function ListItemTag({
   getItemProps,
 }: ListItemTagProps) {
   const editButtonRef = useRef<HTMLInputElement>(null)
+  const tagEditColorRef = useRef(tag.color)
+  const { userTags, cacheAddOrUpdateTag, cacheDeleteTag } = useEntriesContext()
+  const { serverTimeNow } = useUserContext()
   // const inputRef = useRef<HTMLInputElement>(null)
 
   // logger('ListItemTag rerender')
@@ -82,11 +86,24 @@ function ListItemTag({
   }
 
   const updateTag = () => {
-    setTagIndexEditing(null)
+    exitTagEditing()
+    tag.name = tagEditingInputRef.current.value
+    tag.modified_at = serverTimeNow()
+    tag.sync_status = 'pending_update'
+    tag.color = tagEditColorRef.current
+    cacheAddOrUpdateTag(tag)
+    // TODO trigger react state update, so this tag is rerenderd in all entries
   }
 
   const deleteTag = () => {
-    setTagIndexEditing(null)
+    exitTagEditing()
+    tag.sync_status = 'pending_delete'
+    tag.modified_at = serverTimeNow()
+    cacheAddOrUpdateTag(tag)
+    userTags.current = userTags.current.filter((t) => {
+      return t.id != tag.id
+    })
+    // TODO trigger react state update, so this tag is rerenderd in all entries
   }
 
   let isEditingOtherTag = tagIndexEditing != null && tagIndexEditing != i
@@ -99,15 +116,19 @@ function ListItemTag({
             ref={tagEditingInputRef}
             defaultValue={tag.name}
             size={10}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') updateTag()
+            }}
           ></StyledEditTagInput>
           <ListItemTagColorPicker
             inputRef={tagEditingInputRef}
             colorPickerOpen={colorPickerOpen}
             setColorPickerOpen={setColorPickerOpen}
             tag={tag}
+            tagEditColorRef={tagEditColorRef}
           />
           <StyledEditTagButtonsContainer>
-            <StyledTrashIcon />
+            <StyledTrashIcon onClick={() => deleteTag()} />
             <StyledCancelIcon onClick={() => exitTagEditing()} />
             <StyledOKIcon onClick={() => updateTag()} />
           </StyledEditTagButtonsContainer>

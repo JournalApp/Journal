@@ -6,7 +6,7 @@ const electronAPI = {
   onPaste: (callback: any) => ipcRenderer.on('paste', callback),
   onCopy: (callback: any) => ipcRenderer.on('copy', callback),
   onUpdateDownloaded: (callback: any) => ipcRenderer.on('update-downloaded', callback),
-  onTagUpdated: (callback: any) => ipcRenderer.on('sqlite-tag-updated', callback),
+  onTagPending: (callback: any) => ipcRenderer.on('sqlite-tag-event', callback),
   async capture({ distinctId, event, properties, type }: EventMessage) {
     await ipcRenderer.invoke('analytics-capture', { distinctId, event, properties, type })
   },
@@ -42,10 +42,19 @@ const electronAPI = {
       return await ipcRenderer.invoke('cache-get-deleted-days', user_id)
     },
     async getTags(user_id: string) {
-      return await ipcRenderer.invoke('cache-get-tags', user_id)
+      return (await ipcRenderer.invoke('cache-get-tags', user_id)) as Tag[]
     },
-    async getDeletedTags(user_id: string) {
-      return await ipcRenderer.invoke('cache-get-deleted-tags', user_id)
+    async getTag(id: string) {
+      return (await ipcRenderer.invoke('cache-get-tag', id)) as Tag
+    },
+    async getPendingDeleteTags(user_id: string) {
+      return (await ipcRenderer.invoke('cache-get-pending-delete-tags', user_id)) as Tag[]
+    },
+    async getPendingUpdateTags(user_id: string) {
+      return (await ipcRenderer.invoke('cache-get-pending-update-tags', user_id)) as Tag[]
+    },
+    async getPendingCreateTags(user_id: string) {
+      return (await ipcRenderer.invoke('cache-get-pending-create-tags', user_id)) as Tag[]
     },
     async deleteTag(tag_id: string) {
       await ipcRenderer.invoke('cache-delete-tag', tag_id)

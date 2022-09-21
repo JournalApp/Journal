@@ -154,9 +154,8 @@ const createWindow = (): void => {
     })
 
     // Handle events from SQLIte
-    sqliteEvents.on('sqlite-tag-updated', (tag: Tag) => {
-      logger('sqliteEvents.on sqlite-tag-updated')
-      mainWindow.webContents.send('sqlite-tag-updated', tag)
+    sqliteEvents.on('sqlite-tag-event', () => {
+      mainWindow.webContents.send('sqlite-tag-event')
     })
 
     // Handle errors

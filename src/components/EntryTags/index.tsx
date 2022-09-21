@@ -204,6 +204,7 @@ function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
       created_at: timeNow,
       modified_at: timeNow,
       revision: 0,
+      sync_status: 'pending_create',
     }
 
     const entryTagToCreate: EntryTag = {
@@ -214,6 +215,7 @@ function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
       created_at: timeNow,
       modified_at: timeNow,
       revision: 0,
+      sync_status: 'pending_create',
     }
     // Cache: save
     await cacheAddOrUpdateTag(tagToCreate)
@@ -223,25 +225,25 @@ function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
 
     // Supabase: save
     // TODO check what is returned
-    const { error } = await supabase.from<Tag>('tags').upsert(tagToCreate).single()
+    // const { error } = await supabase.from<Tag>('tags').upsert(tagToCreate).single()
 
-    // // TODO Make separate function for 2.
+    // TODO
     // 2. Add tag to this entry
     // Cache: save
-    await cacheAddOrUpdateEntryTag(entryTagToCreate)
+    // await cacheAddOrUpdateEntryTag(entryTagToCreate)
 
     // Save in local state
     addTag(uuid)
 
     // Supabase: save
     // TODO check what is returned
-    const { error: err2 } = await supabase
-      .from<EntryTag>('entries_tags')
-      .upsert(entryTagToCreate)
-      .single()
+    // const { error: err2 } = await supabase
+    //   .from<EntryTag>('entries_tags')
+    //   .upsert(entryTagToCreate)
+    //   .single()
 
     // Add to search results
-    setResults([...searchTag(name)])
+    // setResults([...searchTag(name)])
 
     generateRandomTagColor()
   }

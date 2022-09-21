@@ -23,6 +23,10 @@ function arrayEquals(a: Array<string>, b: Array<string>) {
   )
 }
 
+function isArrayEmpty(a: any[]) {
+  return Array.isArray(a) && !a.length
+}
+
 const countWords = (text: any) => {
   let res = []
   let str = text.replace(/[\t\n\r\.\?\!]/gm, ' ').split(' ')
@@ -98,4 +102,5 @@ export {
   isDev,
   isUnauthorized,
   randomInt,
+  isArrayEmpty,
 }

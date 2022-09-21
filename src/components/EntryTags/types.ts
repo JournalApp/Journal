@@ -1,6 +1,6 @@
 import { lightTheme, theme } from 'themes'
 
-type SyncStatus = 'synced' | 'pending_update' | 'pending_delete'
+type SyncStatus = 'synced' | 'pending_create' | 'pending_update' | 'pending_delete'
 
 type Tag = {
   id: string
