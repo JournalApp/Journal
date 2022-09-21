@@ -13,7 +13,34 @@ import { EventEmitter } from 'events'
 const sqliteEvents = new EventEmitter()
 
 var database: BetterSqlite3.Database
-var databaseReadOnly: BetterSqlite3.Database
+
+const getDB = () => {
+  if (!database) {
+    const dbName = isDev() ? 'cache-dev.db' : 'cache.db'
+    const dbPath = app.getPath('userData') + '/' + dbName
+    try {
+      database = new Database(dbPath, { fileMustExist: true })
+      logger('Database already exists')
+    } catch {
+      logger('No database found, creating new')
+      database = new Database(dbPath)
+      // Run Final Schema, no migrations needed
+      // TODO make it automatic
+      const appVersion = app.getVersion() as keyof typeof schemaVersions
+      const desiredSchemaVersion = schemaVersions[appVersion]
+      const migration = migrations.find((m) => m.finalVersion == desiredSchemaVersion)
+      logger(`Running final schema for version ${migration.finalVersion}`)
+      database.exec(migration.sqlFinal)
+      database.pragma(`user_version = ${migration.finalVersion}`)
+    }
+  }
+  return database
+}
+
+//////////////////////////
+// Migrations
+//////////////////////////
+
 const migrations = [
   { name: 'migration.0-to-1.sql', sql: migration_0to1, sqlFinal: schema_1, finalVersion: 1 },
   { name: 'migration.1-to-2.sql', sql: migration_1to2, sqlFinal: schema_2, finalVersion: 2 },
@@ -26,36 +53,6 @@ const schemaVersions = {
   '1.0.0-beta.4': 1,
   '1.0.0-beta.5': 1,
   '1.0.0-beta.6': 2,
-}
-
-const getDB = (type?: 'readOnly') => {
-  if (!database) {
-    const dbName = isDev() ? 'cache-dev.db' : 'cache.db'
-    const dbPath = app.getPath('userData') + '/' + dbName
-    try {
-      database = new Database(dbPath, { fileMustExist: true })
-      databaseReadOnly = new Database(dbPath, { readonly: true })
-      logger('Database already exists')
-    } catch {
-      logger('No database found, creating new')
-      database = new Database(dbPath)
-      databaseReadOnly = new Database(dbPath, { readonly: true })
-      // Run Final Schema, no migrations needed
-      // TODO make it automatic
-      const appVersion = app.getVersion() as keyof typeof schemaVersions
-      const desiredSchemaVersion = schemaVersions[appVersion]
-      const migration = migrations.find((m) => m.finalVersion == desiredSchemaVersion)
-      logger(`Running final schema for version ${migration.finalVersion}`)
-      database.exec(migration.sqlFinal)
-      database.pragma(`user_version = ${migration.finalVersion}`)
-    }
-  }
-  switch (type) {
-    case 'readOnly':
-      return databaseReadOnly
-    default:
-      return database
-  }
 }
 
 const runMigrations = () => {
@@ -92,6 +89,10 @@ const runMigrations = () => {
   })
 }
 
+//////////////////////////
+// Triggers
+//////////////////////////
+
 const addTriggers = () => {
   const db = getDB()
 
@@ -112,6 +113,10 @@ const addTriggers = () => {
   ).run()
 }
 
+//////////////////////////
+// DB Initlialization
+//////////////////////////
+
 try {
   getDB()
   runMigrations()
@@ -121,7 +126,9 @@ try {
   log.error(error)
 }
 
+//////////////////////////
 // Entries
+//////////////////////////
 
 ipcMain.handle('cache-add-user', async (event, id) => {
   logger('cache-add-user')
@@ -299,7 +306,9 @@ ipcMain.handle('cache-delete-all', async (event, user_id) => {
   }
 })
 
+//////////////////////////
 // Tags
+//////////////////////////
 
 ipcMain.handle('cache-add-or-update-tag', async (event, val: Tag) => {
   logger('cache-add-or-update-tag')
@@ -446,7 +455,9 @@ ipcMain.handle('cache-delete-tag', async (event, tag_id) => {
   }
 })
 
+//////////////////////////
 // Preferences
+//////////////////////////
 
 ipcMain.on('preferences-get-all', (event, user_id?) => {
   interface prefMap {
@@ -512,7 +523,9 @@ ipcMain.handle('preferences-delete-all', async (event, user_id) => {
   }
 })
 
+//////////////////////////
 // App (sync api)
+//////////////////////////
 
 ipcMain.on('app-get-key', (event, key) => {
   logger('app-get-key')
@@ -545,7 +558,9 @@ ipcMain.handle('app-set-key', async (event, set) => {
   }
 })
 
+//////////////////////////
 // User
+//////////////////////////
 
 ipcMain.handle('user-save-secret-key', async (event, user_id, secretKey) => {
   logger('user-save-secret-key')
@@ -578,7 +593,9 @@ ipcMain.handle('app-get-secret-key', async (event, user_id) => {
   }
 })
 
-// functions
+//////////////////////////
+// Functions
+//////////////////////////
 
 const getAppBounds = (defaultWidth: number, defaultHeight: number) => {
   try {
