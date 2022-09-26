@@ -50,7 +50,6 @@ const MARK_HAND_STRIKETHROUGH = 'hand-strikethrough'
 type EntryBlockProps = {
   entryDay: string
   invokeEntriesInitialFetch: React.MutableRefObject<any>
-  invokeEntriesTagsInitialFetch: React.MutableRefObject<any>
   entryDayCount?: number
   entriesObserver: IntersectionObserver
   cachedEntry?: any
@@ -76,7 +75,6 @@ const countEntryWords = (content: any) => {
 const Entry = ({
   entryDay,
   invokeEntriesInitialFetch,
-  invokeEntriesTagsInitialFetch,
   cachedEntry,
   setEntryHeight,
   entriesObserver,
@@ -99,7 +97,7 @@ const Entry = ({
   const debugValue = useRef(cachedEntry?.content ?? [])
   const editorRef = useRef(null)
   const { session, signOut, getSecretKey, serverTimeNow } = useUserContext()
-  const { editorsRef } = useEntriesContext()
+  const { editorsRef, invokeForceSaveEntry } = useEntriesContext()
   const saveTimer = useRef<NodeJS.Timeout | null>(null)
   const id = `${entryDay}-editor`
 
@@ -229,6 +227,14 @@ const Entry = ({
     }
   }
 
+  const forceSaveEntry = async () => {
+    const timeNow = serverTimeNow()
+    if (!needsSavingToServerModifiedAt) {
+      setNeedsSavingToServerModifiedAt(timeNow)
+    }
+    await saveEntry(entryDay, debugValue.current, timeNow)
+  }
+
   const initialFetch = async (entryModifiedAt: string) => {
     logger(`Initial fetch ${entryDay}`)
 
@@ -303,6 +309,7 @@ const Entry = ({
   useEffect(() => {
     logger(`Entry mounted`)
     invokeEntriesInitialFetch.current[entryDay] = initialFetch
+    invokeForceSaveEntry.current[entryDay] = forceSaveEntry
     entriesObserver.observe(editorRef.current)
 
     // Scroll to entry if Today
@@ -495,11 +502,7 @@ const Entry = ({
           <EditorRefAssign />
         </Plate>
       </MainWrapper>
-      <EntryAside
-        wordCount={wordCount}
-        date={entryDay}
-        invokeEntriesTagsInitialFetch={invokeEntriesTagsInitialFetch}
-      />
+      <EntryAside wordCount={wordCount} date={entryDay} />
     </Container>
   )
 }

@@ -110,10 +110,9 @@ const showDate = (day: any) => {
 type EntryAsideProps = {
   date: string
   wordCount: number
-  invokeEntriesTagsInitialFetch: React.MutableRefObject<any>
 }
 
-function EntryAside({ date, wordCount, invokeEntriesTagsInitialFetch }: EntryAsideProps) {
+function EntryAside({ date, wordCount }: EntryAsideProps) {
   const { setDaysCacheStreak, removeCachedDay, setDaysWithNoContent } = useEntriesContext()
   const [streak, setStreak] = useState(0)
   const lastWordCount = useRef(0)
@@ -151,7 +150,7 @@ function EntryAside({ date, wordCount, invokeEntriesTagsInitialFetch }: EntryAsi
         <AsideStickyContainer>
           <AsideMain>{showDate(date)}</AsideMain>
           <AsideMeta>
-            <EntryTags date={date} invokeEntriesTagsInitialFetch={invokeEntriesTagsInitialFetch} />
+            <EntryTags date={date} />
             {/* <AsideItem>{ordinal(streak)}</AsideItem>
             <AsideItemLabel>day</AsideItemLabel>
             <AsideItem>{wordCount}</AsideItem>

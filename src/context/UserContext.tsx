@@ -42,7 +42,7 @@ export function UserProvider({ children }: any) {
     setSession(supabase.auth.session())
     let id = supabase.auth.session()?.user?.id ?? ''
     if (id) {
-      window.electronAPI.cache.addUser(id)
+      window.electronAPI.user.add(id)
       window.electronAPI.app.setKey({ lastUser: id })
     }
 
@@ -66,7 +66,7 @@ export function UserProvider({ children }: any) {
       })
 
       if (_event == 'SIGNED_IN') {
-        window.electronAPI.cache.addUser(newSession.user.id)
+        window.electronAPI.user.add(newSession.user.id)
         window.electronAPI.app.setKey({ lastUser: newSession.user.id })
       }
     })

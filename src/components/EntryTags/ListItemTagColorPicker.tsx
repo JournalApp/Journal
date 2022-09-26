@@ -53,6 +53,7 @@ function ListItemTagColorPicker({
     tagEditColorRef.current = color
     setSelectedColor(color)
     logger('handleColorSelect')
+    toggleOpen(e)
   }
 
   const toggleOpen = (e: any) => {

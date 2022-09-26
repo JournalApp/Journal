@@ -209,6 +209,7 @@ const Calendar = () => {
     removeCachedDay,
     setDaysWithNoContent,
     editorsRef,
+    invokeForceSaveEntry,
   } = useEntriesContext()
   const [daysCache, setDaysCacheInternal] = useState([])
   const [daysWithNoContent, setDaysWithNoContentInternal] = useState<string[]>([])
@@ -259,7 +260,7 @@ const Calendar = () => {
     return false
   }
 
-  const scrollToDay = async (day: string) => {
+  const scrollToDayAndAdd = async (day: string) => {
     let element = document.getElementById(`${day}-entry`)
     if (element) {
       element.scrollIntoView()
@@ -289,8 +290,10 @@ const Calendar = () => {
           const editorRef = document.getElementById(`${day}-entry`)
           editorRef.scrollIntoView()
 
-          // Set focus
+          // Force save to supabase
+          invokeForceSaveEntry.current[day]()
 
+          // Set focus
           focusEditor(editor)
           select(editor, {
             path: [0, 0],
@@ -337,7 +340,7 @@ const Calendar = () => {
                               <DayButton
                                 key={`${today}-calendar`}
                                 id={`${today}-calendar`}
-                                onClick={() => scrollToDay(today)}
+                                onClick={() => scrollToDayAndAdd(today)}
                                 isToday={isToday(year, month, day)}
                                 hasEntry={hasEntry(today)}
                               >

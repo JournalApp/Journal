@@ -34,43 +34,32 @@ import {
   StyledScrollUpIcon,
 } from './styled'
 import { ListItemTag } from './ListItemTag'
-import { Tag, EntryTag } from './types'
+import { Tag, EntryTag, ListItemType } from './types'
 
 type EntryTagsProps = {
   date: string
-  invokeEntriesTagsInitialFetch: React.MutableRefObject<any>
 }
 
-function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
-  // const allTags = useRef<Tag[]>([
-  //   { id: '123', name: 'Vacation', color: 'pink' },
-  //   { id: '456', name: 'Work', color: 'green' },
-  //   { id: '789', name: '100daysofcodetoday', color: 'yellow' },
-  //   { id: 'qwe', name: 'Health', color: 'pink' },
-  //   { id: 'rty', name: 'School', color: 'lime' },
-  //   { id: 'uio', name: 'Summer', color: 'brown' },
-  //   { id: 'asd', name: 'Electronics', color: 'pink' },
-  //   { id: 'fgh', name: 'Books', color: 'yellow' },
-  //   { id: 'ghj', name: 'Family time', color: 'violet' },
-  //   { id: 'fgh1', name: 'Books1', color: 'yellow' },
-  //   { id: 'fgh2', name: 'Books2', color: 'green' },
-  //   { id: 'fgh3', name: 'Books3', color: 'yellow' },
-  //   { id: 'fgh4', name: 'Books4', color: 'navy' },
-  //   { id: 'fgh5', name: 'Books5', color: 'navy' },
-  // ])
-  const { userTags, cacheAddOrUpdateTag, cacheAddOrUpdateEntryTag } = useEntriesContext()
+function EntryTags({ date }: EntryTagsProps) {
+  const {
+    userTags,
+    userEntryTags,
+    cacheAddOrUpdateTag,
+    cacheAddOrUpdateEntryTag,
+    cacheUpdateEntryTagProperty,
+    cacheAddEntryIfNotExists,
+    invokeEntriesTagsInitialFetch,
+  } = useEntriesContext()
   const [editMode, setEditMode] = useState(false) // 1. edit mode
   const [tagIndexEditing, setTagIndexEditing] = useState<number | null>(null) // 3. Tag editing
   const [colorPickerOpen, setColorPickerOpen] = useState(false)
   const [term, setTerm] = useState<string>('')
-  const [tags, setTags] = useState<Tag[]>([
-    // userTags.current[0],
-    // userTags.current[1],
-    // userTags.current[2],
-  ])
+  const [entryTags, setEntryTags] = useState<EntryTag[]>(
+    userEntryTags.current.filter((t) => t.day == date).sort((a, b) => a.order_no - b.order_no)
+  )
   const [results, setResults] = useState<Tag[]>([])
   const listRef = useRef([])
-  const listIndexToId = useRef([])
+  const listIndexToItemType = useRef<ListItemType[]>([])
   const positioningRef = useRef(null)
   const tagWrapperRef = useRef<HTMLDivElement>(null)
   const tagEditingRef = useRef<HTMLDivElement>(null)
@@ -81,13 +70,15 @@ function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
   const [selectedIndex, setSelectedIndex] = useState(Math.max(0, listRef.current.indexOf(term)))
   const [popoverScrollDownArrow, setPopoverScrollDownArrow] = useState(false)
   const [popoverScrollUpArrow, setPopoverScrollUpArrow] = useState(false)
-  const { session, signOut, getSecretKey, serverTimeNow } = useUserContext()
+  const { session, serverTimeNow } = useUserContext()
 
-  const initialFetchEntryTags = async (entryModifiedAt: string) => {
-    logger(`initialFetchEntryTags ${entryModifiedAt}`)
-    // TODO
-    // compare witch cached Tags
-    // ferch from supabase if needed + update cache
+  const initialFetchEntryTags = async () => {
+    logger(`initialFetchEntryTags`)
+    setEntryTags(
+      userEntryTags.current
+        .filter((t) => t.day == date && userTags.current.some((ut) => ut.id == t.tag_id))
+        .sort((a, b) => a.order_no - b.order_no)
+    )
   }
 
   const sel = useFloating<HTMLInputElement>({
@@ -133,7 +124,7 @@ function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
     if (open) {
       sel.update()
     }
-  }, [tags, term, tagIndexEditing])
+  }, [entryTags, term, tagIndexEditing])
 
   useEffect(() => {
     if (open) {
@@ -173,20 +164,22 @@ function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
     return result
   }
 
-  const addTag = (tagId: string) => {
-    setTags((prev: Tag[]) => {
-      if (prev.find((el) => el.id == tagId)) {
-        logger(`- removing tag ${tagId}`)
-        return prev.filter((el) => el.id != tagId)
-      } else {
-        logger(`+ adding tag ${tagId}`)
-        return [...prev, userTags.current.find((t) => t.id == tagId)]
+  const addEntryTag = (entryTag: EntryTag) => {
+    setEntryTags((prev: EntryTag[]) => {
+      if (!prev.find((el) => el.tag_id == entryTag.tag_id)) {
+        logger(`+ adding tag ${entryTag.tag_id}`)
+        return [...prev, entryTag]
       }
     })
   }
 
-  const handleRemoveTag = (e: any, tagId: string) => {
-    addTag(tagId)
+  const removeEntryTag = (entryTagTagId: string) => {
+    setEntryTags((prev: EntryTag[]) => {
+      if (prev.find((el) => el.tag_id == entryTagTagId)) {
+        logger(`- removing tag ${entryTagTagId}`)
+        return prev.filter((el) => el.tag_id != entryTagTagId)
+      }
+    })
   }
 
   const handleCreateAndAddTag = async (e: any, name: string) => {
@@ -196,7 +189,7 @@ function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
     let uuid = self.crypto.randomUUID()
     logger(`Create tag: ${name} (${uuid})`)
     const timeNow = serverTimeNow()
-    const tagToCreate: Tag = {
+    const tagToInsert: Tag = {
       user_id: session.user.id,
       id: uuid,
       name,
@@ -204,57 +197,71 @@ function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
       created_at: timeNow,
       modified_at: timeNow,
       revision: 0,
-      sync_status: 'pending_create',
+      sync_status: 'pending_insert',
     }
 
-    const entryTagToCreate: EntryTag = {
+    const entryTagToInsert: EntryTag = {
       user_id: session.user.id,
       day: date,
       tag_id: uuid,
-      order_no: tags.length,
+      order_no: entryTags.length,
       created_at: timeNow,
       modified_at: timeNow,
       revision: 0,
-      sync_status: 'pending_create',
+      sync_status: 'pending_insert',
     }
     // Cache: save
-    await cacheAddOrUpdateTag(tagToCreate)
+    await cacheAddOrUpdateTag(tagToInsert)
 
     // Local state: add tag
     userTags.current = [...userTags.current, { id: uuid, name, color: newTagColor.current }]
 
-    // Supabase: save
-    // TODO check what is returned
-    // const { error } = await supabase.from<Tag>('tags').upsert(tagToCreate).single()
-
-    // TODO
     // 2. Add tag to this entry
     // Cache: save
-    // await cacheAddOrUpdateEntryTag(entryTagToCreate)
+    await cacheAddOrUpdateEntryTag(entryTagToInsert)
 
-    // Save in local state
-    addTag(uuid)
-
-    // Supabase: save
-    // TODO check what is returned
-    // const { error: err2 } = await supabase
-    //   .from<EntryTag>('entries_tags')
-    //   .upsert(entryTagToCreate)
-    //   .single()
+    // Local state: add entry tag
+    addEntryTag(entryTagToInsert)
 
     // Add to search results
-    // setResults([...searchTag(name)])
+    setResults([...searchTag(name)])
 
     generateRandomTagColor()
   }
 
-  const handleSelect = (e: any, tagId: string) => {
+  const handleSelect = async (e: any, item: ListItemType) => {
     e.preventDefault()
     if (activeIndex !== null) {
-      if (tagId == 'CREATE') {
+      if (item.type == 'action' && item.value == 'CREATE') {
         handleCreateAndAddTag(e, sel.refs.reference.current.value)
       } else {
-        addTag(tagId)
+        let selectedTag = { ...item.value }
+        if (entryTags.some((t) => t.tag_id == selectedTag.id)) {
+          logger(`- Removing ${selectedTag.name}`)
+          removeEntryTag(selectedTag.id)
+          cacheUpdateEntryTagProperty(
+            { sync_status: 'pending_delete' },
+            session.user.id,
+            date,
+            selectedTag.id
+          )
+        } else {
+          await cacheAddEntryIfNotExists(session.user.id, date)
+          logger(`+ Adding ${selectedTag.name}`)
+          const timeNow = serverTimeNow()
+          const entryTagToInsert: EntryTag = {
+            user_id: session.user.id,
+            day: date,
+            tag_id: selectedTag.id,
+            order_no: entryTags.length,
+            created_at: timeNow,
+            modified_at: timeNow,
+            revision: 0,
+            sync_status: 'pending_insert',
+          }
+          addEntryTag(entryTagToInsert)
+          cacheAddOrUpdateEntryTag(entryTagToInsert)
+        }
       }
       setSelectedIndex(activeIndex)
     }
@@ -263,14 +270,14 @@ function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
   const handleEnableEditMode = () => {
     logger('onClick StyledWrapper')
     if (!editMode) {
-      if (!tags.length) {
+      if (!entryTags.length) {
         setTimeout(() => sel.refs.reference.current.focus(), 100)
       }
       setEditMode(true)
     }
   }
 
-  const reorder = (list: Tag[], startIndex: any, endIndex: any) => {
+  const reorder = (list: EntryTag[], startIndex: any, endIndex: any) => {
     const result = Array.from(list)
     const [removed] = result.splice(startIndex, 1)
     result.splice(endIndex, 0, removed)
@@ -286,8 +293,16 @@ function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
     if (result.destination.index === result.source.index) {
       return
     }
-    const reordered = reorder(tags, result.source.index, result.destination.index)
-    setTags([...reordered])
+    const reordered = reorder(entryTags, result.source.index, result.destination.index)
+    logger(reordered)
+    setEntryTags([...reordered])
+    const timeNow = serverTimeNow()
+    reordered.map((entryTag, order_no) => {
+      const sync_status = 'pending_update'
+      const modified_at = timeNow
+      const { user_id, day, tag_id } = entryTag
+      cacheUpdateEntryTagProperty({ order_no, sync_status, modified_at }, user_id, day, tag_id)
+    })
   }
 
   const handleOnScroll = (event: any) => {
@@ -427,32 +442,37 @@ function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
             <Droppable droppableId={`${date}-droppable`}>
               {(provided) => (
                 <div ref={provided.innerRef} {...provided.droppableProps}>
-                  {tags.map((tag: Tag, i) => (
-                    <Draggable
-                      key={`${date}-${tag.id}`}
-                      draggableId={`${date}-${tag.id}`}
-                      index={i}
-                    >
-                      {(provided) => (
-                        <StyledTagHandle
-                          key={tag.id}
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
+                  {entryTags.map((entryTag: EntryTag, i) => {
+                    let tag = userTags.current.find((t) => t.id == entryTag.tag_id)
+                    return (
+                      tag && (
+                        <Draggable
+                          key={`${date}-${entryTag.tag_id}`}
+                          draggableId={`${date}-${entryTag.tag_id}`}
+                          index={i}
                         >
-                          <StyledTag editMode={editMode}>
-                            <StyledTagColorDot fillColor={theme(`color.tags.${tag.color}`)} />
-                            <StyledTagTitle>{tag.name}</StyledTagTitle>
-                            {editMode && (
-                              <StyledRemoveTagIcon
-                                onMouseUp={(e: any) => handleRemoveTag(e, tag.id)}
-                              />
-                            )}
-                          </StyledTag>
-                        </StyledTagHandle>
-                      )}
-                    </Draggable>
-                  ))}
+                          {(provided) => (
+                            <StyledTagHandle
+                              key={entryTag.tag_id}
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                            >
+                              <StyledTag editMode={editMode}>
+                                <StyledTagColorDot fillColor={theme(`color.tags.${tag.color}`)} />
+                                <StyledTagTitle>{tag.name}</StyledTagTitle>
+                                {editMode && (
+                                  <StyledRemoveTagIcon
+                                    onMouseUp={() => removeEntryTag(entryTag.tag_id)}
+                                  />
+                                )}
+                              </StyledTag>
+                            </StyledTagHandle>
+                          )}
+                        </Draggable>
+                      )
+                    )
+                  })}
                   {provided.placeholder}
                 </div>
               )}
@@ -461,14 +481,19 @@ function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
         </EditMode>
       )}
       {!editMode &&
-        tags.map((tag: Tag) => (
-          <StyledTagHandle key={`${date}-${tag.id}`}>
-            <StyledTag editMode={editMode}>
-              <StyledTagColorDot fillColor={theme(`color.tags.${tag.color}`)} />
-              <StyledTagTitle>{tag.name}</StyledTagTitle>
-            </StyledTag>
-          </StyledTagHandle>
-        ))}
+        entryTags.map((entryTag: EntryTag) => {
+          let tag = userTags.current.find((t) => t.id == entryTag.tag_id)
+          return (
+            tag && (
+              <StyledTagHandle key={`${date}-${entryTag.tag_id}`}>
+                <StyledTag editMode={editMode}>
+                  <StyledTagColorDot fillColor={theme(`color.tags.${tag.color}`)} />
+                  <StyledTagTitle>{tag.name}</StyledTagTitle>
+                </StyledTag>
+              </StyledTagHandle>
+            )
+          )
+        })}
       <StyledTagsInputWrapper ref={positioningRef} editMode={editMode}>
         <StyledPlusIcon name='Plus' />
         <StyledTagsInput
@@ -501,8 +526,8 @@ function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
               logger('onKeyDown')
               if (e.key === 'Enter') {
                 logger('Enter')
-                let id = listIndexToId.current[activeIndex]
-                handleSelect(e, id)
+                let item = listIndexToItemType.current[activeIndex]
+                handleSelect(e, item)
               }
             },
           })}
@@ -532,9 +557,9 @@ function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
                 i={i}
                 date={date}
                 tag={tag}
-                tags={tags}
+                entryTags={entryTags}
                 listRef={listRef}
-                listIndexToId={listIndexToId}
+                listIndexToItemType={listIndexToItemType}
                 tagEditingRef={tagEditingRef}
                 tagEditingInputRef={tagEditingInputRef}
                 activeIndex={activeIndex}
@@ -572,9 +597,9 @@ function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
                 i={i}
                 date={date}
                 tag={tag}
-                tags={tags}
+                entryTags={entryTags}
                 listRef={listRef}
-                listIndexToId={listIndexToId}
+                listIndexToItemType={listIndexToItemType}
                 tagEditingRef={tagEditingRef}
                 tagEditingInputRef={tagEditingInputRef}
                 activeIndex={activeIndex}
@@ -593,7 +618,7 @@ function EntryTags({ date, invokeEntriesTagsInitialFetch }: EntryTagsProps) {
               <StyledItem
                 ref={(node) => {
                   listRef.current[results.length] = node
-                  listIndexToId.current[results.length] = 'CREATE'
+                  listIndexToItemType.current[results.length] = { type: 'action', value: 'CREATE' }
                 }}
                 id={`${date}-CREATE`}
                 isActive={activeIndex == results.length}

@@ -1,6 +1,6 @@
 import { lightTheme, theme } from 'themes'
 
-type SyncStatus = 'synced' | 'pending_create' | 'pending_update' | 'pending_delete'
+type SyncStatus = 'synced' | 'pending_insert' | 'pending_update' | 'pending_delete'
 
 type Tag = {
   id: string
@@ -25,4 +25,27 @@ type EntryTag = {
   sync_status?: SyncStatus
 }
 
-export { Tag, EntryTag }
+type EntryTagProperty =
+  | { user_id: string }
+  | { day: string }
+  | { journal_id: number }
+  | { tag_id: string }
+  | { order_no: number }
+  | { created_at: string }
+  | { modified_at: string }
+  | { revision: number }
+  | { sync_status: SyncStatus }
+
+type ListItemActionType = {
+  type: 'action'
+  value: 'CREATE'
+}
+
+type ListItemTagType = {
+  type: 'tag'
+  value: Tag
+}
+
+type ListItemType = ListItemActionType | ListItemTagType
+
+export { Tag, EntryTag, EntryTagProperty, ListItemType }

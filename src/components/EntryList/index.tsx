@@ -106,7 +106,6 @@ function EntryList() {
     cacheUpdateEntryProperty,
   } = useEntriesContext()
   const invokeEntriesInitialFetch = useRef<any | null>({})
-  const invokeEntriesTagsInitialFetch = useRef<any | null>({})
   const entriesHeight: myref = {}
   const itemsRef = useRef<Array<HTMLDivElement | null>>([])
   const element = useRef<HTMLElement | null>(null)
@@ -169,11 +168,9 @@ function EntryList() {
       try {
         let { data: days, error } = await supabase
           .from('journals')
-          .select('day, modified_at, tags_last_modified_at:entries_tags(modified_at)')
+          .select('day, modified_at')
           .eq('user_id', session.user.id)
           .order('day', { ascending: true })
-          .order('modified_at', { ascending: false, foreignTable: 'entries_tags' })
-          .limit(1, { foreignTable: 'entries_tags' })
         logger('Days:')
         logger(days)
         if (error) {
@@ -185,7 +182,6 @@ function EntryList() {
         logger('✋ ✋ ✋ daysFetchInterval stop')
         if (daysFetchInterval.current) clearInterval(daysFetchInterval.current)
 
-        const entriesModifiedAt = days
         days = days.map((d) => (d = d.day.toString()))
 
         // Add Today to server Days
@@ -214,20 +210,6 @@ function EntryList() {
           logger('Cached days equal')
         }
         setInitialFetchDone(true)
-
-        // Trigger initialFetch on all Entries
-        logger(
-          `Trigger initialFetch on ${Object.keys(invokeEntriesInitialFetch.current).length} Entries`
-        )
-        for (const day in invokeEntriesInitialFetch.current) {
-          invokeEntriesInitialFetch.current[day](
-            entriesModifiedAt.find((item: any) => item.day == day)?.modified_at
-          )
-          invokeEntriesTagsInitialFetch.current[day](
-            entriesModifiedAt.find((item: any) => item.day == day)?.tags_last_modified_at[0]
-              ?.modified_at
-          )
-        }
       } catch (err) {
         logger(err)
       }
@@ -248,7 +230,6 @@ function EntryList() {
               key={day}
               entryDay={day}
               invokeEntriesInitialFetch={invokeEntriesInitialFetch}
-              invokeEntriesTagsInitialFetch={invokeEntriesTagsInitialFetch}
               entriesObserver={entriesObserver}
               cachedEntry={initialCache.current.find((item: any) => item.day == day)}
               setEntryHeight={setEntryHeight}

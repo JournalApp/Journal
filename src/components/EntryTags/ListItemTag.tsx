@@ -17,21 +17,9 @@ import {
   StyledCancelIcon,
   StyledTrashIcon,
 } from './styled'
-import {
-  useFloating,
-  offset,
-  useListNavigation,
-  useInteractions,
-  useDismiss,
-  FloatingFocusManager,
-  useFocus,
-  useFloatingNodeId,
-  FloatingNode,
-  FloatingPortal,
-} from '@floating-ui/react-dom-interactions'
 import { useEntriesContext, useUserContext } from 'context'
 import { ListItemTagColorPicker } from './ListItemTagColorPicker'
-import { Tag } from './types'
+import { Tag, EntryTag, EntryTagProperty, ListItemType } from './types'
 
 const StyledWrapper = styled.div``
 
@@ -39,9 +27,9 @@ type ListItemTagProps = {
   i: number
   date: string
   tag: Tag
-  tags: Tag[]
+  entryTags: EntryTag[]
   listRef: React.MutableRefObject<any[]>
-  listIndexToId: React.MutableRefObject<any[]>
+  listIndexToItemType: React.MutableRefObject<ListItemType[]>
   tagEditingRef: React.MutableRefObject<HTMLDivElement>
   tagEditingInputRef: React.MutableRefObject<HTMLInputElement>
   activeIndex: number
@@ -49,7 +37,7 @@ type ListItemTagProps = {
   setTagIndexEditing: any
   colorPickerOpen: boolean
   setColorPickerOpen: any
-  handleSelect: (e: any, tagId: string) => void
+  handleSelect: (e: any, item: ListItemType) => void
   tagsInputRef: React.MutableRefObject<HTMLInputElement>
   getItemProps: any
 }
@@ -58,9 +46,9 @@ function ListItemTag({
   i,
   date,
   tag,
-  tags,
+  entryTags,
   listRef,
-  listIndexToId,
+  listIndexToItemType,
   tagEditingRef,
   tagEditingInputRef,
   activeIndex,
@@ -74,7 +62,8 @@ function ListItemTag({
 }: ListItemTagProps) {
   const editButtonRef = useRef<HTMLInputElement>(null)
   const tagEditColorRef = useRef(tag.color)
-  const { userTags, cacheAddOrUpdateTag, cacheDeleteTag } = useEntriesContext()
+  const { userTags, cacheAddOrUpdateTag, cacheUpdateTagProperty, triggerRerenderEntriesWithTag } =
+    useEntriesContext()
   const { serverTimeNow } = useUserContext()
   // const inputRef = useRef<HTMLInputElement>(null)
 
@@ -87,12 +76,15 @@ function ListItemTag({
 
   const updateTag = () => {
     exitTagEditing()
-    tag.name = tagEditingInputRef.current.value
-    tag.modified_at = serverTimeNow()
-    tag.sync_status = 'pending_update'
-    tag.color = tagEditColorRef.current
-    cacheAddOrUpdateTag(tag)
-    // TODO trigger react state update, so this tag is rerenderd in all entries
+    const name = tagEditingInputRef.current.value
+    const modified_at = serverTimeNow()
+    const sync_status = 'pending_update'
+    const color = tagEditColorRef.current
+    cacheUpdateTagProperty({ name, modified_at, sync_status, color }, tag.id)
+    const i = userTags.current.findIndex((t) => t.id == tag.id)
+    userTags.current[i].name = name
+    userTags.current[i].color = color
+    triggerRerenderEntriesWithTag(tag.id)
   }
 
   const deleteTag = () => {
@@ -103,11 +95,11 @@ function ListItemTag({
     userTags.current = userTags.current.filter((t) => {
       return t.id != tag.id
     })
-    // TODO trigger react state update, so this tag is rerenderd in all entries
+    triggerRerenderEntriesWithTag(tag.id)
   }
 
   let isEditingOtherTag = tagIndexEditing != null && tagIndexEditing != i
-  let isInTags = !!tags.find((t) => t.id == tag.id)
+  let isInTags = !!entryTags.find((t) => t.tag_id == tag.id)
   return (
     <>
       {tagIndexEditing == i && (
@@ -138,7 +130,7 @@ function ListItemTag({
         id={`${date}-${tag.name}-${tag.id}`}
         ref={(node) => {
           listRef.current[i] = node
-          listIndexToId.current[i] = tag.id
+          listIndexToItemType.current[i] = { type: 'tag', value: tag }
         }}
         isActive={activeIndex == i}
         isDisabled={isEditingOtherTag}
@@ -157,7 +149,7 @@ function ListItemTag({
               }, 100)
               logger('onMouseDown StyledEditTag')
             } else {
-              handleSelect(e, tag.id)
+              handleSelect(e, { type: 'tag', value: tag })
             }
           },
           onFocus() {
