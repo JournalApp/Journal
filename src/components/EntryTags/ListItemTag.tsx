@@ -70,16 +70,17 @@ function ListItemTag({
   // logger('ListItemTag rerender')
 
   const exitTagEditing = () => {
+    tagEditColorRef.current = tag.color
     tagsInputRef.current.focus()
     setTagIndexEditing(null)
   }
 
   const updateTag = () => {
-    exitTagEditing()
     const name = tagEditingInputRef.current.value
     const modified_at = serverTimeNow()
     const sync_status = 'pending_update'
     const color = tagEditColorRef.current
+    exitTagEditing()
     cacheUpdateTagProperty({ name, modified_at, sync_status, color }, tag.id)
     const i = userTags.current.findIndex((t) => t.id == tag.id)
     userTags.current[i].name = name
