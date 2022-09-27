@@ -89,9 +89,11 @@ function ListItemTag({
 
   const deleteTag = () => {
     exitTagEditing()
-    tag.sync_status = 'pending_delete'
-    tag.modified_at = serverTimeNow()
-    cacheAddOrUpdateTag(tag)
+    const modified_at = serverTimeNow()
+    const sync_status = 'pending_delete'
+    tag.sync_status = sync_status
+    tag.modified_at = modified_at
+    cacheUpdateTagProperty({ modified_at, sync_status }, tag.id)
     userTags.current = userTags.current.filter((t) => {
       return t.id != tag.id
     })

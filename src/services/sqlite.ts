@@ -343,6 +343,19 @@ ipcMain.handle('cache-update-tag-property', async (event, set, tag_id) => {
   try {
     const db = getDB()
 
+    // Prevent overring sync_status of 'pening_insert' with 'pending_update'
+    // @ts-ignore
+    if (set.sync_status == 'pending_update') {
+      const tag = db
+        .prepare(`SELECT sync_status FROM tags WHERE id = @tag_id`)
+        .get({ tag_id }) as Tag
+      if (tag.sync_status == 'pending_insert') {
+        logger(`Not changing sync_status to 'pending_update' because it's 'pending_insert'`)
+        // @ts-ignore
+        set.sync_status = 'pending_insert'
+      }
+    }
+
     let expr = ''
     for (const property in set) {
       expr += `${property} = @${property}, `
@@ -412,8 +425,7 @@ ipcMain.handle('cache-get-pending-delete-tags', async (event, user_id) => {
       "SELECT * FROM tags WHERE user_id = @user_id AND sync_status = 'pending_delete'"
     )
     const result = stmt.all({ user_id })
-    logger('Pending delete tags:')
-    logger(result)
+    logger(`Pending delete tags: ${result.length}`)
     return result
   } catch (error) {
     logger(`error`)
@@ -430,8 +442,7 @@ ipcMain.handle('cache-get-pending-update-tags', async (event, user_id) => {
       "SELECT * FROM tags WHERE user_id = @user_id AND sync_status = 'pending_update'"
     )
     const result = stmt.all({ user_id })
-    logger('Pending update tags:')
-    logger(result)
+    logger(`Pending update tags: ${result.length}`)
     return result
   } catch (error) {
     logger(`error`)
@@ -448,8 +459,7 @@ ipcMain.handle('cache-get-pending-insert-tags', async (event, user_id) => {
       "SELECT * FROM tags WHERE user_id = @user_id AND sync_status = 'pending_insert'"
     )
     const result = stmt.all({ user_id })
-    logger('Pending insert tags:')
-    logger(result)
+    logger(`Pending insert tags: ${result.length}`)
     return result
   } catch (error) {
     logger(`error`)
@@ -512,8 +522,7 @@ ipcMain.handle('cache-get-pending-insert-entry-tags', async (event, user_id) => 
       "SELECT * FROM entries_tags WHERE user_id = @user_id AND sync_status = 'pending_insert'"
     )
     const result = stmt.all({ user_id })
-    logger('Pending insert entry tags:')
-    logger(result)
+    logger(`Pending insert entry tags: ${result.length}`)
     return result
   } catch (error) {
     logger(`error`)
@@ -528,6 +537,21 @@ ipcMain.handle(
     logger('cache-update-entry-tag-property')
     try {
       const db = getDB()
+
+      // Prevent overring sync_status of 'pening_insert' with 'pending_update'
+      // @ts-ignore
+      if (set.sync_status == 'pending_update') {
+        const entryTag = db
+          .prepare(
+            `SELECT sync_status FROM entries_tags WHERE user_id = @user_id AND day = @day AND tag_id = @tag_id`
+          )
+          .get({ user_id, day, tag_id }) as EntryTag
+        if (entryTag.sync_status == 'pending_insert') {
+          logger(`Not changing sync_status to 'pending_update' because it's 'pending_insert'`)
+          // @ts-ignore
+          set.sync_status = 'pending_insert'
+        }
+      }
 
       let expr = ''
       for (const property in set) {
@@ -555,8 +579,7 @@ ipcMain.handle('cache-get-pending-delete-entry-tags', async (event, user_id) => 
       "SELECT * FROM entries_tags WHERE user_id = @user_id AND sync_status = 'pending_delete'"
     )
     const result = stmt.all({ user_id })
-    logger('Pending delete entry tags:')
-    logger(result)
+    logger(`Pending delete entry tags: ${result.length}`)
     return result
   } catch (error) {
     logger(`error`)
@@ -589,8 +612,7 @@ ipcMain.handle('cache-get-pending-update-entry-tags', async (event, user_id) => 
       "SELECT * FROM entries_tags WHERE user_id = @user_id AND sync_status = 'pending_update'"
     )
     const result = stmt.all({ user_id })
-    logger('Pending update entry tags:')
-    logger(result)
+    logger(`Pending update entry tags: ${result.length}`)
     return result
   } catch (error) {
     logger(`error`)

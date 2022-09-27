@@ -168,6 +168,10 @@ function EntryTags({ date }: EntryTagsProps) {
     setEntryTags((prev: EntryTag[]) => {
       if (!prev.find((el) => el.tag_id == entryTag.tag_id)) {
         logger(`+ adding tag ${entryTag.tag_id}`)
+        // Add to userEntryTags.current
+        userEntryTags.current.push(entryTag)
+        // Add to SQLite
+        cacheAddOrUpdateEntryTag(entryTag)
         return [...prev, entryTag]
       }
     })
@@ -177,6 +181,18 @@ function EntryTags({ date }: EntryTagsProps) {
     setEntryTags((prev: EntryTag[]) => {
       if (prev.find((el) => el.tag_id == entryTagTagId)) {
         logger(`- removing tag ${entryTagTagId}`)
+        // Remove from userEntryTags.current
+        const i = userEntryTags.current.findIndex(
+          (t) => t.tag_id == entryTagTagId && t.day == date && t.user_id == session.user.id
+        )
+        userEntryTags.current.splice(i, 1)
+        // Remove SQLite
+        cacheUpdateEntryTagProperty(
+          { sync_status: 'pending_delete' },
+          session.user.id,
+          date,
+          entryTagTagId
+        )
         return prev.filter((el) => el.tag_id != entryTagTagId)
       }
     })
@@ -239,12 +255,6 @@ function EntryTags({ date }: EntryTagsProps) {
         if (entryTags.some((t) => t.tag_id == selectedTag.id)) {
           logger(`- Removing ${selectedTag.name}`)
           removeEntryTag(selectedTag.id)
-          cacheUpdateEntryTagProperty(
-            { sync_status: 'pending_delete' },
-            session.user.id,
-            date,
-            selectedTag.id
-          )
         } else {
           await cacheAddEntryIfNotExists(session.user.id, date)
           logger(`+ Adding ${selectedTag.name}`)
@@ -260,7 +270,6 @@ function EntryTags({ date }: EntryTagsProps) {
             sync_status: 'pending_insert',
           }
           addEntryTag(entryTagToInsert)
-          cacheAddOrUpdateEntryTag(entryTagToInsert)
         }
       }
       setSelectedIndex(activeIndex)
@@ -302,6 +311,10 @@ function EntryTags({ date }: EntryTagsProps) {
       const modified_at = timeNow
       const { user_id, day, tag_id } = entryTag
       cacheUpdateEntryTagProperty({ order_no, sync_status, modified_at }, user_id, day, tag_id)
+      const i = userEntryTags.current.findIndex(
+        (t) => t.tag_id == entryTag.tag_id && t.day == date && t.user_id == session.user.id
+      )
+      userEntryTags.current[i].order_no = order_no
     })
   }
 
@@ -373,7 +386,6 @@ function EntryTags({ date }: EntryTagsProps) {
 
       if (!tagWrapperRef.current.contains(e.target)) {
         logger('🖱 click outside tagWrapper')
-        logger(e.target)
         setColorPickerOpen(false)
         setTagIndexEditing(null)
         setOpen(false)

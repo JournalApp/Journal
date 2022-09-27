@@ -578,10 +578,18 @@ export function EntriesProvider({ children }: any) {
       await window.electronAPI.cache.deleteEntry({ user_id, day })
     }
 
+    // Remove entryTags associated with this day
+    const entryTagsToDelete = await window.electronAPI.cache.getEntryTagsOnDay(user_id, day)
+    Promise.all(
+      entryTagsToDelete.map(async (et) => {
+        await window.electronAPI.cache.deleteEntryTag(user_id, et.tag_id, day)
+      })
+    )
+    await cacheFetchEntryTags()
+
     let days = await window.electronAPI.cache.getDays(user_id)
     initialCache.current = initialCache.current.filter((item) => item.day !== day)
     setDaysCache([...days])
-    // setDaysCache((prev) => prev.filter((d) => d !== day))
     logger(`Removed day ${day}`)
 
     window.electronAPI.capture({
