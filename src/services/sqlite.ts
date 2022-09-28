@@ -376,7 +376,7 @@ ipcMain.handle('cache-get-tags', async (event, user_id) => {
   try {
     const db = getDB()
     const stmt = db.prepare(
-      "SELECT * FROM tags WHERE user_id = @user_id AND sync_status != 'pending_delete'"
+      "SELECT * FROM tags WHERE user_id = @user_id AND sync_status != 'pending_delete' ORDER BY modified_at DESC"
     )
     const result = stmt.all({ user_id }) as any[]
     return result

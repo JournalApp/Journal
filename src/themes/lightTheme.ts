@@ -47,6 +47,9 @@ const lightTheme = {
       get surface0() {
         return this.surface + alphaToHex(0)
       },
+      get surface80() {
+        return this.surface + alphaToHex(80)
+      },
       hover: lightPalette.neutral[30],
       border: lightPalette.neutral[30],
     },
@@ -73,6 +76,9 @@ const lightTheme = {
     },
     error: {
       main: lightPalette.red[100],
+      get main20() {
+        return this.main + alphaToHex(20)
+      },
     },
     highlight: {
       main: lightPalette.highlight['main'],

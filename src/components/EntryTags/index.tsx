@@ -230,7 +230,7 @@ function EntryTags({ date }: EntryTagsProps) {
     await cacheAddOrUpdateTag(tagToInsert)
 
     // Local state: add tag
-    userTags.current = [...userTags.current, { id: uuid, name, color: newTagColor.current }]
+    userTags.current = [{ id: uuid, name, color: newTagColor.current }, ...userTags.current]
 
     // 2. Add tag to this entry
     // Cache: save
@@ -249,6 +249,7 @@ function EntryTags({ date }: EntryTagsProps) {
     e.preventDefault()
     if (activeIndex !== null) {
       if (item.type == 'action' && item.value == 'CREATE') {
+        await cacheAddEntryIfNotExists(session.user.id, date)
         handleCreateAndAddTag(e, sel.refs.reference.current.value)
       } else {
         let selectedTag = { ...item.value }

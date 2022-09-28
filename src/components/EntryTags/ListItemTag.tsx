@@ -20,6 +20,7 @@ import {
 import { useEntriesContext, useUserContext } from 'context'
 import { ListItemTagColorPicker } from './ListItemTagColorPicker'
 import { Tag, EntryTag, EntryTagProperty, ListItemType } from './types'
+import { ConfirmationModal } from './ConfirmationModal'
 
 const StyledWrapper = styled.div``
 
@@ -123,7 +124,9 @@ function ListItemTag({
             tagEditColorRef={tagEditColorRef}
           />
           <StyledEditTagButtonsContainer>
-            <StyledTrashIcon onClick={() => deleteTag()} />
+            <ConfirmationModal action={deleteTag}>
+              <StyledTrashIcon />
+            </ConfirmationModal>
             <StyledCancelIcon onClick={() => exitTagEditing()} />
             <StyledOKIcon onClick={() => updateTag()} />
           </StyledEditTagButtonsContainer>
