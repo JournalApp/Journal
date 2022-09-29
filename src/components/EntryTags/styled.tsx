@@ -339,7 +339,7 @@ const StyledTag = styled.div<TagProps>`
   align-items: center;
   padding: 0px 8px;
   gap: 4px;
-  background-color: ${(props) => (props.editMode ? theme('color.pure') : theme('color.pure40'))};
+  background-color: ${(props) => (props.editMode ? theme('color.pure') : theme('color.pure', 0.4))};
   border-radius: 100px;
 `
 

@@ -19,8 +19,11 @@ type RecursiveKeyOfHandleValue<TValue, Text extends string> = TValue extends any
 type LightThemeItemKey = RecursiveKeyOf<typeof lightTheme>
 type BaseThemeItemKey = RecursiveKeyOf<typeof baseTheme>
 
-const theme = (itemKey: LightThemeItemKey | BaseThemeItemKey) => {
+const theme = (itemKey: LightThemeItemKey | BaseThemeItemKey, alpha = 1) => {
   const cssVar = itemKey.split('.').reduce((acc, key) => acc + '-' + key, '-')
+  if (itemKey.split('.')[0] == 'color') {
+    return `rgba(var(${cssVar}), ${alpha})`
+  }
   return `var(${cssVar})`
 }
 

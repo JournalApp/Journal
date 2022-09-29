@@ -337,10 +337,10 @@ const Menu = () => {
               }}
             >
               <ToggleButton value='light' padding='8px' disabled={colorTheme == 'light'}>
-                <ColorSwatch fillColor={lightTheme.color.primary.surface} />
+                <ColorSwatch fillColor={`rgba(${lightTheme.color.primary.surface},1)`} />
               </ToggleButton>
               <ToggleButton value='dark' padding='8px' disabled={colorTheme == 'dark'}>
-                <ColorSwatch fillColor={darkTheme.color.primary.surface} />
+                <ColorSwatch fillColor={`rgba(${darkTheme.color.primary.surface},1)`} />
               </ToggleButton>
             </ToggleGroup>
             <HorizontalDivider />

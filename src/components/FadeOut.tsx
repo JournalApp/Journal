@@ -14,7 +14,7 @@ const FadeTop = styled.div`
     180deg,
     ${theme('color.primary.surface')} 0%,
     ${theme('color.primary.surface')} 30%,
-    ${theme('color.primary.surface0')} 100%
+    ${theme('color.primary.surface', 0)} 100%
   );
 `
 // background: linear-gradient(180deg, #e0e0e0 0%, #e0e0e0 35%, rgba(224, 224, 224, 0) 100%);
@@ -31,7 +31,7 @@ const FadeDown = styled.div`
     0deg,
     ${theme('color.primary.surface')} 0%,
     ${theme('color.primary.surface')} 30%,
-    ${theme('color.primary.surface0')} 100%
+    ${theme('color.primary.surface', 0)} 100%
   );
 `
 

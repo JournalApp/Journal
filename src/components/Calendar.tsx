@@ -149,7 +149,7 @@ const FadeTop = styled.div<ContainerProps>`
     180deg,
     ${theme('color.primary.surface')} 0%,
     ${theme('color.primary.surface')} 35%,
-    ${theme('color.primary.surface0')} 100%
+    ${theme('color.primary.surface', 0)} 100%
   );
 `
 
@@ -167,7 +167,7 @@ const FadeDown = styled.div<ContainerProps>`
     0deg,
     ${theme('color.primary.surface')} 0%,
     ${theme('color.primary.surface')} 20%,
-    ${theme('color.primary.surface0')} 100%
+    ${theme('color.primary.surface', 0)} 100%
   );
 `
 

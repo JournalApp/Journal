@@ -3,53 +3,44 @@ import beginningImage from '../../assets/images/beginning-dark@2x.png'
 
 const darkPalette = {
   neutral: {
-    '0': '#000000',
-    '10': '#3A3A3A', // popper
-    '15': '#464646', // hover, inverted, toggle group bg
-    '20': '#4C4C4C', // hover on inverted, border
-    '25': '#252525', // bg
-    '30': '#383838', // secondary surface
-    '35': '#4A4A4A', // secondary hover
-    '40': '#8F8F8F', // Not active toggle in Appearance toolbar
-    '100': '#E3E3E3', // text
+    '0': '0, 0, 0', //'#000000',
+    '10': '58, 58, 58', //'#3A3A3A', // popper
+    '15': '70, 70, 70', //'#464646', // hover, inverted, toggle group bg
+    '20': '76, 76, 76', //'#4C4C4C', // hover on inverted, border
+    '25': '37, 37, 37', //'#252525', // bg
+    '30': '56, 56, 56', //'#383838', // secondary surface
+    '35': '74, 74, 74', //'#4A4A4A', // secondary hover
+    '40': '143, 143, 143', //'#8F8F8F', // Not active toggle in Appearance toolbar
+    '100': '227, 227, 227', //'#E3E3E3', // text
   },
   red: {
-    '100': '#FF5B5B',
+    '100': '255, 91, 91', //'#FF5B5B',
   },
   highlight: {
-    main: '#F0F59B',
-    surface: '#595530',
+    main: '240, 245, 155', //'#F0F59B',
+    surface: '89, 85, 48', //'#595530',
   },
   tags: {
-    pink: '#F05BCA',
-    green: '#10AA99',
-    orange: '#FF7B49',
-    yellow: '#FFCC5E',
-    blue: '#41AAEB',
-    violet: '#C08ADF',
-    lime: '#84DD5A',
-    red: '#FF535D',
-    brown: '#845D49',
-    navy: '#5667DA',
+    pink: '240, 91, 202', //'#F05BCA',
+    green: '16, 170, 153', //'#10AA99',
+    orange: '255, 123, 73', //'#FF7B49',
+    yellow: '255, 204, 94', //'#FFCC5E',
+    blue: '65, 170, 235', //'#41AAEB',
+    violet: '192, 138, 223', //'#C08ADF',
+    lime: '132, 221, 90', //'#84DD5A',
+    red: '255, 83, 93', //'#FF535D',
+    brown: '132, 93, 73', //'#845D49',
+    navy: '86, 103, 218', //'#5667DA',
   },
 }
 
 const darkTheme = {
   color: {
     pure: darkPalette.neutral[0],
-    get pure40() {
-      return this.pure + alphaToHex(40)
-    },
     primary: {
       // base colors
       main: darkPalette.neutral[100],
       surface: darkPalette.neutral[25],
-      get surface0() {
-        return this.surface + alphaToHex(0)
-      },
-      get surface80() {
-        return this.surface + alphaToHex(80)
-      },
       hover: darkPalette.neutral[30],
       border: darkPalette.neutral[30],
     },
@@ -76,9 +67,6 @@ const darkTheme = {
     },
     error: {
       main: darkPalette.red[100],
-      get main20() {
-        return this.main + alphaToHex(20)
-      },
     },
     highlight: {
       main: darkPalette.highlight['main'],

@@ -3,53 +3,44 @@ import beginningImage from '../../assets/images/beginning-light@2x.png'
 
 const lightPalette = {
   neutral: {
-    '0': '#FFFFFF',
-    '10': '#F9F9F9', // popper
-    '15': '#F3F3F3', // hover, inverted, toggle group bg
-    '20': '#E9E9E9', // hover on inverted, border
-    '25': '#E0E0E0', // bg
-    '30': '#CFCFCF', // secondary surface
-    '35': '#B7B7B7', // secondary hover
-    '40': '#9A9A9A', // Not active toggle in Appearance toolbar
-    '100': '#3A3A3A', // text
+    '0': '255, 255, 255',
+    '10': '249, 249, 249', //'#F9F9F9', // popper
+    '15': '243, 243, 243', //'#F3F3F3', // hover, inverted, toggle group bg
+    '20': '233, 233, 233', //'#E9E9E9', // hover on inverted, border
+    '25': '224, 224, 224', //'#E0E0E0', // bg
+    '30': '207, 207, 207', //'#CFCFCF', // secondary surface
+    '35': '183, 183, 183', //'#B7B7B7', // secondary hover
+    '40': '154, 154, 154', //'#9A9A9A', // Not active toggle in Appearance toolbar
+    '100': '58, 58, 58', //'#3A3A3A', // text
   },
   red: {
-    '100': '#EA2F2F',
+    '100': '234, 47, 47',
   },
   highlight: {
-    main: '#104B00',
-    surface: '#EDF56E',
+    main: '16, 75, 0', //'#104B00',
+    surface: '237, 245, 110', //'#EDF56E',
   },
   tags: {
-    pink: '#F05BCA',
-    green: '#10AA99',
-    orange: '#FF7B49',
-    yellow: '#FFCC5E',
-    blue: '#41AAEB',
-    violet: '#C08ADF',
-    lime: '#84DD5A',
-    red: '#FF535D',
-    brown: '#845D49',
-    navy: '#5667DA',
+    pink: '240, 91, 202', //'#F05BCA',
+    green: '16, 170, 153', //'#10AA99',
+    orange: '255, 123, 73', //'#FF7B49',
+    yellow: '255, 204, 94', //'#FFCC5E',
+    blue: '65, 170, 235', //'#41AAEB',
+    violet: '192, 138, 223', //'#C08ADF',
+    lime: '132, 221, 90', //'#84DD5A',
+    red: '255, 83, 93', //'#FF535D',
+    brown: '132, 93, 73', //'#845D49',
+    navy: '86, 103, 218', //'#5667DA',
   },
 }
 
 const lightTheme = {
   color: {
     pure: lightPalette.neutral[0],
-    get pure40() {
-      return this.pure + alphaToHex(40)
-    },
     primary: {
       // base colors
       main: lightPalette.neutral[100],
       surface: lightPalette.neutral[25],
-      get surface0() {
-        return this.surface + alphaToHex(0)
-      },
-      get surface80() {
-        return this.surface + alphaToHex(80)
-      },
       hover: lightPalette.neutral[30],
       border: lightPalette.neutral[30],
     },
@@ -76,9 +67,6 @@ const lightTheme = {
     },
     error: {
       main: lightPalette.red[100],
-      get main20() {
-        return this.main + alphaToHex(20)
-      },
     },
     highlight: {
       main: lightPalette.highlight['main'],

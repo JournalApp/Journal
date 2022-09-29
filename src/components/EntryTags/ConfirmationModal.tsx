@@ -9,7 +9,7 @@ const Overlay = styled(Dialog.Overlay)`
   right: 0;
   bottom: 0;
   left: 0;
-  background-color: ${theme('color.primary.surface80')};
+  background-color: ${theme('color.primary.surface', 0.8)};
   display: grid;
   place-items: center;
 `
@@ -86,7 +86,7 @@ const Action = styled.button`
   cursor: pointer;
   outline: 0;
   &:hover {
-    box-shadow: 0 0 0 3px ${theme('color.error.main20')};
+    box-shadow: 0 0 0 3px ${theme('color.error.main', 0.2)};
     transition: box-shadow ${theme('animation.time.normal')} ease;
   }
 `
