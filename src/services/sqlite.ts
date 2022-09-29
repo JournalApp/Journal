@@ -166,6 +166,10 @@ ipcMain.handle('cache-delete-entry', async (event, query) => {
     const { user_id, day } = query
     const stmt = db.prepare('DELETE FROM journals WHERE user_id = @user_id AND day = @day')
     const result = stmt.run({ user_id, day })
+    db.prepare('DELETE FROM entries_tags WHERE user_id = @user_id AND day = @day').run({
+      user_id,
+      day,
+    })
     return result
   } catch (error) {
     logger(`error`)
@@ -291,8 +295,9 @@ ipcMain.handle('cache-delete-all', async (event, user_id) => {
   logger('cache-delete-all')
   try {
     const db = getDB()
-    const stmt = db.prepare('DELETE FROM journals WHERE user_id = @user_id')
-    return stmt.run({ user_id })
+    db.prepare('DELETE FROM journals WHERE user_id = @user_id').run({ user_id })
+    db.prepare('DELETE FROM journals_catalog WHERE user_id = @user_id').run({ user_id })
+    db.prepare('DELETE FROM entries_tags WHERE user_id = @user_id').run({ user_id })
   } catch (error) {
     logger(`error`)
     logger(error)

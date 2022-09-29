@@ -32,6 +32,7 @@ import {
   StyledRemoveTagIcon,
   StyledScrollDownIcon,
   StyledScrollUpIcon,
+  StyledNoTags,
 } from './styled'
 import { ListItemTag } from './ListItemTag'
 import { Tag, EntryTag, ListItemType } from './types'
@@ -72,13 +73,16 @@ function EntryTags({ date }: EntryTagsProps) {
   const [popoverScrollUpArrow, setPopoverScrollUpArrow] = useState(false)
   const { session, serverTimeNow } = useUserContext()
 
-  const initialFetchEntryTags = async () => {
-    logger(`initialFetchEntryTags`)
+  const rerenderTags = async () => {
+    logger(`rerenderTags`)
     setEntryTags(
       userEntryTags.current
         .filter((t) => t.day == date && userTags.current.some((ut) => ut.id == t.tag_id))
         .sort((a, b) => a.order_no - b.order_no)
     )
+    if (open && term) {
+      setResults([...searchTag(term)])
+    }
   }
 
   const sel = useFloating<HTMLInputElement>({
@@ -95,7 +99,7 @@ function EntryTags({ date }: EntryTagsProps) {
   }
 
   useEffect(() => {
-    invokeEntriesTagsInitialFetch.current[date] = initialFetchEntryTags
+    invokeEntriesTagsInitialFetch.current[date] = rerenderTags
   }, [])
 
   useEffect(() => {
@@ -513,7 +517,7 @@ function EntryTags({ date }: EntryTagsProps) {
           editMode={editMode}
           onChange={handleChange}
           tabIndex={-1}
-          maxLength={50}
+          maxLength={80}
           placeholder='Tag'
           {...getReferenceProps({
             ref: sel.reference,
@@ -564,27 +568,31 @@ function EntryTags({ date }: EntryTagsProps) {
               isVisible={popoverScrollUpArrow}
               onMouseDown={(e: any) => handleScroll(e, 'up')}
             />
-            {userTags.current.map((tag, i) => (
-              <ListItemTag
-                key={`${date}-${tag.name}-${tag.id}`}
-                i={i}
-                date={date}
-                tag={tag}
-                entryTags={entryTags}
-                listRef={listRef}
-                listIndexToItemType={listIndexToItemType}
-                tagEditingRef={tagEditingRef}
-                tagEditingInputRef={tagEditingInputRef}
-                activeIndex={activeIndex}
-                tagIndexEditing={tagIndexEditing}
-                setTagIndexEditing={setTagIndexEditing}
-                colorPickerOpen={colorPickerOpen}
-                setColorPickerOpen={setColorPickerOpen}
-                handleSelect={handleSelect}
-                tagsInputRef={sel.refs.reference}
-                getItemProps={getItemProps}
-              />
-            ))}
+            {userTags.current.length == 0 ? (
+              <StyledNoTags>Type to create tag</StyledNoTags>
+            ) : (
+              userTags.current.map((tag, i) => (
+                <ListItemTag
+                  key={`${date}-${tag.name}-${tag.id}`}
+                  i={i}
+                  date={date}
+                  tag={tag}
+                  entryTags={entryTags}
+                  listRef={listRef}
+                  listIndexToItemType={listIndexToItemType}
+                  tagEditingRef={tagEditingRef}
+                  tagEditingInputRef={tagEditingInputRef}
+                  activeIndex={activeIndex}
+                  tagIndexEditing={tagIndexEditing}
+                  setTagIndexEditing={setTagIndexEditing}
+                  colorPickerOpen={colorPickerOpen}
+                  setColorPickerOpen={setColorPickerOpen}
+                  handleSelect={handleSelect}
+                  tagsInputRef={sel.refs.reference}
+                  getItemProps={getItemProps}
+                />
+              ))
+            )}
             <StyledScrollDownIcon
               isVisible={popoverScrollDownArrow}
               onMouseDown={(e: any) => handleScroll(e, 'down')}

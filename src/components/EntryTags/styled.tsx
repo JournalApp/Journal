@@ -277,6 +277,14 @@ const StyledItem = styled.div<StyledItemProps>`
   }
 `
 
+const StyledNoTags = styled.div`
+  font-size: 14px;
+  text-align: center;
+  padding: 8px;
+  font-style: italic;
+  opacity: 0.8;
+`
+
 const StyledItemColorPicker = styled.div<StyledItemProps>`
   white-space: nowrap;
   border: ${(props) =>
@@ -409,4 +417,5 @@ export {
   StyledTrashIcon,
   StyledEditTagColorPickerPopover,
   StyledItemColorPicker,
+  StyledNoTags,
 }

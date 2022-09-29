@@ -78,6 +78,7 @@ function ListItemTag({
 
   const updateTag = () => {
     const name = tagEditingInputRef.current.value
+    if (!name) return
     const modified_at = serverTimeNow()
     const sync_status = 'pending_update'
     const color = tagEditColorRef.current
@@ -112,6 +113,7 @@ function ListItemTag({
             ref={tagEditingInputRef}
             defaultValue={tag.name}
             size={10}
+            maxLength={80}
             onKeyDown={(e) => {
               if (e.key === 'Enter') updateTag()
             }}

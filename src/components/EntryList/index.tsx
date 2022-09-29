@@ -182,6 +182,7 @@ function EntryList() {
         logger('✋ ✋ ✋ daysFetchInterval stop')
         if (daysFetchInterval.current) clearInterval(daysFetchInterval.current)
 
+        const entriesModifiedAt = days
         days = days.map((d) => (d = d.day.toString()))
 
         // Add Today to server Days
@@ -210,6 +211,16 @@ function EntryList() {
           logger('Cached days equal')
         }
         setInitialFetchDone(true)
+
+        // Trigger initialFetch on all Entries
+        logger(
+          `Trigger initialFetch on ${Object.keys(invokeEntriesInitialFetch.current).length} Entries`
+        )
+        for (const day in invokeEntriesInitialFetch.current) {
+          invokeEntriesInitialFetch.current[day](
+            entriesModifiedAt.find((item: any) => item.day == day)?.modified_at
+          )
+        }
       } catch (err) {
         logger(err)
       }

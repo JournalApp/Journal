@@ -735,9 +735,9 @@ export function EntriesProvider({ children }: any) {
             )
             if (entryTagInCache == undefined) {
               logger(
-                `+ Adding EntryTag '${userTags.current.find((t) => t.id == entryTag.tag_id)}' on ${
-                  entryTag.day
-                } to cache because it's in Supabase`
+                `+ Adding EntryTag '${
+                  userTags.current.find((t) => t.id == entryTag.tag_id).name
+                }' on ${entryTag.day} to cache because it's in Supabase`
               )
               entryTag.sync_status = 'synced'
               await cacheAddOrUpdateEntryTag(entryTag)

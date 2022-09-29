@@ -65,8 +65,8 @@ create table
     revision int,
     sync_status text default 'synced',
     primary key (user_id, day, journal_id, tag_id),
-    foreign key (tag_id) references tags (id) on delete cascade on update no action,
-    foreign key (user_id, day, journal_id) references journals (user_id, day, journal_id) on delete cascade on update no action
+    foreign key (tag_id) references tags (id) on delete cascade on update no action
+    -- foreign key (user_id, day, journal_id) references journals (user_id, day, journal_id) on delete cascade on update no action
   );
 
 -- Create a table for user Preferences
