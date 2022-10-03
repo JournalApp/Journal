@@ -9,6 +9,7 @@ import migration_1to2 from '../sql/migration.1-to-2.sql'
 import dayjs from 'dayjs'
 import { logger, isDev } from '../utils'
 import type { Tag, EntryTag, EntryTagProperty } from '../components/EntryTags/types'
+import type { Day, Entry } from '../components/Entry/types'
 import { EventEmitter } from 'events'
 const sqliteEvents = new EventEmitter()
 
@@ -96,6 +97,23 @@ const runMigrations = () => {
 const addTriggers = () => {
   const db = getDB()
 
+  // 1. Entries
+  db.function('emitEntryEvent', () => {
+    sqliteEvents.emit('sqlite-entry-event')
+  })
+  // Entry updated
+  db.prepare('DROP TRIGGER IF EXISTS entry_updated;').run()
+  db.prepare(
+    "CREATE TRIGGER entry_updated AFTER UPDATE ON journals WHEN NEW.sync_status = 'pending_update' or NEW.sync_status = 'pending_delete' BEGIN SELECT emitEntryEvent(); END"
+  ).run()
+
+  // Entry inserted
+  db.prepare('DROP TRIGGER IF EXISTS entry_inserted;').run()
+  db.prepare(
+    "CREATE TRIGGER entry_inserted AFTER INSERT ON journals WHEN NEW.sync_status = 'pending_insert' BEGIN SELECT emitEntryEvent(); END"
+  ).run()
+
+  // 2. Tags & EntryTags
   db.function('emitTagEvent', () => {
     sqliteEvents.emit('sqlite-tag-event')
   })
@@ -142,16 +160,16 @@ try {
 // Entries
 //////////////////////////
 
-ipcMain.handle('cache-add-or-update-entry', async (event, val) => {
+ipcMain.handle('cache-add-or-update-entry', async (event, entry: Entry) => {
   logger('cache-add-or-update-entry')
   try {
     const db = getDB()
-    const { user_id, day, created_at, modified_at, content } = val
+    const { user_id, day, created_at, modified_at, content, revision, sync_status } = entry
     const stmt = db.prepare(
-      `INSERT INTO journals (user_id, day, created_at, modified_at, content) VALUES (@user_id, @day, @created_at, @modified_at, @content)
-      ON CONFLICT(user_id, journal_id, day) DO UPDATE SET content = excluded.content, modified_at = excluded.modified_at`
+      `INSERT INTO journals (user_id, day, created_at, modified_at, content, revision, sync_status) VALUES (@user_id, @day, @created_at, @modified_at, @content, @revision, @sync_status)
+      ON CONFLICT(user_id, journal_id, day) DO UPDATE SET content = excluded.content, modified_at = excluded.modified_at, revision = excluded.revision, sync_status = excluded.sync_status`
     )
-    return stmt.run({ user_id, day, created_at, modified_at, content })
+    return stmt.run({ user_id, day, created_at, modified_at, content, revision, sync_status })
   } catch (error) {
     logger(`error`)
     logger(error)
@@ -237,19 +255,10 @@ ipcMain.handle('cache-get-days', async (event, user_id) => {
   try {
     const db = getDB()
     const stmt = db.prepare(
-      'SELECT day FROM journals WHERE user_id = @user_id AND deleted = FALSE ORDER BY day ASC'
+      "SELECT day, revision FROM journals WHERE user_id = @user_id AND sync_status != 'pending_delete' ORDER BY day ASC"
     )
-    const result = stmt.all({ user_id }) as any[]
-    var days = result.map((entry: any) => entry.day)
-    let today = dayjs().format('YYYY-MM-DD')
-    let todayExists = days.some((el: any) => {
-      return el == today
-    })
-    if (!todayExists) {
-      days.push(today)
-      logger(`Added ${today} in cache-get-days`)
-    }
-    return days
+    const result = stmt.all({ user_id }) as Entry[]
+    return result
   } catch (error) {
     logger(`error`)
     logger(error)
@@ -261,7 +270,9 @@ ipcMain.handle('cache-get-entries', async (event, user_id) => {
   logger('cache-get-entries')
   try {
     const db = getDB()
-    const stmt = db.prepare('SELECT * FROM journals WHERE user_id = @user_id AND deleted = FALSE')
+    const stmt = db.prepare(
+      "SELECT * FROM journals WHERE user_id = @user_id AND sync_status != 'pending_delete'"
+    )
     var result = stmt.all({ user_id })
     result.forEach((element: any) => {
       element.content = JSON.parse(element.content)

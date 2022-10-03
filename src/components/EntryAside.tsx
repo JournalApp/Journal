@@ -113,36 +113,7 @@ type EntryAsideProps = {
 }
 
 function EntryAside({ date, wordCount }: EntryAsideProps) {
-  const { setDaysCacheStreak, removeCachedDay, setDaysWithNoContent } = useEntriesContext()
-  const [streak, setStreak] = useState(0)
-  const lastWordCount = useRef(0)
-
-  useEffect(() => {
-    setDaysCacheStreak.current[date] = setStreak
-    if (wordCount == 0) {
-      logger(`No content on ${date}`)
-      setDaysWithNoContent.current((prev: string[]) => {
-        return [...prev, date]
-      })
-    }
-  }, [])
-
-  useEffect(() => {
-    if (lastWordCount.current == 0 && wordCount != 0) {
-      logger('changed to has content')
-      setDaysWithNoContent.current((prev: string[]) => {
-        return prev.filter((day: string) => {
-          return day != date
-        })
-      })
-    } else if (lastWordCount.current != 0 && wordCount == 0) {
-      logger('changed to has no content')
-      setDaysWithNoContent.current((prev: string[]) => {
-        return [...new Set([...prev, date])]
-      })
-    }
-    lastWordCount.current = wordCount
-  }, [wordCount])
+  const { deleteEntry } = useEntriesContext()
 
   return (
     <>
@@ -151,17 +122,13 @@ function EntryAside({ date, wordCount }: EntryAsideProps) {
           <AsideMain>{showDate(date)}</AsideMain>
           <AsideMeta>
             <EntryTags date={date} />
-            {/* <AsideItem>{ordinal(streak)}</AsideItem>
-            <AsideItemLabel>day</AsideItemLabel>
-            <AsideItem>{wordCount}</AsideItem>
-            <AsideItemLabel>{wordCount == 1 ? 'word' : 'words'}</AsideItemLabel> */}
           </AsideMeta>
         </AsideStickyContainer>
       </Aside>
       <AsideMenu>
         <AsideMenuStickyContainer>
           {wordCount == 0 && !isToday(date) && (
-            <Remove name='Cross' size={16} onClick={() => removeCachedDay(date)} />
+            <Remove name='Cross' size={16} onClick={() => deleteEntry(date)} />
           )}
         </AsideMenuStickyContainer>
       </AsideMenu>

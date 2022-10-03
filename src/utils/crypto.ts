@@ -48,7 +48,7 @@ const decryptEntry = async (content: any, iv: string, secretKey: CryptoKey) => {
     secretKey,
     contentAb
   )
-  let contentDecrypted = ab2str(contentBuffer, 'utf8')
+  let contentDecrypted = ab2str(contentBuffer, 'utf8') as string
 
   return { contentDecrypted }
 }

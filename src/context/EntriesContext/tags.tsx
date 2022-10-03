@@ -486,7 +486,7 @@ const syncTags = async ({
             await cacheAddOrUpdateEntryTag(entryTag)
             addDayToStateUpdateQueue(entryTag.day)
           } else {
-            // Update entryTags with lower revision that in supabase
+            // Update entryTags with lower revision than in supabase
             if (entryTag.revision > entryTagInCache.revision) {
               entryTag.sync_status = 'synced'
               await cacheAddOrUpdateEntryTag(entryTag)

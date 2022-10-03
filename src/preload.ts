@@ -1,19 +1,21 @@
 import { contextBridge, ipcRenderer, clipboard } from 'electron'
 import { EventMessage } from './services/analytics'
 import type { Tag, EntryTag, EntryTagProperty } from './components/EntryTags/types'
+import type { Day, Entry } from './components/Entry/types'
 
 const electronAPI = {
   onPaste: (callback: any) => ipcRenderer.on('paste', callback),
   onCopy: (callback: any) => ipcRenderer.on('copy', callback),
   onUpdateDownloaded: (callback: any) => ipcRenderer.on('update-downloaded', callback),
+  onEntryPending: (callback: any) => ipcRenderer.on('sqlite-entry-event', callback),
   onTagPending: (callback: any) => ipcRenderer.on('sqlite-tag-event', callback),
   async capture({ distinctId, event, properties, type }: EventMessage) {
     await ipcRenderer.invoke('analytics-capture', { distinctId, event, properties, type })
   },
   cache: {
     // Entry
-    async addOrUpdateEntry(query: any) {
-      await ipcRenderer.invoke('cache-add-or-update-entry', query)
+    async addOrUpdateEntry(entry: Entry) {
+      await ipcRenderer.invoke('cache-add-or-update-entry', entry)
     },
     async deleteEntry(query: any) {
       await ipcRenderer.invoke('cache-delete-entry', query)
@@ -31,13 +33,13 @@ const electronAPI = {
       await ipcRenderer.invoke('cache-update-entry-property', set, where)
     },
     async getDays(user_id: string) {
-      return await ipcRenderer.invoke('cache-get-days', user_id)
+      return (await ipcRenderer.invoke('cache-get-days', user_id)) as Entry[]
     },
     async getEntries(user_id: string) {
-      return await ipcRenderer.invoke('cache-get-entries', user_id)
+      return (await ipcRenderer.invoke('cache-get-entries', user_id)) as Entry[]
     },
     async getDeletedDays(user_id: string) {
-      return await ipcRenderer.invoke('cache-get-deleted-days', user_id)
+      return (await ipcRenderer.invoke('cache-get-deleted-days', user_id)) as Day[]
     },
     async doesEntryExist(user_id: string, day: string) {
       return await ipcRenderer.invoke('cache-does-entry-exist', user_id, day)

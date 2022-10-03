@@ -44,17 +44,17 @@ import {
   createResetNodePlugin,
   createHighlightPlugin,
 } from '@udecode/plate'
+import type { Day } from '../../components/Entry/types'
 
 const MARK_HAND_STRIKETHROUGH = 'hand-strikethrough'
 
 type EntryBlockProps = {
-  entryDay: string
+  entryDay: Day
   invokeEntriesInitialFetch: React.MutableRefObject<any>
   entryDayCount?: number
   entriesObserver: IntersectionObserver
   cachedEntry?: any
   ref?: any
-  setEntryHeight: () => void
   cacheAddOrUpdateEntry: electronAPIType['cache']['addOrUpdateEntry']
   cacheUpdateEntry: electronAPIType['cache']['updateEntry']
   cacheUpdateEntryProperty: electronAPIType['cache']['updateEntryProperty']
@@ -76,7 +76,6 @@ const Entry = ({
   entryDay,
   invokeEntriesInitialFetch,
   cachedEntry,
-  setEntryHeight,
   entriesObserver,
   cacheAddOrUpdateEntry,
   cacheUpdateEntry,
@@ -176,55 +175,50 @@ const Entry = ({
     }
   }
 
-  const saveEntry = async (day: string, content: any, modified_at: string) => {
-    logger(`Save entry day: ${day}, modified_at: ${modified_at}`)
-    cacheAddOrUpdateEntry({
-      user_id: session.user.id,
-      day,
-      created_at: modified_at, // not added when upsert
-      modified_at, // when needsSaving... keep same date in cache
-      content: JSON.stringify(content),
-    })
-
-    if (content == undefined) {
-      logger(`Undefined content on day: ${day}`)
-    }
-
-    try {
-      const secretKey = await getSecretKey()
-      const { contentEncrypted, iv } = await encryptEntry(JSON.stringify(content), secretKey)
-
-      const { error } = await supabase
-        .from('journals')
-        .upsert(
-          {
-            user_id: session.user.id,
-            day,
-            content: '\\x' + contentEncrypted,
-            iv: '\\x' + iv,
-            modified_at,
-          },
-          { returning: 'minimal' }
-        )
-        .single()
-
-      if (error) {
-        logger(error)
-        if (isUnauthorized(error)) signOut()
-        throw new Error(error.message)
-      }
-
-      setNeedsSavingToServer(false)
-      cacheUpdateEntryProperty({ needs_saving_to_server: 0 }, { day, user_id: session.user.id })
-      logger('saved')
-    } catch (err) {
-      if (!needsSavingToServerModifiedAt) {
-        setNeedsSavingToServerModifiedAt(modified_at)
-      }
-      setNeedsSavingToServer(true)
-      cacheUpdateEntryProperty({ needs_saving_to_server: 1 }, { day, user_id: session.user.id })
-      logger(err)
-    }
+  const saveEntry = async (day: Day, content: any, modified_at: string) => {
+    // logger(`Save entry day: ${day}, modified_at: ${modified_at}`)
+    // cacheAddOrUpdateEntry({
+    //   user_id: session.user.id,
+    //   day,
+    //   created_at: modified_at, // not added when upsert
+    //   modified_at, // when needsSaving... keep same date in cache
+    //   content: JSON.stringify(content),
+    // })
+    // if (content == undefined) {
+    //   logger(`Undefined content on day: ${day}`)
+    // }
+    // try {
+    //   const secretKey = await getSecretKey()
+    //   const { contentEncrypted, iv } = await encryptEntry(JSON.stringify(content), secretKey)
+    //   const { error } = await supabase
+    //     .from('journals')
+    //     .upsert(
+    //       {
+    //         user_id: session.user.id,
+    //         day,
+    //         content: '\\x' + contentEncrypted,
+    //         iv: '\\x' + iv,
+    //         modified_at,
+    //       },
+    //       { returning: 'minimal' }
+    //     )
+    //     .single()
+    //   if (error) {
+    //     logger(error)
+    //     if (isUnauthorized(error)) signOut()
+    //     throw new Error(error.message)
+    //   }
+    //   setNeedsSavingToServer(false)
+    //   cacheUpdateEntryProperty({ needs_saving_to_server: 0 }, { day, user_id: session.user.id })
+    //   logger('saved')
+    // } catch (err) {
+    //   if (!needsSavingToServerModifiedAt) {
+    //     setNeedsSavingToServerModifiedAt(modified_at)
+    //   }
+    //   setNeedsSavingToServer(true)
+    //   cacheUpdateEntryProperty({ needs_saving_to_server: 1 }, { day, user_id: session.user.id })
+    //   logger(err)
+    // }
   }
 
   const forceSaveEntry = async () => {
@@ -236,52 +230,47 @@ const Entry = ({
   }
 
   const initialFetch = async (entryModifiedAt: string) => {
-    logger(`Initial fetch ${entryDay}`)
-
-    if (cachedEntry) {
-      if (cachedEntry.needs_saving_to_server) {
-        await saveEntry(entryDay, cachedEntry.content, cachedEntry.modified_at)
-      }
-    }
-
-    if (dayjs(entryModifiedAt).isSame(cachedEntry?.modified_at)) {
-      // If Today is not on server and not in cache it falls
-      // here because comparing two undefined using isSame() returns true
-      logger('ModifiedAt the same, not fetching')
-    } else {
-      logger('ModifiedAt not the same, fetching from server')
-      const init = await fetchEntry(entryDay)
-      if (!cachedEntry && init) {
-        const { user_id, day, created_at, modified_at, content } = init
-        cacheAddOrUpdateEntry({
-          user_id,
-          day,
-          created_at,
-          modified_at,
-          content: JSON.stringify(content),
-        })
-        setInitialValue([...init.content])
-      }
-      if (cachedEntry && init && !dayjs(init.modified_at).isSame(cachedEntry.modified_at)) {
-        logger(`${init.modified_at} != ${cachedEntry.modified_at}`)
-
-        if (dayjs(init.modified_at).isAfter(dayjs(cachedEntry.modified_at))) {
-          // Server entry is newer, save it to cache
-          logger('Server entry is newer, updating cache')
-
-          const { user_id, day, modified_at, content } = init
-          let set = { modified_at, content: JSON.stringify(content) }
-          let where = { day, user_id }
-          cacheUpdateEntry(set, where)
-
-          setInitialValue([...init.content])
-        } else {
-          // Cached entry is newer, push it to server
-          logger('Cached entry is newer, updating on server')
-          saveEntry(entryDay, cachedEntry.content, cachedEntry.modified_at)
-        }
-      }
-    }
+    // logger(`Initial fetch ${entryDay}`)
+    // if (cachedEntry) {
+    //   if (cachedEntry.needs_saving_to_server) {
+    //     await saveEntry(entryDay, cachedEntry.content, cachedEntry.modified_at)
+    //   }
+    // }
+    // if (dayjs(entryModifiedAt).isSame(cachedEntry?.modified_at)) {
+    //   // If Today is not on server and not in cache it falls
+    //   // here because comparing two undefined using isSame() returns true
+    //   logger('ModifiedAt the same, not fetching')
+    // } else {
+    //   logger('ModifiedAt not the same, fetching from server')
+    //   const init = await fetchEntry(entryDay)
+    //   if (!cachedEntry && init) {
+    //     const { user_id, day, created_at, modified_at, content } = init
+    //     cacheAddOrUpdateEntry({
+    //       user_id,
+    //       day,
+    //       created_at,
+    //       modified_at,
+    //       content: JSON.stringify(content),
+    //     })
+    //     setInitialValue([...init.content])
+    //   }
+    //   if (cachedEntry && init && !dayjs(init.modified_at).isSame(cachedEntry.modified_at)) {
+    //     logger(`${init.modified_at} != ${cachedEntry.modified_at}`)
+    //     if (dayjs(init.modified_at).isAfter(dayjs(cachedEntry.modified_at))) {
+    //       // Server entry is newer, save it to cache
+    //       logger('Server entry is newer, updating cache')
+    //       const { user_id, day, modified_at, content } = init
+    //       let set = { modified_at, content: JSON.stringify(content) }
+    //       let where = { day, user_id }
+    //       cacheUpdateEntry(set, where)
+    //       setInitialValue([...init.content])
+    //     } else {
+    //       // Cached entry is newer, push it to server
+    //       logger('Cached entry is newer, updating on server')
+    //       saveEntry(entryDay, cachedEntry.content, cachedEntry.modified_at)
+    //     }
+    //   }
+    // }
   }
 
   const ShouldFocus = () => {
@@ -315,11 +304,6 @@ const Entry = ({
     // Scroll to entry if Today
     if (entryDay == dayjs().format('YYYY-MM-DD')) {
       editorRef.current.scrollIntoView({ block: 'start' })
-      // setTimeout(() => {
-      //   document.activeElement.scrollIntoView({ block: 'start' })
-      // }, 300)
-      // window.scrollTo(0, editorRef.current.getBoundingClientRect().top)
-      // window.scrollBy(0, -50)
     }
 
     // Remove observers

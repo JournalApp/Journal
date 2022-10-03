@@ -6,6 +6,7 @@ import { useEntriesContext, useUserContext } from 'context'
 import dayjs from 'dayjs'
 import { BeforeEntries, PostEntries, Wrapper } from './styled'
 import type { Tag } from '../EntryTags/types'
+import type { Day } from '../../components/Entry/types'
 
 var visibleSections: String[] = []
 var rangeMarker: any
@@ -80,10 +81,6 @@ const entriesObserver = new IntersectionObserver(onIntersection, {
   rootMargin: '-100px',
 })
 
-type myref = {
-  [id: string]: number
-}
-
 const EntryMemo = React.memo(Entry, (prevProps, nextProps) => {
   console.info('New memo compare')
   if (prevProps.entryDay === nextProps.entryDay) {
@@ -93,162 +90,43 @@ const EntryMemo = React.memo(Entry, (prevProps, nextProps) => {
 })
 
 function EntryList() {
-  const [entries, setEntries] = useState([])
-  const [initialFetchDone, setInitialFetchDone] = useState(false)
-  const [daysCache, setDaysCacheInternal] = useState([])
+  const [days, setDaysInternal] = useState<Day[]>([])
   const {
-    initialCache,
-    initialDaysCache,
-    setDaysCache,
-    setDaysCacheEntriesList,
+    userEntries,
+    invokeRerenderEntryList,
     cacheAddOrUpdateEntry,
     cacheUpdateEntry,
     cacheUpdateEntryProperty,
   } = useEntriesContext()
   const invokeEntriesInitialFetch = useRef<any | null>({})
-  const entriesHeight: myref = {}
-  const itemsRef = useRef<Array<HTMLDivElement | null>>([])
-  const element = useRef<HTMLElement | null>(null)
   const { session, signOut } = useUserContext()
-  const daysFetchInterval = useRef<NodeJS.Timeout | null>(null)
 
-  logger(`EntryList render`)
+  const setDays = () => {
+    setDaysInternal([...userEntries.current.map((entry) => entry.day)])
+  }
 
   useEffect(() => {
-    setDaysCacheEntriesList.current = setDaysCacheInternal
-    initialFetch()
-    return () => {
-      if (daysFetchInterval.current) {
-        clearInterval(daysFetchInterval.current)
-      }
-    }
+    invokeRerenderEntryList.current = setDays
   }, [])
-
-  useEffect(() => {
-    logger('Entries updated')
-  }, [entries])
-
-  useEffect(() => {
-    // e.g. user has added a day
-    logger('daysCache have changed')
-    setEntries([...daysCache])
-  }, [daysCache])
-
-  const areDaysEqual = (local: any, server: any) => {
-    return arrayEquals(local, server)
-  }
-
-  const setEntryHeight = () => {
-    if (element.current) {
-      element.current.scrollIntoView({ block: 'start' })
-      // element.scrollTop = 0
-    } else {
-      let today = dayjs().format('YYYY-MM-DD')
-      element.current = document.getElementById(`${today}-entry`)
-    }
-  }
-
-  const initialFetch = async () => {
-    let cached = initialDaysCache.current
-    logger('initialDaysCache.current:')
-    logger(initialDaysCache.current)
-    logger('daysCache:')
-    logger(daysCache)
-    if (cached.length) {
-      logger('---> Cached entries')
-      logger(cached)
-      setEntries([...cached])
-      setInitialFetchDone(true)
-    } else {
-      logger('---> No cached entries')
-    }
-
-    const daysFetch = async () => {
-      logger('🏃‍♂️ 🏃‍♂️ 🏃‍♂️ daysFetching starts')
-      try {
-        let { data: days, error } = await supabase
-          .from('journals')
-          .select('day, modified_at')
-          .eq('user_id', session.user.id)
-          .order('day', { ascending: true })
-        logger('Days:')
-        logger(days)
-        if (error) {
-          logger(error)
-          if (isUnauthorized(error)) signOut()
-          throw new Error(error.message)
-        }
-
-        logger('✋ ✋ ✋ daysFetchInterval stop')
-        if (daysFetchInterval.current) clearInterval(daysFetchInterval.current)
-
-        const entriesModifiedAt = days
-        days = days.map((d) => (d = d.day.toString()))
-
-        // Add Today to server Days
-        let today = dayjs().format('YYYY-MM-DD')
-        let todayExists = days.some((el: any) => {
-          return el == today
-        })
-        if (!todayExists) {
-          days.push(today)
-          logger(`Added ${today} to server Days`)
-        }
-        if (!areDaysEqual(cached, days)) {
-          // Merge two arrays if not equal?
-          logger('Cached days not equal to server days, merging...')
-          logger(cached)
-          logger(days)
-          // logger(days)
-          if (!Array.isArray(cached)) cached = []
-          if (!Array.isArray(days)) days = []
-
-          let merged = [...new Set([...days, ...cached])].sort()
-          // setAllCachedDays(merged)
-          // setEntries([...merged])
-          setDaysCache([...merged])
-        } else {
-          logger('Cached days equal')
-        }
-        setInitialFetchDone(true)
-
-        // Trigger initialFetch on all Entries
-        logger(
-          `Trigger initialFetch on ${Object.keys(invokeEntriesInitialFetch.current).length} Entries`
-        )
-        for (const day in invokeEntriesInitialFetch.current) {
-          invokeEntriesInitialFetch.current[day](
-            entriesModifiedAt.find((item: any) => item.day == day)?.modified_at
-          )
-        }
-      } catch (err) {
-        logger(err)
-      }
-    }
-    daysFetchInterval.current = setInterval(daysFetch, 5000)
-    await daysFetch()
-  }
 
   return (
     <Wrapper>
       <PostEntries></PostEntries>
-      {initialFetchDone &&
-        entries
-          .slice(0)
-          .reverse()
-          .map((day, i) => (
-            <EntryMemo
-              key={day}
-              entryDay={day}
-              invokeEntriesInitialFetch={invokeEntriesInitialFetch}
-              entriesObserver={entriesObserver}
-              cachedEntry={initialCache.current.find((item: any) => item.day == day)}
-              setEntryHeight={setEntryHeight}
-              cacheAddOrUpdateEntry={cacheAddOrUpdateEntry}
-              cacheUpdateEntry={cacheUpdateEntry}
-              cacheUpdateEntryProperty={cacheUpdateEntryProperty}
-            />
-          ))}
+      {days
+        .slice(0)
+        .reverse()
+        .map((day, i) => (
+          <EntryMemo
+            key={day}
+            entryDay={day}
+            invokeEntriesInitialFetch={invokeEntriesInitialFetch}
+            entriesObserver={entriesObserver}
+            cachedEntry={userEntries.current.find((item: any) => item.day == day)}
+            cacheAddOrUpdateEntry={cacheAddOrUpdateEntry}
+            cacheUpdateEntry={cacheUpdateEntry}
+            cacheUpdateEntryProperty={cacheUpdateEntryProperty}
+          />
+        ))}
       <BeforeEntries></BeforeEntries>
     </Wrapper>
   )

@@ -154,6 +154,9 @@ const createWindow = (): void => {
     })
 
     // Handle events from SQLIte
+    sqliteEvents.on('sqlite-entry-event', () => {
+      mainWindow.webContents.send('sqlite-entry-event')
+    })
     sqliteEvents.on('sqlite-tag-event', () => {
       mainWindow.webContents.send('sqlite-tag-event')
     })

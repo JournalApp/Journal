@@ -44,25 +44,21 @@ create table
     created_at datetime,
     modified_at datetime,
     content text,
-    deleted boolean not null default false,
-    needs_saving_to_server boolean not null default false,
+    revision int not null default 0,
+    sync_status text not null default 'synced',
     primary key (user_id, day, journal_id),
     foreign key (user_id) references users (id) on delete cascade on update no action,
     foreign key (user_id, journal_id) references journals_catalog (user_id, journal_id) on delete cascade on update no action
   );
 
 insert into
-  journals (
-    user_id,
-    day,
-    created_at,
-    modified_at,
-    content,
-    deleted,
-    needs_saving_to_server
-  )
+  journals (user_id, day, created_at, modified_at, content)
 select
-  *
+  user_id,
+  day,
+  created_at,
+  modified_at,
+  content
 from
   old_journals;
 

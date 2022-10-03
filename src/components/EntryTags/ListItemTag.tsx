@@ -63,7 +63,7 @@ function ListItemTag({
 }: ListItemTagProps) {
   const editButtonRef = useRef<HTMLInputElement>(null)
   const tagEditColorRef = useRef(tag.color)
-  const { userTags, cacheAddOrUpdateTag, cacheUpdateTagProperty, triggerRerenderEntriesWithTag } =
+  const { userTags, cacheAddOrUpdateTag, cacheUpdateTagProperty, rerenderEntriesWithTag } =
     useEntriesContext()
   const { serverTimeNow } = useUserContext()
   // const inputRef = useRef<HTMLInputElement>(null)
@@ -87,7 +87,7 @@ function ListItemTag({
     const i = userTags.current.findIndex((t) => t.id == tag.id)
     userTags.current[i].name = name
     userTags.current[i].color = color
-    triggerRerenderEntriesWithTag(tag.id)
+    rerenderEntriesWithTag(tag.id)
   }
 
   const deleteTag = () => {
@@ -100,7 +100,7 @@ function ListItemTag({
     userTags.current = userTags.current.filter((t) => {
       return t.id != tag.id
     })
-    triggerRerenderEntriesWithTag(tag.id)
+    rerenderEntriesWithTag(tag.id)
   }
 
   let isEditingOtherTag = tagIndexEditing != null && tagIndexEditing != i

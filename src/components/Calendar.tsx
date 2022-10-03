@@ -203,14 +203,7 @@ const withLeadingZero = (num: number) => {
 
 const Calendar = () => {
   const { isCalendarOpen } = useAppearanceContext()
-  const {
-    cacheCreateNewEntry,
-    setDaysCacheCalendar,
-    removeCachedDay,
-    setDaysWithNoContent,
-    editorsRef,
-    invokeForceSaveEntry,
-  } = useEntriesContext()
+  const { cacheCreateNewEntry, deleteEntry, editorsRef, invokeForceSaveEntry } = useEntriesContext()
   const [daysCache, setDaysCacheInternal] = useState([])
   const [daysWithNoContent, setDaysWithNoContentInternal] = useState<string[]>([])
   const { session } = useUserContext()
@@ -219,8 +212,6 @@ const Calendar = () => {
   logger('Calendar render')
 
   useEffect(() => {
-    setDaysCacheCalendar.current = setDaysCacheInternal
-    setDaysWithNoContent.current = setDaysWithNoContentInternal
     let today = dayjs().format('YYYY-MM-DD')
     let element = document.getElementById(`${today}-calendar`)
     if (element) {
@@ -352,7 +343,7 @@ const Calendar = () => {
                                   <Remove
                                     name='Cross'
                                     size={16}
-                                    onClick={() => removeCachedDay(today)}
+                                    onClick={() => deleteEntry(today)}
                                   />
                                 )}
                             </Day>

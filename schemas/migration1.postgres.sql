@@ -44,6 +44,12 @@ after
 execute
   function create_default_journals_catalog ();
 
+-- update table journals to add revision number
+alter table
+  journals
+add column
+  revision int not null default 0;
+
 -- update table journals to enable multiple journals per user
 alter table
   journals
