@@ -29,7 +29,7 @@ const electronAPI = {
     async updateEntry(set: any, where: any) {
       await ipcRenderer.invoke('cache-update-entry', set, where)
     },
-    async updateEntryProperty(set: any, where: any) {
+    async updateEntryProperty(set: object, where: object) {
       await ipcRenderer.invoke('cache-update-entry-property', set, where)
     },
     async getDays(user_id: string) {
@@ -40,6 +40,9 @@ const electronAPI = {
     },
     async getDeletedDays(user_id: string) {
       return (await ipcRenderer.invoke('cache-get-deleted-days', user_id)) as Day[]
+    },
+    async getPendingUpdateEntries(user_id: string) {
+      return (await ipcRenderer.invoke('cache-get-pending-update-entries', user_id)) as Entry[]
     },
     async doesEntryExist(user_id: string, day: string) {
       return await ipcRenderer.invoke('cache-does-entry-exist', user_id, day)

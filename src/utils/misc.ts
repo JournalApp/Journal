@@ -1,4 +1,5 @@
 import type { PostgrestError } from '@supabase/supabase-js'
+import { getNodeString } from '@udecode/plate'
 
 function shallowEqual(object1: any, object2: any) {
   const keys1 = Object.keys(object1)
@@ -37,6 +38,18 @@ const countWords = (text: any) => {
     }
   })
   return res.length
+}
+
+const countEntryWords = (content: object[]) => {
+  if (Array.isArray(content)) {
+    return countWords(content.map((n: any) => getNodeString(n)).join(' '))
+  } else {
+    return 0
+  }
+}
+
+const entryHasNoContent = (content: any[]) => {
+  return content.some((n: any) => !getNodeString(n))
 }
 
 const setCssVars = (items: any, prefix = '-'): void => {
@@ -103,4 +116,6 @@ export {
   isUnauthorized,
   randomInt,
   isArrayEmpty,
+  entryHasNoContent,
+  countEntryWords,
 }

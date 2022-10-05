@@ -91,18 +91,12 @@ const EntryMemo = React.memo(Entry, (prevProps, nextProps) => {
 
 function EntryList() {
   const [days, setDaysInternal] = useState<Day[]>([])
-  const {
-    userEntries,
-    invokeRerenderEntryList,
-    cacheAddOrUpdateEntry,
-    cacheUpdateEntry,
-    cacheUpdateEntryProperty,
-  } = useEntriesContext()
-  const invokeEntriesInitialFetch = useRef<any | null>({})
-  const { session, signOut } = useUserContext()
+  const { userEntries, invokeRerenderEntryList } = useEntriesContext()
 
   const setDays = () => {
-    setDaysInternal([...userEntries.current.map((entry) => entry.day)])
+    let today = dayjs().format('YYYY-MM-DD') as Day
+    let daysInCache = userEntries.current.map((entry) => entry.day) as Day[]
+    setDaysInternal([...new Set([...daysInCache, today])].sort())
   }
 
   useEffect(() => {
@@ -119,12 +113,8 @@ function EntryList() {
           <EntryMemo
             key={day}
             entryDay={day}
-            invokeEntriesInitialFetch={invokeEntriesInitialFetch}
             entriesObserver={entriesObserver}
             cachedEntry={userEntries.current.find((item: any) => item.day == day)}
-            cacheAddOrUpdateEntry={cacheAddOrUpdateEntry}
-            cacheUpdateEntry={cacheUpdateEntry}
-            cacheUpdateEntryProperty={cacheUpdateEntryProperty}
           />
         ))}
       <BeforeEntries></BeforeEntries>

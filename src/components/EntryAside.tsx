@@ -109,7 +109,7 @@ const showDate = (day: any) => {
 
 type EntryAsideProps = {
   date: string
-  wordCount: number
+  wordCount: React.MutableRefObject<number>
 }
 
 function EntryAside({ date, wordCount }: EntryAsideProps) {
@@ -127,7 +127,7 @@ function EntryAside({ date, wordCount }: EntryAsideProps) {
       </Aside>
       <AsideMenu>
         <AsideMenuStickyContainer>
-          {wordCount == 0 && !isToday(date) && (
+          {wordCount.current == 0 && !isToday(date) && (
             <Remove name='Cross' size={16} onClick={() => deleteEntry(date)} />
           )}
         </AsideMenuStickyContainer>

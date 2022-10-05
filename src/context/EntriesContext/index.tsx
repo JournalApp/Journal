@@ -42,10 +42,12 @@ interface EntriesContextInterface {
   cacheUpdateEntryTagProperty: electronAPIType['cache']['updateEntryTagProperty']
   invokeRerenderEntryList: React.MutableRefObject<any>
   invokeRerenderCalendar: React.MutableRefObject<any>
+  invokeRerenderEntry: React.MutableRefObject<any>
   invokeForceSaveEntry: React.MutableRefObject<any>
-  invokeEntriesTagsInitialFetch: React.MutableRefObject<any>
+  invokeRerenderEntryTags: React.MutableRefObject<any>
   editorsRef: any
   rerenderEntriesWithTag: (tag_id: string) => void
+  rerenderCalendar: () => Promise<void>
 }
 
 const EntriesContext = createContext<EntriesContextInterface | null>(null)
@@ -60,8 +62,9 @@ export function EntriesProvider({ children }: any) {
   // Entries
   const userEntries = useRef<Entry[]>([])
   const invokeRerenderEntryList = useRef<any | null>({})
+  const invokeRerenderEntryTags = useRef<any | null>({})
+  const invokeRerenderEntry = useRef<any | null>({})
   const invokeForceSaveEntry = useRef<any | null>({})
-  const invokeEntriesTagsInitialFetch = useRef<any | null>({})
   const initialEntriesFetchDone = useRef(false)
   const syncEntriesInterval = useRef<NodeJS.Timeout | null>(null)
 
@@ -81,16 +84,33 @@ export function EntriesProvider({ children }: any) {
   const rerenderEntriesWithTag = async (tag_id: string) => {
     const days = await window.electronAPI.cache.getDaysWithTag(tag_id)
     days.map((day) => {
-      if (!!invokeEntriesTagsInitialFetch.current[day]) {
-        invokeEntriesTagsInitialFetch.current[day]()
+      if (!!invokeRerenderEntryTags.current[day]) {
+        invokeRerenderEntryTags.current[day]()
       }
     })
   }
 
-  const rerenderEntryList = async () => {
+  const rerenderEntry = (day: Day) => {
+    if (!!invokeRerenderEntry.current[day]) {
+      invokeRerenderEntry.current[day]()
+    }
+  }
+
+  const rerenderEntries = async () => {
     if (!!invokeRerenderEntryList.current) {
       invokeRerenderEntryList.current()
     }
+  }
+
+  const rerenderCalendar = async () => {
+    if (!!invokeRerenderCalendar.current) {
+      invokeRerenderCalendar.current()
+    }
+  }
+
+  const rerenderEntriesAndCalendar = async () => {
+    rerenderEntries()
+    rerenderCalendar()
   }
 
   const cacheFetchTags = async () => {
@@ -120,7 +140,7 @@ export function EntriesProvider({ children }: any) {
       await cacheFetchEntryTags()
       await cacheFetchEntries()
       setCacheFetchDone(true)
-      rerenderEntryList()
+      rerenderEntriesAndCalendar()
     }
 
     cacheFetchAll()
@@ -130,7 +150,7 @@ export function EntriesProvider({ children }: any) {
       if (today.current != realToday) {
         logger(`New day has come ${realToday} !!!`)
         today.current = realToday
-        rerenderEntryList()
+        rerenderEntriesAndCalendar()
         // TODO invoke scroll to Today from here
         // ...
         window.electronAPI.capture({
@@ -146,7 +166,8 @@ export function EntriesProvider({ children }: any) {
       initialEntriesFetchDone,
       syncEntriesInterval,
       cacheFetchEntries,
-      rerenderEntryList,
+      rerenderEntriesAndCalendar,
+      rerenderEntry,
       session,
       signOut,
       getSecretKey,
@@ -171,7 +192,7 @@ export function EntriesProvider({ children }: any) {
     const syncTagsArgs = {
       initialTagsFetchDone,
       initialEntryTagsFetchDone,
-      invokeEntriesTagsInitialFetch,
+      invokeRerenderEntryTags,
       userTags,
       cacheFetchTags,
       cacheFetchEntryTags,
@@ -225,11 +246,13 @@ export function EntriesProvider({ children }: any) {
     cacheDeleteTag,
     cacheUpdateEntryTagProperty,
     invokeRerenderEntryList,
+    invokeRerenderEntry,
     invokeRerenderCalendar,
+    invokeRerenderEntryTags,
     invokeForceSaveEntry,
-    invokeEntriesTagsInitialFetch,
     editorsRef,
     rerenderEntriesWithTag,
+    rerenderCalendar,
   }
   return (
     <EntriesContext.Provider value={state}>{cacheFetchDone && children}</EntriesContext.Provider>

@@ -1,5 +1,5 @@
 import React from 'react'
-import { supabase, isUnauthorized, logger, decryptEntry } from 'utils'
+import { supabase, isUnauthorized, logger, encryptEntry, decryptEntry } from 'utils'
 import type { Tag, EntryTag, EntryTagProperty } from '../../components/EntryTags/types'
 import type { Day, Entry } from '../../components/Entry/types'
 import { Session } from '@supabase/supabase-js'
@@ -26,7 +26,7 @@ const cacheUpdateEntry = async (set: any, where: any) => {
   await window.electronAPI.cache.updateEntry(set, where)
 }
 
-const cacheUpdateEntryProperty = async (set: any, where: any) => {
+const cacheUpdateEntryProperty = async (set: object, where: object) => {
   await window.electronAPI.cache.updateEntryProperty(set, where)
 }
 
@@ -83,9 +83,92 @@ const deleteEntry = async (day: string) => {
 // Entries sync functions
 //////////////////////////
 
+interface syncTo {
+  addDayToStateUpdateQueue?: (day: string) => void
+  session: Session
+  setDaysHaveChanged: (state: boolean) => void
+  getSecretKey: () => Promise<CryptoKey>
+  signOut: () => void
+}
+
 const syncPendingCreateEntries = async () => {}
 
-const syncPendingUpdateEntries = async () => {}
+const syncPendingUpdateEntries = async ({
+  addDayToStateUpdateQueue,
+  getSecretKey,
+  setDaysHaveChanged,
+  session,
+  signOut,
+}: syncTo) => {
+  const entries = await window.electronAPI.cache.getPendingUpdateEntries(session.user.id)
+  if (entries.length) {
+    await Promise.all(
+      entries.map(async (entry: Entry) => {
+        const secretKey = await getSecretKey()
+        const { contentEncrypted, iv } = await encryptEntry(
+          JSON.stringify(entry.content),
+          secretKey
+        )
+
+        const { data, error } = await supabase
+          .from<Entry>('journals')
+          .update({
+            user_id: session.user.id,
+            content: '\\x' + contentEncrypted,
+            iv: '\\x' + iv,
+            modified_at: entry.modified_at,
+            revision: entry.revision + 1,
+          })
+          .match({ user_id: session.user.id, day: entry.day, revision: entry.revision })
+        if (error) {
+          // Supabase also throws error when 0 rows updated (404)
+          // hence can't throw error just yet
+          if (isUnauthorized(error)) signOut()
+        }
+
+        if (!data) {
+          logger('Entry not updated, check whats in supabase:')
+          // Fetch this entry from supabase
+          const { data: entryOnServer, error } = await supabase
+            .from<Entry>('journals')
+            .select()
+            .match({ user_id: session.user.id, day: entry.day })
+            .single()
+          if (error) {
+            logger('Entry fetch error:')
+            logger(error)
+            if (isUnauthorized(error)) signOut()
+            throw new Error(error.message)
+          }
+          if (!entryOnServer) {
+            logger('This entry is not in supabase, removing from cache too')
+            await window.electronAPI.cache.deleteEntry({ user_id: session.user.id, day: entry.day })
+            setDaysHaveChanged(true)
+          } else {
+            if (entryOnServer.revision != entry.revision) {
+              logger('Entry revision mismatch -> reverting to supabase version')
+              const { contentDecrypted } = await decryptEntry(
+                entryOnServer.content,
+                entryOnServer.iv,
+                secretKey
+              )
+              entryOnServer.content = JSON.parse(contentDecrypted)
+              entryOnServer.sync_status = 'synced'
+              cacheAddOrUpdateEntry(entryOnServer)
+              addDayToStateUpdateQueue(entry.day)
+            }
+          }
+        } else {
+          logger('Marking entry as synced')
+          logger(data)
+          entry.sync_status = 'synced'
+          entry.revision = entry.revision + 1
+          await cacheAddOrUpdateEntry(entry)
+        }
+      })
+    )
+  }
+}
 
 const syncPendingDeletedEntries = async () => {}
 
@@ -97,7 +180,8 @@ interface syncEntriesProps {
   initialEntriesFetchDone: React.MutableRefObject<boolean>
   syncEntriesInterval: React.MutableRefObject<NodeJS.Timeout | null>
   cacheFetchEntries: () => Promise<void>
-  rerenderEntryList: () => Promise<void>
+  rerenderEntriesAndCalendar: () => Promise<void>
+  rerenderEntry: (day: Day) => void
   session: Session
   signOut: () => void
   getSecretKey: () => Promise<CryptoKey>
@@ -107,7 +191,8 @@ const syncEntries = async ({
   initialEntriesFetchDone,
   syncEntriesInterval,
   cacheFetchEntries,
-  rerenderEntryList,
+  rerenderEntriesAndCalendar,
+  rerenderEntry,
   session,
   signOut,
   getSecretKey,
@@ -116,6 +201,9 @@ const syncEntries = async ({
   try {
     // init entriesToUpdateQueue
     let daysHaveChanged = false
+    const setDaysHaveChanged = (state: boolean) => {
+      daysHaveChanged = state
+    }
     let newDaysToFetch: Day[] = []
     let entriesToUpdateQueue: Day[] = []
     const addDayToStateUpdateQueue = (day: Day) => {
@@ -126,7 +214,13 @@ const syncEntries = async ({
 
     // SYNC TO -->
     await syncPendingCreateEntries()
-    await syncPendingUpdateEntries()
+    await syncPendingUpdateEntries({
+      addDayToStateUpdateQueue,
+      getSecretKey,
+      setDaysHaveChanged,
+      session,
+      signOut,
+    })
     await syncPendingDeletedEntries()
 
     // SYNC FROM <-- (only at launch)
@@ -215,17 +309,15 @@ const syncEntries = async ({
 
     // Rerender EntryList
     if (daysHaveChanged) {
-      await rerenderEntryList()
+      logger(`Invoking rerender bacuse days have changed`)
+      await rerenderEntriesAndCalendar()
     }
 
     // Run entriesToUpdateQueue
     logger(`Invoking update Entries for ${entriesToUpdateQueue.length} days:`)
     logger(entriesToUpdateQueue)
     entriesToUpdateQueue.map((day) => {
-      // TODO trigger update editor value
-      // if (!!invokeEntriesTagsInitialFetch.current[day]) {
-      //   invokeEntriesTagsInitialFetch.current[day]()
-      // }
+      rerenderEntry(day)
     })
 
     logger('⏹ ⏹ ⏹ syncEntries stops')

@@ -49,7 +49,7 @@ function EntryTags({ date }: EntryTagsProps) {
     cacheAddOrUpdateEntryTag,
     cacheUpdateEntryTagProperty,
     cacheAddEntryIfNotExists,
-    invokeEntriesTagsInitialFetch,
+    invokeRerenderEntryTags,
   } = useEntriesContext()
   const [editMode, setEditMode] = useState(false) // 1. edit mode
   const [tagIndexEditing, setTagIndexEditing] = useState<number | null>(null) // 3. Tag editing
@@ -99,7 +99,7 @@ function EntryTags({ date }: EntryTagsProps) {
   }
 
   useEffect(() => {
-    invokeEntriesTagsInitialFetch.current[date] = rerenderTags
+    invokeRerenderEntryTags.current[date] = rerenderTags
   }, [])
 
   useEffect(() => {

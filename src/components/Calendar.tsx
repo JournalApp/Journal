@@ -5,9 +5,9 @@ import { theme } from 'themes'
 import { select, focusEditor } from '@udecode/plate'
 import { useAppearanceContext, useEntriesContext, useUserContext } from 'context'
 import { CalendarOpen, getCalendarIsOpen } from 'config'
-import { createDays, getYearsSince, logger } from 'utils'
+import { createDays, getYearsSince, logger, entryHasNoContent } from 'utils'
 import { Icon } from 'components'
-
+import type { Day } from '../components/Entry/types'
 interface ContainerProps {
   isOpen: CalendarOpen
 }
@@ -203,15 +203,36 @@ const withLeadingZero = (num: number) => {
 
 const Calendar = () => {
   const { isCalendarOpen } = useAppearanceContext()
-  const { cacheCreateNewEntry, deleteEntry, editorsRef, invokeForceSaveEntry } = useEntriesContext()
-  const [daysCache, setDaysCacheInternal] = useState([])
-  const [daysWithNoContent, setDaysWithNoContentInternal] = useState<string[]>([])
+  const {
+    cacheCreateNewEntry,
+    deleteEntry,
+    editorsRef,
+    invokeForceSaveEntry,
+    invokeRerenderCalendar,
+    userEntries,
+  } = useEntriesContext()
+  const [days, setDaysInternal] = useState([])
+  const [daysWithNoContent, setDaysWithNoContent] = useState<string[]>([])
   const { session } = useUserContext()
   const today = new Date()
 
   logger('Calendar render')
 
+  const setDays = () => {
+    let today = dayjs().format('YYYY-MM-DD') as Day
+    let daysWithNoContent: Day[] = []
+    let daysInCache = userEntries.current.map((entry) => {
+      if (Array.isArray(entry.content) && entryHasNoContent(entry.content)) {
+        daysWithNoContent.push(entry.day)
+      }
+      return entry.day
+    }) as Day[]
+    setDaysInternal([...new Set([...daysInCache, today])].sort())
+    setDaysWithNoContent([...daysWithNoContent])
+  }
+
   useEffect(() => {
+    invokeRerenderCalendar.current = setDays
     let today = dayjs().format('YYYY-MM-DD')
     let element = document.getElementById(`${today}-calendar`)
     if (element) {
@@ -225,8 +246,8 @@ const Calendar = () => {
   }, [daysWithNoContent])
 
   const hasEntry = (date: string) => {
-    if (daysCache && Array.isArray(daysCache)) {
-      return daysCache.some((el: string) => el == date)
+    if (days && Array.isArray(days)) {
+      return days.some((el: string) => el == date)
     } else {
       return false
     }

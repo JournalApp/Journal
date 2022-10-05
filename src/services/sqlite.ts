@@ -236,13 +236,27 @@ ipcMain.handle('cache-update-entry-property', async (event, set, where) => {
   try {
     const db = getDB()
     const { user_id, day } = where
-    const property = Object.keys(set)[0] as string
-    const value = Object.values(set)[0]
 
-    const stmt = db.prepare(
-      `UPDATE journals SET ${property} = @value WHERE day = @day and user_id = @user_id`
-    )
-    return stmt.run({ user_id, day, value })
+    // Prevent overring sync_status of 'pening_insert' with 'pending_update'
+    if (set.sync_status == 'pending_update') {
+      const entry = db
+        .prepare(`SELECT sync_status FROM journals WHERE day = @day and user_id = @user_id`)
+        .get({ user_id, day }) as Entry
+      if (entry.sync_status == 'pending_insert') {
+        logger(`Not changing sync_status to 'pending_update' because it's 'pending_insert'`)
+        // @ts-ignore
+        set.sync_status = 'pending_insert'
+      }
+    }
+
+    let expr = ''
+    for (const property in set) {
+      expr += `${property} = @${property}, `
+    }
+    expr = expr.slice(0, -2)
+
+    const stmt = db.prepare(`UPDATE journals SET ${expr} WHERE day = @day and user_id = @user_id`)
+    return stmt.run({ user_id, day, ...set })
   } catch (error) {
     logger(`error`)
     logger(error)
@@ -295,6 +309,23 @@ ipcMain.handle('cache-get-deleted-days', async (event, user_id) => {
     logger('Deleted days:')
     logger(days)
     return days
+  } catch (error) {
+    logger(`error`)
+    logger(error)
+    return error
+  }
+})
+
+ipcMain.handle('cache-get-pending-update-entries', async (event, user_id) => {
+  logger('cache-get-pending-update-entries')
+  try {
+    const db = getDB()
+    const stmt = db.prepare(
+      "SELECT * FROM journals WHERE user_id = @user_id AND sync_status = 'pending_update'"
+    )
+    const result = stmt.all({ user_id })
+    logger(`Pending update entries: ${result.length}`)
+    return result
   } catch (error) {
     logger(`error`)
     logger(error)

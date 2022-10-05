@@ -13,7 +13,7 @@ import {
   createTEditor,
 } from '@udecode/plate'
 import { CONFIG, defaultContent } from 'config'
-import { countWords, isUnauthorized, encryptEntry, decryptEntry } from 'utils'
+import { countEntryWords } from 'utils'
 import { supabase, logger } from 'utils'
 import { useUserContext, useEntriesContext } from 'context'
 import { Container, MainWrapper, MiniDate } from './styled'
@@ -50,45 +50,20 @@ const MARK_HAND_STRIKETHROUGH = 'hand-strikethrough'
 
 type EntryBlockProps = {
   entryDay: Day
-  invokeEntriesInitialFetch: React.MutableRefObject<any>
   entryDayCount?: number
   entriesObserver: IntersectionObserver
   cachedEntry?: any
   ref?: any
-  cacheAddOrUpdateEntry: electronAPIType['cache']['addOrUpdateEntry']
-  cacheUpdateEntry: electronAPIType['cache']['updateEntry']
-  cacheUpdateEntryProperty: electronAPIType['cache']['updateEntryProperty']
 }
 
 const isToday = (day: any) => {
   return day.toString() == dayjs().format('YYYY-MM-DD')
 }
 
-const countEntryWords = (content: any) => {
-  if (Array.isArray(content)) {
-    return countWords(content.map((n: any) => getNodeString(n)).join(' '))
-  } else {
-    return 0
-  }
-}
-
-const Entry = ({
-  entryDay,
-  invokeEntriesInitialFetch,
-  cachedEntry,
-  entriesObserver,
-  cacheAddOrUpdateEntry,
-  cacheUpdateEntry,
-  cacheUpdateEntryProperty,
-}: EntryBlockProps) => {
-  const [wordCount, setWordCount] = useState(
-    countEntryWords(cachedEntry ? cachedEntry.content : '')
-  )
-  const [needsSavingToServer, setNeedsSavingToServer] = useState(false)
-  const [needsSavingToServerModifiedAt, setNeedsSavingToServerModifiedAt] = useState('')
+const Entry = ({ entryDay, cachedEntry, entriesObserver }: EntryBlockProps) => {
+  const wordCount = useRef(countEntryWords(cachedEntry ? cachedEntry.content : ''))
   const [initialValue, setInitialValue] = useState(cachedEntry?.content ?? defaultContent)
   const [shouldFocus, setShouldFocus] = useState(isToday(entryDay))
-  const firstRender = useRef(true)
   const contextMenuVisible = useRef(false)
   const toggleContextMenu = useRef(null)
   const setEditorFocusedContextMenu = useRef(null)
@@ -96,8 +71,17 @@ const Entry = ({
   const debugValue = useRef(cachedEntry?.content ?? [])
   const editorRef = useRef(null)
   const { session, signOut, getSecretKey, serverTimeNow } = useUserContext()
-  const { editorsRef, invokeForceSaveEntry } = useEntriesContext()
-  const saveTimer = useRef<NodeJS.Timeout | null>(null)
+  const {
+    editorsRef,
+    userEntries,
+    invokeForceSaveEntry,
+    invokeRerenderEntry,
+    cacheAddOrUpdateEntry,
+    cacheUpdateEntry,
+    cacheUpdateEntryProperty,
+    rerenderCalendar,
+  } = useEntriesContext()
+  const saveDebounceTimer = useRef<NodeJS.Timeout | null>(null)
   const id = `${entryDay}-editor`
 
   logger(`Entry render`)
@@ -120,157 +104,50 @@ const Entry = ({
   }
 
   const onChangeDebug = (newValue: any) => {
-    setWordCount(countEntryWords(newValue))
     debugValue.current = newValue
-  }
 
-  const fetchEntry = async (day: any) => {
-    try {
-      const secretKey = await getSecretKey()
-      let { data, error } = await supabase
-        .from('journals')
-        .select()
-        .match({ user_id: session.user.id, day })
-        .single()
-      if (!data) {
-        if (!isToday(day)) {
-          const { contentEncrypted, iv } = await encryptEntry(
-            JSON.stringify(defaultContent),
-            secretKey
-          )
-          let now = serverTimeNow()
-          let { data, error } = await supabase
-            .from('journals')
-            .insert([
-              {
-                user_id: session.user.id,
-                day,
-                modified_at: now,
-                created_at: now,
-                content: '\\x' + contentEncrypted,
-                iv: '\\x' + iv,
-              },
-            ])
-            .single()
-          if (error) {
-            logger(error)
-            if (isUnauthorized(error)) signOut()
-            throw new Error(error.message)
-          }
-          const { contentDecrypted } = await decryptEntry(data.content, data.iv, secretKey)
-          data.content = JSON.parse(contentDecrypted)
-          return data
-        }
-      }
-      if (error) {
-        logger(error)
-        if (isUnauthorized(error)) signOut()
-        throw new Error(error.message)
-      }
-      const { contentDecrypted } = await decryptEntry(data.content, data.iv, secretKey)
-      data.content = JSON.parse(contentDecrypted)
-      return data
-    } catch (err) {
-      logger(err)
+    if (userEntries.current.some((entry) => entry.day == entryDay)) {
+      const i = userEntries.current.findIndex((e) => e.day == entryDay)
+      userEntries.current[i].content = newValue
     }
+
+    const previousWordCount = wordCount.current
+    const currentWordCount = countEntryWords(newValue)
+    if (!!previousWordCount != !!currentWordCount) {
+      logger('Changed to has content or to has no content')
+      rerenderCalendar()
+    }
+
+    wordCount.current = currentWordCount
   }
 
-  const saveEntry = async (day: Day, content: any, modified_at: string) => {
-    // logger(`Save entry day: ${day}, modified_at: ${modified_at}`)
-    // cacheAddOrUpdateEntry({
-    //   user_id: session.user.id,
-    //   day,
-    //   created_at: modified_at, // not added when upsert
-    //   modified_at, // when needsSaving... keep same date in cache
-    //   content: JSON.stringify(content),
-    // })
-    // if (content == undefined) {
-    //   logger(`Undefined content on day: ${day}`)
-    // }
-    // try {
-    //   const secretKey = await getSecretKey()
-    //   const { contentEncrypted, iv } = await encryptEntry(JSON.stringify(content), secretKey)
-    //   const { error } = await supabase
-    //     .from('journals')
-    //     .upsert(
-    //       {
-    //         user_id: session.user.id,
-    //         day,
-    //         content: '\\x' + contentEncrypted,
-    //         iv: '\\x' + iv,
-    //         modified_at,
-    //       },
-    //       { returning: 'minimal' }
-    //     )
-    //     .single()
-    //   if (error) {
-    //     logger(error)
-    //     if (isUnauthorized(error)) signOut()
-    //     throw new Error(error.message)
-    //   }
-    //   setNeedsSavingToServer(false)
-    //   cacheUpdateEntryProperty({ needs_saving_to_server: 0 }, { day, user_id: session.user.id })
-    //   logger('saved')
-    // } catch (err) {
-    //   if (!needsSavingToServerModifiedAt) {
-    //     setNeedsSavingToServerModifiedAt(modified_at)
-    //   }
-    //   setNeedsSavingToServer(true)
-    //   cacheUpdateEntryProperty({ needs_saving_to_server: 1 }, { day, user_id: session.user.id })
-    //   logger(err)
-    // }
+  const saveEntry = async (day: Day, content: any) => {
+    const user_id = session.user.id
+    const modified_at = serverTimeNow()
+    content = JSON.stringify(content)
+    logger(`Save entry day: ${day}, modified_at: ${modified_at}`)
+    if (userEntries.current.some((entry) => entry.day == day)) {
+      logger('Entry exists, updating...')
+      cacheUpdateEntryProperty(
+        { modified_at, content, sync_status: 'pending_update' },
+        { user_id, day }
+      )
+    } else {
+      logger('Entry doesnt exist, inserting...')
+      cacheAddOrUpdateEntry({
+        user_id,
+        day,
+        created_at: modified_at,
+        modified_at,
+        content,
+        revision: 0,
+        sync_status: 'pending_insert',
+      })
+    }
   }
 
   const forceSaveEntry = async () => {
-    const timeNow = serverTimeNow()
-    if (!needsSavingToServerModifiedAt) {
-      setNeedsSavingToServerModifiedAt(timeNow)
-    }
-    await saveEntry(entryDay, debugValue.current, timeNow)
-  }
-
-  const initialFetch = async (entryModifiedAt: string) => {
-    // logger(`Initial fetch ${entryDay}`)
-    // if (cachedEntry) {
-    //   if (cachedEntry.needs_saving_to_server) {
-    //     await saveEntry(entryDay, cachedEntry.content, cachedEntry.modified_at)
-    //   }
-    // }
-    // if (dayjs(entryModifiedAt).isSame(cachedEntry?.modified_at)) {
-    //   // If Today is not on server and not in cache it falls
-    //   // here because comparing two undefined using isSame() returns true
-    //   logger('ModifiedAt the same, not fetching')
-    // } else {
-    //   logger('ModifiedAt not the same, fetching from server')
-    //   const init = await fetchEntry(entryDay)
-    //   if (!cachedEntry && init) {
-    //     const { user_id, day, created_at, modified_at, content } = init
-    //     cacheAddOrUpdateEntry({
-    //       user_id,
-    //       day,
-    //       created_at,
-    //       modified_at,
-    //       content: JSON.stringify(content),
-    //     })
-    //     setInitialValue([...init.content])
-    //   }
-    //   if (cachedEntry && init && !dayjs(init.modified_at).isSame(cachedEntry.modified_at)) {
-    //     logger(`${init.modified_at} != ${cachedEntry.modified_at}`)
-    //     if (dayjs(init.modified_at).isAfter(dayjs(cachedEntry.modified_at))) {
-    //       // Server entry is newer, save it to cache
-    //       logger('Server entry is newer, updating cache')
-    //       const { user_id, day, modified_at, content } = init
-    //       let set = { modified_at, content: JSON.stringify(content) }
-    //       let where = { day, user_id }
-    //       cacheUpdateEntry(set, where)
-    //       setInitialValue([...init.content])
-    //     } else {
-    //       // Cached entry is newer, push it to server
-    //       logger('Cached entry is newer, updating on server')
-    //       saveEntry(entryDay, cachedEntry.content, cachedEntry.modified_at)
-    //     }
-    //   }
-    // }
+    await saveEntry(entryDay, debugValue.current)
   }
 
   const ShouldFocus = () => {
@@ -295,10 +172,14 @@ const Entry = ({
     return <></>
   }
 
+  //////////////////////////
+  // ⛰ useEffect on mount
+  //////////////////////////
+
   useEffect(() => {
     logger(`Entry mounted`)
-    invokeEntriesInitialFetch.current[entryDay] = initialFetch
     invokeForceSaveEntry.current[entryDay] = forceSaveEntry
+    invokeRerenderEntry.current[entryDay] = rerenderEntry
     entriesObserver.observe(editorRef.current)
 
     // Scroll to entry if Today
@@ -313,21 +194,19 @@ const Entry = ({
         entriesObserver.unobserve(editorRef.current)
         // resizeObserver.unobserve(editorRef.current)
       }
-      if (saveTimer.current) {
-        clearTimeout(saveTimer.current)
+      if (saveDebounceTimer.current) {
+        clearTimeout(saveDebounceTimer.current)
+        saveDebounceTimer.current = null
       }
     }
   }, [])
 
-  useEffect(() => {
-    // logger(`needsSaving: ${needsSavingToServer}`)
-    if (needsSavingToServer) {
-      saveTimer.current = setTimeout(() => {
-        setNeedsSavingToServer(false)
-        saveEntry(entryDay, debugValue.current, needsSavingToServerModifiedAt)
-      }, 5000)
-    }
-  }, [needsSavingToServer])
+  const debounceSaveEntry = () => {
+    clearTimeout(saveDebounceTimer.current)
+    saveDebounceTimer.current = setTimeout(() => {
+      saveEntry(entryDay, debugValue.current)
+    }, 3000)
+  }
 
   const editableProps = {
     placeholder: "What's on your mind…",
@@ -354,12 +233,7 @@ const Entry = ({
         logger('Change')
         const isContentChange = editor.operations.some((op) => 'set_selection' !== op.type)
         if (isContentChange) {
-          // logger('isContentChange')
-          // Needs saving as it's an actual content change
-          setNeedsSavingToServerModifiedAt(serverTimeNow())
-          setNeedsSavingToServer(true)
-          // Another way to access editor value:
-          // logger(editor.children)
+          debounceSaveEntry()
         }
       },
       onContextMenu: () => (e) => {
@@ -437,22 +311,25 @@ const Entry = ({
     }
   )
 
-  const updateEditorValue = (value: any) => {
-    const newEditor = withPlate(createTEditor(), { id, plugins })
-    getPlateActions(id).value(value)
-    getPlateActions(id).editor(newEditor)
-    editorsRef.current[entryDay] = newEditor
-  }
+  const rerenderEntry = () => {
+    logger(`rerenderEntry on ${entryDay}`)
+    const entry = userEntries.current.find((e) => e.day == entryDay) as any
+    if (entry) {
+      const newEditor = withPlate(createTEditor(), { id, plugins })
+      getPlateActions(id).value(entry.content)
+      getPlateActions(id).editor(newEditor)
+      editorsRef.current[entryDay] = newEditor
 
-  useEffect(() => {
-    if (firstRender.current == false) {
-      updateEditorValue(initialValue)
-    } else {
-      firstRender.current = false
+      // Word count
+      const previousWordCount = wordCount.current
+      const currentWordCount = countEntryWords(entry.content)
+      if (!!previousWordCount != !!currentWordCount) {
+        logger('Changed to has content or to has no content')
+        rerenderCalendar()
+      }
+      wordCount.current = currentWordCount
     }
-    debugValue.current = initialValue
-    setWordCount(countEntryWords(initialValue))
-  }, [initialValue])
+  }
 
   const showMiniDate = (day: any) => {
     if (isToday(day)) {

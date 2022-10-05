@@ -353,7 +353,7 @@ const syncPendingDeletedEntryTags = async ({
 interface syncTagsProps {
   initialTagsFetchDone: React.MutableRefObject<boolean>
   initialEntryTagsFetchDone: React.MutableRefObject<boolean>
-  invokeEntriesTagsInitialFetch: React.MutableRefObject<any>
+  invokeRerenderEntryTags: React.MutableRefObject<any>
   userTags: React.MutableRefObject<Tag[]>
   cacheFetchTags: () => Promise<void>
   cacheFetchEntryTags: () => Promise<void>
@@ -365,7 +365,7 @@ interface syncTagsProps {
 const syncTags = async ({
   initialTagsFetchDone,
   initialEntryTagsFetchDone,
-  invokeEntriesTagsInitialFetch,
+  invokeRerenderEntryTags,
   userTags,
   cacheFetchTags,
   cacheFetchEntryTags,
@@ -532,8 +532,8 @@ const syncTags = async ({
     logger(`Invoking update entryTags for ${entriesToUpdateQueue.length} days:`)
     logger(entriesToUpdateQueue)
     entriesToUpdateQueue.map((day) => {
-      if (!!invokeEntriesTagsInitialFetch.current[day]) {
-        invokeEntriesTagsInitialFetch.current[day]()
+      if (!!invokeRerenderEntryTags.current[day]) {
+        invokeRerenderEntryTags.current[day]()
       }
     })
 
