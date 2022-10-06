@@ -7,7 +7,8 @@ import { useAppearanceContext, useEntriesContext, useUserContext } from 'context
 import { CalendarOpen, getCalendarIsOpen } from 'config'
 import { createDays, getYearsSince, logger, entryHasNoContent } from 'utils'
 import { Icon } from 'components'
-import type { Day } from '../components/Entry/types'
+import { defaultContent } from 'config'
+import type { Entry, Day } from './Entry/types'
 interface ContainerProps {
   isOpen: CalendarOpen
 }
@@ -205,6 +206,8 @@ const Calendar = () => {
   const { isCalendarOpen } = useAppearanceContext()
   const {
     cacheCreateNewEntry,
+    cacheAddOrUpdateEntry,
+    rerenderEntriesAndCalendar,
     deleteEntry,
     editorsRef,
     invokeForceSaveEntry,
@@ -213,7 +216,7 @@ const Calendar = () => {
   } = useEntriesContext()
   const [days, setDaysInternal] = useState([])
   const [daysWithNoContent, setDaysWithNoContent] = useState<string[]>([])
-  const { session } = useUserContext()
+  const { session, serverTimeNow } = useUserContext()
   const today = new Date()
 
   logger('Calendar render')
@@ -231,6 +234,10 @@ const Calendar = () => {
     setDaysWithNoContent([...daysWithNoContent])
   }
 
+  //////////////////////////
+  // ⛰ useEffect on mount
+  //////////////////////////
+
   useEffect(() => {
     invokeRerenderCalendar.current = setDays
     let today = dayjs().format('YYYY-MM-DD')
@@ -239,11 +246,6 @@ const Calendar = () => {
       element.scrollIntoView({ block: 'center' })
     }
   }, [])
-
-  useEffect(() => {
-    logger('daysWithNoContent updated:')
-    logger(daysWithNoContent)
-  }, [daysWithNoContent])
 
   const hasEntry = (date: string) => {
     if (days && Array.isArray(days)) {
@@ -272,7 +274,7 @@ const Calendar = () => {
     return false
   }
 
-  const scrollToDayAndAdd = async (day: string) => {
+  const scrollToDayAndAdd = async (day: Day) => {
     let element = document.getElementById(`${day}-entry`)
     if (element) {
       element.scrollIntoView()
@@ -290,8 +292,29 @@ const Calendar = () => {
       })
     } else {
       logger('no such day, adding...')
-      await cacheCreateNewEntry(day)
+      const user_id = session.user.id
+      const modified_at = serverTimeNow()
+      const entryToInsert: Entry = {
+        user_id,
+        day,
+        created_at: modified_at,
+        modified_at,
+        content: defaultContent,
+        revision: 0,
+        sync_status: 'pending_insert',
+      }
 
+      // Local state: add entry
+      userEntries.current.push({ ...entryToInsert })
+
+      // Cache: save
+      entryToInsert.content = JSON.stringify(defaultContent)
+      cacheAddOrUpdateEntry(entryToInsert)
+
+      // Rerender
+      rerenderEntriesAndCalendar()
+
+      //
       const focusInterval = setInterval(() => {
         const editor = editorsRef.current[day]
         if (editor) {
@@ -301,9 +324,6 @@ const Calendar = () => {
           // Scroll to new entry
           const editorRef = document.getElementById(`${day}-entry`)
           editorRef.scrollIntoView()
-
-          // Force save to supabase
-          invokeForceSaveEntry.current[day]()
 
           // Set focus
           focusEditor(editor)
@@ -345,7 +365,7 @@ const Calendar = () => {
                       {createDays(year, month + 1).map((day) => {
                         const today = `${year}-${withLeadingZero(month + 1)}-${withLeadingZero(
                           day
-                        )}`
+                        )}` as Day
                         return (
                           isBeforeToday(year, month, day) && (
                             <Day key={`${today}-wrapper`}>

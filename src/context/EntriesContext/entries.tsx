@@ -43,7 +43,6 @@ const cacheCreateNewEntry = async (day: Day) => {
   // let days = await window.electronAPI.cache.getDays(session.user.id)
   // entry.content = defaultContent
   // userEntries.current.push(entry)
-  // setDaysCache([...days])
   // logger(`Added day ${day}`)
 }
 
@@ -180,7 +179,7 @@ interface syncEntriesProps {
   initialEntriesFetchDone: React.MutableRefObject<boolean>
   syncEntriesInterval: React.MutableRefObject<NodeJS.Timeout | null>
   cacheFetchEntries: () => Promise<void>
-  rerenderEntriesAndCalendar: () => Promise<void>
+  rerenderEntriesAndCalendar: () => void
   rerenderEntry: (day: Day) => void
   session: Session
   signOut: () => void
@@ -213,6 +212,7 @@ const syncEntries = async ({
     }
 
     // SYNC TO -->
+    // IN_PROGRESS
     await syncPendingCreateEntries()
     await syncPendingUpdateEntries({
       addDayToStateUpdateQueue,

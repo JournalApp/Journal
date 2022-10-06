@@ -20,6 +20,7 @@ import { Container, MainWrapper, MiniDate } from './styled'
 import { electronAPIType } from '../../preload'
 import { theme } from 'themes'
 import { resetBlockTypePlugin } from '../../config/resetBlockTypePlugin'
+import type { Entry, Day } from './types'
 
 import {
   createPlateUI,
@@ -44,7 +45,6 @@ import {
   createResetNodePlugin,
   createHighlightPlugin,
 } from '@udecode/plate'
-import type { Day } from '../../components/Entry/types'
 
 const MARK_HAND_STRIKETHROUGH = 'hand-strikethrough'
 
@@ -60,7 +60,7 @@ const isToday = (day: any) => {
   return day.toString() == dayjs().format('YYYY-MM-DD')
 }
 
-const Entry = ({ entryDay, cachedEntry, entriesObserver }: EntryBlockProps) => {
+const EntryItem = ({ entryDay, cachedEntry, entriesObserver }: EntryBlockProps) => {
   const wordCount = useRef(countEntryWords(cachedEntry ? cachedEntry.content : ''))
   const [initialValue, setInitialValue] = useState(cachedEntry?.content ?? defaultContent)
   const [shouldFocus, setShouldFocus] = useState(isToday(entryDay))
@@ -121,10 +121,10 @@ const Entry = ({ entryDay, cachedEntry, entriesObserver }: EntryBlockProps) => {
     wordCount.current = currentWordCount
   }
 
-  const saveEntry = async (day: Day, content: any) => {
+  const saveEntry = async (day: Day, contentJson: any) => {
     const user_id = session.user.id
     const modified_at = serverTimeNow()
-    content = JSON.stringify(content)
+    const content = JSON.stringify(contentJson)
     logger(`Save entry day: ${day}, modified_at: ${modified_at}`)
     if (userEntries.current.some((entry) => entry.day == day)) {
       logger('Entry exists, updating...')
@@ -134,7 +134,7 @@ const Entry = ({ entryDay, cachedEntry, entriesObserver }: EntryBlockProps) => {
       )
     } else {
       logger('Entry doesnt exist, inserting...')
-      cacheAddOrUpdateEntry({
+      const entryToInsert: Entry = {
         user_id,
         day,
         created_at: modified_at,
@@ -142,7 +142,13 @@ const Entry = ({ entryDay, cachedEntry, entriesObserver }: EntryBlockProps) => {
         content,
         revision: 0,
         sync_status: 'pending_insert',
-      })
+      }
+      // Cache: save
+      cacheAddOrUpdateEntry({ ...entryToInsert })
+
+      // Local state: add entry
+      entryToInsert.content = contentJson
+      userEntries.current.push({ ...entryToInsert })
     }
   }
 
@@ -368,4 +374,4 @@ const Entry = ({ entryDay, cachedEntry, entriesObserver }: EntryBlockProps) => {
   )
 }
 
-export { Entry }
+export { EntryItem }

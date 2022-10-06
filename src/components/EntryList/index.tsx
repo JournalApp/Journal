@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Entry } from 'components'
+import { EntryItem } from 'components'
 import { useEventEditorSelectors } from '@udecode/plate'
 import { supabase, arrayEquals, isUnauthorized, logger } from 'utils'
 import { useEntriesContext, useUserContext } from 'context'
@@ -81,7 +81,7 @@ const entriesObserver = new IntersectionObserver(onIntersection, {
   rootMargin: '-100px',
 })
 
-const EntryMemo = React.memo(Entry, (prevProps, nextProps) => {
+const EntryMemo = React.memo(EntryItem, (prevProps, nextProps) => {
   console.info('New memo compare')
   if (prevProps.entryDay === nextProps.entryDay) {
     return true

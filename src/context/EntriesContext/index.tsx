@@ -46,8 +46,9 @@ interface EntriesContextInterface {
   invokeForceSaveEntry: React.MutableRefObject<any>
   invokeRerenderEntryTags: React.MutableRefObject<any>
   editorsRef: any
+  rerenderEntriesAndCalendar: () => void
   rerenderEntriesWithTag: (tag_id: string) => void
-  rerenderCalendar: () => Promise<void>
+  rerenderCalendar: () => void
 }
 
 const EntriesContext = createContext<EntriesContextInterface | null>(null)
@@ -96,19 +97,19 @@ export function EntriesProvider({ children }: any) {
     }
   }
 
-  const rerenderEntries = async () => {
+  const rerenderEntries = () => {
     if (!!invokeRerenderEntryList.current) {
       invokeRerenderEntryList.current()
     }
   }
 
-  const rerenderCalendar = async () => {
+  const rerenderCalendar = () => {
     if (!!invokeRerenderCalendar.current) {
       invokeRerenderCalendar.current()
     }
   }
 
-  const rerenderEntriesAndCalendar = async () => {
+  const rerenderEntriesAndCalendar = () => {
     rerenderEntries()
     rerenderCalendar()
   }
@@ -252,6 +253,7 @@ export function EntriesProvider({ children }: any) {
     invokeForceSaveEntry,
     editorsRef,
     rerenderEntriesWithTag,
+    rerenderEntriesAndCalendar,
     rerenderCalendar,
   }
   return (
