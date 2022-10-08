@@ -98,6 +98,22 @@ function isUnauthorized(error: PostgrestError) {
   }
 }
 
+function isUniqueViolation(error: PostgrestError) {
+  if (error.code == '23505') {
+    return true
+  } else {
+    return false
+  }
+}
+
+function isForeignKeyViolation(error: PostgrestError) {
+  if (error.code == '23503') {
+    return true
+  } else {
+    return false
+  }
+}
+
 function randomInt(max: number) {
   // max number (exclusive)
   // e.g. max=3 -> 0,1,2
@@ -114,6 +130,8 @@ export {
   ordinal,
   isDev,
   isUnauthorized,
+  isUniqueViolation,
+  isForeignKeyViolation,
   randomInt,
   isArrayEmpty,
   entryHasNoContent,

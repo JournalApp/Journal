@@ -1,5 +1,14 @@
 import React from 'react'
-import { supabase, isUnauthorized, logger, encryptEntry, decryptEntry } from 'utils'
+import dayjs from 'dayjs'
+import {
+  supabase,
+  isUnauthorized,
+  isUniqueViolation,
+  logger,
+  encryptEntry,
+  decryptEntry,
+  isArrayEmpty,
+} from 'utils'
 import type { Tag, EntryTag, EntryTagProperty } from '../../components/EntryTags/types'
 import type { Day, Entry } from '../../components/Entry/types'
 import { Session } from '@supabase/supabase-js'
@@ -12,70 +21,12 @@ const cacheAddOrUpdateEntry = async (entry: Entry) => {
   await window.electronAPI.cache.addOrUpdateEntry(entry)
 }
 
-const cacheAddEntryIfNotExists = async (user_id: string, day: string) => {
-  // const exists = await window.electronAPI.cache.doesEntryExist(user_id, day)
-  // if (!exists) {
-  //   logger(`Day ${day} doesnt exist, creating...`)
-  //   await invokeForceSaveEntry.current[day]()
-  // } else {
-  //   logger(`Day already ${day} exists`)
-  // }
-}
-
 const cacheUpdateEntry = async (set: any, where: any) => {
   await window.electronAPI.cache.updateEntry(set, where)
 }
 
 const cacheUpdateEntryProperty = async (set: object, where: object) => {
   await window.electronAPI.cache.updateEntryProperty(set, where)
-}
-
-const cacheCreateNewEntry = async (day: Day) => {
-  // let now = serverTimeNow()
-  // let entry = {
-  //   user_id: session.user.id,
-  //   day,
-  //   created_at: now,
-  //   modified_at: now,
-  //   content: JSON.stringify(defaultContent) as any,
-  // }
-  // await window.electronAPI.cache.addOrUpdateEntry(entry)
-  // let days = await window.electronAPI.cache.getDays(session.user.id)
-  // entry.content = defaultContent
-  // userEntries.current.push(entry)
-  // logger(`Added day ${day}`)
-}
-
-const deleteEntry = async (day: string) => {
-  // let user_id = session.user.id
-  // let { error } = await supabase
-  //   .from('journals')
-  //   .delete({ returning: 'minimal' })
-  //   .match({ user_id, day })
-  // if (error) {
-  //   logger(error)
-  //   setPendingDeletedEntries(true)
-  //   await window.electronAPI.cache.markPendingDeleteEntry({ user_id, day })
-  //   if (isUnauthorized(error)) signOut()
-  // } else {
-  //   await window.electronAPI.cache.deleteEntry({ user_id, day })
-  // }
-  // // Remove entryTags associated with this day
-  // const entryTagsToDelete = await window.electronAPI.cache.getEntryTagsOnDay(user_id, day)
-  // Promise.all(
-  //   entryTagsToDelete.map(async (et) => {
-  //     await window.electronAPI.cache.deleteEntryTag(user_id, et.tag_id, day)
-  //   })
-  // )
-  // await cacheFetchEntryTags()
-  // let days = await window.electronAPI.cache.getDays(user_id)
-  // userEntries.current = userEntries.current.filter((item) => item.day !== day)
-  // setDaysCache([...days])
-  // logger(`Removed day ${day}`)
-  // window.electronAPI.capture({
-  //   distinctId: session.user.id,
-  //   event: 'entry remove',
-  // })
 }
 
 //////////////////////////
@@ -86,15 +37,70 @@ interface syncTo {
   addDayToStateUpdateQueue?: (day: string) => void
   session: Session
   setDaysHaveChanged: (state: boolean) => void
-  getSecretKey: () => Promise<CryptoKey>
+  setEntryTagsHaveChanged: (state: boolean) => void
+  forceSyncTags: () => void
+  secretKey: CryptoKey
   signOut: () => void
 }
 
-const syncPendingCreateEntries = async () => {}
+const syncPendingCreateEntries = async ({
+  addDayToStateUpdateQueue,
+  secretKey,
+  setEntryTagsHaveChanged,
+  session,
+  signOut,
+}: syncTo) => {
+  const entries = await window.electronAPI.cache.getPendingInsertEntries(session.user.id)
+  if (entries.length) {
+    await Promise.all(
+      entries.map(async (entry: Entry) => {
+        const { contentEncrypted, iv } = await encryptEntry(entry.content, secretKey)
+        entry.content = '\\x' + contentEncrypted
+        entry.iv = '\\x' + iv
+        delete entry.sync_status
+        const { error } = await supabase.from<Entry>('journals').insert(entry)
+        logger('Inserting pending insert entry')
+        if (error) {
+          logger(error)
+          if (isUnauthorized(error)) signOut()
+          if (isUniqueViolation(error)) {
+            logger('Entry is already in supabase, updating to supabase version')
+            const { data: entryOnServer, error: error2 } = await supabase
+              .from<Entry>('journals')
+              .select()
+              .match({ user_id: session.user.id, day: entry.day })
+            if (error2) {
+              logger('Entry fetch error:')
+              logger(error)
+              if (isUnauthorized(error)) signOut()
+              throw new Error(error.message)
+            }
+            const { contentDecrypted } = await decryptEntry(
+              entryOnServer[0].content,
+              entryOnServer[0].iv,
+              secretKey
+            )
+            entryOnServer[0].content = contentDecrypted
+            entryOnServer[0].sync_status = 'synced'
+            await cacheAddOrUpdateEntry(entryOnServer[0])
+            addDayToStateUpdateQueue(entry.day)
+            setEntryTagsHaveChanged(true)
+          } else {
+            throw new Error(error.message)
+          }
+        }
+        cacheUpdateEntryProperty(
+          { sync_status: 'synced' },
+          { user_id: session.user.id, day: entry.day }
+        )
+      })
+    )
+  }
+}
 
 const syncPendingUpdateEntries = async ({
   addDayToStateUpdateQueue,
-  getSecretKey,
+  secretKey,
   setDaysHaveChanged,
   session,
   signOut,
@@ -103,11 +109,7 @@ const syncPendingUpdateEntries = async ({
   if (entries.length) {
     await Promise.all(
       entries.map(async (entry: Entry) => {
-        const secretKey = await getSecretKey()
-        const { contentEncrypted, iv } = await encryptEntry(
-          JSON.stringify(entry.content),
-          secretKey
-        )
+        const { contentEncrypted, iv } = await encryptEntry(entry.content, secretKey)
 
         const { data, error } = await supabase
           .from<Entry>('journals')
@@ -118,7 +120,12 @@ const syncPendingUpdateEntries = async ({
             modified_at: entry.modified_at,
             revision: entry.revision + 1,
           })
-          .match({ user_id: session.user.id, day: entry.day, revision: entry.revision })
+          .match({
+            user_id: session.user.id,
+            day: entry.day,
+            created_at: entry.created_at,
+            revision: entry.revision,
+          })
         if (error) {
           // Supabase also throws error when 0 rows updated (404)
           // hence can't throw error just yet
@@ -132,29 +139,74 @@ const syncPendingUpdateEntries = async ({
             .from<Entry>('journals')
             .select()
             .match({ user_id: session.user.id, day: entry.day })
-            .single()
           if (error) {
             logger('Entry fetch error:')
             logger(error)
             if (isUnauthorized(error)) signOut()
             throw new Error(error.message)
           }
-          if (!entryOnServer) {
+          if (!entryOnServer[0]) {
             logger('This entry is not in supabase, removing from cache too')
             await window.electronAPI.cache.deleteEntry({ user_id: session.user.id, day: entry.day })
             setDaysHaveChanged(true)
           } else {
-            if (entryOnServer.revision != entry.revision) {
-              logger('Entry revision mismatch -> reverting to supabase version')
+            if (dayjs(entryOnServer[0].created_at).isSame(entry.created_at)) {
+              logger('Entry created_at are the same')
+              if (entryOnServer[0].revision != entry.revision) {
+                logger('Entry revision mismatch -> reverting to supabase version')
+                const { contentDecrypted } = await decryptEntry(
+                  entryOnServer[0].content,
+                  entryOnServer[0].iv,
+                  secretKey
+                )
+                entryOnServer[0].content = contentDecrypted
+                entryOnServer[0].sync_status = 'synced'
+                cacheAddOrUpdateEntry(entryOnServer[0])
+                addDayToStateUpdateQueue(entry.day)
+              }
+            }
+            if (dayjs(entryOnServer[0].created_at).isAfter(dayjs(entry.created_at))) {
+              // User deleted it and added again or other device
+              // Revisons may even be the same, but it's a different entry
+              logger('Supabase created_at is newer, reverting to supabase version')
               const { contentDecrypted } = await decryptEntry(
-                entryOnServer.content,
-                entryOnServer.iv,
+                entryOnServer[0].content,
+                entryOnServer[0].iv,
                 secretKey
               )
-              entryOnServer.content = JSON.parse(contentDecrypted)
-              entryOnServer.sync_status = 'synced'
-              cacheAddOrUpdateEntry(entryOnServer)
+              entryOnServer[0].content = contentDecrypted
+              entryOnServer[0].sync_status = 'synced'
+              cacheAddOrUpdateEntry(entryOnServer[0])
               addDayToStateUpdateQueue(entry.day)
+            }
+            if (dayjs(entry.created_at).isAfter(dayjs(entryOnServer[0].created_at))) {
+              // User deleted entry and created it again while being offline
+              logger('Cached created_at is newer, pushing to supabase')
+              const { error: updateError } = await supabase
+                .from<Entry>('journals')
+                .update({
+                  user_id: session.user.id,
+                  content: '\\x' + contentEncrypted,
+                  iv: '\\x' + iv,
+                  created_at: entry.created_at,
+                  modified_at: entry.modified_at,
+                  revision: entry.revision,
+                })
+                .match({
+                  user_id: session.user.id,
+                  day: entry.day,
+                })
+              if (updateError) {
+                logger('Entry update error:')
+                logger(updateError)
+                if (isUnauthorized(updateError)) signOut()
+                throw new Error(updateError.message)
+              }
+              logger('Marking entry as synced')
+              cacheUpdateEntryProperty(
+                { sync_status: 'synced' },
+                { user_id: session.user.id, day: entry.day }
+              )
             }
           }
         } else {
@@ -169,7 +221,71 @@ const syncPendingUpdateEntries = async ({
   }
 }
 
-const syncPendingDeletedEntries = async () => {}
+const syncPendingDeletedEntries = async ({
+  secretKey,
+  setDaysHaveChanged,
+  session,
+  signOut,
+}: syncTo) => {
+  const entries = await window.electronAPI.cache.getPendingDeleteEntries(session.user.id)
+  if (entries.length) {
+    await Promise.all(
+      entries.map(async (entry: Entry) => {
+        const { data, error } = await supabase
+          .from<Entry>('journals')
+          .delete()
+          .match({ user_id: session.user.id, day: entry.day, revision: entry.revision })
+        if (error) {
+          logger('Delete error:')
+          logger(error)
+          if (isUnauthorized(error)) signOut()
+          throw new Error(error.message)
+        }
+        if (data == null) {
+          // null usually means offline
+          logger('Data == null')
+          throw new Error()
+        } else {
+          logger('Data not null')
+        }
+        logger('Delete entry return data:')
+        logger(data)
+        if (isArrayEmpty(data)) {
+          logger('Entry not deleted, check whats in supabase:')
+          // Fetch this entry from supabase
+          const { data: entryOnServer, error } = await supabase
+            .from<Entry>('journals')
+            .select()
+            .match({ user_id: session.user.id, day: entry.day })
+          if (error) {
+            logger('Entry fetch error:')
+            logger(error)
+            if (isUnauthorized(error)) signOut()
+            throw new Error(error.message)
+          }
+          if (!entryOnServer[0]) {
+            logger('This entry is not in supabase, removing from cache too')
+            await window.electronAPI.cache.deleteEntry({ user_id: session.user.id, day: entry.day })
+          } else {
+            logger('Entry revision mismatch -> reverting to supabase version')
+            const { contentDecrypted } = await decryptEntry(
+              entryOnServer[0].content,
+              entryOnServer[0].iv,
+              secretKey
+            )
+            entryOnServer[0].content = contentDecrypted
+            entryOnServer[0].sync_status = 'synced'
+            cacheAddOrUpdateEntry(entryOnServer[0])
+            setDaysHaveChanged(true)
+          }
+        } else {
+          logger('Deleting Entry from cache')
+          await window.electronAPI.cache.deleteEntry({ user_id: session.user.id, day: entry.day })
+        }
+      })
+    )
+  }
+}
 
 //////////////////////////
 // Entries sync
@@ -181,6 +297,7 @@ interface syncEntriesProps {
   cacheFetchEntries: () => Promise<void>
   rerenderEntriesAndCalendar: () => void
   rerenderEntry: (day: Day) => void
+  forceSyncTags: () => void
   session: Session
   signOut: () => void
   getSecretKey: () => Promise<CryptoKey>
@@ -192,16 +309,22 @@ const syncEntries = async ({
   cacheFetchEntries,
   rerenderEntriesAndCalendar,
   rerenderEntry,
+  forceSyncTags,
   session,
   signOut,
   getSecretKey,
 }: syncEntriesProps) => {
   logger('🗓 🗓 🗓 syncEntries starts')
   try {
-    // init entriesToUpdateQueue
+    const secretKey = await getSecretKey()
+    // init things to update at the end of sync
     let daysHaveChanged = false
     const setDaysHaveChanged = (state: boolean) => {
       daysHaveChanged = state
+    }
+    let entryTagsHaveChanged = false
+    const setEntryTagsHaveChanged = (state: boolean) => {
+      entryTagsHaveChanged = state
     }
     let newDaysToFetch: Day[] = []
     let entriesToUpdateQueue: Day[] = []
@@ -212,16 +335,18 @@ const syncEntries = async ({
     }
 
     // SYNC TO -->
-    // IN_PROGRESS
-    await syncPendingCreateEntries()
-    await syncPendingUpdateEntries({
+    const syncArgs = {
       addDayToStateUpdateQueue,
-      getSecretKey,
+      secretKey,
       setDaysHaveChanged,
+      setEntryTagsHaveChanged,
+      forceSyncTags,
       session,
       signOut,
-    })
-    await syncPendingDeletedEntries()
+    }
+    await syncPendingCreateEntries(syncArgs)
+    await syncPendingUpdateEntries(syncArgs)
+    await syncPendingDeletedEntries(syncArgs)
 
     // SYNC FROM <-- (only at launch)
     if (!initialEntriesFetchDone.current) {
@@ -304,13 +429,18 @@ const syncEntries = async ({
       initialEntriesFetchDone.current = true
     }
 
-    // Update local state with tags (userTags.current)
+    // Update local state with tags (userEntries.current)
     await cacheFetchEntries()
 
     // Rerender EntryList
     if (daysHaveChanged) {
       logger(`Invoking rerender bacuse days have changed`)
       await rerenderEntriesAndCalendar()
+    }
+
+    // Force sync Tags and EntryTags
+    if (entryTagsHaveChanged) {
+      forceSyncTags()
     }
 
     // Run entriesToUpdateQueue
@@ -330,12 +460,4 @@ const syncEntries = async ({
   }
 }
 
-export {
-  syncEntries,
-  cacheAddOrUpdateEntry,
-  cacheAddEntryIfNotExists,
-  cacheUpdateEntry,
-  cacheUpdateEntryProperty,
-  cacheCreateNewEntry,
-  deleteEntry,
-}
+export { syncEntries, cacheAddOrUpdateEntry, cacheUpdateEntry, cacheUpdateEntryProperty }

@@ -10,11 +10,8 @@ import type { Day, Entry } from '../../components/Entry/types'
 import {
   syncEntries,
   cacheAddOrUpdateEntry,
-  cacheAddEntryIfNotExists,
   cacheUpdateEntry,
   cacheUpdateEntryProperty,
-  cacheCreateNewEntry,
-  deleteEntry,
 } from './entries'
 import {
   cacheAddOrUpdateTag,
@@ -29,8 +26,7 @@ interface EntriesContextInterface {
   userEntries: React.MutableRefObject<Entry[]>
   userTags: React.MutableRefObject<Tag[]>
   userEntryTags: React.MutableRefObject<EntryTag[]>
-  cacheCreateNewEntry: (day: string) => Promise<void>
-  cacheAddEntryIfNotExists: (user_id: string, day: string) => Promise<void>
+  cacheAddEntryIfNotExists: (day: string) => Promise<void>
   deleteEntry: (day: string) => Promise<void>
   cacheAddOrUpdateEntry: electronAPIType['cache']['addOrUpdateEntry']
   cacheUpdateEntry: electronAPIType['cache']['updateEntry']
@@ -78,9 +74,29 @@ export function EntriesProvider({ children }: any) {
   const userEntryTags = useRef<EntryTag[]>([])
   const initialEntryTagsFetchDone = useRef(false)
 
+  logger('EntriesContext render')
+
   //////////////////////////
   // Entries functions
   //////////////////////////
+
+  const cacheAddEntryIfNotExists = async (day: string) => {
+    const exists = await window.electronAPI.cache.doesEntryExist(session.user.id, day)
+    if (!exists) {
+      logger(`Day ${day} doesnt exist, creating...`)
+      await invokeForceSaveEntry.current[day]()
+    } else {
+      logger(`Day already ${day} exists`)
+    }
+  }
+
+  const deleteEntry = async (day: string) => {
+    logger(`Removing day ${day}`)
+    const i = userEntries.current.findIndex((e) => e.day == day)
+    userEntries.current.splice(i, 1)
+    rerenderEntriesAndCalendar()
+    cacheUpdateEntryProperty({ sync_status: 'pending_delete' }, { user_id: session.user.id, day })
+  }
 
   const rerenderEntriesWithTag = async (tag_id: string) => {
     const days = await window.electronAPI.cache.getDaysWithTag(tag_id)
@@ -131,6 +147,61 @@ export function EntriesProvider({ children }: any) {
     userEntries.current = entries
   }
 
+  const forceSyncTags = () => {
+    initialTagsFetchDone.current = false
+    initialEntryTagsFetchDone.current = false
+    onTagPending()
+  }
+
+  // Entries
+  const syncEntriesArgs = {
+    initialEntriesFetchDone,
+    syncEntriesInterval,
+    cacheFetchEntries,
+    rerenderEntriesAndCalendar,
+    rerenderEntry,
+    forceSyncTags,
+    session,
+    signOut,
+    getSecretKey,
+  }
+  // Handeler for SQLite trigger
+  const onEntryPending = () => {
+    syncEntries(syncEntriesArgs)
+    logger('onEntryPending()')
+    if (!syncEntriesInterval.current) {
+      syncEntriesInterval.current = setInterval(syncEntries, 5000, syncEntriesArgs)
+      logger('interval set')
+    } else {
+      logger('interval not set')
+      logger(syncEntriesInterval.current)
+    }
+  }
+
+  // Tags
+  const syncTagsArgs = {
+    initialTagsFetchDone,
+    initialEntryTagsFetchDone,
+    invokeRerenderEntryTags,
+    userTags,
+    cacheFetchTags,
+    cacheFetchEntryTags,
+    syncTagsInterval,
+    session,
+    signOut,
+  }
+  // Handeler for SQLite trigger
+  const onTagPending = () => {
+    logger('onTagPending()')
+    if (!syncTagsInterval.current) {
+      syncTagsInterval.current = setInterval(syncTags, 5000, syncTagsArgs)
+      logger('interval set')
+    } else {
+      logger('interval not set')
+      logger(syncTagsInterval.current)
+    }
+  }
+
   //////////////////////////
   // ⛰ useEffect on mount
   //////////////////////////
@@ -152,8 +223,6 @@ export function EntriesProvider({ children }: any) {
         logger(`New day has come ${realToday} !!!`)
         today.current = realToday
         rerenderEntriesAndCalendar()
-        // TODO invoke scroll to Today from here
-        // ...
         window.electronAPI.capture({
           type: 'system',
           distinctId: session.user.id,
@@ -162,61 +231,17 @@ export function EntriesProvider({ children }: any) {
       }
     }, 1000)
 
-    // Entires
-    const syncEntriesArgs = {
-      initialEntriesFetchDone,
-      syncEntriesInterval,
-      cacheFetchEntries,
-      rerenderEntriesAndCalendar,
-      rerenderEntry,
-      session,
-      signOut,
-      getSecretKey,
-    }
-
+    // Sync Entires on mount
     syncEntriesInterval.current = setInterval(syncEntries, 5000, syncEntriesArgs)
     syncEntries(syncEntriesArgs)
+    // Set handeler for SQLite trigger
+    window.electronAPI.onEntryPending(onEntryPending)
 
-    window.electronAPI.onEntryPending(() => {
-      syncEntries(syncEntriesArgs)
-      logger('onEntryPending()')
-      if (!syncEntriesInterval.current) {
-        syncEntriesInterval.current = setInterval(syncEntries, 5000, syncEntriesArgs)
-        logger('interval set')
-      } else {
-        logger('interval not set')
-        logger(syncEntriesInterval.current)
-      }
-    })
-
-    // Tags
-    const syncTagsArgs = {
-      initialTagsFetchDone,
-      initialEntryTagsFetchDone,
-      invokeRerenderEntryTags,
-      userTags,
-      cacheFetchTags,
-      cacheFetchEntryTags,
-      syncTagsInterval,
-      session,
-      signOut,
-    }
-
+    // Sync Tags on mount
     syncTagsInterval.current = setInterval(syncTags, 5000, syncTagsArgs)
     syncTags(syncTagsArgs)
-
-    // TODO monitor if listener is not added more than once
-    // if so, remove listener in useEffect return()
-    window.electronAPI.onTagPending(() => {
-      logger('onTagPending()')
-      if (!syncTagsInterval.current) {
-        syncTagsInterval.current = setInterval(syncTags, 5000, syncTagsArgs)
-        logger('interval set')
-      } else {
-        logger('interval not set')
-        logger(syncTagsInterval.current)
-      }
-    })
+    // Set handeler for SQLite trigger
+    window.electronAPI.onTagPending(onTagPending)
 
     return () => {
       clearInterval(hasNewDayCome)
@@ -235,7 +260,6 @@ export function EntriesProvider({ children }: any) {
     userEntries,
     userTags,
     userEntryTags,
-    cacheCreateNewEntry,
     cacheAddEntryIfNotExists,
     deleteEntry,
     cacheAddOrUpdateEntry,

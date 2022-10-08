@@ -205,7 +205,6 @@ const withLeadingZero = (num: number) => {
 const Calendar = () => {
   const { isCalendarOpen } = useAppearanceContext()
   const {
-    cacheCreateNewEntry,
     cacheAddOrUpdateEntry,
     rerenderEntriesAndCalendar,
     deleteEntry,

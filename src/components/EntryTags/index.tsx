@@ -253,7 +253,7 @@ function EntryTags({ date }: EntryTagsProps) {
     e.preventDefault()
     if (activeIndex !== null) {
       if (item.type == 'action' && item.value == 'CREATE') {
-        await cacheAddEntryIfNotExists(session.user.id, date)
+        await cacheAddEntryIfNotExists(date)
         handleCreateAndAddTag(e, sel.refs.reference.current.value)
       } else {
         let selectedTag = { ...item.value }
@@ -261,7 +261,7 @@ function EntryTags({ date }: EntryTagsProps) {
           logger(`- Removing ${selectedTag.name}`)
           removeEntryTag(selectedTag.id)
         } else {
-          await cacheAddEntryIfNotExists(session.user.id, date)
+          await cacheAddEntryIfNotExists(date)
           logger(`+ Adding ${selectedTag.name}`)
           const timeNow = serverTimeNow()
           const entryTagToInsert: EntryTag = {

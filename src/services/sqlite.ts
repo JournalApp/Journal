@@ -164,10 +164,22 @@ ipcMain.handle('cache-add-or-update-entry', async (event, entry: Entry) => {
   logger('cache-add-or-update-entry')
   try {
     const db = getDB()
-    const { user_id, day, created_at, modified_at, content, revision, sync_status } = entry
+    let { user_id, day, created_at, modified_at, content, revision, sync_status } = entry
+
+    // Prevent overriding 'pending_delete' sync_status with 'pending_insert'
+    if (sync_status == 'pending_insert') {
+      const entryCache = db
+        .prepare(`SELECT sync_status FROM journals WHERE day = @day and user_id = @user_id`)
+        .get({ user_id, day }) as Entry
+      if (entryCache && entryCache.sync_status == 'pending_delete') {
+        logger(`Changing sync_status to 'pending_update' because it's 'pending_delete'`)
+        sync_status = 'pending_update'
+      }
+    }
+
     const stmt = db.prepare(
       `INSERT INTO journals (user_id, day, created_at, modified_at, content, revision, sync_status) VALUES (@user_id, @day, @created_at, @modified_at, @content, @revision, @sync_status)
-      ON CONFLICT(user_id, journal_id, day) DO UPDATE SET content = excluded.content, modified_at = excluded.modified_at, revision = excluded.revision, sync_status = excluded.sync_status`
+      ON CONFLICT(user_id, journal_id, day) DO UPDATE SET content = excluded.content, created_at = excluded.created_at, modified_at = excluded.modified_at, revision = excluded.revision, sync_status = excluded.sync_status`
     )
     return stmt.run({ user_id, day, created_at, modified_at, content, revision, sync_status })
   } catch (error) {
@@ -188,23 +200,6 @@ ipcMain.handle('cache-delete-entry', async (event, query) => {
       user_id,
       day,
     })
-    return result
-  } catch (error) {
-    logger(`error`)
-    logger(error)
-    return error
-  }
-})
-
-ipcMain.handle('cache-mark-deleted-entry', async (event, query) => {
-  logger('cache-mark-deleted-entry')
-  try {
-    const db = getDB()
-    const { user_id, day } = query
-    const stmt = db.prepare(
-      'UPDATE journals SET deleted = TRUE WHERE user_id = @user_id AND day = @day'
-    )
-    const result = stmt.run({ user_id, day })
     return result
   } catch (error) {
     logger(`error`)
@@ -299,16 +294,33 @@ ipcMain.handle('cache-get-entries', async (event, user_id) => {
   }
 })
 
-ipcMain.handle('cache-get-deleted-days', async (event, user_id) => {
-  logger('cache-get-deleted-days')
+ipcMain.handle('cache-get-pending-delete-entries', async (event, user_id) => {
+  logger('cache-get-pending-delete-entries')
   try {
     const db = getDB()
-    const stmt = db.prepare('SELECT day FROM journals WHERE user_id = @user_id AND deleted = TRUE')
+    const stmt = db.prepare(
+      "SELECT * FROM journals WHERE user_id = @user_id AND sync_status = 'pending_delete'"
+    )
     const result = stmt.all({ user_id })
-    const days = result.map((entry: any) => entry.day)
-    logger('Deleted days:')
-    logger(days)
-    return days
+    logger(`Pending delete entries: ${result.length}`)
+    return result
+  } catch (error) {
+    logger(`error`)
+    logger(error)
+    return error
+  }
+})
+
+ipcMain.handle('cache-get-pending-insert-entries', async (event, user_id) => {
+  logger('cache-get-pending-insert-entries')
+  try {
+    const db = getDB()
+    const stmt = db.prepare(
+      "SELECT * FROM journals WHERE user_id = @user_id AND sync_status = 'pending_insert'"
+    )
+    const result = stmt.all({ user_id })
+    logger(`Pending insert entries: ${result.length}`)
+    return result
   } catch (error) {
     logger(`error`)
     logger(error)

@@ -20,9 +20,6 @@ const electronAPI = {
     async deleteEntry(query: any) {
       await ipcRenderer.invoke('cache-delete-entry', query)
     },
-    async markPendingDeleteEntry(query: any) {
-      await ipcRenderer.invoke('cache-mark-deleted-entry', query)
-    },
     async deleteAll(user_id: string) {
       await ipcRenderer.invoke('cache-delete-all', user_id)
     },
@@ -38,8 +35,11 @@ const electronAPI = {
     async getEntries(user_id: string) {
       return (await ipcRenderer.invoke('cache-get-entries', user_id)) as Entry[]
     },
-    async getDeletedDays(user_id: string) {
-      return (await ipcRenderer.invoke('cache-get-deleted-days', user_id)) as Day[]
+    async getPendingDeleteEntries(user_id: string) {
+      return (await ipcRenderer.invoke('cache-get-pending-delete-entries', user_id)) as Entry[]
+    },
+    async getPendingInsertEntries(user_id: string) {
+      return (await ipcRenderer.invoke('cache-get-pending-insert-entries', user_id)) as Entry[]
     },
     async getPendingUpdateEntries(user_id: string) {
       return (await ipcRenderer.invoke('cache-get-pending-update-entries', user_id)) as Entry[]

@@ -127,9 +127,7 @@ function EntryAside({ date, wordCount }: EntryAsideProps) {
       </Aside>
       <AsideMenu>
         <AsideMenuStickyContainer>
-          {wordCount.current == 0 && !isToday(date) && (
-            <Remove name='Cross' size={16} onClick={() => deleteEntry(date)} />
-          )}
+          {!isToday(date) && <Remove name='Cross' size={16} onClick={() => deleteEntry(date)} />}
         </AsideMenuStickyContainer>
       </AsideMenu>
     </>
