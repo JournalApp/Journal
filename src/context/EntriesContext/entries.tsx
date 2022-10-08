@@ -398,28 +398,45 @@ const syncEntries = async ({
 
       // Fetch newDaysToFetch from Supabase
       if (newDaysToFetch.length) {
-        let orString = newDaysToFetch.map((s) => `day.eq.${s}`).join()
-        logger('orString:')
-        logger(orString)
-        let { data: additionalDaysSupabase, error: error2 } = await supabase
-          .from<Entry>('journals')
-          .select()
-          .eq('user_id', session.user.id)
-          .or(orString)
-        logger('additionalDaysSupabase:')
-        logger(additionalDaysSupabase)
-        if (error2) {
-          logger(error2)
-          if (isUnauthorized(error2)) signOut()
-          throw new Error(error2.message)
-        }
-        const secretKey = await getSecretKey()
+        // if >200 'or' statements, there is an error:
+        // (502) An invalid response was received from the upstream server
+        // Fetch from supabase in chunks of 50 days:
+        newDaysToFetch.reverse()
+        const daysInChunk = 50
+        let numberOfChunks = Math.ceil(newDaysToFetch.length / daysInChunk)
+        const chunks = Array(numberOfChunks).fill(0)
+
         await Promise.all(
-          additionalDaysSupabase.map(async (entry) => {
-            const { contentDecrypted } = await decryptEntry(entry.content, entry.iv, secretKey)
-            entry.content = contentDecrypted
-            entry.sync_status = 'synced'
-            await cacheAddOrUpdateEntry(entry)
+          chunks.map(async (v, i) => {
+            logger(`Fetching chunk ${i + 1} of ${numberOfChunks}`)
+
+            let cursor = i * daysInChunk
+            let chunk = newDaysToFetch.slice(cursor, cursor + daysInChunk)
+
+            let orString = chunk.map((s) => `day.eq.${s}`).join()
+            logger('orString:')
+            logger(orString)
+            let { data: additionalDaysSupabase, error: error2 } = await supabase
+              .from<Entry>('journals')
+              .select()
+              .eq('user_id', session.user.id)
+              .or(orString)
+            logger('additionalDaysSupabase:')
+            logger(additionalDaysSupabase)
+            if (error2) {
+              logger(error2)
+              if (isUnauthorized(error2)) signOut()
+              throw new Error(error2.message)
+            }
+            const secretKey = await getSecretKey()
+            await Promise.all(
+              additionalDaysSupabase.map(async (entry) => {
+                const { contentDecrypted } = await decryptEntry(entry.content, entry.iv, secretKey)
+                entry.content = contentDecrypted
+                entry.sync_status = 'synced'
+                await cacheAddOrUpdateEntry(entry)
+              })
+            )
           })
         )
       }

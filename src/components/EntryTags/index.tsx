@@ -102,10 +102,6 @@ function EntryTags({ date }: EntryTagsProps) {
     invokeRerenderEntryTags.current[date] = rerenderTags
   }, [])
 
-  useEffect(() => {
-    logger(`activeIndex: ${activeIndex}`)
-  }, [activeIndex])
-
   const { getReferenceProps, getFloatingProps, getItemProps } = useInteractions([
     // useFocus(sel.context, { keyboardOnly: false }),
     // useDismiss(sel.context, { escapeKey: false }),
@@ -141,9 +137,9 @@ function EntryTags({ date }: EntryTagsProps) {
   }, [open])
 
   useEffect(() => {
-    logger(`${editMode ? '✔' : '-'} Edit mode`)
-    logger(`${open ? '✔' : '-'} Popover`)
-    logger(`${tagIndexEditing != null ? '✔' : '-'} Tag edit`)
+    // logger(`${editMode ? '✔' : '-'} Edit mode`)
+    // logger(`${open ? '✔' : '-'} Popover`)
+    // logger(`${tagIndexEditing != null ? '✔' : '-'} Tag edit`)
   }, [open, editMode, tagIndexEditing])
 
   // useEffect(() => {
@@ -352,9 +348,9 @@ function EntryTags({ date }: EntryTagsProps) {
     // logger('EditMode rerender')
     const handleCloseEsc = (e: any) => {
       logger('🚪 ESC')
-      logger(`${editMode ? '✔' : '-'} Edit mode`)
-      logger(`${open ? '✔' : '-'} Popover`)
-      logger(`${tagIndexEditing != null ? '✔' : '-'} Tag edit`)
+      // logger(`${editMode ? '✔' : '-'} Edit mode`)
+      // logger(`${open ? '✔' : '-'} Popover`)
+      // logger(`${tagIndexEditing != null ? '✔' : '-'} Tag edit`)
       if (e.key == 'Escape') {
         if (colorPickerOpen) {
           if (!!tagEditingInputRef.current) {
@@ -385,9 +381,9 @@ function EntryTags({ date }: EntryTagsProps) {
 
     const handleCloseMouse = (e: any) => {
       logger('🖱 Mouse')
-      logger(`${editMode ? '✔' : '-'} Edit mode`)
-      logger(`${open ? '✔' : '-'} Popover`)
-      logger(`${tagIndexEditing != null ? '✔' : '-'} Tag edit`)
+      // logger(`${editMode ? '✔' : '-'} Edit mode`)
+      // logger(`${open ? '✔' : '-'} Popover`)
+      // logger(`${tagIndexEditing != null ? '✔' : '-'} Tag edit`)
 
       if (!tagWrapperRef.current.contains(e.target)) {
         logger('🖱 click outside tagWrapper')

@@ -183,7 +183,6 @@ const EntryItem = ({ entryDay, cachedEntry, entriesObserver }: EntryBlockProps) 
   //////////////////////////
 
   useEffect(() => {
-    logger(`Entry mounted`)
     invokeForceSaveEntry.current[entryDay] = forceSaveEntry
     invokeRerenderEntry.current[entryDay] = rerenderEntry
     entriesObserver.observe(editorRef.current)
