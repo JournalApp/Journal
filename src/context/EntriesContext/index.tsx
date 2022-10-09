@@ -161,6 +161,7 @@ export function EntriesProvider({ children }: any) {
     rerenderEntriesAndCalendar,
     rerenderEntry,
     forceSyncTags,
+    cacheFetchEntryTags,
     session,
     signOut,
     getSecretKey,

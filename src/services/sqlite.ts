@@ -551,7 +551,6 @@ ipcMain.handle('cache-add-or-update-entry-tag', async (event, entryTag: EntryTag
     const db = getDB()
     const { user_id, day, tag_id, order_no, created_at, modified_at, revision, sync_status } =
       entryTag
-    logger(entryTag)
     const stmt = db.prepare(
       `INSERT INTO entries_tags (user_id, day, tag_id, order_no, created_at, modified_at, revision, sync_status ) VALUES (@user_id, @day, @tag_id, @order_no, @created_at, @modified_at, @revision, @sync_status )
       ON CONFLICT(user_id, day, journal_id, tag_id) DO UPDATE SET order_no = excluded.order_no, modified_at = excluded.modified_at, revision = excluded.revision, sync_status = excluded.sync_status`

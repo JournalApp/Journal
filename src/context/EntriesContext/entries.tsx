@@ -39,6 +39,7 @@ interface syncTo {
   setDaysHaveChanged: (state: boolean) => void
   setEntryTagsHaveChanged: (state: boolean) => void
   forceSyncTags: () => void
+  cacheFetchEntryTags: () => Promise<void>
   secretKey: CryptoKey
   signOut: () => void
 }
@@ -102,6 +103,7 @@ const syncPendingUpdateEntries = async ({
   addDayToStateUpdateQueue,
   secretKey,
   setDaysHaveChanged,
+  cacheFetchEntryTags,
   session,
   signOut,
 }: syncTo) => {
@@ -148,6 +150,8 @@ const syncPendingUpdateEntries = async ({
           if (!entryOnServer[0]) {
             logger('This entry is not in supabase, removing from cache too')
             await window.electronAPI.cache.deleteEntry({ user_id: session.user.id, day: entry.day })
+            // Refrsh tags
+            cacheFetchEntryTags()
             setDaysHaveChanged(true)
           } else {
             if (dayjs(entryOnServer[0].created_at).isSame(entry.created_at)) {
@@ -211,7 +215,6 @@ const syncPendingUpdateEntries = async ({
           }
         } else {
           logger('Marking entry as synced')
-          logger(data)
           entry.sync_status = 'synced'
           entry.revision = entry.revision + 1
           await cacheAddOrUpdateEntry(entry)
@@ -224,6 +227,7 @@ const syncPendingUpdateEntries = async ({
 const syncPendingDeletedEntries = async ({
   secretKey,
   setDaysHaveChanged,
+  cacheFetchEntryTags,
   session,
   signOut,
 }: syncTo) => {
@@ -231,10 +235,12 @@ const syncPendingDeletedEntries = async ({
   if (entries.length) {
     await Promise.all(
       entries.map(async (entry: Entry) => {
-        const { data, error } = await supabase
-          .from<Entry>('journals')
-          .delete()
-          .match({ user_id: session.user.id, day: entry.day, revision: entry.revision })
+        const { data, error } = await supabase.from<Entry>('journals').delete().match({
+          user_id: session.user.id,
+          day: entry.day,
+          created_at: entry.created_at,
+          revision: entry.revision,
+        })
         if (error) {
           logger('Delete error:')
           logger(error)
@@ -266,21 +272,37 @@ const syncPendingDeletedEntries = async ({
           if (!entryOnServer[0]) {
             logger('This entry is not in supabase, removing from cache too')
             await window.electronAPI.cache.deleteEntry({ user_id: session.user.id, day: entry.day })
+            // Refrsh tags
+            cacheFetchEntryTags()
           } else {
-            logger('Entry revision mismatch -> reverting to supabase version')
-            const { contentDecrypted } = await decryptEntry(
-              entryOnServer[0].content,
-              entryOnServer[0].iv,
-              secretKey
-            )
-            entryOnServer[0].content = contentDecrypted
-            entryOnServer[0].sync_status = 'synced'
-            cacheAddOrUpdateEntry(entryOnServer[0])
-            setDaysHaveChanged(true)
+            let created_at_same = dayjs(entryOnServer[0].created_at).isSame(entry.created_at)
+            let revisions_missmatch = entryOnServer[0].revision != entry.revision
+            const revertToSupabaseVersion = async () => {
+              logger('Reverting to supabase version')
+              const { contentDecrypted } = await decryptEntry(
+                entryOnServer[0].content,
+                entryOnServer[0].iv,
+                secretKey
+              )
+              entryOnServer[0].content = contentDecrypted
+              entryOnServer[0].sync_status = 'synced'
+              cacheAddOrUpdateEntry(entryOnServer[0])
+              setDaysHaveChanged(true)
+            }
+            if (created_at_same && revisions_missmatch) {
+              logger('Entry created_at are the same, but revision missmatch')
+              await revertToSupabaseVersion()
+            }
+            if (!created_at_same) {
+              logger('Entry created_at different')
+              await revertToSupabaseVersion()
+            }
           }
         } else {
           logger('Deleting Entry from cache')
           await window.electronAPI.cache.deleteEntry({ user_id: session.user.id, day: entry.day })
+          // Refrsh tags
+          cacheFetchEntryTags()
         }
       })
     )
@@ -298,6 +320,7 @@ interface syncEntriesProps {
   rerenderEntriesAndCalendar: () => void
   rerenderEntry: (day: Day) => void
   forceSyncTags: () => void
+  cacheFetchEntryTags: () => Promise<void>
   session: Session
   signOut: () => void
   getSecretKey: () => Promise<CryptoKey>
@@ -310,6 +333,7 @@ const syncEntries = async ({
   rerenderEntriesAndCalendar,
   rerenderEntry,
   forceSyncTags,
+  cacheFetchEntryTags,
   session,
   signOut,
   getSecretKey,
@@ -341,6 +365,7 @@ const syncEntries = async ({
       setDaysHaveChanged,
       setEntryTagsHaveChanged,
       forceSyncTags,
+      cacheFetchEntryTags,
       session,
       signOut,
     }
