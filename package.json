@@ -78,7 +78,7 @@
           "@electron-forge/plugin-webpack",
           {
             "mainConfig": "./webpack.main.config.js",
-            "devContentSecurityPolicy": "connect-src 'self' https://hsbagpjhlxzabpiitqjw.supabase.co https://tnfdauoowyrpxqodomqn.supabase.co http://localhost:8000 https://kms.journal.do https://kms.journal.local https://capture.journal.local https://capture.journal.do 'unsafe-eval'",
+            "devContentSecurityPolicy": "connect-src 'self' https://hsbagpjhlxzabpiitqjw.supabase.co https://tnfdauoowyrpxqodomqn.supabase.co http://localhost:8000 https://kms.journal.do https://kms.journal.local https://capture.journal.local https://capture.journal.do https://subscriptions.journal.local https://subscriptions.journal.do 'unsafe-eval'",
             "renderer": {
               "config": "./webpack.renderer.config.js",
               "entryPoints": [
@@ -133,9 +133,12 @@
     "@radix-ui/react-dialog": "^1.0.0",
     "@radix-ui/react-dropdown-menu": "^1.0.0",
     "@radix-ui/react-select": "^0.1.1",
+    "@radix-ui/react-tabs": "^1.0.0",
     "@radix-ui/react-toggle": "^0.1.4",
     "@radix-ui/react-toggle-group": "^0.1.5",
     "@radix-ui/react-toolbar": "^1.0.0",
+    "@stripe/react-stripe-js": "^1.12.0",
+    "@stripe/stripe-js": "^1.39.0",
     "@styled-icons/boxicons-regular": "^10.38.0",
     "@styled-icons/foundation": "^10.34.0",
     "@styled-icons/material": "^10.34.0",
@@ -162,6 +165,7 @@
     "remarkable": "^2.0.1",
     "serialize-error": "^11.0.0",
     "string-to-arraybuffer": "^1.0.2",
+    "stripe": "^10.15.0",
     "styled-components": "^5.3.3",
     "tailwindcss": "^3.0.23",
     "twin.macro": "^2.8.2"

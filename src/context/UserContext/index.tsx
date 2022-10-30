@@ -4,6 +4,8 @@ import { Login } from 'components'
 import { Session } from '@supabase/supabase-js'
 import dayjs from 'dayjs'
 import { isDev } from 'utils'
+import type { Subscription } from './types'
+import { getSubscription } from './subscriptions'
 
 interface UserContextInterface {
   session: Session
@@ -21,6 +23,7 @@ export function UserProvider({ children }: any) {
   const [authError, setAuthError] = useState('')
   const secretKey = useRef(null)
   const serverClientTimeDelta = useRef(0) //  server time - client time = delta
+  const subscription = useRef<Subscription | null>(null)
 
   logger('UserProvider re-render')
 
@@ -37,6 +40,26 @@ export function UserProvider({ children }: any) {
       }
     }
   })
+
+  const initSubscription = async () => {
+    // const subState = {
+    //   status: 'active',
+    //   product_id: 'prod_2323'
+    // }
+    if (session?.access_token) {
+      try {
+        subscription.current = await getSubscription(session.access_token)
+      } catch (error) {
+        logger(error)
+      }
+    }
+  }
+
+  useEffect(() => {
+    logger('Session changed')
+    logger(session)
+    initSubscription()
+  }, [session])
 
   useEffect(() => {
     setSession(supabase.auth.session())
