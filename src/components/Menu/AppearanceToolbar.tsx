@@ -1,10 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react'
-import * as Dialog from '@radix-ui/react-dialog'
 import * as Toolbar from '@radix-ui/react-toolbar'
 import styled, { keyframes } from 'styled-components'
 import { theme, lightTheme, darkTheme } from 'themes'
 import { breakpoints, isDev, logger } from 'utils'
 import { useAppearanceContext, AppearanceContextInterface } from 'context'
+import {
+  useFloating,
+  FloatingTree,
+  FloatingOverlay,
+  useInteractions,
+  useDismiss,
+  useClick,
+  FloatingFocusManager,
+  useFloatingNodeId,
+  FloatingNode,
+  FloatingPortal,
+} from '@floating-ui/react-dom-interactions'
 
 const reveal = keyframes`
   0% {
@@ -54,7 +65,7 @@ const ToggleButton = styled(({ padding, fontName, ...props }) => (
   }
 `
 
-const AppearanceToolbarWrapper = styled(Dialog.Content)`
+const AppearanceToolbarWrapper = styled.div`
   position: fixed;
   bottom: 80px;
   left: 0;
@@ -119,89 +130,135 @@ const HorizontalDivider = styled(Toolbar.Separator)`
   margin: 4px 8px;
 `
 
-const AppearanceToolbarTrigger = styled(Dialog.Trigger)`
-  background-color: transparent;
-  color: inherit;
-  padding: 0;
-  outline: none;
-  border: 0;
-  width: 100%;
-  &:focus,
-  &:hover {
-    outline: none;
-  }
-`
-
 interface AppearanceToolbarProps {
   setOpenAppearanceToolbar: React.MutableRefObject<any>
+  returnFocus: React.MutableRefObject<HTMLButtonElement>
 }
 
-const AppearanceToolbar = ({ setOpenAppearanceToolbar }: AppearanceToolbarProps) => {
+const AppearanceToolbar = ({ setOpenAppearanceToolbar, returnFocus }: AppearanceToolbarProps) => {
   const [open, setOpen] = useState(false)
-
+  const firstRender = useRef(true)
+  const initialFocus = useRef<HTMLDivElement>(null)
+  const nodeId = useFloatingNodeId()
   const { fontSize, setFontSize, fontFace, setFontFace, colorTheme, setColorTheme } =
     useAppearanceContext()
 
+  const { floating, context, refs } = useFloating({
+    open,
+    onOpenChange: setOpen,
+    nodeId,
+  })
+
+  const { getFloatingProps } = useInteractions([
+    useClick(context),
+    useDismiss(context, {
+      escapeKey: false,
+    }),
+  ])
+
+  const handleCloseEsc = (e: any) => {
+    if (e.key == 'Escape') {
+      if (refs.floating.current && refs.floating.current.contains(document.activeElement)) {
+        setOpen(false)
+      }
+    }
+  }
+
   useEffect(() => {
     setOpenAppearanceToolbar.current = setOpen
+
+    logger('✅ addEventListener')
+    document.addEventListener('keydown', handleCloseEsc)
+    return () => {
+      logger('❌ removeEventListener')
+      document.removeEventListener('keydown', handleCloseEsc)
+    }
   }, [])
 
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false
+    } else {
+      if (open) {
+        setTimeout(() => {
+          initialFocus.current.focus()
+        }, 100)
+      } else {
+        setTimeout(() => {
+          returnFocus.current.focus()
+        }, 100)
+      }
+    }
+  }, [open])
+
   return (
-    <Dialog.Root open={open} onOpenChange={setOpen}>
-      <Dialog.Portal>
-        <AppearanceToolbarWrapper>
-          <AppearanceToolbarStyled>
-            <ToggleGroup
-              type='single'
-              defaultValue={fontSize}
-              onValueChange={(value) => {
-                setFontSize(value as AppearanceContextInterface['fontSize'])
-              }}
-            >
-              <ToggleFontA value='small' disabled={fontSize == 'small'}>
-                A
-              </ToggleFontA>
-              <ToggleFontAA value='normal' disabled={fontSize == 'normal'}>
-                A
-              </ToggleFontAA>
-              <ToggleFontAAA value='large' disabled={fontSize == 'large'}>
-                A
-              </ToggleFontAAA>
-            </ToggleGroup>
-            <HorizontalDivider />
-            <ToggleGroup
-              type='single'
-              defaultValue={colorTheme}
-              onValueChange={(value) => {
-                setColorTheme(value as AppearanceContextInterface['colorTheme'])
-              }}
-            >
-              <ToggleButton value='light' padding='8px' disabled={colorTheme == 'light'}>
-                <ColorSwatch fillColor={`rgba(${lightTheme.color.primary.surface},1)`} />
-              </ToggleButton>
-              <ToggleButton value='dark' padding='8px' disabled={colorTheme == 'dark'}>
-                <ColorSwatch fillColor={`rgba(${darkTheme.color.primary.surface},1)`} />
-              </ToggleButton>
-            </ToggleGroup>
-            <HorizontalDivider />
-            <ToggleGroup
-              type='single'
-              defaultValue={fontFace}
-              onValueChange={(value) => {
-                setFontFace(value as AppearanceContextInterface['fontFace'])
-              }}
-            >
-              <ToggleButton value='inter' disabled={fontFace == 'inter'}>
-                Inter
-              </ToggleButton>
-              <ToggleButton value='novela' fontName='Novela' disabled={fontFace == 'novela'}>
-                Novela
-              </ToggleButton>
-            </ToggleGroup>
-          </AppearanceToolbarStyled>
-        </AppearanceToolbarWrapper>
-      </Dialog.Portal>
-    </Dialog.Root>
+    <FloatingTree>
+      <FloatingNode id={nodeId}>
+        <FloatingPortal>
+          {open && (
+            <FloatingOverlay>
+              <FloatingFocusManager context={context}>
+                <AppearanceToolbarWrapper ref={floating} {...getFloatingProps()}>
+                  <AppearanceToolbarStyled ref={initialFocus}>
+                    <ToggleGroup
+                      type='single'
+                      defaultValue={fontSize}
+                      onValueChange={(value) => {
+                        setFontSize(value as AppearanceContextInterface['fontSize'])
+                      }}
+                    >
+                      <ToggleFontA value='small' disabled={fontSize == 'small'}>
+                        A
+                      </ToggleFontA>
+                      <ToggleFontAA value='normal' disabled={fontSize == 'normal'}>
+                        A
+                      </ToggleFontAA>
+                      <ToggleFontAAA value='large' disabled={fontSize == 'large'}>
+                        A
+                      </ToggleFontAAA>
+                    </ToggleGroup>
+                    <HorizontalDivider />
+                    <ToggleGroup
+                      type='single'
+                      defaultValue={colorTheme}
+                      onValueChange={(value) => {
+                        setColorTheme(value as AppearanceContextInterface['colorTheme'])
+                      }}
+                    >
+                      <ToggleButton value='light' padding='8px' disabled={colorTheme == 'light'}>
+                        <ColorSwatch fillColor={`rgba(${lightTheme.color.primary.surface},1)`} />
+                      </ToggleButton>
+                      <ToggleButton value='dark' padding='8px' disabled={colorTheme == 'dark'}>
+                        <ColorSwatch fillColor={`rgba(${darkTheme.color.primary.surface},1)`} />
+                      </ToggleButton>
+                    </ToggleGroup>
+                    <HorizontalDivider />
+                    <ToggleGroup
+                      type='single'
+                      defaultValue={fontFace}
+                      onValueChange={(value) => {
+                        setFontFace(value as AppearanceContextInterface['fontFace'])
+                      }}
+                    >
+                      <ToggleButton value='inter' disabled={fontFace == 'inter'}>
+                        Inter
+                      </ToggleButton>
+                      <ToggleButton
+                        value='novela'
+                        fontName='Novela'
+                        disabled={fontFace == 'novela'}
+                      >
+                        Novela
+                      </ToggleButton>
+                    </ToggleGroup>
+                  </AppearanceToolbarStyled>
+                </AppearanceToolbarWrapper>
+              </FloatingFocusManager>
+            </FloatingOverlay>
+          )}
+        </FloatingPortal>
+      </FloatingNode>
+    </FloatingTree>
   )
 }
 

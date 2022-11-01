@@ -54,16 +54,8 @@ interface SettingsDialogProps {
 const SettingsDialog = ({ setOpenSettings, returnFocus }: SettingsDialogProps) => {
   const [open, setOpen] = useState(false)
   const firstRender = useRef(true)
-
   const initialFocus = useRef<HTMLButtonElement>(null)
-
-  useEffect(() => {
-    setOpenSettings.current = setOpen
-  }, [])
-
   const nodeId = useFloatingNodeId()
-  const parentNodeId = useFloatingParentNodeId()
-  logger(`Settings nodeId=${nodeId}, parentNodeId=${parentNodeId}`)
 
   const { floating, context, refs } = useFloating({
     open,
@@ -87,6 +79,8 @@ const SettingsDialog = ({ setOpenSettings, returnFocus }: SettingsDialogProps) =
   }
 
   useEffect(() => {
+    setOpenSettings.current = setOpen
+
     logger('✅ addEventListener')
     document.addEventListener('keydown', handleCloseEsc)
     return () => {

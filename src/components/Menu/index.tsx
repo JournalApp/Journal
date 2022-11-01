@@ -183,7 +183,10 @@ const Menu = () => {
           )}
         </Dropdown>
       </DropdownMenu.Root>
-      <AppearanceToolbar setOpenAppearanceToolbar={setOpenAppearanceToolbar} />
+      <AppearanceToolbar
+        returnFocus={returnFocus}
+        setOpenAppearanceToolbar={setOpenAppearanceToolbar}
+      />
       <SettingsDialog returnFocus={returnFocus} setOpenSettings={setOpenSettings} />
     </>
   )

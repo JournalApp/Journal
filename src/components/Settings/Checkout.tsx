@@ -24,34 +24,9 @@ import {
   useFloatingTree,
 } from '@floating-ui/react-dom-interactions'
 
-const Root = styled(Tabs.Root)`
-  display: flex;
-  flex-direction: row;
-  background-color: ${theme('color.popper.surface')};
-  width: -webkit-fill-available;
-  max-width: 1000px;
-  height: -webkit-fill-available;
-  max-height: 600px;
-  padding: 8px;
-  margin: 48px 8px 8px 8px;
-  border-radius: 8px;
-`
-
-const Content = styled.div`
-  padding: 32px;
-`
-
-const List = styled(Tabs.List)`
-  display: flex;
-  flex-direction: column;
-`
-
 const Checkout = () => {
   const [open, setOpen] = useState(false)
-
   const nodeId = useFloatingNodeId()
-  const parentNodeId = useFloatingParentNodeId()
-  logger(`Checkout nodeId=${nodeId}, parentNodeId=${parentNodeId}`)
 
   const { reference, floating, context, refs } = useFloating({
     open,
