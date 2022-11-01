@@ -9,7 +9,6 @@ import {
   ScrollToToday,
   FeedbackWidget,
   Splash,
-  Settings,
 } from 'components'
 import { AppearanceProvider, EntriesProvider, UserProvider } from 'context'
 import { theme } from 'themes'
@@ -123,7 +122,6 @@ function App() {
             <FadeOut />
             <Menu />
             <TrafficLightMenu />
-            {/* <Settings /> */}
             <Calendar />
             <ScrollToToday />
             <FeedbackWidget />

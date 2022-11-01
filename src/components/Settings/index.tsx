@@ -2,19 +2,27 @@ import React, { useState, useEffect, useRef } from 'react'
 import * as Tabs from '@radix-ui/react-tabs'
 import styled from 'styled-components'
 import { theme } from 'themes'
+import { isDev, logger } from 'utils'
 import { Upgrade } from './Upgrade'
-
-const Overlay = styled.div`
-  position: fixed;
-  z-index: 10;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background-color: ${theme('color.primary.surface', 0.8)};
-  display: grid;
-  place-items: center;
-`
+import {
+  useFloating,
+  offset,
+  FloatingTree,
+  FloatingOverlay,
+  useListNavigation,
+  useInteractions,
+  useDismiss,
+  useId,
+  useClick,
+  useRole,
+  FloatingFocusManager,
+  useFocus,
+  useFloatingNodeId,
+  useFloatingParentNodeId,
+  FloatingNode,
+  FloatingPortal,
+} from '@floating-ui/react-dom-interactions'
+import { Checkout } from './Checkout'
 
 const Root = styled(Tabs.Root)`
   display: flex;
@@ -38,25 +46,113 @@ const List = styled(Tabs.List)`
   flex-direction: column;
 `
 
-const Settings = () => {
+interface SettingsDialogProps {
+  setOpenSettings: React.MutableRefObject<any>
+  returnFocus: React.MutableRefObject<HTMLButtonElement>
+}
+
+const SettingsDialog = ({ setOpenSettings, returnFocus }: SettingsDialogProps) => {
+  const [open, setOpen] = useState(false)
+  const firstRender = useRef(true)
+
+  const initialFocus = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    setOpenSettings.current = setOpen
+  }, [])
+
+  const nodeId = useFloatingNodeId()
+  const parentNodeId = useFloatingParentNodeId()
+  logger(`Settings nodeId=${nodeId}, parentNodeId=${parentNodeId}`)
+
+  const { floating, context, refs } = useFloating({
+    open,
+    onOpenChange: setOpen,
+    nodeId,
+  })
+
+  const { getFloatingProps } = useInteractions([
+    useClick(context),
+    useDismiss(context, {
+      escapeKey: false,
+    }),
+  ])
+
+  const handleCloseEsc = (e: any) => {
+    if (e.key == 'Escape') {
+      if (refs.floating.current && refs.floating.current.contains(document.activeElement)) {
+        setOpen(false)
+      }
+    }
+  }
+
+  useEffect(() => {
+    logger('✅ addEventListener')
+    document.addEventListener('keydown', handleCloseEsc)
+    return () => {
+      logger('❌ removeEventListener')
+      document.removeEventListener('keydown', handleCloseEsc)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false
+    } else {
+      if (open) {
+        setTimeout(() => {
+          initialFocus.current.focus()
+        }, 100)
+      } else {
+        setTimeout(() => {
+          returnFocus.current.focus()
+        }, 100)
+      }
+    }
+  }, [open])
+
   return (
-    <Overlay>
-      <Root defaultValue='tab1' orientation='vertical'>
-        <List aria-label='tabs example'>
-          <Tabs.Trigger value='tab1'>Account</Tabs.Trigger>
-          <Tabs.Trigger value='tab2'>Upgrade</Tabs.Trigger>
-          <Tabs.Trigger value='tab3'>Invoices</Tabs.Trigger>
-        </List>
-        <Content>
-          <Tabs.Content value='tab1'>Tab one content</Tabs.Content>
-          <Tabs.Content value='tab2'>
-            <Upgrade />
-          </Tabs.Content>
-          <Tabs.Content value='tab3'>Tab three content</Tabs.Content>
-        </Content>
-      </Root>
-    </Overlay>
+    <FloatingTree>
+      <FloatingNode id={nodeId}>
+        <FloatingPortal>
+          {open && (
+            <FloatingOverlay
+              lockScroll
+              style={{
+                display: 'grid',
+                placeItems: 'center',
+                background: theme('color.primary.surface', 0.8),
+              }}
+            >
+              <FloatingFocusManager context={context}>
+                <div ref={floating} {...getFloatingProps()}>
+                  <Root defaultValue='tab1' orientation='vertical'>
+                    <List aria-label='tabs example'>
+                      <Tabs.Trigger ref={initialFocus} value='tab1'>
+                        Account
+                      </Tabs.Trigger>
+                      <Tabs.Trigger value='tab2'>Upgrade</Tabs.Trigger>
+                      <Tabs.Trigger value='tab3'>Invoices</Tabs.Trigger>
+                    </List>
+                    <Content>
+                      <Tabs.Content value='tab1'>
+                        Tab one content
+                        <Checkout />
+                      </Tabs.Content>
+                      <Tabs.Content value='tab2'>
+                        <Upgrade />
+                      </Tabs.Content>
+                      <Tabs.Content value='tab3'>Tab three content</Tabs.Content>
+                    </Content>
+                  </Root>
+                </div>
+              </FloatingFocusManager>
+            </FloatingOverlay>
+          )}
+        </FloatingPortal>
+      </FloatingNode>
+    </FloatingTree>
   )
 }
 
-export { Settings }
+export { SettingsDialog }
