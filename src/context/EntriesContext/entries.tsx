@@ -492,7 +492,7 @@ const syncEntries = async ({
       rerenderEntry(day)
     })
 
-    logger('⏹ ⏹ ⏹ syncEntries stops')
+    logger('✋🏻 ✋🏻 ✋🏻 syncEntries stops')
     if (syncEntriesInterval.current) {
       clearInterval(syncEntriesInterval.current)
       syncEntriesInterval.current = null

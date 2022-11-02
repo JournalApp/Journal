@@ -6,7 +6,7 @@ import { Elements } from '@stripe/react-stripe-js'
 import { Subscribe } from './Subscribe'
 import type { PaymentIntent, Stripe } from '@stripe/stripe-js'
 
-const Upgrade = () => {
+const UpgradeTabContent = () => {
   const [prices, setPrices] = useState([])
   const [subscriptionData, setSubscriptionData] = useState(null)
   const [publishableKeyState, setPublishableKeyState] = useState<any>()
@@ -79,4 +79,4 @@ const Upgrade = () => {
   )
 }
 
-export { Upgrade }
+export { UpgradeTabContent }

@@ -65,6 +65,10 @@ hr {
   opacity: 0.1;
 }
 
+button {
+  -webkit-app-region: no-drag;
+}
+
 .slate-hand-strikethrough {
   background-image: ${theme('style.handStriketrough')};
   background-position: center;

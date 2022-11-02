@@ -3,7 +3,7 @@ import * as Tabs from '@radix-ui/react-tabs'
 import styled from 'styled-components'
 import { theme } from 'themes'
 import { isDev, logger } from 'utils'
-import { Upgrade } from './Upgrade'
+import { UpgradeTabContent } from './Upgrade'
 import {
   useFloating,
   offset,
