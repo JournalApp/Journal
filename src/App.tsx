@@ -7,7 +7,6 @@ import {
   TrafficLightMenu,
   FadeOut,
   ScrollToToday,
-  ConnectionStatus,
   FeedbackWidget,
   Splash,
 } from 'components'
@@ -123,7 +122,6 @@ function App() {
             <TrafficLightMenu />
             <Calendar />
             <ScrollToToday />
-            {isDev() && <ConnectionStatus />}
             <FeedbackWidget />
             <NoDragScrollBars />
             <Container>

@@ -23,6 +23,7 @@ import {
   FloatingPortal,
 } from '@floating-ui/react-dom-interactions'
 import { Checkout } from './Checkout'
+import { useIsOnline } from 'hooks'
 
 const Root = styled(Tabs.Root)`
   display: flex;
@@ -56,6 +57,7 @@ const SettingsDialog = ({ setOpenSettings, returnFocus }: SettingsDialogProps) =
   const firstRender = useRef(true)
   const initialFocus = useRef<HTMLButtonElement>(null)
   const nodeId = useFloatingNodeId()
+  const isOnline = useIsOnline()
 
   const { floating, context, refs } = useFloating({
     open,
@@ -120,25 +122,29 @@ const SettingsDialog = ({ setOpenSettings, returnFocus }: SettingsDialogProps) =
             >
               <FloatingFocusManager context={context}>
                 <div ref={floating} {...getFloatingProps()}>
-                  <Root defaultValue='tab1' orientation='vertical'>
-                    <List aria-label='tabs example'>
-                      <Tabs.Trigger ref={initialFocus} value='tab1'>
-                        Account
-                      </Tabs.Trigger>
-                      <Tabs.Trigger value='tab2'>Upgrade</Tabs.Trigger>
-                      <Tabs.Trigger value='tab3'>Invoices</Tabs.Trigger>
-                    </List>
-                    <Content>
-                      <Tabs.Content value='tab1'>
-                        Tab one content
-                        <Checkout />
-                      </Tabs.Content>
-                      <Tabs.Content value='tab2'>
-                        <Upgrade />
-                      </Tabs.Content>
-                      <Tabs.Content value='tab3'>Tab three content</Tabs.Content>
-                    </Content>
-                  </Root>
+                  {isOnline ? (
+                    <Root defaultValue='tab1' orientation='vertical'>
+                      <List aria-label='tabs example'>
+                        <Tabs.Trigger ref={initialFocus} value='tab1'>
+                          Account
+                        </Tabs.Trigger>
+                        <Tabs.Trigger value='tab2'>Upgrade</Tabs.Trigger>
+                        <Tabs.Trigger value='tab3'>Invoices</Tabs.Trigger>
+                      </List>
+                      <Content>
+                        <Tabs.Content value='tab1'>
+                          Tab one content
+                          <Checkout />
+                        </Tabs.Content>
+                        <Tabs.Content value='tab2'>
+                          <Upgrade />
+                        </Tabs.Content>
+                        <Tabs.Content value='tab3'>Tab three content</Tabs.Content>
+                      </Content>
+                    </Root>
+                  ) : (
+                    'offline'
+                  )}
                 </div>
               </FloatingFocusManager>
             </FloatingOverlay>
