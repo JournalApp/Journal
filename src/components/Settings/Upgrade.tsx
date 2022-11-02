@@ -13,9 +13,9 @@ const Upgrade = () => {
 
   useEffect(() => {
     const fetchPrices = async () => {
-      const { publishableKey, prices } = await fetch(
-        'https://subscriptions.journal.local/api/v1/config'
-      ).then((r) => r.json())
+      const { publishableKey, prices } = await fetch('https://s.journal.local/api/v1/config').then(
+        (r) => r.json()
+      )
       setPublishableKeyState(publishableKey)
       setPrices(prices)
     }
@@ -24,7 +24,7 @@ const Upgrade = () => {
 
   const createSubscription = async (priceId: string) => {
     const { subscriptionId, clientSecret } = await fetch(
-      'https://subscriptions.journal.local/api/v1/create-subscription',
+      'https://s.journal.local/api/v1/create-subscription',
       {
         method: 'POST',
         headers: {

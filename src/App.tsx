@@ -7,6 +7,7 @@ import {
   TrafficLightMenu,
   FadeOut,
   ScrollToToday,
+  ConnectionStatus,
   FeedbackWidget,
   Splash,
 } from 'components'
@@ -25,6 +26,7 @@ import {
 } from 'config'
 import { electronAPIType } from './preload'
 import { serializeError } from 'serialize-error'
+import { isDev } from 'utils'
 
 declare global {
   interface Window {
@@ -103,9 +105,6 @@ function App() {
     })
   }
 
-  window.addEventListener('online', () => logger('online'))
-  window.addEventListener('offline', () => logger('offline'))
-
   return (
     <>
       <GlobalStyle />
@@ -124,6 +123,7 @@ function App() {
             <TrafficLightMenu />
             <Calendar />
             <ScrollToToday />
+            {isDev() && <ConnectionStatus />}
             <FeedbackWidget />
             <NoDragScrollBars />
             <Container>

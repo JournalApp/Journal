@@ -14,6 +14,7 @@ interface UserContextInterface {
   quitAndInstall: () => void
   getSecretKey: () => Promise<CryptoKey>
   serverTimeNow: () => string
+  isOnline: React.MutableRefObject<boolean>
 }
 
 const UserContext = createContext<UserContextInterface | null>(null)
@@ -24,6 +25,7 @@ export function UserProvider({ children }: any) {
   const secretKey = useRef(null)
   const serverClientTimeDelta = useRef(0) //  server time - client time = delta
   const subscription = useRef<Subscription | null>(null)
+  const isOnline = useRef(true)
 
   logger('UserProvider re-render')
 
@@ -55,6 +57,19 @@ export function UserProvider({ children }: any) {
     }
   }
 
+  const updateIsOnline = () => {
+    logger(`isOnline = ${navigator.onLine}`)
+    isOnline.current = navigator.onLine
+    if (isDev()) {
+      let element = document.getElementById('ConnectionStatus')
+      if (element) element.textContent = isOnline.current ? 'Online' : 'Offline'
+    }
+  }
+
+  //////////////////////////
+  // ⛰ useEffect on mount
+  //////////////////////////
+
   useEffect(() => {
     logger('Session changed')
     logger(session)
@@ -62,6 +77,12 @@ export function UserProvider({ children }: any) {
   }, [session])
 
   useEffect(() => {
+    // Connection status
+    window.addEventListener('online', updateIsOnline)
+    window.addEventListener('offline', updateIsOnline)
+    updateIsOnline()
+
+    // Supabase session
     setSession(supabase.auth.session())
     let id = supabase.auth.session()?.user?.id ?? ''
     if (id) {
@@ -69,8 +90,10 @@ export function UserProvider({ children }: any) {
       window.electronAPI.app.setKey({ lastUser: id })
     }
 
+    // Server time
     fetchServerTimeDelta()
 
+    // Handle session change
     supabase.auth.onAuthStateChange((_event, newSession) => {
       logger(`Auth event: ${_event}`)
       setSession((prevSession) => {
@@ -93,6 +116,11 @@ export function UserProvider({ children }: any) {
         window.electronAPI.app.setKey({ lastUser: newSession.user.id })
       }
     })
+
+    return () => {
+      window.removeEventListener('online', updateIsOnline)
+      window.removeEventListener('offline', updateIsOnline)
+    }
   }, [])
 
   const getSecretKey = async () => {
@@ -183,6 +211,7 @@ export function UserProvider({ children }: any) {
     quitAndInstall,
     getSecretKey,
     serverTimeNow,
+    isOnline,
   }
   return <UserContext.Provider value={state}>{session ? children : <Login />}</UserContext.Provider>
 }
