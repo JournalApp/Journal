@@ -158,7 +158,7 @@ const Menu = () => {
           </Item>
           <Divider />
           <Item onSelect={setOpenSettings.current}>
-            <Icon name='Exit' />
+            <Icon name='Settings' />
             <ItemTitle>Settings</ItemTitle>
           </Item>
           <Item onSelect={() => signOutAndCapture()}>

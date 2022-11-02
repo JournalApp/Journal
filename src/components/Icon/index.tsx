@@ -26,6 +26,7 @@ import { FormatHandStriketrough } from './FormatHandStriketrough'
 import { Plus } from './Plus'
 import { Edit } from './Edit'
 import { Trash } from './Trash'
+import { Settings } from './Settings'
 
 type IconMapType = {
   [key: string]: any
@@ -69,6 +70,7 @@ const IconMap: IconMapType = {
   Plus,
   Edit,
   Trash,
+  Settings,
 }
 
 const Icon = function (props: IconProps) {
