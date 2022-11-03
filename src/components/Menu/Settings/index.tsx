@@ -16,6 +16,8 @@ import {
 } from '@floating-ui/react-dom-interactions'
 import { Checkout } from './Checkout'
 import { UpgradeTabContent } from './Upgrade'
+import { BillingTabContent } from './Billing'
+import { EarnTabContent } from './Earn'
 import { useIsOnline } from 'hooks'
 import {
   TabsStyled,
@@ -31,7 +33,7 @@ interface SettingsDialogProps {
 }
 
 const SettingsDialog = ({ setOpenSettings, returnFocus }: SettingsDialogProps) => {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(true)
   const firstRender = useRef(true)
   const initialFocus = useRef<HTMLButtonElement>(null)
   const nodeId = useFloatingNodeId()
@@ -107,20 +109,21 @@ const SettingsDialog = ({ setOpenSettings, returnFocus }: SettingsDialogProps) =
                   <ListStyled>
                     <SettingsTitleStyled>Settings</SettingsTitleStyled>
                     <MenuItemStyled ref={initialFocus} value='tab1'>
-                      Account
+                      Upgrade
                     </MenuItemStyled>
-                    <MenuItemStyled value='tab2'>Upgrade</MenuItemStyled>
+                    <MenuItemStyled value='tab2'>Earn credit</MenuItemStyled>
                     <MenuItemStyled value='tab3'>Billing</MenuItemStyled>
                   </ListStyled>
                   <ContentStyled>
                     <Tabs.Content value='tab1'>
-                      Tab one content
-                      <Checkout />
-                    </Tabs.Content>
-                    <Tabs.Content value='tab2'>
                       <UpgradeTabContent />
                     </Tabs.Content>
-                    <Tabs.Content value='tab3'>Tab three content</Tabs.Content>
+                    <Tabs.Content value='tab2'>
+                      <EarnTabContent />{' '}
+                    </Tabs.Content>
+                    <Tabs.Content value='tab3'>
+                      <BillingTabContent />
+                    </Tabs.Content>
                   </ContentStyled>
                 </TabsStyled>
               </FloatingFocusManager>
