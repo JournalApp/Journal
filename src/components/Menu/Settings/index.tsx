@@ -114,16 +114,14 @@ const SettingsDialog = ({ setOpenSettings, returnFocus }: SettingsDialogProps) =
                     <MenuItemStyled value='tab2'>Earn credit</MenuItemStyled>
                     <MenuItemStyled value='tab3'>Billing</MenuItemStyled>
                   </ListStyled>
-                  <ContentStyled>
-                    <Tabs.Content value='tab1'>
-                      <UpgradeTabContent />
-                    </Tabs.Content>
-                    <Tabs.Content value='tab2'>
-                      <EarnTabContent />{' '}
-                    </Tabs.Content>
-                    <Tabs.Content value='tab3'>
-                      <BillingTabContent />
-                    </Tabs.Content>
+                  <ContentStyled value='tab1'>
+                    <UpgradeTabContent />
+                  </ContentStyled>
+                  <ContentStyled value='tab2'>
+                    <EarnTabContent />{' '}
+                  </ContentStyled>
+                  <ContentStyled value='tab3'>
+                    <BillingTabContent />
                   </ContentStyled>
                 </TabsStyled>
               </FloatingFocusManager>

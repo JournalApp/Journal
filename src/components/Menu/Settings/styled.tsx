@@ -5,8 +5,9 @@ import { theme } from 'themes'
 import { breakpoints } from 'utils'
 
 const TabsStyled = styled(Tabs.Root)`
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: 192px auto;
   background-color: ${theme('color.popper.surface')};
   width: -webkit-fill-available;
   max-width: 1000px;
@@ -18,10 +19,11 @@ const TabsStyled = styled(Tabs.Root)`
   -webkit-app-region: no-drag;
 `
 
-const ContentStyled = styled.div`
+const ContentStyled = styled(Tabs.Content)`
   padding: 24px 32px;
   overflow: scroll;
   flex-grow: 1;
+  outline: 0;
 `
 
 const MenuItemStyled = styled(Tabs.Trigger)`
@@ -55,7 +57,6 @@ const MenuItemStyled = styled(Tabs.Trigger)`
 const ListStyled = styled(Tabs.List)`
   display: flex;
   gap: 2px;
-  width: 176px;
   padding: 8px;
   flex-direction: column;
   background-color: ${theme('color.popper.inverted')};

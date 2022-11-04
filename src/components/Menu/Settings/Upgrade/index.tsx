@@ -1,16 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react'
-import styled from 'styled-components'
+import styled, { keyframes } from 'styled-components'
 import { theme } from 'themes'
-import { loadStripe } from '@stripe/stripe-js'
-import { Elements } from '@stripe/react-stripe-js'
-import { Subscribe } from './Subscribe'
-import type { PaymentIntent, Stripe } from '@stripe/stripe-js'
+import { Icon } from 'components'
 import * as Switch from '@radix-ui/react-switch'
+import * as Accordion from '@radix-ui/react-accordion'
 import { SectionTitleStyled } from '../styled'
 
 const PlansSectionStyled = styled.div`
-  display: flex;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
   gap: 16px;
+  margin-bottom: 40px;
 `
 
 interface PlanStyledProps {
@@ -22,7 +23,6 @@ const PlanStyled = styled.div<PlanStyledProps>`
   flex-direction: column;
   gap: 16px;
   background-color: ${(props) => (props.bgColor ? props.bgColor : 'transparent')};
-  flex-grow: 1;
   border-radius: 12px;
   padding: 16px;
 `
@@ -85,6 +85,7 @@ const Infinity = styled.div`
 
 const PriceContainerStyled = styled.div`
   display: flex;
+  align-items: center;
 `
 
 const PriceStyled = styled.div`
@@ -95,39 +96,182 @@ const PriceStyled = styled.div`
   letter-spacing: -0.03em;
 `
 
-const SwitchStyled = styled(Switch.Root)`
-  all: unset;
-  width: 42px;
-  height: 25px;
-  background-color: ${theme('color.primary.main', 0.8)};
-  border-radius: 9999px;
-  position: relative;
-  box-shadow: 0 2px 10px black;
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-  &:focus {
-    box-shadow: 0 0 0 2px black;
+interface SwitchStyledProps {
+  turnedOn: boolean
+}
+
+const SwitchStyled = styled.div<SwitchStyledProps>`
+  display: flex;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 18px;
+  gap: 6px;
+  align-items: center;
+  padding: 2px 6px;
+  height: fit-content;
+  border-radius: 100px;
+  color: ${(props) =>
+    props.turnedOn ? theme('color.primary.main') : theme('color.primary.main', 0.5)};
+  transition: all ${theme('animation.time.normal')};
+  &:hover {
+    background-color: ${theme('color.primary.main', 0.05)};
   }
+  & label {
+    cursor: pointer;
+  }
+`
+
+const SwitchBgStyled = styled(Switch.Root)`
+  all: unset;
+  width: 16px;
+  height: 10px;
+  background-color: ${theme('color.primary.main', 0.5)};
+  border-radius: 100px;
+  position: relative;
   &[data-state='checked'] {
-    background-color: black;
+    background-color: ${theme('color.primary.main')};
   }
 `
 
 const SwitchThumbStyled = styled(Switch.Thumb)`
   display: block;
-  width: 21px;
-  height: 21px;
+  width: 6px;
+  height: 6px;
   background-color: white;
-  border-radius: 9999px;
-  box-shadow: 0 2px 2px black;
+  border-radius: 100px;
   transition: transform 100ms;
   transform: translateX(2px);
   will-change: transform;
   &[data-state='checked'] {
-    transform: translateX(19px);
+    transform: translateX(8px);
   }
 `
 
+const PrimaryButtonStyled = styled.button`
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 17px;
+  cursor: pointer;
+  color: ${theme('color.popper.inverted')};
+  background-color: ${theme('color.popper.main')};
+  display: flex;
+  padding: 8px 12px;
+  border-radius: 6px;
+  width: fit-content;
+  border: 0;
+  outline: 0;
+  transition: box-shadow ${theme('animation.time.normal')} ease;
+  &:hover {
+    box-shadow: 0 0 0 4px ${theme('color.popper.main', 0.15)};
+  }
+  &:focus {
+    box-shadow: 0 0 0 2px ${theme('color.popper.main', 0.15)};
+  }
+`
+
+const SecondaryButtonStyled = styled.button`
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 17px;
+  color: ${theme('color.popper.main')};
+  background-color: transparent;
+  display: flex;
+  padding: 8px 12px;
+  border-radius: 6px;
+  width: fit-content;
+  border: 1px solid ${theme('color.popper.main')};
+  outline: 0;
+  transition: box-shadow ${theme('animation.time.normal')} ease;
+  opacity: 0.8;
+`
+
+const H2 = styled.div`
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: -0.03em;
+  color: ${theme('color.popper.main')};
+  margin-bottom: 16px;
+`
+
+const Chevron = styled(Icon)`
+  transition: transform ${theme('animation.time.normal')};
+  [data-state='open'] & {
+    transform: rotate(180deg);
+  }
+`
+
+const Open = keyframes`
+  0% {
+    height: 0;
+    opacity: 0;
+    padding-bottom: 8px;
+  }
+  100% {
+    height: var(--radix-accordion-content-height);
+    opacity: 0.8;
+    padding-bottom: 16px;
+  }
+`
+
+const Close = keyframes`
+  0% {
+    height: var(--radix-accordion-content-height);
+    opacity: 0.8;
+    padding-bottom: 16px;
+  }
+  100% {
+    height: 0;
+    opacity: 0;
+    padding-bottom: 8px;
+  }
+`
+
+const AccordionContent = styled(Accordion.Content)`
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 20px;
+  opacity: 0.8;
+  letter-spacing: normal;
+  overflow: hidden;
+  &[data-state='open'] {
+    animation: ${Open} ${theme('animation.time.normal')} ease-out;
+    animation-fill-mode: both;
+  }
+  &[data-state='closed'] {
+    animation: ${Close} ${theme('animation.time.normal')} ease-out;
+    animation-fill-mode: both;
+  }
+`
+
+const AccordionHeader = styled(Accordion.Header)`
+  margin: 0;
+`
+
+const AccordionTrigger = styled(Accordion.Trigger)`
+  display: flex;
+  cursor: pointer;
+  width: -webkit-fill-available;
+  text-align: left;
+  background-color: transparent;
+  border: 0;
+  border-top: 1px solid ${theme('color.popper.border')};
+  outline: 0;
+  padding: 8px 0;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 20px;
+`
+
+const TriggerLabel = styled.span`
+  flex-grow: 1;
+`
+
+const AccordionItem = styled(Accordion.Item)``
+
 const UpgradeTabContent = () => {
+  const [billingYearly, setBillingYearly] = useState(true)
+
   return (
     <>
       <SectionTitleStyled>Upgrade your plan</SectionTitleStyled>
@@ -145,6 +289,7 @@ const UpgradeTabContent = () => {
           <PriceContainerStyled>
             <PriceStyled>$0</PriceStyled>
           </PriceContainerStyled>
+          <SecondaryButtonStyled disabled>Current plan</SecondaryButtonStyled>
         </PlanStyled>
         <PlanStyled bgColor='#D8DEFF'>
           <PlanTitleStyled>
@@ -155,13 +300,43 @@ const UpgradeTabContent = () => {
           </PlansLimitsBoxStyled>
           <PriceContainerStyled>
             <PriceStyled>$4 / month</PriceStyled>
-            <SwitchStyled>
-              <SwitchThumbStyled />
+            <SwitchStyled turnedOn={billingYearly}>
+              <SwitchBgStyled id='s1' checked={billingYearly} onCheckedChange={setBillingYearly}>
+                <SwitchThumbStyled />
+              </SwitchBgStyled>
+              <label htmlFor='s1'>Billed yearly</label>
             </SwitchStyled>
-            Billed yearly
           </PriceContainerStyled>
+          <PrimaryButtonStyled>Upgrade</PrimaryButtonStyled>
         </PlanStyled>
       </PlansSectionStyled>
+      <H2>All plans include:</H2>
+      <Accordion.Root type='multiple'>
+        <AccordionItem value='item-1'>
+          <AccordionHeader>
+            <AccordionTrigger>
+              <TriggerLabel>AES 256-bit encryption</TriggerLabel>
+              <Chevron name='Chevron' type='down' size={16} />
+            </AccordionTrigger>
+          </AccordionHeader>
+          <AccordionContent>
+            I'm baby squid migas humblebrag, authentic slow-carb hashtag XOXO viral. Etsy meditation
+            raclette photo booth flannel
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value='item-2'>
+          <AccordionHeader>
+            <AccordionTrigger>
+              <TriggerLabel>Cloud sync</TriggerLabel>
+              <Chevron name='Chevron' type='down' size={16} />
+            </AccordionTrigger>
+          </AccordionHeader>
+          <AccordionContent>
+            I'm baby squid migas humblebrag, authentic slow-carb hashtag XOXO viral. Etsy meditation
+            raclette photo booth flannel
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion.Root>
     </>
   )
 }
