@@ -5,6 +5,9 @@ import { Icon } from 'components'
 import * as Switch from '@radix-ui/react-switch'
 import * as Accordion from '@radix-ui/react-accordion'
 import { SectionTitleStyled } from '../styled'
+import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote'
+import { nanoid } from 'nanoid'
+import { logger, supabase, supabaseUrl, supabaseAnonKey } from 'utils'
 
 const PlansSectionStyled = styled.div`
   display: grid;
@@ -269,8 +272,53 @@ const TriggerLabel = styled.span`
 
 const AccordionItem = styled(Accordion.Item)``
 
+const content = `
+  <Acc>
+  <AccItem>
+  <AccTitle>**AES 256-bit** encryption</AccTitle>
+  <AccContent>I'm baby squid migas humblebrag, **authentic** slow-carb hashtag XOXO viral. Etsy meditation raclette photo booth flannel</AccContent>
+  </AccItem>
+  <AccItem>
+  <AccTitle>Cloud sync</AccTitle>
+  <AccContent>I'm baby squid migas humblebrag, **authentic** slow-carb hashtag XOXO viral. Etsy meditation raclette photo booth flannel</AccContent>
+  </AccItem>
+  </Acc>
+  `
+
+const components = {
+  Acc: (props: any) => <Accordion.Root type='multiple' {...props} />,
+  AccItem: (props: any) => <AccordionItem value={nanoid(5)} {...props} />,
+  AccTitle: ({ children, ...rest }: any) => (
+    <>
+      <AccordionHeader {...rest}>
+        <AccordionTrigger>
+          <TriggerLabel>{children}</TriggerLabel>
+          <Chevron name='Chevron' type='down' size={16} />
+        </AccordionTrigger>
+      </AccordionHeader>
+    </>
+  ),
+  AccContent: (props: any) => <AccordionContent {...props} />,
+}
+
 const UpgradeTabContent = () => {
   const [billingYearly, setBillingYearly] = useState(true)
+  const [loading, setLoading] = useState(true)
+
+  const source = useRef<MDXRemoteSerializeResult | null>(null)
+
+  useEffect(() => {
+    const load = async () => {
+      const { data, error } = await supabase
+        .from('website_pages')
+        .select('content')
+        .eq('page', 'pricing')
+        .single()
+      source.current = await window.electronAPI.mdxSerialize(data?.content ?? '')
+      setLoading(false)
+    }
+    load()
+  }, [])
 
   return (
     <>
@@ -311,32 +359,7 @@ const UpgradeTabContent = () => {
         </PlanStyled>
       </PlansSectionStyled>
       <H2>All plans include:</H2>
-      <Accordion.Root type='multiple'>
-        <AccordionItem value='item-1'>
-          <AccordionHeader>
-            <AccordionTrigger>
-              <TriggerLabel>AES 256-bit encryption</TriggerLabel>
-              <Chevron name='Chevron' type='down' size={16} />
-            </AccordionTrigger>
-          </AccordionHeader>
-          <AccordionContent>
-            I'm baby squid migas humblebrag, authentic slow-carb hashtag XOXO viral. Etsy meditation
-            raclette photo booth flannel
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value='item-2'>
-          <AccordionHeader>
-            <AccordionTrigger>
-              <TriggerLabel>Cloud sync</TriggerLabel>
-              <Chevron name='Chevron' type='down' size={16} />
-            </AccordionTrigger>
-          </AccordionHeader>
-          <AccordionContent>
-            I'm baby squid migas humblebrag, authentic slow-carb hashtag XOXO viral. Etsy meditation
-            raclette photo booth flannel
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion.Root>
+      {!loading && <MDXRemote {...source.current} components={components} />}
     </>
   )
 }

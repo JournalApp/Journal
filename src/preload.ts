@@ -2,6 +2,7 @@ import { contextBridge, ipcRenderer, clipboard } from 'electron'
 import { EventMessage } from './services/analytics'
 import type { Tag, EntryTag, EntryTagProperty } from './components/EntryTags/types'
 import type { Day, Entry } from './components/Entry/types'
+import { MDXRemoteSerializeResult } from 'next-mdx-remote'
 
 const electronAPI = {
   onPaste: (callback: any) => ipcRenderer.on('paste', callback),
@@ -11,6 +12,9 @@ const electronAPI = {
   onTagPending: (callback: any) => ipcRenderer.on('sqlite-tag-event', callback),
   async capture({ distinctId, event, properties, type }: EventMessage) {
     await ipcRenderer.invoke('analytics-capture', { distinctId, event, properties, type })
+  },
+  mdxSerialize: async (source: string) => {
+    return (await ipcRenderer.invoke('mdx-serialize', source)) as MDXRemoteSerializeResult
   },
   cache: {
     // Entry

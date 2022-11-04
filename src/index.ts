@@ -9,6 +9,8 @@ import { isDev, logger } from './utils'
 import { serializeError, deserializeError } from 'serialize-error'
 import type { Tag, EntryTag } from './components/EntryTags/types'
 
+require('./services/mdx')
+
 var openUrl = ''
 
 if (process.defaultApp) {
