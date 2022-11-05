@@ -27,6 +27,7 @@ import { Plus } from './Plus'
 import { Edit } from './Edit'
 import { Trash } from './Trash'
 import { Settings } from './Settings'
+import { Offline } from './Offline'
 
 type IconMapType = {
   [key: string]: any
@@ -71,6 +72,7 @@ const IconMap: IconMapType = {
   Edit,
   Trash,
   Settings,
+  Offline,
 }
 
 const Icon = function (props: IconProps) {

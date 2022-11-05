@@ -26,6 +26,20 @@ const ContentStyled = styled(Tabs.Content)`
   outline: 0;
 `
 
+const Offline = styled.div`
+  font-size: 14px;
+  padding: 24px 32px;
+  overflow: scroll;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+  outline: 0;
+  color: ${theme('color.popper.main', 0.6)};
+  text-align: center;
+`
+
 const MenuItemStyled = styled(Tabs.Trigger)`
   font-size: 13px;
   line-height: 20px;
@@ -87,4 +101,5 @@ export {
   MenuItemStyled,
   SettingsTitleStyled,
   SectionTitleStyled,
+  Offline,
 }

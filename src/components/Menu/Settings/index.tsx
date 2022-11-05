@@ -19,12 +19,14 @@ import { UpgradeTabContent } from './Upgrade'
 import { BillingTabContent } from './Billing'
 import { EarnTabContent } from './Earn'
 import { useIsOnline } from 'hooks'
+import { Icon } from 'components'
 import {
   TabsStyled,
   ContentStyled,
   ListStyled,
   MenuItemStyled,
   SettingsTitleStyled,
+  Offline,
 } from './styled'
 
 interface SettingsDialogProps {
@@ -114,15 +116,24 @@ const SettingsDialog = ({ setOpenSettings, returnFocus }: SettingsDialogProps) =
                     <MenuItemStyled value='tab2'>Earn credit</MenuItemStyled>
                     <MenuItemStyled value='tab3'>Billing</MenuItemStyled>
                   </ListStyled>
-                  <ContentStyled value='tab1'>
-                    <UpgradeTabContent />
-                  </ContentStyled>
-                  <ContentStyled value='tab2'>
-                    <EarnTabContent />{' '}
-                  </ContentStyled>
-                  <ContentStyled value='tab3'>
-                    <BillingTabContent />
-                  </ContentStyled>
+                  {isOnline ? (
+                    <>
+                      <ContentStyled value='tab1'>
+                        <UpgradeTabContent />
+                      </ContentStyled>
+                      <ContentStyled value='tab2'>
+                        <EarnTabContent />{' '}
+                      </ContentStyled>
+                      <ContentStyled value='tab3'>
+                        <BillingTabContent />
+                      </ContentStyled>
+                    </>
+                  ) : (
+                    <Offline>
+                      <Icon name='Offline' tintColor={theme('color.popper.main', 0.2)} /> Please go
+                      online to manage your settings.
+                    </Offline>
+                  )}
                 </TabsStyled>
               </FloatingFocusManager>
             </FloatingOverlay>
