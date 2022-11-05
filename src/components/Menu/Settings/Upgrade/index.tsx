@@ -8,6 +8,7 @@ import { SectionTitleStyled } from '../styled'
 import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote'
 import { nanoid } from 'nanoid'
 import { logger, supabase, supabaseUrl, supabaseAnonKey } from 'utils'
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
 
 const PlansSectionStyled = styled.div`
   display: grid;
@@ -57,7 +58,7 @@ const PlansLimitsBoxStyled = styled.div`
   line-height: 24px;
   padding: 8px 12px 12px 12px;
   border-radius: 8px;
-  background-color: ${theme('color.pure', 0.6)};
+  background-color: ${theme('color.pure', 0.3)};
 `
 
 interface PlansProgressBarStyledProps {
@@ -66,7 +67,7 @@ interface PlansProgressBarStyledProps {
 
 const PlansProgressBarStyled = styled.div<PlansProgressBarStyledProps>`
   margin-top: 8px;
-  background-color: #dae5d6;
+  background-color: ${theme('color.primary.surface')};
   height: 3px;
   border-radius: 3px;
   & div {
@@ -140,7 +141,7 @@ const SwitchThumbStyled = styled(Switch.Thumb)`
   display: block;
   width: 6px;
   height: 6px;
-  background-color: white;
+  background-color: ${theme('color.pure')};
   border-radius: 100px;
   transition: transform 100ms;
   transform: translateX(2px);
@@ -179,6 +180,8 @@ const SecondaryButtonStyled = styled.button`
   color: ${theme('color.popper.main')};
   background-color: transparent;
   display: flex;
+  align-items: center;
+  gap: 4px;
   padding: 8px 12px;
   border-radius: 6px;
   width: fit-content;
@@ -253,6 +256,7 @@ const AccordionHeader = styled(Accordion.Header)`
 
 const AccordionTrigger = styled(Accordion.Trigger)`
   display: flex;
+  color: ${theme('color.popper.main')};
   cursor: pointer;
   width: -webkit-fill-available;
   text-align: left;
@@ -268,6 +272,13 @@ const AccordionTrigger = styled(Accordion.Trigger)`
 
 const TriggerLabel = styled.span`
   flex-grow: 1;
+`
+
+const SkeletonContainer = styled.div`
+  display: block;
+  & span {
+    margin: 4px 0;
+  }
 `
 
 const AccordionItem = styled(Accordion.Item)``
@@ -301,65 +312,95 @@ const components = {
   AccContent: (props: any) => <AccordionContent {...props} />,
 }
 
+const awaitTimeout = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay))
+
 const UpgradeTabContent = () => {
   const [billingYearly, setBillingYearly] = useState(true)
   const [loading, setLoading] = useState(true)
-
   const source = useRef<MDXRemoteSerializeResult | null>(null)
 
   useEffect(() => {
-    const load = async () => {
+    const fetchFeaturesAndFAQ = async () => {
       const { data, error } = await supabase
         .from('website_pages')
         .select('content')
         .eq('page', 'pricing')
         .single()
       source.current = await window.electronAPI.mdxSerialize(data?.content ?? '')
+      await awaitTimeout(5000)
       setLoading(false)
     }
-    load()
+
+    const fetchProducts = async () => {
+      const { data, error } = await supabase.from('prices').select('*,  products(*)')
+
+      logger(data)
+    }
+    fetchProducts()
+    fetchFeaturesAndFAQ()
   }, [])
 
   return (
     <>
       <SectionTitleStyled>Upgrade your plan</SectionTitleStyled>
       <PlansSectionStyled>
-        <PlanStyled bgColor='#E0ECDB'>
-          <PlanTitleStyled>
-            Free<sub>Try it out</sub>
-          </PlanTitleStyled>
-          <PlansLimitsBoxStyled>
-            30 entries (8 used)
-            <PlansProgressBarStyled progress='25%'>
-              <div></div>
-            </PlansProgressBarStyled>
-          </PlansLimitsBoxStyled>
-          <PriceContainerStyled>
-            <PriceStyled>$0</PriceStyled>
-          </PriceContainerStyled>
-          <SecondaryButtonStyled disabled>Current plan</SecondaryButtonStyled>
-        </PlanStyled>
-        <PlanStyled bgColor='#D8DEFF'>
-          <PlanTitleStyled>
-            Writer<sub>Write without limits</sub>
-          </PlanTitleStyled>
-          <PlansLimitsBoxStyled>
-            Unlimited entries<Infinity>∞</Infinity>
-          </PlansLimitsBoxStyled>
-          <PriceContainerStyled>
-            <PriceStyled>$4 / month</PriceStyled>
-            <SwitchStyled turnedOn={billingYearly}>
-              <SwitchBgStyled id='s1' checked={billingYearly} onCheckedChange={setBillingYearly}>
-                <SwitchThumbStyled />
-              </SwitchBgStyled>
-              <label htmlFor='s1'>Billed yearly</label>
-            </SwitchStyled>
-          </PriceContainerStyled>
-          <PrimaryButtonStyled>Upgrade</PrimaryButtonStyled>
-        </PlanStyled>
+        <SkeletonTheme baseColor={theme('color.pure', 0.2)} enableAnimation={false}>
+          <PlanStyled bgColor={theme('color.products.free')}>
+            <PlanTitleStyled>
+              {loading ? <Skeleton width='25%' /> : 'Free'}
+              <sub>{loading ? <Skeleton width='40%' /> : 'Try it out'}</sub>
+            </PlanTitleStyled>
+            <PlansLimitsBoxStyled>
+              30 entries (8 used)
+              <PlansProgressBarStyled progress='25%'>
+                <div></div>
+              </PlansProgressBarStyled>
+            </PlansLimitsBoxStyled>
+            <PriceContainerStyled>
+              <PriceStyled>$0</PriceStyled>
+            </PriceContainerStyled>
+            <SecondaryButtonStyled disabled>
+              Current plan
+              <Icon name='Check' size={16} />
+            </SecondaryButtonStyled>
+          </PlanStyled>
+        </SkeletonTheme>
+        <SkeletonTheme baseColor={theme('color.pure', 0.2)} enableAnimation={false}>
+          <PlanStyled bgColor={theme('color.products.writer')}>
+            <PlanTitleStyled>
+              {loading ? <Skeleton width='25%' /> : 'Writer'}
+              <sub>{loading ? <Skeleton width='40%' /> : 'Write without limits'}</sub>
+            </PlanTitleStyled>
+            <PlansLimitsBoxStyled>
+              Unlimited entries<Infinity>∞</Infinity>
+            </PlansLimitsBoxStyled>
+            <PriceContainerStyled>
+              <PriceStyled>{loading ? <Skeleton width='25%' /> : '$4 / month'}</PriceStyled>
+              <SwitchStyled turnedOn={billingYearly}>
+                <SwitchBgStyled id='s1' checked={billingYearly} onCheckedChange={setBillingYearly}>
+                  <SwitchThumbStyled />
+                </SwitchBgStyled>
+                <label htmlFor='s1'>Billed yearly</label>
+              </SwitchStyled>
+            </PriceContainerStyled>
+            <PrimaryButtonStyled>Upgrade</PrimaryButtonStyled>
+          </PlanStyled>
+        </SkeletonTheme>
       </PlansSectionStyled>
       <H2>All plans include:</H2>
-      {!loading && <MDXRemote {...source.current} components={components} />}
+      {loading ? (
+        <SkeletonContainer>
+          <Skeleton
+            count={5}
+            height={20}
+            baseColor={theme('color.popper.hover')}
+            highlightColor={theme('color.popper.surface')}
+            enableAnimation={false}
+          />
+        </SkeletonContainer>
+      ) : (
+        <MDXRemote {...source.current} components={components} />
+      )}
     </>
   )
 }
