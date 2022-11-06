@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import styled, { keyframes } from 'styled-components'
-import { theme } from 'themes'
+import { theme, LightThemeItemKey, BaseThemeItemKey } from 'themes'
 import { Icon } from 'components'
 import * as Switch from '@radix-ui/react-switch'
 import * as Accordion from '@radix-ui/react-accordion'
@@ -20,6 +20,7 @@ const PlansSectionStyled = styled.div`
 
 interface PlanStyledProps {
   bgColor?: string
+  textColor?: string
 }
 
 const PlanStyled = styled.div<PlanStyledProps>`
@@ -27,6 +28,7 @@ const PlanStyled = styled.div<PlanStyledProps>`
   flex-direction: column;
   gap: 16px;
   background-color: ${(props) => (props.bgColor ? props.bgColor : 'transparent')};
+  color: ${(props) => (props.textColor ? props.textColor : theme('color.popper.main'))};
   border-radius: 12px;
   padding: 16px;
 `
@@ -44,7 +46,7 @@ const PlanTitleStyled = styled.div`
     font-weight: 400;
     font-size: 12px;
     line-height: 18px;
-    color: ${theme('color.primary.main', 0.8)};
+    opacity: 0.8;
   }
 `
 
@@ -79,7 +81,6 @@ const PlansProgressBarStyled = styled.div<PlansProgressBarStyledProps>`
 `
 
 const Infinity = styled.div`
-  color: ${theme('color.primary.main', 0.8)};
   font-style: normal;
   font-weight: 400;
   font-size: 12px;
@@ -115,10 +116,10 @@ const SwitchStyled = styled.div<SwitchStyledProps>`
   height: fit-content;
   border-radius: 100px;
   color: ${(props) =>
-    props.turnedOn ? theme('color.primary.main') : theme('color.primary.main', 0.5)};
+    props.turnedOn ? theme('color.productWriter.main') : theme('color.productWriter.main', 0.5)};
   transition: all ${theme('animation.time.normal')};
   &:hover {
-    background-color: ${theme('color.primary.main', 0.05)};
+    background-color: ${theme('color.productWriter.main', 0.05)};
   }
   & label {
     cursor: pointer;
@@ -129,11 +130,11 @@ const SwitchBgStyled = styled(Switch.Root)`
   all: unset;
   width: 16px;
   height: 10px;
-  background-color: ${theme('color.primary.main', 0.5)};
+  background-color: ${theme('color.productWriter.main', 0.3)};
   border-radius: 100px;
   position: relative;
   &[data-state='checked'] {
-    background-color: ${theme('color.primary.main')};
+    background-color: ${theme('color.productWriter.main')};
   }
 `
 
@@ -141,23 +142,30 @@ const SwitchThumbStyled = styled(Switch.Thumb)`
   display: block;
   width: 6px;
   height: 6px;
-  background-color: ${theme('color.pure')};
+  background-color: ${theme('color.productWriter.popper', 0.5)};
   border-radius: 100px;
   transition: transform 100ms;
   transform: translateX(2px);
   will-change: transform;
   &[data-state='checked'] {
     transform: translateX(8px);
+    background-color: ${theme('color.productWriter.popper')};
   }
 `
 
-const PrimaryButtonStyled = styled.button`
+interface PrimaryButtonStyledProps {
+  bgColor?: LightThemeItemKey | BaseThemeItemKey
+  textColor?: LightThemeItemKey | BaseThemeItemKey
+}
+
+const PrimaryButtonStyled = styled.button<PrimaryButtonStyledProps>`
   font-weight: 500;
   font-size: 14px;
   line-height: 17px;
   cursor: pointer;
-  color: ${theme('color.popper.inverted')};
-  background-color: ${theme('color.popper.main')};
+  color: ${(props) => (props.textColor ? theme(props.textColor) : theme(`color.popper.inverted`))};
+  background-color: ${(props) =>
+    props.bgColor ? theme(props.bgColor) : theme('color.popper.main')};
   display: flex;
   padding: 8px 12px;
   border-radius: 6px;
@@ -166,10 +174,12 @@ const PrimaryButtonStyled = styled.button`
   outline: 0;
   transition: box-shadow ${theme('animation.time.normal')} ease;
   &:hover {
-    box-shadow: 0 0 0 4px ${theme('color.popper.main', 0.15)};
+    box-shadow: 0 0 0 4px
+      ${(props) => (props.bgColor ? theme(props.bgColor, 0.15) : theme('color.popper.main', 0.15))};
   }
   &:focus {
-    box-shadow: 0 0 0 2px ${theme('color.popper.main', 0.15)};
+    box-shadow: 0 0 0 2px
+      ${(props) => (props.bgColor ? theme(props.bgColor, 0.15) : theme('color.popper.main', 0.15))};
   }
 `
 
@@ -333,7 +343,7 @@ const UpgradeTabContent = () => {
 
     const fetchProducts = async () => {
       const { data, error } = await supabase.from('prices').select('*,  products(*)')
-
+      logger('fetchProducts')
       logger(data)
     }
     fetchProducts()
@@ -345,7 +355,10 @@ const UpgradeTabContent = () => {
       <SectionTitleStyled>Upgrade your plan</SectionTitleStyled>
       <PlansSectionStyled>
         <SkeletonTheme baseColor={theme('color.pure', 0.2)} enableAnimation={false}>
-          <PlanStyled bgColor={theme('color.products.free')}>
+          <PlanStyled
+            bgColor={theme('color.productFree.surface')}
+            textColor={theme('color.productFree.main')}
+          >
             <PlanTitleStyled>
               {loading ? <Skeleton width='25%' /> : 'Free'}
               <sub>{loading ? <Skeleton width='40%' /> : 'Try it out'}</sub>
@@ -360,13 +373,16 @@ const UpgradeTabContent = () => {
               <PriceStyled>$0</PriceStyled>
             </PriceContainerStyled>
             <SecondaryButtonStyled disabled>
-              Current plan
               <Icon name='Check' size={16} />
+              Current plan
             </SecondaryButtonStyled>
           </PlanStyled>
         </SkeletonTheme>
         <SkeletonTheme baseColor={theme('color.pure', 0.2)} enableAnimation={false}>
-          <PlanStyled bgColor={theme('color.products.writer')}>
+          <PlanStyled
+            bgColor={theme('color.productWriter.surface')}
+            textColor={theme('color.productWriter.main')}
+          >
             <PlanTitleStyled>
               {loading ? <Skeleton width='25%' /> : 'Writer'}
               <sub>{loading ? <Skeleton width='40%' /> : 'Write without limits'}</sub>
@@ -383,7 +399,12 @@ const UpgradeTabContent = () => {
                 <label htmlFor='s1'>Billed yearly</label>
               </SwitchStyled>
             </PriceContainerStyled>
-            <PrimaryButtonStyled>Upgrade</PrimaryButtonStyled>
+            <PrimaryButtonStyled
+              bgColor={'color.productWriter.main'}
+              textColor={'color.productWriter.popper'}
+            >
+              Upgrade
+            </PrimaryButtonStyled>
           </PlanStyled>
         </SkeletonTheme>
       </PlansSectionStyled>

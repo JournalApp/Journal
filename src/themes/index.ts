@@ -27,4 +27,4 @@ const theme = (itemKey: LightThemeItemKey | BaseThemeItemKey, alpha = 1) => {
   return `var(${cssVar})`
 }
 
-export { theme, lightTheme, darkTheme, baseTheme }
+export { theme, lightTheme, darkTheme, baseTheme, LightThemeItemKey, BaseThemeItemKey }

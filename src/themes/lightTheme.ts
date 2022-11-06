@@ -32,10 +32,6 @@ const lightPalette = {
     brown: '132, 93, 73', //'#845D49',
     navy: '86, 103, 218', //'#5667DA',
   },
-  products: {
-    free: '233, 233, 233',
-    writer: '204, 226, 195',
-  },
 }
 
 const lightTheme = {
@@ -89,9 +85,15 @@ const lightTheme = {
       brown: lightPalette.tags['brown'],
       navy: lightPalette.tags['navy'],
     },
-    products: {
-      free: lightPalette.products['free'],
-      writer: lightPalette.products['writer'],
+    productFree: {
+      main: '58, 58, 58',
+      surface: '233, 233, 233',
+      popper: '245, 245, 245',
+    },
+    productWriter: {
+      main: '25, 76, 45',
+      surface: '204, 226, 195',
+      popper: '220, 239, 213',
     },
   },
   style: {

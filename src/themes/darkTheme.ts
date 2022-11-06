@@ -89,9 +89,15 @@ const darkTheme = {
       brown: darkPalette.tags['brown'],
       navy: darkPalette.tags['navy'],
     },
-    products: {
-      free: darkPalette.products['free'],
-      writer: darkPalette.products['writer'],
+    productFree: {
+      main: '227, 227, 227',
+      surface: '74, 74, 74',
+      popper: '62, 62, 62',
+    },
+    productWriter: {
+      main: '215, 243, 170',
+      surface: '70, 85, 64',
+      popper: '62, 73, 56',
     },
   },
   style: {
