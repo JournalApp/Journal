@@ -26,6 +26,9 @@ import {
 import { electronAPIType } from './preload'
 import { serializeError } from 'serialize-error'
 import { isDev } from 'utils'
+import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query'
+
+const queryClient = new QueryClient()
 
 declare global {
   interface Window {
@@ -109,7 +112,7 @@ function App() {
   }
 
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
       <GlobalStyle />
       <Splash />
       <UserProvider>
@@ -134,7 +137,7 @@ function App() {
           </AppearanceProvider>
         </EntriesProvider>
       </UserProvider>
-    </>
+    </QueryClientProvider>
   )
 }
 
