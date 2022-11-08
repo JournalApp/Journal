@@ -1,6 +1,6 @@
 import React from 'react'
 import { supabase, isUnauthorized, logger, isArrayEmpty } from 'utils'
-import type { Tag, EntryTag, EntryTagProperty } from '../../components/EntryTags/types'
+import type { Tag, EntryTag, EntryTagProperty } from 'types'
 import { Session } from '@supabase/supabase-js'
 
 ////////////////////////////////////////////////////

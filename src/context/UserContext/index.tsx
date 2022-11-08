@@ -4,7 +4,7 @@ import { Login } from 'components'
 import { Session } from '@supabase/supabase-js'
 import dayjs from 'dayjs'
 import { isDev } from 'utils'
-import type { Subscription } from './types'
+import type { Subscription } from 'types'
 import { getSubscription } from './subscriptions'
 
 interface UserContextInterface {

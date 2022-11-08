@@ -19,7 +19,7 @@ import {
 } from './styled'
 import { useEntriesContext, useUserContext } from 'context'
 import { ListItemTagColorPicker } from './ListItemTagColorPicker'
-import { Tag, EntryTag, EntryTagProperty, ListItemType } from './types'
+import { Tag, EntryTag, EntryTagProperty, ListItemType } from 'types'
 import { ConfirmationModal } from './ConfirmationModal'
 
 const StyledWrapper = styled.div``

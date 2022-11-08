@@ -5,8 +5,7 @@ import { supabase, arrayEquals, isUnauthorized, logger } from 'utils'
 import { useEntriesContext, useUserContext } from 'context'
 import dayjs from 'dayjs'
 import { BeforeEntries, PostEntries, Wrapper } from './styled'
-import type { Tag } from '../EntryTags/types'
-import type { Day } from '../../components/Entry/types'
+import type { Day, Tag } from 'types'
 
 var visibleSections: String[] = []
 var rangeMarker: any

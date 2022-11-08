@@ -35,7 +35,7 @@ import {
   StyledNoTags,
 } from './styled'
 import { ListItemTag } from './ListItemTag'
-import { Tag, EntryTag, ListItemType } from './types'
+import { Tag, EntryTag, ListItemType } from 'types'
 
 type EntryTagsProps = {
   date: string

@@ -17,6 +17,7 @@
       "hooks": ["./src/hooks/"],
       "utils": ["./src/utils/"],
       "themes": ["./src/themes/"],
+      "types": ["./src/types/"],
       "config": ["./src/config/"],
       "context": ["./src/context/"]
     },

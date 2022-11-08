@@ -5,8 +5,7 @@ import { electronAPIType } from '../../preload'
 import { defaultContent } from 'config'
 import { supabase, isUnauthorized, logger, isArrayEmpty } from 'utils'
 import { PlateEditor } from '@udecode/plate'
-import type { Tag, EntryTag } from '../../components/EntryTags/types'
-import type { Day, Entry } from '../../components/Entry/types'
+import type { Day, Entry, Tag, EntryTag } from 'types'
 import {
   syncEntries,
   cacheAddOrUpdateEntry,

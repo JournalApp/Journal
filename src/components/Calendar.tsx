@@ -8,7 +8,7 @@ import { CalendarOpen, getCalendarIsOpen } from 'config'
 import { createDays, getYearsSince, logger, entryHasNoContent } from 'utils'
 import { Icon } from 'components'
 import { defaultContent } from 'config'
-import type { Entry, Day } from './Entry/types'
+import type { Entry, Day } from 'types'
 interface ContainerProps {
   isOpen: CalendarOpen
 }

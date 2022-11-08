@@ -8,8 +8,7 @@ import migration_0to1 from '../sql/migration.0-to-1.sql'
 import migration_1to2 from '../sql/migration.1-to-2.sql'
 import dayjs from 'dayjs'
 import { logger, isDev } from '../utils'
-import type { Tag, EntryTag, EntryTagProperty } from '../components/EntryTags/types'
-import type { Day, Entry } from '../components/Entry/types'
+import type { Day, Entry, Tag, EntryTag, EntryTagProperty } from 'types'
 import { EventEmitter } from 'events'
 const sqliteEvents = new EventEmitter()
 

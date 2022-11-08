@@ -21,7 +21,7 @@ import {
   StyledItem,
   StyledItemColorPicker,
 } from './styled'
-import type { Tag } from './types'
+import type { Tag } from 'types'
 import { logger } from 'src/utils'
 
 type ListItemTagColorPickerProps = {

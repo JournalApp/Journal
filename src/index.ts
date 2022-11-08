@@ -7,7 +7,7 @@ import { getLastUser, getAppBounds, setAppBounds, sqliteEvents } from './service
 import { capture } from './services/analytics'
 import { isDev, logger } from './utils'
 import { serializeError, deserializeError } from 'serialize-error'
-import type { Tag, EntryTag } from './components/EntryTags/types'
+import type { Tag, EntryTag } from 'types'
 
 require('./services/mdx')
 

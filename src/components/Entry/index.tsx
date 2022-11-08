@@ -17,10 +17,9 @@ import { countEntryWords } from 'utils'
 import { supabase, logger } from 'utils'
 import { useUserContext, useEntriesContext } from 'context'
 import { Container, MainWrapper, MiniDate } from './styled'
-import { electronAPIType } from '../../preload'
 import { theme } from 'themes'
 import { resetBlockTypePlugin } from '../../config/resetBlockTypePlugin'
-import type { Entry, Day } from './types'
+import type { Entry, Day } from 'types'
 
 import {
   createPlateUI,

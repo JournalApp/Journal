@@ -9,8 +9,7 @@ import {
   decryptEntry,
   isArrayEmpty,
 } from 'utils'
-import type { Tag, EntryTag, EntryTagProperty } from '../../components/EntryTags/types'
-import type { Day, Entry } from '../../components/Entry/types'
+import type { Day, Entry } from 'types'
 import { Session } from '@supabase/supabase-js'
 
 ////////////////////////////////////////////////////

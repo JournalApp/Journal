@@ -1,5 +1,5 @@
 import { isDev, logger } from 'utils'
-import type { Subscription } from './types'
+import type { Subscription } from 'types'
 
 const getSubscription = async (access_token: string) => {
   logger('getSubscription')

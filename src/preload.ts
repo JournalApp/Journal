@@ -1,7 +1,6 @@
 import { contextBridge, ipcRenderer, clipboard } from 'electron'
 import { EventMessage } from './services/analytics'
-import type { Tag, EntryTag, EntryTagProperty } from './components/EntryTags/types'
-import type { Day, Entry } from './components/Entry/types'
+import type { Entry, Tag, EntryTag, EntryTagProperty } from 'types'
 import { MDXRemoteSerializeResult } from 'next-mdx-remote'
 
 const electronAPI = {
