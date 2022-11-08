@@ -18,6 +18,7 @@
       "utils": ["./src/utils/"],
       "themes": ["./src/themes/"],
       "types": ["./src/types/"],
+      "consts": ["./src/constants/"],
       "config": ["./src/config/"],
       "context": ["./src/context/"]
     },

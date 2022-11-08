@@ -3,14 +3,12 @@ import styled, { keyframes } from 'styled-components'
 import { theme, LightThemeItemKey, BaseThemeItemKey } from 'themes'
 import { Icon } from 'components'
 import * as Switch from '@radix-ui/react-switch'
-import * as Accordion from '@radix-ui/react-accordion'
-import { SectionTitleStyled } from '../styled'
-import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote'
-import { nanoid } from 'nanoid'
 import { logger, supabase, supabaseUrl, supabaseAnonKey } from 'utils'
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
 import { useQuery } from '@tanstack/react-query'
-import { Features } from './Features'
+import type { Price } from 'types'
+import * as Const from 'consts'
+import { useUserContext } from 'context'
 
 const PlansSectionStyled = styled.div`
   display: grid;
@@ -203,15 +201,47 @@ const SecondaryButtonStyled = styled.button`
   opacity: 0.8;
 `
 
+function calcPercentage(limit: number, current: number, min = 0, max = 100) {
+  if (current == 0) {
+    return 100
+  } else {
+    let val = Math.round((current / limit) * 100)
+    return val < min ? min : val > max ? max : val
+  }
+}
+
 const awaitTimeout = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay))
 
 const fetchProducts = async () => {
-  const { data, error } = await supabase.from('prices').select('*,  products(*)')
+  const { data, error } = await supabase.from<Price>('prices').select('*,  products(*)')
   if (error) {
     throw new Error(error.message)
   }
   await awaitTimeout(2000)
   return data
+}
+
+const UsedEntries = () => {
+  const { session } = useUserContext()
+  const { isLoading, isError, data, error } = useQuery({
+    queryKey: ['entriesCount'],
+    queryFn: async () => {
+      return await window.electronAPI.cache.getEntriesCount(session.user.id)
+    },
+  })
+
+  if (isLoading || isError) {
+    return <></>
+  }
+
+  return (
+    <PlansLimitsBoxStyled>
+      {Const.entriesLimit} entries ({data} used)
+      <PlansProgressBarStyled progress={`${calcPercentage(Const.entriesLimit, data)}%`}>
+        <div></div>
+      </PlansProgressBarStyled>
+    </PlansLimitsBoxStyled>
+  )
 }
 
 const Products = () => {
@@ -222,7 +252,21 @@ const Products = () => {
     queryFn: fetchProducts,
   })
 
-  // TODO use actual fetched data
+  // TODO what is current plan
+
+  const displayWriterPrice = () => {
+    if (billingYearly) {
+      let amount = data.filter(
+        (price) => price.product_id == Const.productWriterId && price.interval == 'year'
+      )[0]?.unit_amount
+      return `$${amount / 100} / year`
+    } else {
+      let amount = data.filter(
+        (price) => price.product_id == Const.productWriterId && price.interval == 'month'
+      )[0]?.unit_amount
+      return `$${amount / 100} / month`
+    }
+  }
 
   return (
     <PlansSectionStyled>
@@ -232,15 +276,21 @@ const Products = () => {
           textColor={theme('color.productFree.main')}
         >
           <PlanTitleStyled>
-            {isLoading || isError ? <Skeleton width='25%' /> : 'Free'}
-            <sub>{isLoading || isError ? <Skeleton width='40%' /> : 'Try it out'}</sub>
+            {isLoading || isError ? (
+              <Skeleton width='25%' />
+            ) : (
+              data.filter((price) => price.product_id == Const.productFreeId)[0]?.products.name
+            )}
+            <sub>
+              {isLoading || isError ? (
+                <Skeleton width='40%' />
+              ) : (
+                data.filter((price) => price.product_id == Const.productFreeId)[0]?.products
+                  .description
+              )}
+            </sub>
           </PlanTitleStyled>
-          <PlansLimitsBoxStyled>
-            30 entries (8 used)
-            <PlansProgressBarStyled progress='25%'>
-              <div></div>
-            </PlansProgressBarStyled>
-          </PlansLimitsBoxStyled>
+          <UsedEntries />
           <PriceContainerStyled>
             <PriceStyled>$0</PriceStyled>
           </PriceContainerStyled>
@@ -256,15 +306,26 @@ const Products = () => {
           textColor={theme('color.productWriter.main')}
         >
           <PlanTitleStyled>
-            {isLoading || isError ? <Skeleton width='25%' /> : 'Writer'}
-            <sub>{isLoading || isError ? <Skeleton width='40%' /> : 'Write without limits'}</sub>
+            {isLoading || isError ? (
+              <Skeleton width='25%' />
+            ) : (
+              data.filter((price) => price.product_id == Const.productWriterId)[0]?.products.name
+            )}
+            <sub>
+              {isLoading || isError ? (
+                <Skeleton width='40%' />
+              ) : (
+                data.filter((price) => price.product_id == Const.productWriterId)[0]?.products
+                  .description
+              )}
+            </sub>
           </PlanTitleStyled>
           <PlansLimitsBoxStyled>
             Unlimited entries<Infinity>∞</Infinity>
           </PlansLimitsBoxStyled>
           <PriceContainerStyled>
             <PriceStyled>
-              {isLoading || isError ? <Skeleton width='25%' /> : '$4 / month'}
+              {isLoading || isError ? <Skeleton width='25%' /> : displayWriterPrice()}
             </PriceStyled>
             <SwitchStyled turnedOn={billingYearly}>
               <SwitchBgStyled id='s1' checked={billingYearly} onCheckedChange={setBillingYearly}>

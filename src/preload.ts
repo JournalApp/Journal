@@ -50,7 +50,9 @@ const electronAPI = {
     async doesEntryExist(user_id: string, day: string) {
       return await ipcRenderer.invoke('cache-does-entry-exist', user_id, day)
     },
-
+    async getEntriesCount(user_id: string) {
+      return (await ipcRenderer.invoke('cache-get-entries-count', user_id)) as number
+    },
     // Tags
     async getTags(user_id: string) {
       return (await ipcRenderer.invoke('cache-get-tags', user_id)) as Tag[]

@@ -6,7 +6,7 @@ import schema_1 from '../sql/schema.1.sqlite.sql'
 import schema_2 from '../sql/schema.2.sqlite.sql'
 import migration_0to1 from '../sql/migration.0-to-1.sql'
 import migration_1to2 from '../sql/migration.1-to-2.sql'
-import dayjs from 'dayjs'
+import { betaEndDate } from '../constants'
 import { logger, isDev } from '../utils'
 import type { Day, Entry, Tag, EntryTag, EntryTagProperty } from 'types'
 import { EventEmitter } from 'events'
@@ -368,6 +368,23 @@ ipcMain.handle('cache-does-entry-exist', async (event: any, user_id: string, day
     const exists = !!Object.values(result)[0]
     logger(`Entry ${day} exists = ${exists}`)
     return exists
+  } catch (error) {
+    logger(`error`)
+    logger(error)
+    return error
+  }
+})
+
+ipcMain.handle('cache-get-entries-count', async (event, user_id) => {
+  logger('cache-get-entries-count')
+  try {
+    const db = getDB()
+    const result = db
+      .prepare(
+        "SELECT count(*) FROM journals WHERE user_id = @user_id AND sync_status != 'pending_delete' AND created_at > @betaEndDate"
+      )
+      .get({ user_id, betaEndDate })
+    return Object.values(result)[0] ?? 0
   } catch (error) {
     logger(`error`)
     logger(error)
