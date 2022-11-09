@@ -1,6 +1,10 @@
 import { isDev, logger } from 'utils'
 import type { Subscription } from 'types'
 
+// TODO use react query ???
+// Dependent Queries (wait with this query until user is logged in)
+// https://tanstack.com/query/v4/docs/guides/dependent-queries
+
 const getSubscription = async (access_token: string) => {
   logger('getSubscription')
   const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'

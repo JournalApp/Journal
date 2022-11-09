@@ -92,6 +92,7 @@ const H2 = styled.div`
   letter-spacing: -0.03em;
   color: ${theme('color.popper.main')};
   margin-bottom: 16px;
+  margin-top: 25px;
 `
 
 const SkeletonContainer = styled.div`

@@ -6,6 +6,8 @@ import dayjs from 'dayjs'
 import { isDev } from 'utils'
 import type { Subscription } from 'types'
 import { getSubscription } from './subscriptions'
+import { useQuery } from '@tanstack/react-query'
+import * as Const from 'consts'
 
 interface UserContextInterface {
   session: Session
@@ -19,13 +21,27 @@ interface UserContextInterface {
 const UserContext = createContext<UserContextInterface | null>(null)
 
 export function UserProvider({ children }: any) {
+  logger('UserProvider re-render')
   const [session, setSession] = useState<Session | null>(null)
   const [authError, setAuthError] = useState('')
   const secretKey = useRef(null)
   const serverClientTimeDelta = useRef(0) //  server time - client time = delta
   const subscription = useRef<Subscription | null>(null)
+  const { data: subscriptionData } = useQuery({
+    queryKey: ['subscription', session?.user.id],
+    queryFn: async () => {
+      return await getSubscription(session.access_token)
+    },
+    enabled: !!session?.access_token,
+  })
 
-  logger('UserProvider re-render')
+  if (subscriptionData) {
+    logger(`subscriptionData received`)
+    logger(`User has product: ${subscriptionData.prices.product_id}`)
+    logger(`Is Free: ${Const.productFreeId == subscriptionData.prices.product_id}`)
+    logger(`Is Writer: ${Const.productWriterId == subscriptionData.prices.product_id}`)
+    subscription.current = subscriptionData
+  }
 
   window.electronAPI.handleOpenUrl(async (event: any, value: any) => {
     const url = new URL(value)
@@ -41,24 +57,9 @@ export function UserProvider({ children }: any) {
     }
   })
 
-  const initSubscription = async () => {
-    // const subState = {
-    //   status: 'active',
-    //   product_id: 'prod_2323'
-    // }
-    if (session?.access_token) {
-      try {
-        subscription.current = await getSubscription(session.access_token)
-      } catch (error) {
-        logger(error)
-      }
-    }
-  }
-
   useEffect(() => {
     logger('Session changed')
     logger(session)
-    initSubscription()
   }, [session])
 
   //////////////////////////
