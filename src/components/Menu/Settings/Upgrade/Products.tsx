@@ -191,7 +191,7 @@ const SecondaryButtonStyled = styled.button`
   color: ${theme('color.popper.main')};
   background-color: transparent;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 4px;
   padding: 8px 12px;
   border-radius: 6px;

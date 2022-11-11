@@ -8,7 +8,7 @@ import migration_0to1 from '../sql/migration.0-to-1.sql'
 import migration_1to2 from '../sql/migration.1-to-2.sql'
 import { betaEndDate } from '../constants'
 import { logger, isDev } from '../utils'
-import type { Day, Entry, Tag, EntryTag, EntryTagProperty } from 'types'
+import type { Day, Entry, Tag, EntryTag, EntryTagProperty, Subscription } from 'types'
 import { EventEmitter } from 'events'
 const sqliteEvents = new EventEmitter()
 
@@ -880,6 +880,42 @@ ipcMain.handle('app-get-secret-key', async (event, user_id) => {
     logger(`error`)
     logger(error)
     return null
+  }
+})
+
+ipcMain.handle(
+  'user-save-subscription',
+  async (event, user_id: string, subscription: Subscription) => {
+    logger('user-save-subscription')
+    try {
+      const db = getDB()
+      const stmt = db.prepare(
+        `INSERT INTO users (id, subscription) VALUES (@id, @subscription)
+        ON CONFLICT(id) DO UPDATE SET subscription = excluded.subscription`
+      )
+      stmt.run({ id: user_id, subscription: JSON.stringify(subscription) })
+    } catch (error) {
+      logger(`error`)
+      logger(error)
+    }
+  }
+)
+
+ipcMain.on('user-get-subscription', (event, user_id: string) => {
+  logger('user-get-subscription')
+  try {
+    const db = getDB()
+    const stmt = db.prepare('SELECT subscription FROM users WHERE id = @user_id')
+    let res = stmt.get({ user_id })
+    if (res?.subscription) {
+      event.returnValue = JSON.parse(res.subscription)
+    } else {
+      event.returnValue = null
+    }
+  } catch (error) {
+    logger(`error`)
+    logger(error)
+    event.returnValue = null
   }
 })
 

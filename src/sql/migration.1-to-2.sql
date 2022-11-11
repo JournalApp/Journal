@@ -1,4 +1,4 @@
- -- Create a table for journals_catalog
+-- Create a table for journals_catalog
 create table
   journals_catalog (
     user_id text,
@@ -98,3 +98,9 @@ create table
     foreign key (tag_id) references tags (id) on delete cascade on update no action
     -- foreign key (user_id, day, journal_id) references journals (user_id, day, journal_id) on delete cascade on update no action
   );
+
+-- Add subscription column to cache it
+alter table
+  users
+add
+  subscription text;

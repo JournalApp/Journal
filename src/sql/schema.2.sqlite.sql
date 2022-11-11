@@ -1,9 +1,10 @@
- -- Create a table for Users
+-- Create a table for Users
 create table
   users (
     id text,
     full_name text,
     secret_key blob,
+    subscription text,
     primary key (id)
   );
 

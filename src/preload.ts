@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer, clipboard } from 'electron'
 import { EventMessage } from './services/analytics'
-import type { Entry, Tag, EntryTag, EntryTagProperty } from 'types'
+import type { Entry, Tag, EntryTag, EntryTagProperty, Subscription } from 'types'
 import { MDXRemoteSerializeResult } from 'next-mdx-remote'
 
 const electronAPI = {
@@ -149,6 +149,12 @@ const electronAPI = {
     },
     async getSecretKey(user_id: string) {
       return await ipcRenderer.invoke('app-get-secret-key', user_id)
+    },
+    async saveSubscription(user_id: string, subscription: Subscription) {
+      await ipcRenderer.invoke('user-save-subscription', user_id, subscription)
+    },
+    getSubscription(user_id: string) {
+      return ipcRenderer.sendSync('user-get-subscription', user_id) as Subscription
     },
     async add(id: string) {
       await ipcRenderer.invoke('cache-add-user', id)

@@ -27,16 +27,22 @@ export function UserProvider({ children }: any) {
   const secretKey = useRef(null)
   const serverClientTimeDelta = useRef(0) //  server time - client time = delta
   const subscription = useRef<Subscription | null>(null)
-  const { data: subscriptionData } = useQuery({
+  const { isStale: isSubscriptionDataStale, data: subscriptionData } = useQuery({
     queryKey: ['subscription', session?.user.id],
+    initialData: window.electronAPI.user.getSubscription(session?.user.id),
     queryFn: async () => {
-      return await getSubscription(session.access_token)
+      return await getSubscription(session?.user.id, session.access_token)
     },
     enabled: !!session?.access_token,
   })
 
+  if (isSubscriptionDataStale) {
+    logger('Using subscriptionData from SQLite')
+  }
+
   if (subscriptionData) {
     logger(`subscriptionData received`)
+    logger(subscriptionData)
     logger(`User has product: ${subscriptionData.prices.product_id}`)
     logger(`Is Free: ${Const.productFreeId == subscriptionData.prices.product_id}`)
     logger(`Is Writer: ${Const.productWriterId == subscriptionData.prices.product_id}`)

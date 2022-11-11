@@ -1,20 +1,19 @@
 import { isDev, logger } from 'utils'
 import type { Subscription } from 'types'
 
-// TODO use react query ???
-// Dependent Queries (wait with this query until user is logged in)
-// https://tanstack.com/query/v4/docs/guides/dependent-queries
+// TODO save to SQLite and use as initial val
 
-const getSubscription = async (access_token: string) => {
+const getSubscription = async (user_id: string, access_token: string) => {
   logger('getSubscription')
   const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
   const response = await fetch(`${url}/api/v1/subscription`, {
     headers: { Authorization: `Bearer ${access_token}` },
   })
-  const subscription = await response.json()
+  const subscription = (await response.json()) as Subscription
   logger('getSubscription response:')
   logger(subscription)
-  return subscription as Subscription
+  window.electronAPI.user.saveSubscription(user_id, subscription)
+  return subscription
 }
 
 export { getSubscription }
