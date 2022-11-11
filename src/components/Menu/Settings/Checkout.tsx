@@ -24,7 +24,11 @@ import {
   useFloatingTree,
 } from '@floating-ui/react-dom-interactions'
 
-const Checkout = () => {
+interface CheckoutProps {
+  renderTrigger: any
+}
+
+const Checkout = ({ renderTrigger }: CheckoutProps) => {
   const [open, setOpen] = useState(false)
   const nodeId = useFloatingNodeId()
 
@@ -60,10 +64,7 @@ const Checkout = () => {
 
   return (
     <FloatingNode id={nodeId}>
-      <button ref={reference} {...getReferenceProps()} onClick={() => setOpen(true)}>
-        Open checkout
-      </button>
-
+      {renderTrigger({ close: () => setOpen(false), ref: reference, ...getReferenceProps() })}
       <FloatingPortal>
         {open && (
           <FloatingOverlay
@@ -72,6 +73,7 @@ const Checkout = () => {
               display: 'grid',
               placeItems: 'center',
               background: theme('color.primary.surface', 0.8),
+              zIndex: 1010,
             }}
           >
             <FloatingFocusManager context={context}>

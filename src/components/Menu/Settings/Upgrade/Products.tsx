@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query'
 import type { Price } from 'types'
 import * as Const from 'consts'
 import { useUserContext } from 'context'
+import { Checkout } from '../Checkout'
 
 const PlansSectionStyled = styled.div`
   display: grid;
@@ -252,8 +253,6 @@ const Products = () => {
     queryFn: fetchProducts,
   })
 
-  // TODO what is current plan
-
   const displayWriterPrice = () => {
     if (billingYearly) {
       let amount = data.filter(
@@ -334,12 +333,21 @@ const Products = () => {
               <label htmlFor='s1'>Billed yearly</label>
             </SwitchStyled>
           </PriceContainerStyled>
-          <PrimaryButtonStyled
-            bgColor={'color.productWriter.main'}
-            textColor={'color.productWriter.popper'}
-          >
-            Upgrade
-          </PrimaryButtonStyled>
+          {
+            // TODO Add price_id to checkout modal props
+          }
+          <Checkout
+            renderTrigger={({ close, ...rest }: any) => (
+              <PrimaryButtonStyled
+                bgColor={'color.productWriter.main'}
+                textColor={'color.productWriter.popper'}
+                onClick={close}
+                {...rest}
+              >
+                Upgrade
+              </PrimaryButtonStyled>
+            )}
+          />
         </PlanStyled>
       </SkeletonTheme>
     </PlansSectionStyled>

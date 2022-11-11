@@ -110,6 +110,9 @@ const SettingsDialog = ({ setOpenSettings, returnFocus }: SettingsDialogProps) =
                 >
                   <ListStyled>
                     <SettingsTitleStyled>Settings</SettingsTitleStyled>
+                    {
+                      // TODO hide Upgrade tab if user has Writer plan
+                    }
                     <MenuItemStyled ref={initialFocus} value='tab1'>
                       Upgrade
                     </MenuItemStyled>
