@@ -218,7 +218,7 @@ const fetchProducts = async () => {
   if (error) {
     throw new Error(error.message)
   }
-  await awaitTimeout(2000)
+  // await awaitTimeout(2000)
   return data
 }
 

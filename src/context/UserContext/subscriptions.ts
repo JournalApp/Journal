@@ -1,8 +1,6 @@
 import { isDev, logger } from 'utils'
 import type { Subscription } from 'types'
 
-// TODO save to SQLite and use as initial val
-
 const getSubscription = async (user_id: string, access_token: string) => {
   logger('getSubscription')
   const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'

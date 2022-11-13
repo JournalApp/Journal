@@ -28,7 +28,13 @@ import { serializeError } from 'serialize-error'
 import { isDev } from 'utils'
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query'
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+})
 
 declare global {
   interface Window {

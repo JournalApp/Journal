@@ -130,11 +130,12 @@ const fetchFeaturesAndFAQ = async () => {
   if (error) {
     throw new Error(error.message)
   }
-  await awaitTimeout(2000)
+  // await awaitTimeout(2000)
   return await window.electronAPI.mdxSerialize(data?.content ?? '')
 }
 
 const Features = () => {
+  logger('Features rerender')
   const { isLoading, isError, data, error } = useQuery({
     queryKey: ['features'],
     queryFn: fetchFeaturesAndFAQ,

@@ -119,6 +119,7 @@ const Divider = styled(DropdownMenu.Separator)`
 `
 
 const Menu = () => {
+  logger('Menu re-render')
   const [open, setOpen] = useState(false)
   const [updateDownloaded, setUpdateDownloaded] = useState(false)
   const { session, signOut, quitAndInstall } = useUserContext()
