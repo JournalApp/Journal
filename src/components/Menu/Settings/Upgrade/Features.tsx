@@ -5,7 +5,7 @@ import { Icon } from 'components'
 import * as Accordion from '@radix-ui/react-accordion'
 import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote'
 import { nanoid } from 'nanoid'
-import { logger, supabase } from 'utils'
+import { logger, supabase, awaitTimeout } from 'utils'
 import Skeleton from 'react-loading-skeleton'
 import { useQuery } from '@tanstack/react-query'
 
@@ -118,8 +118,6 @@ const components = {
   ),
   AccContent: (props: any) => <AccordionContent {...props} />,
 }
-
-const awaitTimeout = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay))
 
 const fetchFeaturesAndFAQ = async () => {
   const { data, error } = await supabase

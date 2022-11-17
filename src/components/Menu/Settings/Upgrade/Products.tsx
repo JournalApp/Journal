@@ -3,7 +3,7 @@ import styled, { keyframes } from 'styled-components'
 import { theme, LightThemeItemKey, BaseThemeItemKey } from 'themes'
 import { Icon } from 'components'
 import * as Switch from '@radix-ui/react-switch'
-import { logger, supabase, supabaseUrl, supabaseAnonKey } from 'utils'
+import { logger, supabase, awaitTimeout } from 'utils'
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
 import { useQuery } from '@tanstack/react-query'
 import type { Price } from 'types'
@@ -210,8 +210,6 @@ function calcPercentage(limit: number, current: number, min = 0, max = 100) {
     return val < min ? min : val > max ? max : val
   }
 }
-
-const awaitTimeout = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay))
 
 const fetchProducts = async () => {
   const { data, error } = await supabase.from<Price>('prices').select('*,  products(*)')

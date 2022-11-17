@@ -361,12 +361,70 @@ select
   using (auth.uid () = user_id);
 
 /**
+ * COUNTRIES
+ * List of countries when I can sell (tax-wise)
+ */
+create table
+  countries (country_code text primary key, country_name text);
+
+alter table
+  countries enable row level security;
+
+create policy
+  "Allow public read-only access." on countries for
+select
+  using (true);
+
+insert into
+  countries (country_code, country_name)
+values
+  ('AU', 'Australia'),
+  ('AT', 'Austria'),
+  ('BE', 'Belgium'),
+  ('BG', 'Bulgaria'),
+  ('CA', 'Canada'),
+  ('CN', 'China'),
+  ('HR', 'Croatia'),
+  ('CY', 'Cyprus'),
+  ('CZ', 'Czech Republic'),
+  ('DK', 'Denmark'),
+  ('EE', 'Estonia'),
+  ('FI', 'Finland'),
+  ('FR', 'France'),
+  ('DE', 'Germany'),
+  ('GR', 'Greece'),
+  ('HU', 'Hungary'),
+  ('IS', 'Iceland'),
+  ('IE', 'Ireland'),
+  ('IT', 'Italy'),
+  ('JP', 'Japan'),
+  ('LV', 'Latvia'),
+  ('LT', 'Lithuania'),
+  ('LU', 'Luxembourg'),
+  ('MT', 'Malta'),
+  ('NL', 'Netherlands'),
+  ('NZ', 'New Zealand'),
+  ('NO', 'Norway'),
+  ('PL', 'Poland'),
+  ('PT', 'Portugal'),
+  ('RO', 'Romania'),
+  ('SG', 'Singapore'),
+  ('SK', 'Slovakia'),
+  ('SI', 'Slovenia'),
+  ('ZA', 'South Africa'),
+  ('ES', 'Spain'),
+  ('SE', 'Sweden'),
+  ('CH', 'Switzerland'),
+  ('US', 'United States'),
+  ('TW', 'Taiwan'),
+  ('UA', 'Ukraine');
+
+/**
  * REALTIME SUBSCRIPTIONS
  * Only allow realtime listening on public tables.
  */
-drop publication
-  if exists supabase_realtime;
-
-create publication
-  supabase_realtime for table products,
-  prices;
+-- drop publication
+--   if exists supabase_realtime;
+-- create publication
+--   supabase_realtime for table products,
+--   prices;

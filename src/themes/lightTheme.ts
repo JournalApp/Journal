@@ -53,6 +53,7 @@ const lightTheme = {
     },
     popper: {
       // base colors
+      pure: lightPalette.neutral[0],
       main: lightPalette.neutral[100],
       inverted: lightPalette.neutral[15],
       border: lightPalette.neutral[20],

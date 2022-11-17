@@ -27,4 +27,8 @@ const theme = (itemKey: LightThemeItemKey | BaseThemeItemKey, alpha = 1) => {
   return `var(${cssVar})`
 }
 
-export { theme, lightTheme, darkTheme, baseTheme, LightThemeItemKey, BaseThemeItemKey }
+const getCSSVar = (itemKey: LightThemeItemKey | BaseThemeItemKey) => {
+  return itemKey.split('.').reduce((acc, key) => acc + '-' + key, '-')
+}
+
+export { theme, getCSSVar, lightTheme, darkTheme, baseTheme, LightThemeItemKey, BaseThemeItemKey }

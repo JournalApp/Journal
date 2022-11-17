@@ -120,6 +120,8 @@ function randomInt(max: number) {
   return (max * Math.random()) << 0
 }
 
+const awaitTimeout = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay))
+
 export {
   shallowEqual,
   arrayEquals,
@@ -136,4 +138,5 @@ export {
   isArrayEmpty,
   entryHasNoContent,
   countEntryWords,
+  awaitTimeout,
 }

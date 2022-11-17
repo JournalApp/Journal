@@ -59,4 +59,9 @@ interface Subscription {
   prices?: Price
 }
 
-export { Product, Price, Subscription }
+interface Countries {
+  country_code: string /* primary key */
+  country_name: string
+}
+
+export { Product, Price, Subscription, Countries }

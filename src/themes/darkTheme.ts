@@ -57,6 +57,7 @@ const darkTheme = {
     },
     popper: {
       // base colors
+      pure: darkPalette.neutral[25],
       main: darkPalette.neutral[100],
       inverted: darkPalette.neutral[15],
       border: darkPalette.neutral[20],
