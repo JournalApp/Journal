@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import { theme, getCSSVar } from 'themes'
-import { useForm, Controller, SubmitHandler } from 'react-hook-form'
-import { logger, supabase, supabaseUrl, supabaseAnonKey, isDev, awaitTimeout } from 'utils'
+import { useForm, Controller, SubmitHandler, ValidationRule } from 'react-hook-form'
+import { logger, supabase, getZipRegexByCountry, isDev, awaitTimeout } from 'utils'
 import {
   useFloating,
   FloatingOverlay,
@@ -134,12 +134,13 @@ const CardElementStyled = styled(CardElement)<CardElementProps>`
 
 interface InputProps {
   borderRadius?: string
+  hasError: boolean
 }
 
 const Input = styled.input<InputProps>`
   padding: 8px 12px;
   background-color: ${theme('color.popper.pure', 0.8)};
-  color: ${theme('color.primary.main')};
+  color: ${(props) => (props.hasError ? theme('color.error.main') : theme('color.primary.main'))};
   border: 0;
   border-radius: ${(props) => (props.borderRadius ? props.borderRadius : '8px')};
   box-sizing: border-box;
@@ -156,6 +157,10 @@ const Input = styled.input<InputProps>`
   }
   &:hover {
     background-color: ${theme('color.popper.pure', 0.9)};
+  }
+  &::placeholder {
+    opacity: 0.6;
+    color: ${(props) => (props.hasError ? theme('color.error.main') : theme('color.primary.main'))};
   }
 `
 
@@ -193,7 +198,12 @@ const AddressRowStyled = styled.div`
   display: flex;
 `
 
-const getCustomStyles = (borderRadius?: string) => {
+interface getCustomStylesProps {
+  borderRadius?: string
+  hasError: boolean
+}
+
+const getCustomStyles = ({ borderRadius, hasError }: getCustomStylesProps) => {
   return {
     option: (provided: any, state: any) => ({
       ...provided,
@@ -221,6 +231,7 @@ const getCustomStyles = (borderRadius?: string) => {
     control: (provided: any, state: any) => ({
       // none of react-select's styles are passed to <Control />
       ...provided,
+      color: hasError ? theme('color.error.main') : theme('color.popper.main'),
       fontSize: '14px',
       display: 'flex',
       backgroundColor: state.isFocused
@@ -245,8 +256,14 @@ const getCustomStyles = (borderRadius?: string) => {
         backgroundColor: theme('color.popper.pure', 0.9),
       },
     }),
+    placeholder: (provided: any, state: any) => ({
+      ...provided,
+      color: hasError ? theme('color.error.main') : theme('color.popper.main'),
+      opacity: 0.6,
+    }),
     input: (provided: any, state: any) => ({
       ...provided,
+      color: theme('color.popper.main'),
       padding: 0,
     }),
     singleValue: (provided: any, state: any) => {
@@ -337,6 +354,7 @@ const Checkout = ({ renderTrigger }: CheckoutProps) => {
     setValue,
     setError,
     setFocus,
+    getValues,
     resetField,
     reset,
     control,
@@ -413,7 +431,6 @@ const Checkout = ({ renderTrigger }: CheckoutProps) => {
     // setPaymentIntent(paymentIntent)
   }
 
-  // TODO show errors to the user
   logger('Errors:')
   logger(errors)
 
@@ -465,7 +482,7 @@ const Checkout = ({ renderTrigger }: CheckoutProps) => {
                                   <IconChevronStyled {...innerProps} />
                                 ),
                               }}
-                              styles={getCustomStyles()}
+                              styles={getCustomStyles({ hasError: !!errors.billingInterval })}
                               isClearable={false}
                               isSearchable={false}
                               defaultValue={{
@@ -484,6 +501,7 @@ const Checkout = ({ renderTrigger }: CheckoutProps) => {
                         <AddressInputsStyled>
                           <Input
                             borderRadius='8px 8px 0 0'
+                            hasError={!!errors.name}
                             type='text'
                             id='name'
                             placeholder='Full name'
@@ -494,6 +512,7 @@ const Checkout = ({ renderTrigger }: CheckoutProps) => {
                           <Controller
                             name='country'
                             control={control}
+                            rules={{ required: true }}
                             render={({ field: { onChange, onBlur, value, name, ref } }) => (
                               <Select
                                 placeholder='Country'
@@ -504,7 +523,10 @@ const Checkout = ({ renderTrigger }: CheckoutProps) => {
                                     <IconChevronStyled {...innerProps} />
                                   ),
                                 }}
-                                styles={getCustomStyles('0px')}
+                                styles={getCustomStyles({
+                                  borderRadius: '0px',
+                                  hasError: !!errors.country,
+                                })}
                                 onBlur={onBlur}
                                 onChange={onChange}
                                 ref={ref}
@@ -513,6 +535,7 @@ const Checkout = ({ renderTrigger }: CheckoutProps) => {
                           />
                           <Input
                             borderRadius='0px'
+                            hasError={!!errors.address}
                             type='text'
                             id='address'
                             placeholder='Address'
@@ -522,6 +545,7 @@ const Checkout = ({ renderTrigger }: CheckoutProps) => {
                           />
                           <Input
                             borderRadius='0px'
+                            hasError={!!errors.city}
                             type='text'
                             id='city'
                             placeholder='City'
@@ -532,15 +556,21 @@ const Checkout = ({ renderTrigger }: CheckoutProps) => {
                           <AddressRowStyled>
                             <Input
                               borderRadius='0 0 0 8px'
+                              hasError={!!errors.zip}
                               type='text'
                               id='zip'
                               placeholder='Zip code'
                               {...register('zip', {
                                 required: { value: true, message: 'Required' },
+                                pattern: new RegExp(
+                                  // @ts-ignore
+                                  getZipRegexByCountry(getValues('country')?.value)
+                                ),
                               })}
                             />
                             <Input
                               borderRadius='0 0 8px 0'
+                              hasError={!!errors.state}
                               type='text'
                               id='state'
                               placeholder='State / Province'
@@ -554,6 +584,7 @@ const Checkout = ({ renderTrigger }: CheckoutProps) => {
                       <InputContainer>
                         <Label>Payment information</Label>
                         <CardElementStyled
+                          // TODO show errors to the user
                           // TODO onReady={} enable submit when ready
                           // handle loading state (before ready)
                           isFocused={cardElemetFocused}
@@ -565,6 +596,9 @@ const Checkout = ({ renderTrigger }: CheckoutProps) => {
                               clearErrors('cardElement')
                             }
                             if (error) {
+                              setError('cardElement', error)
+                            }
+                            if (!complete) {
                               setError('cardElement', error)
                             }
                             logger(empty)
