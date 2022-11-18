@@ -295,7 +295,7 @@ interface CheckoutProps {
 type FormData = {
   billingInterval: 'year' | 'month'
   name: string
-  country: string
+  country: object
   address: string
   city: string
   zip: string
@@ -357,11 +357,14 @@ const Checkout = ({ renderTrigger }: CheckoutProps) => {
     getValues,
     resetField,
     reset,
+    trigger,
     control,
     clearErrors,
     watch,
     formState: { errors, isDirty },
   } = useForm<FormData>()
+
+  const watchCountry = watch('country', { value: 'US' })
 
   const handleCloseEsc = (e: any) => {
     if (e.key == 'Escape') {
@@ -370,6 +373,18 @@ const Checkout = ({ renderTrigger }: CheckoutProps) => {
       }
     }
   }
+
+  useEffect(() => {
+    if (getValues('zip')) {
+      trigger('zip')
+    }
+  }, [watchCountry])
+
+  useEffect(() => {
+    if (!open) {
+      reset()
+    }
+  }, [open])
 
   useEffect(() => {
     logger('✅ addEventListener')
@@ -554,20 +569,22 @@ const Checkout = ({ renderTrigger }: CheckoutProps) => {
                             })}
                           />
                           <AddressRowStyled>
-                            <Input
-                              borderRadius='0 0 0 8px'
-                              hasError={!!errors.zip}
-                              type='text'
-                              id='zip'
-                              placeholder='Zip code'
-                              {...register('zip', {
-                                required: { value: true, message: 'Required' },
-                                pattern: new RegExp(
-                                  // @ts-ignore
-                                  getZipRegexByCountry(getValues('country')?.value)
-                                ),
-                              })}
-                            />
+                            {(watchCountry || !watchCountry) && (
+                              <Input
+                                borderRadius='0 0 0 8px'
+                                hasError={!!errors.zip}
+                                type='text'
+                                id='zip'
+                                placeholder='Zip code'
+                                {...register('zip', {
+                                  required: { value: true, message: 'Required' },
+                                  pattern: new RegExp(
+                                    // @ts-ignore
+                                    getZipRegexByCountry(getValues('country')?.value)
+                                  ),
+                                })}
+                              />
+                            )}
                             <Input
                               borderRadius='0 0 8px 0'
                               hasError={!!errors.state}
