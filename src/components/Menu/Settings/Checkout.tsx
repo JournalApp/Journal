@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import { theme, getCSSVar } from 'themes'
 import { useForm, Controller, SubmitHandler, ValidationRule } from 'react-hook-form'
 import { logger, supabase, getZipRegexByCountry, isDev, awaitTimeout } from 'utils'
+import * as Const from 'consts'
 import {
   useFloating,
   FloatingOverlay,
@@ -25,7 +26,7 @@ import {
 } from '@stripe/react-stripe-js'
 import { Icon } from 'components'
 import Select from 'react-select'
-import type { Countries } from 'types'
+import type { Countries, Price } from 'types'
 import { BorderRadius } from '@styled-icons/boxicons-regular'
 
 const IconCloseStyled = styled((props) => <Icon name='Cross' {...props} />)`
@@ -290,10 +291,12 @@ const fetchCountries = async () => {
 
 interface CheckoutProps {
   renderTrigger: any
+  prices: Price[]
+  billingInterval: 'year' | 'month'
 }
 
 type FormData = {
-  billingInterval: 'year' | 'month'
+  billingInterval: { value: 'year' | 'month'; label: string }
   name: string
   country: object
   address: string
@@ -303,14 +306,12 @@ type FormData = {
   cardElement: any
 }
 
-// TODO accept a prop with selected price
-// TODO show real prices
-const Checkout = ({ renderTrigger }: CheckoutProps) => {
+const Checkout = ({ renderTrigger, prices, billingInterval }: CheckoutProps) => {
   logger('Checkout rerender')
   const [open, setOpen] = useState(false)
   const nodeId = useFloatingNodeId()
   const [stripePromise, setStripePromise] = useState<Promise<Stripe> | null>(null)
-  const [prices, setPrices] = useState([])
+  // const [prices, setPrices] = useState([])
   const [subscriptionData, setSubscriptionData] = useState(null)
   const [cardElemetFocused, setCardElemetFocused] = useState(false)
   const [messages, _setMessages] = useState('')
@@ -319,8 +320,8 @@ const Checkout = ({ renderTrigger }: CheckoutProps) => {
     queryKey: ['stripePromise'],
     queryFn: async () => {
       const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
-      const { publishableKey, prices } = await fetch(`${url}/api/v1/config`).then((r) => r.json())
-      setPrices(prices)
+      const { publishableKey } = await fetch(`${url}/api/v1/config`).then((r) => r.json())
+      // setPrices(prices)
       setStripePromise(() => loadStripe(publishableKey))
       return publishableKey
     },
@@ -348,6 +349,26 @@ const Checkout = ({ renderTrigger }: CheckoutProps) => {
     }),
   ])
 
+  interface PricingOption {
+    value: 'year' | 'month'
+    label: string
+  }
+
+  const yearlyPrice = prices
+    ? prices.filter(
+        (price) => price.product_id == Const.productWriterId && price.interval == 'year'
+      )[0]?.unit_amount
+    : 0
+  const monthlyPrice = prices
+    ? prices.filter(
+        (price) => price.product_id == Const.productWriterId && price.interval == 'month'
+      )[0]?.unit_amount
+    : 0
+  const billingIntervalOptions: PricingOption[] = [
+    { value: 'year', label: `Yearly – $${yearlyPrice / 100} / year (save 20%)` },
+    { value: 'month', label: `Monthly – $${monthlyPrice / 100} / month` },
+  ]
+
   const {
     register,
     handleSubmit,
@@ -365,6 +386,10 @@ const Checkout = ({ renderTrigger }: CheckoutProps) => {
   } = useForm<FormData>()
 
   const watchCountry = watch('country', { value: 'US' })
+  const watchBillingInterval = watch(
+    'billingInterval',
+    billingIntervalOptions.find((price) => price.value == billingInterval)
+  )
 
   const handleCloseEsc = (e: any) => {
     if (e.key == 'Escape') {
@@ -373,6 +398,13 @@ const Checkout = ({ renderTrigger }: CheckoutProps) => {
       }
     }
   }
+
+  useEffect(() => {
+    setValue(
+      'billingInterval',
+      billingIntervalOptions.find((price) => price.value == billingInterval)
+    )
+  }, [billingInterval])
 
   useEffect(() => {
     if (getValues('zip')) {
@@ -384,6 +416,10 @@ const Checkout = ({ renderTrigger }: CheckoutProps) => {
     if (!open) {
       reset()
     }
+    setValue(
+      'billingInterval',
+      billingIntervalOptions.find((price) => price.value == billingInterval)
+    )
   }, [open])
 
   useEffect(() => {
@@ -486,11 +522,8 @@ const Checkout = ({ renderTrigger }: CheckoutProps) => {
                         render={({ field: { onChange, onBlur, value, name, ref } }) => (
                           <InputContainer>
                             <Label>Billing interval</Label>
-                            <Select
-                              options={[
-                                { value: 'year', label: 'Yearly – $48 / year (save 20%)' },
-                                { value: 'month', label: 'Monthly – $5 / month' },
-                              ]}
+                            <Select<PricingOption>
+                              options={[...billingIntervalOptions]}
                               components={{
                                 IndicatorSeparator: null,
                                 DropdownIndicator: ({ innerProps }) => (
@@ -500,10 +533,9 @@ const Checkout = ({ renderTrigger }: CheckoutProps) => {
                               styles={getCustomStyles({ hasError: !!errors.billingInterval })}
                               isClearable={false}
                               isSearchable={false}
-                              defaultValue={{
-                                value: 'year',
-                                label: 'Yearly – $48 / year (save 20%)',
-                              }}
+                              defaultValue={billingIntervalOptions.find(
+                                (price) => price.value == billingInterval
+                              )}
                               onBlur={onBlur}
                               onChange={onChange}
                               ref={ref}
@@ -624,7 +656,18 @@ const Checkout = ({ renderTrigger }: CheckoutProps) => {
                           }}
                         />
                       </InputContainer>
-                      <Button type='submit'>Upgrade to Writer – $48</Button>
+                      <Button type='submit'>
+                        Upgrade to Writer
+                        {prices
+                          ? ' - $' +
+                            prices.filter(
+                              (price) =>
+                                price.product_id == Const.productWriterId &&
+                                price.interval == watchBillingInterval?.value
+                            )[0]?.unit_amount /
+                              100
+                          : ''}
+                      </Button>
                       <div>{messages}</div>
                     </Form>
                   </Elements>

@@ -244,21 +244,26 @@ const UsedEntries = () => {
 }
 
 const Products = () => {
-  const [billingYearly, setBillingYearly] = useState(true)
+  const [billingInterval, setBillingInterval] = useState<'year' | 'month'>('year')
 
-  const { isLoading, isError, data, error } = useQuery({
-    queryKey: ['products'],
+  const {
+    isLoading,
+    isError,
+    data: prices,
+    error,
+  } = useQuery({
+    queryKey: ['prices'],
     queryFn: fetchProducts,
   })
 
   const displayWriterPrice = () => {
-    if (billingYearly) {
-      let amount = data.filter(
+    if (billingInterval == 'year') {
+      let amount = prices.filter(
         (price) => price.product_id == Const.productWriterId && price.interval == 'year'
       )[0]?.unit_amount
       return `$${amount / 100} / year`
     } else {
-      let amount = data.filter(
+      let amount = prices.filter(
         (price) => price.product_id == Const.productWriterId && price.interval == 'month'
       )[0]?.unit_amount
       return `$${amount / 100} / month`
@@ -276,13 +281,13 @@ const Products = () => {
             {isLoading || isError ? (
               <Skeleton width='25%' />
             ) : (
-              data.filter((price) => price.product_id == Const.productFreeId)[0]?.products.name
+              prices.filter((price) => price.product_id == Const.productFreeId)[0]?.products.name
             )}
             <sub>
               {isLoading || isError ? (
                 <Skeleton width='40%' />
               ) : (
-                data.filter((price) => price.product_id == Const.productFreeId)[0]?.products
+                prices.filter((price) => price.product_id == Const.productFreeId)[0]?.products
                   .description
               )}
             </sub>
@@ -306,13 +311,13 @@ const Products = () => {
             {isLoading || isError ? (
               <Skeleton width='25%' />
             ) : (
-              data.filter((price) => price.product_id == Const.productWriterId)[0]?.products.name
+              prices.filter((price) => price.product_id == Const.productWriterId)[0]?.products.name
             )}
             <sub>
               {isLoading || isError ? (
                 <Skeleton width='40%' />
               ) : (
-                data.filter((price) => price.product_id == Const.productWriterId)[0]?.products
+                prices.filter((price) => price.product_id == Const.productWriterId)[0]?.products
                   .description
               )}
             </sub>
@@ -324,17 +329,22 @@ const Products = () => {
             <PriceStyled>
               {isLoading || isError ? <Skeleton width='25%' /> : displayWriterPrice()}
             </PriceStyled>
-            <SwitchStyled turnedOn={billingYearly}>
-              <SwitchBgStyled id='s1' checked={billingYearly} onCheckedChange={setBillingYearly}>
+            <SwitchStyled turnedOn={billingInterval == 'year'}>
+              <SwitchBgStyled
+                id='s1'
+                checked={billingInterval == 'year'}
+                onCheckedChange={(checked) => {
+                  checked ? setBillingInterval('year') : setBillingInterval('month')
+                }}
+              >
                 <SwitchThumbStyled />
               </SwitchBgStyled>
               <label htmlFor='s1'>Billed yearly</label>
             </SwitchStyled>
           </PriceContainerStyled>
-          {
-            // TODO Add price_id to checkout modal props
-          }
           <Checkout
+            billingInterval={billingInterval}
+            prices={prices}
             renderTrigger={({ close, ...rest }: any) => (
               <PrimaryButtonStyled
                 bgColor={'color.productWriter.main'}
