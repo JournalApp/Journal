@@ -417,7 +417,8 @@ values
   ('CH', 'Switzerland'),
   ('US', 'United States'),
   ('TW', 'Taiwan'),
-  ('UA', 'Ukraine');
+  ('UA', 'Ukraine'),
+  ('HK', 'Hong Kong');
 
 /**
  * REALTIME SUBSCRIPTIONS

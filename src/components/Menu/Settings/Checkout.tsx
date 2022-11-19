@@ -27,7 +27,6 @@ import {
 import { Icon } from 'components'
 import Select from 'react-select'
 import type { Countries, Price } from 'types'
-import { BorderRadius } from '@styled-icons/boxicons-regular'
 
 const IconCloseStyled = styled((props) => <Icon name='Cross' {...props} />)`
   position: absolute;
@@ -109,10 +108,13 @@ const Label = styled.div`
 
 interface CardElementProps {
   isFocused: boolean
+  isReady: boolean
 }
 
 const CardElementStyled = styled(CardElement)<CardElementProps>`
   padding: 12px;
+  box-sizing: border-box;
+  height: 43px;
   background-color: ${theme('color.popper.pure', 0.8)};
   color: ${theme('color.primary.main')};
   border: ${(props) =>
@@ -123,6 +125,7 @@ const CardElementStyled = styled(CardElement)<CardElementProps>`
     props.isFocused ? `0 0 0 2px ${theme('color.popper.main', 0.1)}` : null};
   border-radius: 8px;
   outline: 0;
+  opacity: ${(props) => (props.isReady ? 1 : 0.6)};
   transition: all ${theme('animation.time.normal')};
   &:hover {
     transition: all ${theme('animation.time.normal')};
@@ -314,6 +317,7 @@ const Checkout = ({ renderTrigger, prices, billingInterval }: CheckoutProps) => 
   // const [prices, setPrices] = useState([])
   const [subscriptionData, setSubscriptionData] = useState(null)
   const [cardElemetFocused, setCardElemetFocused] = useState(false)
+  const [cardElemetReady, setCardElemetReady] = useState(false)
   const [messages, _setMessages] = useState('')
   const customStylesCardElement = useRef({})
   useQuery({
@@ -460,7 +464,7 @@ const Checkout = ({ renderTrigger, prices, billingInterval }: CheckoutProps) => 
   const submitCheckout: SubmitHandler<FormData> = (data) => {
     logger('Submitted data:')
     logger(data)
-
+    // TODO make paymet
     // // Get a reference to a mounted CardElement. Elements knows how
     // // to find your CardElement because there can only ever be one of
     // // each type of element.
@@ -634,12 +638,17 @@ const Checkout = ({ renderTrigger, prices, billingInterval }: CheckoutProps) => 
                         <Label>Payment information</Label>
                         <CardElementStyled
                           // TODO show errors to the user
-                          // TODO onReady={} enable submit when ready
-                          // handle loading state (before ready)
+                          onReady={(element) => {
+                            setCardElemetReady(true)
+                          }}
                           isFocused={cardElemetFocused}
+                          isReady={cardElemetReady}
                           onFocus={() => setCardElemetFocused(true)}
                           onBlur={() => setCardElemetFocused(false)}
-                          options={{ hidePostalCode: true, style: customStylesCardElement.current }}
+                          options={{
+                            hidePostalCode: true,
+                            style: customStylesCardElement.current,
+                          }}
                           onChange={({ empty, complete, error }) => {
                             if (complete) {
                               clearErrors('cardElement')
