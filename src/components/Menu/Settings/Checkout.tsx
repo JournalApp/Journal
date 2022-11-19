@@ -313,23 +313,16 @@ const Checkout = ({ renderTrigger, prices, billingInterval }: CheckoutProps) => 
   logger('Checkout rerender')
   const [open, setOpen] = useState(false)
   const nodeId = useFloatingNodeId()
-  const [stripePromise, setStripePromise] = useState<Promise<Stripe> | null>(null)
+
   // const [prices, setPrices] = useState([])
   const [subscriptionData, setSubscriptionData] = useState(null)
   const [cardElemetFocused, setCardElemetFocused] = useState(false)
   const [cardElemetReady, setCardElemetReady] = useState(false)
+  const [cardElemetComplete, setCardElemetComplete] = useState(false)
+  const [paymentIntent, setPaymentIntent] = useState<PaymentIntent | null>(null)
   const [messages, _setMessages] = useState('')
   const customStylesCardElement = useRef({})
-  useQuery({
-    queryKey: ['stripePromise'],
-    queryFn: async () => {
-      const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
-      const { publishableKey } = await fetch(`${url}/api/v1/config`).then((r) => r.json())
-      // setPrices(prices)
-      setStripePromise(() => loadStripe(publishableKey))
-      return publishableKey
-    },
-  })
+
   const {
     isLoading,
     isError,
@@ -403,6 +396,10 @@ const Checkout = ({ renderTrigger, prices, billingInterval }: CheckoutProps) => 
     }
   }
 
+  // Initialize an instance of stripe.
+  const stripe = useStripe()
+  const elements = useElements()
+
   useEffect(() => {
     setValue(
       'billingInterval',
@@ -461,29 +458,34 @@ const Checkout = ({ renderTrigger, prices, billingInterval }: CheckoutProps) => 
     _setMessages(`${messages}\n\n${message}`)
   }
 
-  const submitCheckout: SubmitHandler<FormData> = (data) => {
+  const submitCheckout: SubmitHandler<FormData> = async (data) => {
     logger('Submitted data:')
     logger(data)
+    if (!cardElemetComplete) {
+      elements.getElement(CardElement).focus()
+      return
+    }
     // TODO make paymet
-    // // Get a reference to a mounted CardElement. Elements knows how
-    // // to find your CardElement because there can only ever be one of
-    // // each type of element.
-    // const cardElement = elements.getElement(CardElement)
-    // // Use card Element to tokenize payment details
-    // let { error, paymentIntent } = await stripe.confirmCardPayment(subscriptionData.clientSecret, {
-    //   payment_method: {
-    //     card: cardElement,
-    //     billing_details: {
-    //       name: name,
-    //     },
-    //   },
-    // })
-    // if (error) {
-    //   // show error and collect new card details.
-    //   setMessage(error.message)
-    //   return
-    // }
-    // setPaymentIntent(paymentIntent)
+    // 1. Update subscription from Free to Writer
+    // ...
+    // 2. Create payment using clientSecret
+    const cardElement = elements.getElement(CardElement)
+    // Use card Element to tokenize payment details
+
+    let { error, paymentIntent } = await stripe.confirmCardPayment(subscriptionData.clientSecret, {
+      payment_method: {
+        card: cardElement,
+        billing_details: {
+          name: data.name,
+        },
+      },
+    })
+    if (error) {
+      // show error and collect new card details.
+      setMessage(error.message)
+      return
+    }
+    setPaymentIntent(paymentIntent)
   }
 
   logger('Errors:')
@@ -517,170 +519,155 @@ const Checkout = ({ renderTrigger, prices, billingInterval }: CheckoutProps) => 
                     limits
                   </em>
                 </LeftPanel>
-                {stripePromise && (
-                  <Elements stripe={stripePromise}>
-                    <Form onSubmit={handleSubmit(submitCheckout)}>
-                      <Controller
-                        name='billingInterval'
-                        control={control}
-                        render={({ field: { onChange, onBlur, value, name, ref } }) => (
-                          <InputContainer>
-                            <Label>Billing interval</Label>
-                            <Select<PricingOption>
-                              options={[...billingIntervalOptions]}
-                              components={{
-                                IndicatorSeparator: null,
-                                DropdownIndicator: ({ innerProps }) => (
-                                  <IconChevronStyled {...innerProps} />
-                                ),
-                              }}
-                              styles={getCustomStyles({ hasError: !!errors.billingInterval })}
-                              isClearable={false}
-                              isSearchable={false}
-                              defaultValue={billingIntervalOptions.find(
-                                (price) => price.value == billingInterval
-                              )}
-                              onBlur={onBlur}
-                              onChange={onChange}
-                              ref={ref}
-                            />
-                          </InputContainer>
-                        )}
-                      />
-                      <AddressStyled>
-                        <Label>Billing information</Label>
-                        <AddressInputsStyled>
-                          <Input
-                            borderRadius='8px 8px 0 0'
-                            hasError={!!errors.name}
-                            type='text'
-                            id='name'
-                            placeholder='Full name'
-                            {...register('name', {
-                              required: { value: true, message: 'Required' },
-                            })}
-                          />
-                          <Controller
-                            name='country'
-                            control={control}
-                            rules={{ required: true }}
-                            render={({ field: { onChange, onBlur, value, name, ref } }) => (
-                              <Select
-                                placeholder='Country'
-                                options={countries}
-                                components={{
-                                  IndicatorSeparator: null,
-                                  DropdownIndicator: ({ innerProps }) => (
-                                    <IconChevronStyled {...innerProps} />
-                                  ),
-                                }}
-                                styles={getCustomStyles({
-                                  borderRadius: '0px',
-                                  hasError: !!errors.country,
-                                })}
-                                onBlur={onBlur}
-                                onChange={onChange}
-                                ref={ref}
-                              />
-                            )}
-                          />
-                          <Input
-                            borderRadius='0px'
-                            hasError={!!errors.address}
-                            type='text'
-                            id='address'
-                            placeholder='Address'
-                            {...register('address', {
-                              required: { value: true, message: 'Required' },
-                            })}
-                          />
-                          <Input
-                            borderRadius='0px'
-                            hasError={!!errors.city}
-                            type='text'
-                            id='city'
-                            placeholder='City'
-                            {...register('city', {
-                              required: { value: true, message: 'Required' },
-                            })}
-                          />
-                          <AddressRowStyled>
-                            {(watchCountry || !watchCountry) && (
-                              <Input
-                                borderRadius='0 0 0 8px'
-                                hasError={!!errors.zip}
-                                type='text'
-                                id='zip'
-                                placeholder='Zip code'
-                                {...register('zip', {
-                                  required: { value: true, message: 'Required' },
-                                  pattern: new RegExp(
-                                    // @ts-ignore
-                                    getZipRegexByCountry(getValues('country')?.value)
-                                  ),
-                                })}
-                              />
-                            )}
-                            <Input
-                              borderRadius='0 0 8px 0'
-                              hasError={!!errors.state}
-                              type='text'
-                              id='state'
-                              placeholder='State / Province'
-                              {...register('state', {
-                                required: { value: true, message: 'Required' },
-                              })}
-                            />
-                          </AddressRowStyled>
-                        </AddressInputsStyled>
-                      </AddressStyled>
+
+                <Form onSubmit={handleSubmit(submitCheckout)}>
+                  <Controller
+                    name='billingInterval'
+                    control={control}
+                    render={({ field: { onChange, onBlur, value, name, ref } }) => (
                       <InputContainer>
-                        <Label>Payment information</Label>
-                        <CardElementStyled
-                          // TODO show errors to the user
-                          onReady={(element) => {
-                            setCardElemetReady(true)
+                        <Label>Billing interval</Label>
+                        <Select<PricingOption>
+                          options={[...billingIntervalOptions]}
+                          components={{
+                            IndicatorSeparator: null,
+                            DropdownIndicator: ({ innerProps }) => (
+                              <IconChevronStyled {...innerProps} />
+                            ),
                           }}
-                          isFocused={cardElemetFocused}
-                          isReady={cardElemetReady}
-                          onFocus={() => setCardElemetFocused(true)}
-                          onBlur={() => setCardElemetFocused(false)}
-                          options={{
-                            hidePostalCode: true,
-                            style: customStylesCardElement.current,
-                          }}
-                          onChange={({ empty, complete, error }) => {
-                            if (complete) {
-                              clearErrors('cardElement')
-                            }
-                            if (error) {
-                              setError('cardElement', error)
-                            }
-                            if (!complete) {
-                              setError('cardElement', error)
-                            }
-                            logger(empty)
-                            logger(complete)
-                            logger(error)
-                          }}
+                          styles={getCustomStyles({ hasError: !!errors.billingInterval })}
+                          isClearable={false}
+                          isSearchable={false}
+                          defaultValue={billingIntervalOptions.find(
+                            (price) => price.value == billingInterval
+                          )}
+                          onBlur={onBlur}
+                          onChange={onChange}
+                          ref={ref}
                         />
                       </InputContainer>
-                      <Button type='submit'>
-                        Upgrade to Writer
-                        {prices
-                          ? ' - $' +
-                            prices.filter(
-                              (price) =>
-                                price.product_id == Const.productWriterId &&
-                                price.interval == watchBillingInterval?.value
-                            )[0]?.unit_amount /
-                              100
-                          : ''}
-                      </Button>
-                      <div>{messages}</div>
-                    </Form>
-                  </Elements>
-                )}
+                    )}
+                  />
+                  <AddressStyled>
+                    <Label>Billing information</Label>
+                    <AddressInputsStyled>
+                      <Input
+                        borderRadius='8px 8px 0 0'
+                        hasError={!!errors.name}
+                        type='text'
+                        id='name'
+                        placeholder='Full name'
+                        {...register('name', {
+                          required: { value: true, message: 'Required' },
+                        })}
+                      />
+                      <Controller
+                        name='country'
+                        control={control}
+                        rules={{ required: true }}
+                        render={({ field: { onChange, onBlur, value, name, ref } }) => (
+                          <Select
+                            placeholder='Country'
+                            options={countries}
+                            components={{
+                              IndicatorSeparator: null,
+                              DropdownIndicator: ({ innerProps }) => (
+                                <IconChevronStyled {...innerProps} />
+                              ),
+                            }}
+                            styles={getCustomStyles({
+                              borderRadius: '0px',
+                              hasError: !!errors.country,
+                            })}
+                            onBlur={onBlur}
+                            onChange={onChange}
+                            ref={ref}
+                          />
+                        )}
+                      />
+                      <Input
+                        borderRadius='0px'
+                        hasError={!!errors.address}
+                        type='text'
+                        id='address'
+                        placeholder='Address'
+                        {...register('address', {
+                          required: { value: true, message: 'Required' },
+                        })}
+                      />
+                      <Input
+                        borderRadius='0px'
+                        hasError={!!errors.city}
+                        type='text'
+                        id='city'
+                        placeholder='City'
+                        {...register('city', {
+                          required: { value: true, message: 'Required' },
+                        })}
+                      />
+                      <AddressRowStyled>
+                        {(watchCountry || !watchCountry) && (
+                          <Input
+                            borderRadius='0 0 0 8px'
+                            hasError={!!errors.zip}
+                            type='text'
+                            id='zip'
+                            placeholder='Zip code'
+                            {...register('zip', {
+                              required: { value: true, message: 'Required' },
+                              pattern: new RegExp(
+                                // @ts-ignore
+                                getZipRegexByCountry(getValues('country')?.value)
+                              ),
+                            })}
+                          />
+                        )}
+                        <Input
+                          borderRadius='0 0 8px 0'
+                          hasError={!!errors.state}
+                          type='text'
+                          id='state'
+                          placeholder='State / Province'
+                          {...register('state', {
+                            required: { value: true, message: 'Required' },
+                          })}
+                        />
+                      </AddressRowStyled>
+                    </AddressInputsStyled>
+                  </AddressStyled>
+                  <InputContainer>
+                    <Label>Payment information</Label>
+                    <CardElementStyled
+                      onReady={(element) => {
+                        setCardElemetReady(true)
+                      }}
+                      isFocused={cardElemetFocused}
+                      isReady={cardElemetReady}
+                      onFocus={() => setCardElemetFocused(true)}
+                      onBlur={() => setCardElemetFocused(false)}
+                      options={{
+                        hidePostalCode: true,
+                        style: customStylesCardElement.current,
+                      }}
+                      onChange={({ empty, complete, error }) => {
+                        setCardElemetComplete(complete)
+                      }}
+                    />
+                  </InputContainer>
+                  <Button type='submit'>
+                    Upgrade to Writer
+                    {prices
+                      ? ' - $' +
+                        prices.filter(
+                          (price) =>
+                            price.product_id == Const.productWriterId &&
+                            price.interval == watchBillingInterval?.value
+                        )[0]?.unit_amount /
+                          100
+                      : ''}
+                  </Button>
+                  <div>{messages}</div>
+                </Form>
               </CheckoutModal>
             </FloatingFocusManager>
           </FloatingOverlay>

@@ -3,13 +3,21 @@ import styled, { keyframes } from 'styled-components'
 import { theme, LightThemeItemKey, BaseThemeItemKey } from 'themes'
 import { Icon } from 'components'
 import * as Switch from '@radix-ui/react-switch'
-import { logger, supabase, awaitTimeout } from 'utils'
+import { logger, supabase, awaitTimeout, isDev } from 'utils'
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
 import { useQuery } from '@tanstack/react-query'
 import type { Price } from 'types'
 import * as Const from 'consts'
 import { useUserContext } from 'context'
 import { Checkout } from '../Checkout'
+import { loadStripe, PaymentIntent, Stripe } from '@stripe/stripe-js'
+import {
+  Elements,
+  CardElement,
+  PaymentElement,
+  useStripe,
+  useElements,
+} from '@stripe/react-stripe-js'
 
 const PlansSectionStyled = styled.div`
   display: grid;
@@ -245,6 +253,18 @@ const UsedEntries = () => {
 
 const Products = () => {
   const [billingInterval, setBillingInterval] = useState<'year' | 'month'>('year')
+  const [stripePromise, setStripePromise] = useState<Promise<Stripe> | null>(null)
+
+  useQuery({
+    queryKey: ['stripePromise'],
+    queryFn: async () => {
+      const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
+      const { publishableKey } = await fetch(`${url}/api/v1/config`).then((r) => r.json())
+      // setPrices(prices)
+      setStripePromise(() => loadStripe(publishableKey))
+      return publishableKey
+    },
+  })
 
   const {
     isLoading,
@@ -342,20 +362,24 @@ const Products = () => {
               <label htmlFor='s1'>Billed yearly</label>
             </SwitchStyled>
           </PriceContainerStyled>
-          <Checkout
-            billingInterval={billingInterval}
-            prices={prices}
-            renderTrigger={({ close, ...rest }: any) => (
-              <PrimaryButtonStyled
-                bgColor={'color.productWriter.main'}
-                textColor={'color.productWriter.popper'}
-                onClick={close}
-                {...rest}
-              >
-                Upgrade
-              </PrimaryButtonStyled>
-            )}
-          />
+          {/* {stripePromise && ( */}
+          <Elements stripe={stripePromise}>
+            <Checkout
+              billingInterval={billingInterval}
+              prices={prices}
+              renderTrigger={({ close, ...rest }: any) => (
+                <PrimaryButtonStyled
+                  bgColor={'color.productWriter.main'}
+                  textColor={'color.productWriter.popper'}
+                  onClick={close}
+                  {...rest}
+                >
+                  Upgrade
+                </PrimaryButtonStyled>
+              )}
+            />
+          </Elements>
+          {/* )} */}
         </PlanStyled>
       </SkeletonTheme>
     </PlansSectionStyled>
