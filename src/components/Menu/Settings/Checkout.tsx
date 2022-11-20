@@ -27,6 +27,7 @@ import {
 import { Icon } from 'components'
 import Select from 'react-select'
 import type { Countries, Price } from 'types'
+import { useUserContext } from 'context'
 
 const IconCloseStyled = styled((props) => <Icon name='Cross' {...props} />)`
   position: absolute;
@@ -313,7 +314,6 @@ const Checkout = ({ renderTrigger, prices, billingInterval }: CheckoutProps) => 
   logger('Checkout rerender')
   const [open, setOpen] = useState(false)
   const nodeId = useFloatingNodeId()
-
   // const [prices, setPrices] = useState([])
   const [subscriptionData, setSubscriptionData] = useState(null)
   const [cardElemetFocused, setCardElemetFocused] = useState(false)
@@ -322,6 +322,7 @@ const Checkout = ({ renderTrigger, prices, billingInterval }: CheckoutProps) => 
   const [paymentIntent, setPaymentIntent] = useState<PaymentIntent | null>(null)
   const [messages, _setMessages] = useState('')
   const customStylesCardElement = useRef({})
+  const { session, createSubscription } = useUserContext()
 
   const {
     isLoading,
@@ -466,13 +467,23 @@ const Checkout = ({ renderTrigger, prices, billingInterval }: CheckoutProps) => 
       return
     }
     // TODO make paymet
-    // 1. Update subscription from Free to Writer
+    // 1. Save billing address to make stripe tax work
     // ...
-    // 2. Create payment using clientSecret
+    // TODO 2. Create subscription
+    const { subscriptionId, clientSecret } = await createSubscription(
+      session.user.id,
+      session.access_token,
+      prices.filter(
+        (price) =>
+          price.product_id == Const.productWriterId && price.interval == data.billingInterval.value
+      )[0]?.id
+    )
+    setSubscriptionData({ subscriptionId, clientSecret })
+
+    // 3. Create payment using clientSecret
     const cardElement = elements.getElement(CardElement)
     // Use card Element to tokenize payment details
-
-    let { error, paymentIntent } = await stripe.confirmCardPayment(subscriptionData.clientSecret, {
+    let { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
       payment_method: {
         card: cardElement,
         billing_details: {

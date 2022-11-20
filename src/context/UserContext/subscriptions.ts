@@ -14,4 +14,20 @@ const getSubscription = async (user_id: string, access_token: string) => {
   return subscription
 }
 
-export { getSubscription }
+const createSubscription = async (user_id: string, access_token: string, priceId: string) => {
+  logger('createSubscription')
+  const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
+  const { subscriptionId, clientSecret } = await fetch(`${url}/api/v1/subscription`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${access_token}`,
+    },
+    body: JSON.stringify({
+      priceId,
+    }),
+  }).then((r) => r.json())
+  return { subscriptionId, clientSecret }
+}
+
+export { getSubscription, createSubscription }

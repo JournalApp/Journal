@@ -5,7 +5,7 @@ import { Session } from '@supabase/supabase-js'
 import dayjs from 'dayjs'
 import { isDev } from 'utils'
 import type { Subscription } from 'types'
-import { getSubscription } from './subscriptions'
+import { getSubscription, createSubscription } from './subscriptions'
 import { useQuery } from '@tanstack/react-query'
 import * as Const from 'consts'
 
@@ -16,6 +16,11 @@ interface UserContextInterface {
   quitAndInstall: () => void
   getSecretKey: () => Promise<CryptoKey>
   serverTimeNow: () => string
+  createSubscription: (
+    user_id: string,
+    access_token: string,
+    priceId: string
+  ) => Promise<{ subscriptionId: any; clientSecret: any }>
 }
 
 const UserContext = createContext<UserContextInterface | null>(null)
@@ -197,6 +202,7 @@ export function UserProvider({ children }: any) {
     quitAndInstall,
     getSecretKey,
     serverTimeNow,
+    createSubscription,
   }
   return <UserContext.Provider value={state}>{session ? children : <Login />}</UserContext.Provider>
 }
