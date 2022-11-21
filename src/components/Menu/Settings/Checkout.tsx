@@ -280,7 +280,7 @@ const getCustomStyles = ({ borderRadius, hasError }: getCustomStylesProps) => {
     singleValue: (provided: any, state: any) => {
       const opacity = state.isDisabled ? 0.5 : 1
       const transition = 'opacity 300ms'
-      const padding = '2px'
+      const padding = 0
       const color = theme('color.popper.main')
       return { ...provided, opacity, transition, padding, color }
     },
