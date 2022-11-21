@@ -16,7 +16,7 @@ import {
   FloatingPortal,
 } from '@floating-ui/react-dom-interactions'
 import { useQuery } from '@tanstack/react-query'
-import { loadStripe, PaymentIntent, Stripe } from '@stripe/stripe-js'
+import { loadStripe, PaymentIntent } from '@stripe/stripe-js'
 import {
   Elements,
   CardElement,
@@ -28,6 +28,8 @@ import { Icon } from 'components'
 import Select from 'react-select'
 import type { Countries, Price } from 'types'
 import { useUserContext } from 'context'
+import Stripe from 'stripe'
+import { getSubscription } from './../../../context/UserContext/subscriptions'
 
 const IconCloseStyled = styled((props) => <Icon name='Cross' {...props} />)`
   position: absolute;
@@ -92,6 +94,10 @@ const Button = styled.button`
   &:hover,
   &:focus {
     box-shadow: 0 0 0 2px ${theme('color.popper.main', 0.15)};
+  }
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
   }
 `
 
@@ -293,6 +299,11 @@ const fetchCountries = async () => {
   return options
 }
 
+const Success = () => {
+  // TODO how to rerender whole app?
+  return <div>Success</div>
+}
+
 interface CheckoutProps {
   renderTrigger: any
   prices: Price[]
@@ -302,7 +313,7 @@ interface CheckoutProps {
 type FormData = {
   billingInterval: { value: 'year' | 'month'; label: string }
   name: string
-  country: object
+  country: { value: string; label: string }
   address: string
   city: string
   zip: string
@@ -314,15 +325,17 @@ const Checkout = ({ renderTrigger, prices, billingInterval }: CheckoutProps) => 
   logger('Checkout rerender')
   const [open, setOpen] = useState(false)
   const nodeId = useFloatingNodeId()
-  // const [prices, setPrices] = useState([])
-  const [subscriptionData, setSubscriptionData] = useState(null)
+  const [subscriptionId, setSubscriptionId] = useState<string | null>(null)
   const [cardElemetFocused, setCardElemetFocused] = useState(false)
   const [cardElemetReady, setCardElemetReady] = useState(false)
   const [cardElemetComplete, setCardElemetComplete] = useState(false)
+  const [formProcessing, setFormProcessing] = useState(false)
+  const [poolingSubscription, setPoolingSubscription] = useState(false)
   const [paymentIntent, setPaymentIntent] = useState<PaymentIntent | null>(null)
-  const [messages, _setMessages] = useState('')
+  const [messages, setMessages] = useState('')
+  const [success, setSuccess] = useState(false)
   const customStylesCardElement = useRef({})
-  const { session, createSubscription } = useUserContext()
+  const { session, subscription, createSubscription } = useUserContext()
 
   const {
     isLoading,
@@ -332,6 +345,28 @@ const Checkout = ({ renderTrigger, prices, billingInterval }: CheckoutProps) => 
   } = useQuery({
     queryKey: ['countries'],
     queryFn: fetchCountries,
+  })
+
+  useQuery({
+    queryKey: ['subscription', session?.user.id],
+    queryFn: async () => {
+      setPoolingSubscription(true)
+      logger('setPoolingSubscription(true)')
+      return await getSubscription(session?.user.id, session.access_token)
+    },
+    refetchInterval: (data) => {
+      if (data?.status == 'active' && data?.id == subscriptionId) {
+        logger('Active subscription received!')
+        subscription.current = data
+        setPoolingSubscription(false)
+        setSuccess(true)
+        return false
+      } else {
+        return 2000
+      }
+    },
+    refetchIntervalInBackground: true,
+    enabled: !!(paymentIntent?.status === 'succeeded'),
   })
 
   const { reference, floating, context, refs } = useFloating({
@@ -383,7 +418,7 @@ const Checkout = ({ renderTrigger, prices, billingInterval }: CheckoutProps) => 
     formState: { errors, isDirty },
   } = useForm<FormData>()
 
-  const watchCountry = watch('country', { value: 'US' })
+  const watchCountry = watch('country', { value: 'US', label: '' })
   const watchBillingInterval = watch(
     'billingInterval',
     billingIntervalOptions.find((price) => price.value == billingInterval)
@@ -454,33 +489,38 @@ const Checkout = ({ renderTrigger, prices, billingInterval }: CheckoutProps) => 
     }
   }, [])
 
-  // helper for displaying status messages.
-  const setMessage = (message: string) => {
-    _setMessages(`${messages}\n\n${message}`)
-  }
-
   const submitCheckout: SubmitHandler<FormData> = async (data) => {
+    if (formProcessing) {
+      return
+    }
+    setFormProcessing(true)
     logger('Submitted data:')
     logger(data)
     if (!cardElemetComplete) {
       elements.getElement(CardElement).focus()
       return
     }
-    // TODO make paymet
-    // 1. Save billing address to make stripe tax work
-    // ...
-    // TODO 2. Create subscription
-    const { subscriptionId, clientSecret } = await createSubscription(
-      session.user.id,
-      session.access_token,
-      prices.filter(
+
+    // 1. Create subscription and Save billing address to make stripe tax work
+    const address: Stripe.Address = {
+      city: data.city,
+      country: data.country.value,
+      line1: data.address,
+      line2: '',
+      postal_code: data.zip,
+      state: data.state,
+    }
+    const { subscriptionId, clientSecret } = await createSubscription({
+      access_token: session.access_token,
+      priceId: prices.filter(
         (price) =>
           price.product_id == Const.productWriterId && price.interval == data.billingInterval.value
-      )[0]?.id
-    )
-    setSubscriptionData({ subscriptionId, clientSecret })
+      )[0]?.id,
+      address,
+    })
+    setSubscriptionId(subscriptionId)
 
-    // 3. Create payment using clientSecret
+    // 2. Create payment using clientSecret
     const cardElement = elements.getElement(CardElement)
     // Use card Element to tokenize payment details
     let { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
@@ -493,10 +533,33 @@ const Checkout = ({ renderTrigger, prices, billingInterval }: CheckoutProps) => 
     })
     if (error) {
       // show error and collect new card details.
-      setMessage(error.message)
+      // setMessage(error.message)
+      setMessages('There was an error processing your payment, please try again')
+      setFormProcessing(false)
       return
     }
     setPaymentIntent(paymentIntent)
+  }
+
+  const submitButtonText = () => {
+    if (poolingSubscription) {
+      return 'Finalizing...'
+    } else if (formProcessing) {
+      return 'Processing...'
+    } else {
+      return (
+        'Upgrade to Writer' +
+        (prices
+          ? ' - $' +
+            prices.filter(
+              (price) =>
+                price.product_id == Const.productWriterId &&
+                price.interval == watchBillingInterval?.value
+            )[0]?.unit_amount /
+              100
+          : '')
+      )
+    }
   }
 
   logger('Errors:')
@@ -519,166 +582,162 @@ const Checkout = ({ renderTrigger, prices, billingInterval }: CheckoutProps) => 
             <FloatingFocusManager context={context}>
               <CheckoutModal ref={floating} {...getFloatingProps()}>
                 <IconCloseStyled onClick={() => setOpen(false)} />
-                <LeftPanel>
-                  Upgrade,
-                  <em>
-                    <br />
-                    write
-                    <br />
-                    without
-                    <br />
-                    limits
-                  </em>
-                </LeftPanel>
-
-                <Form onSubmit={handleSubmit(submitCheckout)}>
-                  <Controller
-                    name='billingInterval'
-                    control={control}
-                    render={({ field: { onChange, onBlur, value, name, ref } }) => (
+                {success ? (
+                  <Success />
+                ) : (
+                  <>
+                    <LeftPanel>
+                      Upgrade,
+                      <em>
+                        <br />
+                        write
+                        <br />
+                        without
+                        <br />
+                        limits
+                      </em>
+                    </LeftPanel>
+                    <Form onSubmit={handleSubmit(submitCheckout)}>
+                      <Controller
+                        name='billingInterval'
+                        control={control}
+                        render={({ field: { onChange, onBlur, value, name, ref } }) => (
+                          <InputContainer>
+                            <Label>Billing interval</Label>
+                            <Select<PricingOption>
+                              options={[...billingIntervalOptions]}
+                              components={{
+                                IndicatorSeparator: null,
+                                DropdownIndicator: ({ innerProps }) => (
+                                  <IconChevronStyled {...innerProps} />
+                                ),
+                              }}
+                              styles={getCustomStyles({ hasError: !!errors.billingInterval })}
+                              isClearable={false}
+                              isSearchable={false}
+                              defaultValue={billingIntervalOptions.find(
+                                (price) => price.value == billingInterval
+                              )}
+                              onBlur={onBlur}
+                              onChange={onChange}
+                              ref={ref}
+                            />
+                          </InputContainer>
+                        )}
+                      />
+                      <AddressStyled>
+                        <Label>Billing information</Label>
+                        <AddressInputsStyled>
+                          <Input
+                            borderRadius='8px 8px 0 0'
+                            hasError={!!errors.name}
+                            type='text'
+                            id='name'
+                            placeholder='Full name'
+                            {...register('name', {
+                              required: { value: true, message: 'Required' },
+                            })}
+                          />
+                          <Controller
+                            name='country'
+                            control={control}
+                            rules={{ required: true }}
+                            render={({ field: { onChange, onBlur, value, name, ref } }) => (
+                              <Select
+                                placeholder='Country'
+                                options={countries}
+                                components={{
+                                  IndicatorSeparator: null,
+                                  DropdownIndicator: ({ innerProps }) => (
+                                    <IconChevronStyled {...innerProps} />
+                                  ),
+                                }}
+                                styles={getCustomStyles({
+                                  borderRadius: '0px',
+                                  hasError: !!errors.country,
+                                })}
+                                onBlur={onBlur}
+                                onChange={onChange}
+                                ref={ref}
+                              />
+                            )}
+                          />
+                          <Input
+                            borderRadius='0px'
+                            hasError={!!errors.address}
+                            type='text'
+                            id='address'
+                            placeholder='Address'
+                            {...register('address', {
+                              required: { value: true, message: 'Required' },
+                            })}
+                          />
+                          <Input
+                            borderRadius='0px'
+                            hasError={!!errors.city}
+                            type='text'
+                            id='city'
+                            placeholder='City'
+                            {...register('city', {
+                              required: { value: true, message: 'Required' },
+                            })}
+                          />
+                          <AddressRowStyled>
+                            {(watchCountry || !watchCountry) && (
+                              <Input
+                                borderRadius='0 0 0 8px'
+                                hasError={!!errors.zip}
+                                type='text'
+                                id='zip'
+                                placeholder='Zip code'
+                                {...register('zip', {
+                                  required: { value: true, message: 'Required' },
+                                  pattern: new RegExp(
+                                    // @ts-ignore
+                                    getZipRegexByCountry(getValues('country')?.value)
+                                  ),
+                                })}
+                              />
+                            )}
+                            <Input
+                              borderRadius='0 0 8px 0'
+                              hasError={!!errors.state}
+                              type='text'
+                              id='state'
+                              placeholder='State / Province'
+                              {...register('state', {
+                                required: { value: true, message: 'Required' },
+                              })}
+                            />
+                          </AddressRowStyled>
+                        </AddressInputsStyled>
+                      </AddressStyled>
                       <InputContainer>
-                        <Label>Billing interval</Label>
-                        <Select<PricingOption>
-                          options={[...billingIntervalOptions]}
-                          components={{
-                            IndicatorSeparator: null,
-                            DropdownIndicator: ({ innerProps }) => (
-                              <IconChevronStyled {...innerProps} />
-                            ),
+                        <Label>Payment information</Label>
+                        <CardElementStyled
+                          onReady={(element) => {
+                            setCardElemetReady(true)
                           }}
-                          styles={getCustomStyles({ hasError: !!errors.billingInterval })}
-                          isClearable={false}
-                          isSearchable={false}
-                          defaultValue={billingIntervalOptions.find(
-                            (price) => price.value == billingInterval
-                          )}
-                          onBlur={onBlur}
-                          onChange={onChange}
-                          ref={ref}
+                          isFocused={cardElemetFocused}
+                          isReady={cardElemetReady}
+                          onFocus={() => setCardElemetFocused(true)}
+                          onBlur={() => setCardElemetFocused(false)}
+                          options={{
+                            hidePostalCode: true,
+                            style: customStylesCardElement.current,
+                          }}
+                          onChange={({ empty, complete, error }) => {
+                            setCardElemetComplete(complete)
+                          }}
                         />
                       </InputContainer>
-                    )}
-                  />
-                  <AddressStyled>
-                    <Label>Billing information</Label>
-                    <AddressInputsStyled>
-                      <Input
-                        borderRadius='8px 8px 0 0'
-                        hasError={!!errors.name}
-                        type='text'
-                        id='name'
-                        placeholder='Full name'
-                        {...register('name', {
-                          required: { value: true, message: 'Required' },
-                        })}
-                      />
-                      <Controller
-                        name='country'
-                        control={control}
-                        rules={{ required: true }}
-                        render={({ field: { onChange, onBlur, value, name, ref } }) => (
-                          <Select
-                            placeholder='Country'
-                            options={countries}
-                            components={{
-                              IndicatorSeparator: null,
-                              DropdownIndicator: ({ innerProps }) => (
-                                <IconChevronStyled {...innerProps} />
-                              ),
-                            }}
-                            styles={getCustomStyles({
-                              borderRadius: '0px',
-                              hasError: !!errors.country,
-                            })}
-                            onBlur={onBlur}
-                            onChange={onChange}
-                            ref={ref}
-                          />
-                        )}
-                      />
-                      <Input
-                        borderRadius='0px'
-                        hasError={!!errors.address}
-                        type='text'
-                        id='address'
-                        placeholder='Address'
-                        {...register('address', {
-                          required: { value: true, message: 'Required' },
-                        })}
-                      />
-                      <Input
-                        borderRadius='0px'
-                        hasError={!!errors.city}
-                        type='text'
-                        id='city'
-                        placeholder='City'
-                        {...register('city', {
-                          required: { value: true, message: 'Required' },
-                        })}
-                      />
-                      <AddressRowStyled>
-                        {(watchCountry || !watchCountry) && (
-                          <Input
-                            borderRadius='0 0 0 8px'
-                            hasError={!!errors.zip}
-                            type='text'
-                            id='zip'
-                            placeholder='Zip code'
-                            {...register('zip', {
-                              required: { value: true, message: 'Required' },
-                              pattern: new RegExp(
-                                // @ts-ignore
-                                getZipRegexByCountry(getValues('country')?.value)
-                              ),
-                            })}
-                          />
-                        )}
-                        <Input
-                          borderRadius='0 0 8px 0'
-                          hasError={!!errors.state}
-                          type='text'
-                          id='state'
-                          placeholder='State / Province'
-                          {...register('state', {
-                            required: { value: true, message: 'Required' },
-                          })}
-                        />
-                      </AddressRowStyled>
-                    </AddressInputsStyled>
-                  </AddressStyled>
-                  <InputContainer>
-                    <Label>Payment information</Label>
-                    <CardElementStyled
-                      onReady={(element) => {
-                        setCardElemetReady(true)
-                      }}
-                      isFocused={cardElemetFocused}
-                      isReady={cardElemetReady}
-                      onFocus={() => setCardElemetFocused(true)}
-                      onBlur={() => setCardElemetFocused(false)}
-                      options={{
-                        hidePostalCode: true,
-                        style: customStylesCardElement.current,
-                      }}
-                      onChange={({ empty, complete, error }) => {
-                        setCardElemetComplete(complete)
-                      }}
-                    />
-                  </InputContainer>
-                  <Button type='submit'>
-                    Upgrade to Writer
-                    {prices
-                      ? ' - $' +
-                        prices.filter(
-                          (price) =>
-                            price.product_id == Const.productWriterId &&
-                            price.interval == watchBillingInterval?.value
-                        )[0]?.unit_amount /
-                          100
-                      : ''}
-                  </Button>
-                  <div>{messages}</div>
-                </Form>
+                      <Button type='submit' disabled={formProcessing || poolingSubscription}>
+                        {submitButtonText()}
+                      </Button>
+                      <div>{messages}</div>
+                    </Form>
+                  </>
+                )}
               </CheckoutModal>
             </FloatingFocusManager>
           </FloatingOverlay>

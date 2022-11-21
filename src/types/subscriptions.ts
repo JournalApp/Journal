@@ -64,4 +64,10 @@ interface Countries {
   country_name: string
 }
 
-export { Product, Price, Subscription, Countries }
+interface CreateSubscriptionProps {
+  access_token: string
+  priceId: string
+  address: Stripe.Address
+}
+
+export { Product, Price, Subscription, Countries, CreateSubscriptionProps }

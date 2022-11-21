@@ -4,23 +4,25 @@ import { Login } from 'components'
 import { Session } from '@supabase/supabase-js'
 import dayjs from 'dayjs'
 import { isDev } from 'utils'
-import type { Subscription } from 'types'
+import type { Subscription, CreateSubscriptionProps } from 'types'
 import { getSubscription, createSubscription } from './subscriptions'
 import { useQuery } from '@tanstack/react-query'
 import * as Const from 'consts'
+import Stripe from 'stripe'
 
 interface UserContextInterface {
   session: Session
+  subscription: React.MutableRefObject<Subscription | null>
   authError: string
   signOut: () => void
   quitAndInstall: () => void
   getSecretKey: () => Promise<CryptoKey>
   serverTimeNow: () => string
-  createSubscription: (
-    user_id: string,
-    access_token: string,
-    priceId: string
-  ) => Promise<{ subscriptionId: any; clientSecret: any }>
+  createSubscription: ({
+    access_token,
+    priceId,
+    address,
+  }: CreateSubscriptionProps) => Promise<{ subscriptionId: any; clientSecret: any }>
 }
 
 const UserContext = createContext<UserContextInterface | null>(null)
@@ -32,7 +34,11 @@ export function UserProvider({ children }: any) {
   const secretKey = useRef(null)
   const serverClientTimeDelta = useRef(0) //  server time - client time = delta
   const subscription = useRef<Subscription | null>(null)
-  const { isStale: isSubscriptionDataStale, data: subscriptionData } = useQuery({
+  const {
+    isStale: isSubscriptionDataStale,
+    isSuccess: isSubscriptionDataFetched,
+    data: subscriptionData,
+  } = useQuery({
     queryKey: ['subscription', session?.user.id],
     initialData: window.electronAPI.user.getSubscription(session?.user.id),
     queryFn: async () => {
@@ -45,12 +51,15 @@ export function UserProvider({ children }: any) {
     logger('Using subscriptionData from SQLite')
   }
 
-  if (subscriptionData) {
+  if (isSubscriptionDataFetched) {
     logger(`subscriptionData received`)
     logger(subscriptionData)
-    logger(`User has product: ${subscriptionData.prices.product_id}`)
-    logger(`Is Free: ${Const.productFreeId == subscriptionData.prices.product_id}`)
-    logger(`Is Writer: ${Const.productWriterId == subscriptionData.prices.product_id}`)
+    if (subscriptionData == null) {
+      logger('Free plan. Fetched subscriptionData == null')
+    } else {
+      logger(`User has product: ${subscriptionData.prices.product_id}`)
+      logger(`Is Writer: ${Const.productWriterId == subscriptionData.prices.product_id}`)
+    }
     subscription.current = subscriptionData
   }
 
@@ -197,6 +206,7 @@ export function UserProvider({ children }: any) {
 
   let state = {
     session,
+    subscription,
     authError,
     signOut,
     quitAndInstall,

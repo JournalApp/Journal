@@ -298,19 +298,8 @@ const Products = () => {
           textColor={theme('color.productFree.main')}
         >
           <PlanTitleStyled>
-            {isLoading || isError ? (
-              <Skeleton width='25%' />
-            ) : (
-              prices.filter((price) => price.product_id == Const.productFreeId)[0]?.products.name
-            )}
-            <sub>
-              {isLoading || isError ? (
-                <Skeleton width='40%' />
-              ) : (
-                prices.filter((price) => price.product_id == Const.productFreeId)[0]?.products
-                  .description
-              )}
-            </sub>
+            {isLoading || isError ? <Skeleton width='25%' /> : 'Free'}
+            <sub>{isLoading || isError ? <Skeleton width='40%' /> : 'Try it out'}</sub>
           </PlanTitleStyled>
           <UsedEntries />
           <PriceContainerStyled>
