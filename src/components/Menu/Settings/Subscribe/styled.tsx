@@ -27,7 +27,7 @@ const CheckoutModalStyled = styled.div`
   display: flex;
   position: relative;
   padding: 0;
-  padding: 40px 48px 32px 32px;
+  padding: 40px 32px 32px 32px;
   margin: 48px 8px 8px 8px;
   border-radius: 8px;
   -webkit-app-region: no-drag;
@@ -139,6 +139,7 @@ const InputStyled = styled.input<InputProps>`
 
 const FormStyled = styled.form`
   width: 368px;
+  padding-right: 16px;
   display: flex;
   flex-direction: column;
   gap: 16px;
