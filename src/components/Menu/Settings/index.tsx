@@ -14,7 +14,7 @@ import {
   FloatingNode,
   FloatingPortal,
 } from '@floating-ui/react-dom-interactions'
-import { Checkout } from './Checkout'
+import { Checkout } from './Subscribe'
 import { UpgradeTabContent } from './Upgrade'
 import { BillingTabContent } from './Billing'
 import { EarnTabContent } from './Earn'

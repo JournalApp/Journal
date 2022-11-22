@@ -9,7 +9,7 @@ import { useQuery } from '@tanstack/react-query'
 import type { Price } from 'types'
 import * as Const from 'consts'
 import { useUserContext } from 'context'
-import { Checkout } from '../Checkout'
+import { Subscribe } from '../Subscribe'
 import { loadStripe, PaymentIntent, Stripe } from '@stripe/stripe-js'
 import {
   Elements,
@@ -353,7 +353,7 @@ const Products = () => {
           </PriceContainerStyled>
           {/* {stripePromise && ( */}
           <Elements stripe={stripePromise}>
-            <Checkout
+            <Subscribe
               billingInterval={billingInterval}
               prices={prices}
               renderTrigger={({ close, ...rest }: any) => (
