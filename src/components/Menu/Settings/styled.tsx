@@ -90,7 +90,8 @@ const SectionTitleStyled = styled.div`
   font-weight: 500;
   font-size: 18px;
   line-height: 28px;
-  padding: 0 0 24px 0;
+  padding: 0;
+  margin-bottom: 24px;
   letter-spacing: -0.03em;
 `
 

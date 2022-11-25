@@ -122,6 +122,10 @@ function randomInt(max: number) {
 
 const awaitTimeout = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay))
 
+const capitalize = (word: string) => {
+  return word[0].toUpperCase() + word.substring(1)
+}
+
 export {
   shallowEqual,
   arrayEquals,
@@ -139,4 +143,5 @@ export {
   entryHasNoContent,
   countEntryWords,
   awaitTimeout,
+  capitalize,
 }

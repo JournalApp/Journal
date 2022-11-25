@@ -27,6 +27,7 @@ import {
   SettingsTitleStyled,
   Offline,
 } from './styled'
+import { useUserContext } from 'context'
 
 interface SettingsDialogProps {
   setOpenSettings: React.MutableRefObject<any>
@@ -39,6 +40,7 @@ const SettingsDialog = ({ setOpenSettings, returnFocus }: SettingsDialogProps) =
   const initialFocus = useRef<HTMLButtonElement>(null)
   const nodeId = useFloatingNodeId()
   const isOnline = useIsOnline()
+  const { subscription } = useUserContext()
 
   const { floating, context, refs } = useFloating({
     open,
@@ -109,26 +111,29 @@ const SettingsDialog = ({ setOpenSettings, returnFocus }: SettingsDialogProps) =
                 >
                   <ListStyled>
                     <SettingsTitleStyled>Settings</SettingsTitleStyled>
-                    {
-                      // TODO hide Upgrade tab if user has Writer plan
-                    }
-                    <MenuItemStyled ref={initialFocus} value='tab1'>
-                      Upgrade
-                    </MenuItemStyled>
+                    {subscription.current == null && (
+                      <MenuItemStyled ref={initialFocus} value='tab1'>
+                        Upgrade
+                      </MenuItemStyled>
+                    )}
                     <MenuItemStyled value='tab2'>Earn credit</MenuItemStyled>
-                    <MenuItemStyled value='tab3'>Billing</MenuItemStyled>
+                    {subscription.current && <MenuItemStyled value='tab3'>Billing</MenuItemStyled>}
                   </ListStyled>
                   {isOnline ? (
                     <>
-                      <ContentStyled value='tab1'>
-                        <UpgradeTabContent />
-                      </ContentStyled>
+                      {subscription.current == null && (
+                        <ContentStyled value='tab1'>
+                          <UpgradeTabContent />
+                        </ContentStyled>
+                      )}
                       <ContentStyled value='tab2'>
                         <EarnTabContent />{' '}
                       </ContentStyled>
-                      <ContentStyled value='tab3'>
-                        <BillingTabContent />
-                      </ContentStyled>
+                      {subscription.current && (
+                        <ContentStyled value='tab3'>
+                          <BillingTabContent />
+                        </ContentStyled>
+                      )}
                     </>
                   ) : (
                     <Offline>
