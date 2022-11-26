@@ -1,5 +1,5 @@
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
-import { logger, capitalize, stripeEpochToDate, isDev } from 'utils'
+import { logger, capitalize, stripeEpochToDate, displayAmount } from 'utils'
 import { theme } from 'themes'
 import {
   HeaderStyled,
@@ -33,6 +33,7 @@ const Receipts = ({ billingInfo, isLoading }: PaymentMethodProps) => {
                     ' - ' +
                     dayjs(stripeEpochToDate(invoice.period_end)).format('MMM D YYYY')}
                 </ReceiptsCellStyled>
+                <ReceiptsCellStyled>{displayAmount(invoice.amount_paid)}</ReceiptsCellStyled>
                 <ReceiptsCellStyled>{capitalize(invoice.status)}</ReceiptsCellStyled>
                 <ReceiptsCellStyled>
                   <DownloadStyled href={invoice.invoice_pdf}>PDF↓</DownloadStyled>
@@ -45,9 +46,12 @@ const Receipts = ({ billingInfo, isLoading }: PaymentMethodProps) => {
   }
 
   return (
-    <SkeletonTheme baseColor={theme('color.pure', 0.2)} enableAnimation={false}>
+    <SkeletonTheme baseColor={theme('color.popper.pure', 0.6)} enableAnimation={false}>
       <HeaderStyled>Receipts</HeaderStyled>
-      <TextStyled>{isLoading ? <Skeleton count={3} /> : <Items />}</TextStyled>
+      <TextStyled>{isLoading ? <Skeleton count={3} height='24px' /> : <Items />}</TextStyled>
+      <TextStyled>
+        <Skeleton count={3} height='24px' />
+      </TextStyled>
     </SkeletonTheme>
   )
 }

@@ -213,7 +213,6 @@ const Subscribe = ({ renderTrigger, prices, billingInterval }: SubscribeProps) =
     customStylesCardElement.current = {
       base: {
         color: `rgba(${styles.getPropertyValue(getCSSVar('color.popper.main'))},1)`,
-        // backgroundColor: `rgba(${styles.getPropertyValue(getCSSVar('color.popper.pure'))},)`,
         fontFamily: 'Inter, Inter var, Arial, Helvetica',
         fontSize: '14px',
         fontSmoothing: 'antialiased',

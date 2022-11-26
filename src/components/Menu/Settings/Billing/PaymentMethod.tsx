@@ -34,7 +34,7 @@ const PaymentMethod = ({ billingInfo, isLoading }: PaymentMethodProps) => {
   }
 
   return (
-    <SkeletonTheme baseColor={theme('color.pure', 0.2)} enableAnimation={false}>
+    <SkeletonTheme baseColor={theme('color.popper.pure', 0.6)} enableAnimation={false}>
       <HeaderStyled>Payment method</HeaderStyled>
       <ContentStyled>
         <TextStyled>{isLoading ? <Skeleton width='50%' /> : <Card />}</TextStyled>
