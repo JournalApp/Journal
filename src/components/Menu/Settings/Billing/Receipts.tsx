@@ -1,5 +1,6 @@
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
 import { logger, capitalize, stripeEpochToDate, isDev } from 'utils'
+import { theme } from 'themes'
 import {
   HeaderStyled,
   TextStyled,
@@ -44,10 +45,10 @@ const Receipts = ({ billingInfo, isLoading }: PaymentMethodProps) => {
   }
 
   return (
-    <>
+    <SkeletonTheme baseColor={theme('color.pure', 0.2)} enableAnimation={false}>
       <HeaderStyled>Receipts</HeaderStyled>
-      <TextStyled>{isLoading ? <Skeleton /> : <Items />}</TextStyled>
-    </>
+      <TextStyled>{isLoading ? <Skeleton count={3} /> : <Items />}</TextStyled>
+    </SkeletonTheme>
   )
 }
 

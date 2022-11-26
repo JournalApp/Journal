@@ -1,5 +1,6 @@
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
 import { Icon } from 'components'
+import { theme } from 'themes'
 import { logger, capitalize, stripeEpochToDate, isDev } from 'utils'
 import {
   HeaderStyled,
@@ -33,10 +34,10 @@ const PaymentMethod = ({ billingInfo, isLoading }: PaymentMethodProps) => {
   }
 
   return (
-    <>
+    <SkeletonTheme baseColor={theme('color.pure', 0.2)} enableAnimation={false}>
       <HeaderStyled>Payment method</HeaderStyled>
       <ContentStyled>
-        <TextStyled>{isLoading ? <Skeleton /> : <Card />}</TextStyled>
+        <TextStyled>{isLoading ? <Skeleton width='50%' /> : <Card />}</TextStyled>
         {isLoading ? (
           <Skeleton />
         ) : (
@@ -46,7 +47,7 @@ const PaymentMethod = ({ billingInfo, isLoading }: PaymentMethodProps) => {
           </ActionsStyled>
         )}
       </ContentStyled>
-    </>
+    </SkeletonTheme>
   )
 }
 

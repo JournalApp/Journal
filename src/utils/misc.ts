@@ -126,6 +126,19 @@ const capitalize = (word: string) => {
   return word[0].toUpperCase() + word.substring(1)
 }
 
+const displayAmount = (amount: number) => {
+  const formatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  })
+  const a = formatter.format(amount / 100)
+  if (a.slice(-3) == '.00') {
+    return a.slice(0, -3)
+  } else {
+    return a
+  }
+}
+
 export {
   shallowEqual,
   arrayEquals,
@@ -144,4 +157,5 @@ export {
   countEntryWords,
   awaitTimeout,
   capitalize,
+  displayAmount,
 }

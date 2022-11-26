@@ -34,7 +34,7 @@ const BillingTabContent = () => {
   }, [billingInfo])
 
   return (
-    <SkeletonTheme baseColor={theme('color.pure', 0.2)} enableAnimation={false}>
+    <>
       <SectionTitleStyled>Billing</SectionTitleStyled>
       <Balance billingInfo={billingInfo} isLoading={isLoading} />
       <Divider />
@@ -43,7 +43,7 @@ const BillingTabContent = () => {
       <PaymentMethod billingInfo={billingInfo} isLoading={isLoading} />
       <Divider />
       <Receipts billingInfo={billingInfo} isLoading={isLoading} />
-    </SkeletonTheme>
+    </>
   )
 }
 
