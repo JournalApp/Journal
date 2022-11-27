@@ -70,4 +70,23 @@ interface CreateSubscriptionProps {
   address: Stripe.Address
 }
 
-export { Product, Price, Subscription, Countries, CreateSubscriptionProps }
+interface CancelSubscriptionProps {
+  access_token: string
+  subscriptionId: string
+}
+
+interface BillingInfo {
+  customer: Stripe.Customer
+  card: Stripe.PaymentMethod | null
+  invoices: Stripe.Invoice[]
+}
+
+export {
+  Product,
+  Price,
+  Subscription,
+  Countries,
+  CreateSubscriptionProps,
+  CancelSubscriptionProps,
+  BillingInfo,
+}

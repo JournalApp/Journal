@@ -1,7 +1,7 @@
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
 import { HeaderStyled, TextStyled } from './styled'
 import { displayAmount } from 'utils'
-import type { BillingInfo, PaymentMethodProps } from './types'
+import type { PaymentMethodProps } from './types'
 import dayjs from 'dayjs'
 import { theme } from 'themes'
 import relativeTime from 'dayjs/plugin/relativeTime'

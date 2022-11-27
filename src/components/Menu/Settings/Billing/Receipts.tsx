@@ -13,7 +13,7 @@ import {
   ReceiptsCellStyled,
   DownloadStyled,
 } from './styled'
-import type { BillingInfo, PaymentMethodProps } from './types'
+import type { PaymentMethodProps } from './types'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 dayjs.extend(relativeTime)
@@ -49,9 +49,6 @@ const Receipts = ({ billingInfo, isLoading }: PaymentMethodProps) => {
     <SkeletonTheme baseColor={theme('color.popper.pure', 0.6)} enableAnimation={false}>
       <HeaderStyled>Receipts</HeaderStyled>
       <TextStyled>{isLoading ? <Skeleton count={3} height='24px' /> : <Items />}</TextStyled>
-      <TextStyled>
-        <Skeleton count={3} height='24px' />
-      </TextStyled>
     </SkeletonTheme>
   )
 }

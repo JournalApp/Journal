@@ -1,6 +1,15 @@
 import { isDev, logger } from 'utils'
-import type { Subscription, CreateSubscriptionProps } from 'types'
+import type { Subscription, CreateSubscriptionProps, CancelSubscriptionProps } from 'types'
 import Stripe from 'stripe'
+import { BillingInfo } from 'types'
+
+const getCustomer = async (access_token: string) => {
+  logger('getCustomer')
+  const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
+  return (await fetch(`${url}/api/v1/customer`, {
+    headers: { Authorization: `Bearer ${access_token}` },
+  }).then((r) => r.json())) as BillingInfo
+}
 
 const getSubscription = async (user_id: string, access_token: string) => {
   logger('getSubscription')
@@ -37,4 +46,20 @@ const createSubscription = async ({ access_token, priceId, address }: CreateSubs
   return { subscriptionId, clientSecret }
 }
 
-export { getSubscription, createSubscription }
+const cancelSubscription = async ({ access_token, subscriptionId }: CancelSubscriptionProps) => {
+  logger('cancelSubscription')
+  const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
+  await fetch(`${url}/api/v1/subscription`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${access_token}`,
+    },
+    body: JSON.stringify({
+      subscriptionId,
+    }),
+  }).then((r) => r.json())
+  return true
+}
+
+export { getSubscription, createSubscription, cancelSubscription, getCustomer }

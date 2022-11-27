@@ -4,8 +4,8 @@ import { logger, supabase, stripeEpochToDate, isDev } from 'utils'
 import { SectionTitleStyled } from '../styled'
 import { useQuery } from '@tanstack/react-query'
 import { useUserContext } from 'context'
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
-import type { BillingInfo, PaymentMethodProps } from './types'
+import { getCustomer } from '../../../../context/UserContext/subscriptions'
+import type { PaymentMethodProps } from './types'
 import { PaymentMethod } from './PaymentMethod'
 import { Receipts } from './Receipts'
 import { Plan } from './Plan'
@@ -21,12 +21,7 @@ const BillingTabContent = () => {
     data: billingInfo,
   } = useQuery({
     queryKey: ['billingInfo'],
-    queryFn: async () => {
-      const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
-      return (await fetch(`${url}/api/v1/customer`, {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      }).then((r) => r.json())) as BillingInfo
-    },
+    queryFn: async () => getCustomer(session.access_token),
   })
 
   useEffect(() => {

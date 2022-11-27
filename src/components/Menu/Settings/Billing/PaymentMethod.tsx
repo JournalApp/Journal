@@ -11,7 +11,8 @@ import {
   CardStyled,
   ReceiptsRowStyled,
 } from './styled'
-import type { BillingInfo, PaymentMethodProps } from './types'
+import type { PaymentMethodProps } from './types'
+import type { BillingInfo } from 'types'
 
 const PaymentMethod = ({ billingInfo, isLoading }: PaymentMethodProps) => {
   const Card = () => {

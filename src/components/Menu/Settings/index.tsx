@@ -117,7 +117,7 @@ const SettingsDialog = ({ setOpenSettings, returnFocus }: SettingsDialogProps) =
                       </MenuItemStyled>
                     )}
                     <MenuItemStyled value='tab2'>Earn credit</MenuItemStyled>
-                    {subscription.current && <MenuItemStyled value='tab3'>Billing</MenuItemStyled>}
+                    <MenuItemStyled value='tab3'>Billing</MenuItemStyled>
                   </ListStyled>
                   {isOnline ? (
                     <>
@@ -127,13 +127,11 @@ const SettingsDialog = ({ setOpenSettings, returnFocus }: SettingsDialogProps) =
                         </ContentStyled>
                       )}
                       <ContentStyled value='tab2'>
-                        <EarnTabContent />{' '}
+                        <EarnTabContent />
                       </ContentStyled>
-                      {subscription.current && (
-                        <ContentStyled value='tab3'>
-                          <BillingTabContent />
-                        </ContentStyled>
-                      )}
+                      <ContentStyled value='tab3'>
+                        <BillingTabContent />
+                      </ContentStyled>
                     </>
                   ) : (
                     <Offline>
