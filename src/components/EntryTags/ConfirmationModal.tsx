@@ -117,10 +117,8 @@ const ConfirmationModal = ({ action, children }: any) => {
             <Title>Remove this tag permanently?</Title>
             <Description>This tag will be removed from all entries</Description>
             <Actions>
-              <Action onMouseDown={(e) => performAction(e)} tabIndex={0}>
-                Remove
-              </Action>
-              <Close ref={closeRef} onMouseDown={(e) => close(e)} tabIndex={1}>
+              <Action onMouseDown={(e) => performAction(e)}>Remove</Action>
+              <Close ref={closeRef} onMouseDown={(e) => close(e)}>
                 Close
               </Close>
             </Actions>

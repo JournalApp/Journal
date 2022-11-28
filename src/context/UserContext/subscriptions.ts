@@ -49,17 +49,28 @@ const createSubscription = async ({ access_token, priceId, address }: CreateSubs
 const cancelSubscription = async ({ access_token, subscriptionId }: CancelSubscriptionProps) => {
   logger('cancelSubscription')
   const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
-  await fetch(`${url}/api/v1/subscription`, {
+  await fetch(`${url}/api/v1/subscription/${subscriptionId}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${access_token}`,
     },
-    body: JSON.stringify({
-      subscriptionId,
-    }),
-  }).then((r) => r.json())
-  return true
+  })
 }
 
-export { getSubscription, createSubscription, cancelSubscription, getCustomer }
+const resumeSubscription = async ({ access_token, subscriptionId }: CancelSubscriptionProps) => {
+  logger('cancelSubscription')
+  const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
+  await fetch(`${url}/api/v1/subscription/${subscriptionId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${access_token}`,
+    },
+    body: JSON.stringify({
+      action: 'resume',
+    }),
+  })
+}
+
+export { getSubscription, createSubscription, cancelSubscription, resumeSubscription, getCustomer }

@@ -14,7 +14,7 @@ import {
 import type { PaymentMethodProps } from './types'
 import type { BillingInfo } from 'types'
 
-const PaymentMethod = ({ billingInfo, isLoading }: PaymentMethodProps) => {
+const PaymentMethod = ({ billingInfo, isLoading, showActions = true }: PaymentMethodProps) => {
   const Card = () => {
     const { card } = billingInfo
     const expire = card.card.exp_month + '/' + card.card.exp_year.toString().substring(2)
@@ -39,14 +39,15 @@ const PaymentMethod = ({ billingInfo, isLoading }: PaymentMethodProps) => {
       <HeaderStyled>Payment method</HeaderStyled>
       <ContentStyled>
         <TextStyled>{isLoading ? <Skeleton width='50%' /> : <Card />}</TextStyled>
-        {isLoading ? (
-          <Skeleton />
-        ) : (
-          <ActionsStyled>
-            <ActionStyled>Change</ActionStyled>
-            <ActionStyled>Remove</ActionStyled>
-          </ActionsStyled>
-        )}
+        {showActions &&
+          (isLoading ? (
+            <Skeleton />
+          ) : (
+            <ActionsStyled>
+              <ActionStyled>Change</ActionStyled>
+              <ActionStyled>Remove</ActionStyled>
+            </ActionsStyled>
+          ))}
       </ContentStyled>
     </SkeletonTheme>
   )
