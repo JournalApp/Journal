@@ -14,13 +14,14 @@ import {
 import type { PaymentMethodProps } from './types'
 import type { BillingInfo } from 'types'
 
-const PaymentMethod = ({ billingInfo, isLoading, showActions = true }: PaymentMethodProps) => {
+const PaymentMethod = ({ billingInfo, isLoading, showCardOnly = false }: PaymentMethodProps) => {
+  const card = billingInfo?.card
+
   const Card = () => {
-    const { card } = billingInfo
-    const expire = card.card.exp_month + '/' + card.card.exp_year.toString().substring(2)
-    const brand = capitalize(card.card.brand)
-    const last4 = card.card.last4
     if (card) {
+      const expire = card.card.exp_month + '/' + card.card.exp_year.toString().substring(2)
+      const brand = capitalize(card.card.brand)
+      const last4 = card.card.last4
       return (
         <CardStyled>
           <Icon name='CardBrand' type={card.card.brand} />
@@ -36,16 +37,20 @@ const PaymentMethod = ({ billingInfo, isLoading, showActions = true }: PaymentMe
 
   return (
     <SkeletonTheme baseColor={theme('color.popper.pure', 0.6)} enableAnimation={false}>
-      <HeaderStyled>Payment method</HeaderStyled>
+      {!showCardOnly && <HeaderStyled>Payment method</HeaderStyled>}
       <ContentStyled>
         <TextStyled>{isLoading ? <Skeleton width='50%' /> : <Card />}</TextStyled>
-        {showActions &&
+        {!showCardOnly &&
           (isLoading ? (
             <Skeleton />
+          ) : card ? (
+            <ActionsStyled>
+              <ActionStyled>Update</ActionStyled>
+              <ActionStyled>Remove</ActionStyled>
+            </ActionsStyled>
           ) : (
             <ActionsStyled>
-              <ActionStyled>Change</ActionStyled>
-              <ActionStyled>Remove</ActionStyled>
+              <ActionStyled>Add card</ActionStyled>
             </ActionsStyled>
           ))}
       </ContentStyled>

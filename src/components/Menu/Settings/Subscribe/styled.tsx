@@ -22,6 +22,19 @@ const IconChevronStyled = styled((props) => <Icon name='Chevron' {...props} />)`
   opacity: 0.6;
 `
 
+const TextStyled = styled.div`
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 24px;
+`
+
+const ErrorStyled = styled.div`
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 24px;
+  color: ${theme('color.error.main')};
+`
+
 const CheckoutModalStyled = styled.div`
   background-color: ${theme('color.popper.surface')};
   display: flex;
@@ -49,6 +62,7 @@ const ButtonStyled = styled.button`
   line-height: 24px;
   cursor: pointer;
   display: flex;
+  margin-top: 16px;
   padding: 8px 12px;
   border-radius: 6px;
   width: fit-content;
@@ -263,5 +277,7 @@ export {
   AddressStyled,
   AddressInputsStyled,
   AddressRowStyled,
+  ErrorStyled,
+  TextStyled,
   getCustomStyles,
 }

@@ -15,6 +15,7 @@ import {
   FloatingPortal,
 } from '@floating-ui/react-dom-interactions'
 import { useQuery } from '@tanstack/react-query'
+import { displayAmount } from 'utils'
 import { loadStripe, PaymentIntent } from '@stripe/stripe-js'
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
 import Select from 'react-select'
@@ -36,6 +37,8 @@ import {
   AddressInputsStyled,
   AddressRowStyled,
   getCustomStyles,
+  ErrorStyled,
+  TextStyled,
 } from './styled'
 import { Success } from './Success'
 import { LeftPanel } from './LeftPanel'
@@ -84,6 +87,8 @@ const Subscribe = ({ renderTrigger, prices, billingInterval }: SubscribeProps) =
   const [paymentIntent, setPaymentIntent] = useState<PaymentIntent | null>(null)
   const [messages, setMessages] = useState('')
   const [success, setSuccess] = useState(false)
+  const [isCardPayment, setIsCardPayment] = useState(true)
+  const [subscriptionCreated, setSubscriptionCreated] = useState(false)
   const customStylesCardElement = useRef({})
   const { session, subscription, createSubscription } = useUserContext()
 
@@ -121,7 +126,7 @@ const Subscribe = ({ renderTrigger, prices, billingInterval }: SubscribeProps) =
       }
     },
     refetchIntervalInBackground: true,
-    enabled: !!(paymentIntent?.status === 'succeeded'),
+    enabled: !!(paymentIntent?.status === 'succeeded' || subscriptionCreated),
   })
 
   const { reference, floating, context, refs } = useFloating({
@@ -195,10 +200,44 @@ const Subscribe = ({ renderTrigger, prices, billingInterval }: SubscribeProps) =
   }, [billingInterval])
 
   useEffect(() => {
+    if (billingInfo && prices) {
+      let charge = prices.filter(
+        (price) =>
+          price.product_id == Const.productWriterId && price.interval == watchBillingInterval.value
+      )[0].unit_amount
+      let balance = billingInfo.customer.balance
+      if (charge + balance <= 0) {
+        setIsCardPayment(false)
+      } else {
+        setIsCardPayment(true)
+      }
+      logger(`To pay: ${(charge + balance) / 100}`)
+    }
+  }, [watchBillingInterval])
+
+  useEffect(() => {
     if (getValues('zip')) {
       trigger('zip')
     }
   }, [watchCountry])
+
+  useEffect(() => {
+    if (billingInfo?.customer?.address?.city) {
+      setValue('city', billingInfo.customer.address.city)
+    }
+    if (billingInfo?.customer?.address?.line1) {
+      setValue('address', billingInfo.customer.address.line1)
+    }
+    if (billingInfo?.customer?.address?.postal_code) {
+      setValue('zip', billingInfo.customer.address.postal_code)
+    }
+    if (billingInfo?.customer?.address?.state) {
+      setValue('state', billingInfo.customer.address.state)
+    }
+    if (billingInfo?.card?.billing_details?.name) {
+      setValue('name', billingInfo.card.billing_details.name)
+    }
+  }, [billingInfo])
 
   useEffect(() => {
     if (!open) {
@@ -239,54 +278,76 @@ const Subscribe = ({ renderTrigger, prices, billingInterval }: SubscribeProps) =
     }
   }, [])
 
+  //////////////////////////
+  // Submit
+  //////////////////////////
+
   const submitCheckout: SubmitHandler<FormData> = async (data) => {
     if (formProcessing) {
       return
     }
     logger('Submitted data:')
     logger(data)
-    if (!cardElemetComplete) {
-      elements.getElement(CardElement).focus()
-      return
+    if (!billingInfo.card) {
+      if (!cardElemetComplete) {
+        elements.getElement(CardElement).focus()
+        return
+      }
     }
     setFormProcessing(true)
 
     // 1. Create subscription and Save billing address to make stripe tax work
-    const address: Stripe.Address = {
-      city: data.city,
-      country: data.country.value,
-      line1: data.address,
-      line2: '',
-      postal_code: data.zip,
-      state: data.state,
+    let address: Stripe.Address | null = null
+    if (isCardPayment) {
+      address = {
+        city: data.city,
+        country: data.country.value,
+        line1: data.address,
+        line2: '',
+        postal_code: data.zip,
+        state: data.state,
+      }
     }
+
     const { subscriptionId, clientSecret } = await createSubscription({
       access_token: session.access_token,
       priceId: prices.filter(
         (price) =>
           price.product_id == Const.productWriterId && price.interval == data.billingInterval.value
       )[0]?.id,
-      address,
+      ...(address && { address }),
     })
-    setSubscriptionId(subscriptionId)
 
-    // 2. Create payment using clientSecret
-    const cardElement = elements.getElement(CardElement)
-    let { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-      payment_method: {
-        card: cardElement,
-        billing_details: {
-          name: data.name,
-        },
-      },
-    })
-    if (error) {
-      // setMessage(error.message)
+    if (subscriptionId) {
+      setSubscriptionId(subscriptionId)
+    } else {
       setMessages('There was an error processing your payment, please try again')
       setFormProcessing(false)
       return
     }
-    setPaymentIntent(paymentIntent)
+
+    if (isCardPayment && clientSecret) {
+      // 2. Create payment using clientSecret
+      // if clientSecret is empty, stripe didn't create a invoice
+      const cardElement = elements.getElement(CardElement)
+      let { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: billingInfo?.card?.id || {
+          card: cardElement,
+          billing_details: {
+            name: data.name,
+          },
+        },
+      })
+      if (error) {
+        // setMessage(error.message)
+        setMessages('There was an error processing your payment, please try again')
+        setFormProcessing(false)
+        return
+      }
+      setPaymentIntent(paymentIntent)
+    } else {
+      setSubscriptionCreated(true)
+    }
   }
 
   const submitButtonText = () => {
@@ -308,6 +369,69 @@ const Subscribe = ({ renderTrigger, prices, billingInterval }: SubscribeProps) =
           : '')
       )
     }
+  }
+
+  const ChargeSummary = () => {
+    const balance = billingInfo.customer.balance
+
+    if (balance == 0) {
+      return <></>
+    }
+    if (balance > 0) {
+      return (
+        <TextStyled>
+          {`
+          Card charge will be increased by your ${displayAmount(
+            Math.abs(billingInfo.customer.balance)
+          )} balance.`}
+        </TextStyled>
+      )
+    }
+    if (balance < 0) {
+      const charge = prices.filter(
+        (price) =>
+          price.product_id == Const.productWriterId && price.interval == watchBillingInterval?.value
+      )[0]?.unit_amount
+      return (
+        <TextStyled>{`${displayAmount(
+          Math.min(-balance, charge)
+        )} will be used from your balance.`}</TextStyled>
+      )
+    }
+  }
+
+  const PaymentInformation = () => {
+    return (
+      <InputContainerStyled>
+        <LabelStyled>Payment information</LabelStyled>
+        {billingInfoIsLoading ? (
+          <Skeleton />
+        ) : billingInfo?.card ? (
+          <PaymentMethod
+            billingInfo={billingInfo}
+            isLoading={billingInfoIsLoading}
+            showCardOnly={true}
+          />
+        ) : (
+          <CardElementStyled
+            onReady={(element) => {
+              setCardElemetReady(true)
+            }}
+            isFocused={cardElemetFocused}
+            isReady={cardElemetReady}
+            onFocus={() => setCardElemetFocused(true)}
+            onBlur={() => setCardElemetFocused(false)}
+            options={{
+              hidePostalCode: true,
+              style: customStylesCardElement.current,
+            }}
+            onChange={({ empty, complete, error }) => {
+              setCardElemetComplete(complete)
+            }}
+          />
+        )}
+      </InputContainerStyled>
+    )
   }
 
   logger('Errors:')
@@ -367,130 +491,106 @@ const Subscribe = ({ renderTrigger, prices, billingInterval }: SubscribeProps) =
                             </InputContainerStyled>
                           )}
                         />
-                        <AddressStyled>
-                          <LabelStyled>Billing information</LabelStyled>
-                          <AddressInputsStyled>
-                            <InputStyled
-                              borderRadius='8px 8px 0 0'
-                              hasError={!!errors.name}
-                              type='text'
-                              id='name'
-                              placeholder='Full name'
-                              {...register('name', {
-                                required: { value: true, message: 'Required' },
-                              })}
-                            />
-                            <Controller
-                              name='country'
-                              control={control}
-                              rules={{ required: true }}
-                              render={({ field: { onChange, onBlur, value, name, ref } }) => (
-                                <Select
-                                  placeholder='Country'
-                                  options={countries}
-                                  components={{
-                                    IndicatorSeparator: null,
-                                    DropdownIndicator: ({ innerProps }) => (
-                                      <IconChevronStyled {...innerProps} />
-                                    ),
-                                  }}
-                                  styles={getCustomStyles({
-                                    borderRadius: '0px',
-                                    hasError: !!errors.country,
-                                  })}
-                                  onBlur={onBlur}
-                                  onChange={onChange}
-                                  ref={ref}
-                                />
-                              )}
-                            />
-                            <InputStyled
-                              borderRadius='0px'
-                              hasError={!!errors.address}
-                              type='text'
-                              id='address'
-                              placeholder='Address'
-                              {...register('address', {
-                                required: { value: true, message: 'Required' },
-                              })}
-                            />
-                            <InputStyled
-                              borderRadius='0px'
-                              hasError={!!errors.city}
-                              type='text'
-                              id='city'
-                              placeholder='City'
-                              {...register('city', {
-                                required: { value: true, message: 'Required' },
-                              })}
-                            />
-                            <AddressRowStyled>
-                              {(watchCountry || !watchCountry) && (
+                        {isCardPayment && (
+                          <>
+                            <AddressStyled>
+                              <LabelStyled>Billing information</LabelStyled>
+                              <AddressInputsStyled>
                                 <InputStyled
-                                  borderRadius='0 0 0 8px'
-                                  hasError={!!errors.zip}
+                                  borderRadius='8px 8px 0 0'
+                                  hasError={!!errors.name}
                                   type='text'
-                                  id='zip'
-                                  placeholder='Zip code'
-                                  {...register('zip', {
+                                  id='name'
+                                  placeholder='Full name'
+                                  {...register('name', {
                                     required: { value: true, message: 'Required' },
-                                    pattern: new RegExp(
-                                      // @ts-ignore
-                                      getZipRegexByCountry(getValues('country')?.value)
-                                    ),
                                   })}
                                 />
-                              )}
-                              <InputStyled
-                                borderRadius='0 0 8px 0'
-                                hasError={!!errors.state}
-                                type='text'
-                                id='state'
-                                placeholder='State / Province'
-                                {...register('state', {
-                                  required: { value: true, message: 'Required' },
-                                })}
-                              />
-                            </AddressRowStyled>
-                          </AddressInputsStyled>
-                        </AddressStyled>
-                        <InputContainerStyled>
-                          <LabelStyled>Payment information</LabelStyled>
-                          {billingInfoIsLoading ? (
-                            <Skeleton />
-                          ) : (
-                            billingInfo.card && (
-                              <PaymentMethod
-                                billingInfo={billingInfo}
-                                isLoading={billingInfoIsLoading}
-                                showActions={false}
-                              />
-                            )
-                          )}
-                          <CardElementStyled
-                            onReady={(element) => {
-                              setCardElemetReady(true)
-                            }}
-                            isFocused={cardElemetFocused}
-                            isReady={cardElemetReady}
-                            onFocus={() => setCardElemetFocused(true)}
-                            onBlur={() => setCardElemetFocused(false)}
-                            options={{
-                              hidePostalCode: true,
-                              style: customStylesCardElement.current,
-                            }}
-                            onChange={({ empty, complete, error }) => {
-                              setCardElemetComplete(complete)
-                            }}
-                          />
-                        </InputContainerStyled>
+                                <Controller
+                                  name='country'
+                                  control={control}
+                                  rules={{ required: true }}
+                                  render={({ field: { onChange, onBlur, value, name, ref } }) => (
+                                    <Select
+                                      placeholder='Country'
+                                      options={countries}
+                                      components={{
+                                        IndicatorSeparator: null,
+                                        DropdownIndicator: ({ innerProps }) => (
+                                          <IconChevronStyled {...innerProps} />
+                                        ),
+                                      }}
+                                      styles={getCustomStyles({
+                                        borderRadius: '0px',
+                                        hasError: !!errors.country,
+                                      })}
+                                      onBlur={onBlur}
+                                      onChange={onChange}
+                                      ref={ref}
+                                    />
+                                  )}
+                                />
+                                <InputStyled
+                                  borderRadius='0px'
+                                  hasError={!!errors.address}
+                                  type='text'
+                                  id='address'
+                                  placeholder='Address'
+                                  {...register('address', {
+                                    required: { value: true, message: 'Required' },
+                                  })}
+                                />
+                                <InputStyled
+                                  borderRadius='0px'
+                                  hasError={!!errors.city}
+                                  type='text'
+                                  id='city'
+                                  placeholder='City'
+                                  {...register('city', {
+                                    required: { value: true, message: 'Required' },
+                                  })}
+                                />
+                                <AddressRowStyled>
+                                  {(watchCountry || !watchCountry) && (
+                                    <InputStyled
+                                      borderRadius='0 0 0 8px'
+                                      hasError={!!errors.zip}
+                                      type='text'
+                                      id='zip'
+                                      placeholder='Zip code'
+                                      {...register('zip', {
+                                        required: { value: true, message: 'Required' },
+                                        pattern: new RegExp(
+                                          // @ts-ignore
+                                          getZipRegexByCountry(getValues('country')?.value)
+                                        ),
+                                      })}
+                                    />
+                                  )}
+                                  <InputStyled
+                                    borderRadius='0 0 8px 0'
+                                    hasError={!!errors.state}
+                                    type='text'
+                                    id='state'
+                                    placeholder='State / Province'
+                                    {...register('state', {
+                                      required: { value: true, message: 'Required' },
+                                    })}
+                                  />
+                                </AddressRowStyled>
+                              </AddressInputsStyled>
+                            </AddressStyled>
+                            <PaymentInformation />
+                          </>
+                        )}
                         <ButtonStyled
                           type='submit'
                           disabled={billingInfoIsLoading || formProcessing || poolingSubscription}
                         >
                           {submitButtonText()}
                         </ButtonStyled>
-                        <div>{messages}</div>
+                        {billingInfo ? <ChargeSummary /> : <Skeleton />}
+                        <ErrorStyled>{messages}</ErrorStyled>
                       </FormStyled>
                     </SkeletonTheme>
                   </>

@@ -67,7 +67,7 @@ interface Countries {
 interface CreateSubscriptionProps {
   access_token: string
   priceId: string
-  address: Stripe.Address
+  address?: Stripe.Address
 }
 
 interface CancelSubscriptionProps {

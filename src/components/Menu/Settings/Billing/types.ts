@@ -4,7 +4,7 @@ import { BillingInfo } from 'types'
 interface PaymentMethodProps {
   billingInfo: BillingInfo
   isLoading: boolean
-  showActions?: boolean
+  showCardOnly?: boolean
 }
 
 export { PaymentMethodProps }

@@ -127,6 +127,10 @@ const capitalize = (word: string) => {
 }
 
 const displayAmount = (amount: number) => {
+  // prevent amount being -0
+  if (amount == 0) {
+    amount = 0
+  }
   const formatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',

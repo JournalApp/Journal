@@ -40,7 +40,7 @@ const createSubscription = async ({ access_token, priceId, address }: CreateSubs
     },
     body: JSON.stringify({
       priceId,
-      address,
+      ...(address && { address }),
     }),
   }).then((r) => r.json())
   return { subscriptionId, clientSecret }
