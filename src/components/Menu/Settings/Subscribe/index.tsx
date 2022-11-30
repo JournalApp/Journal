@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { theme, getCSSVar } from 'themes'
 import { useForm, Controller, SubmitHandler } from 'react-hook-form'
-import { logger, supabase, getZipRegexByCountry, isDev, awaitTimeout } from 'utils'
+import { logger, getZipRegexByCountry } from 'utils'
 import * as Const from 'consts'
 import {
   useFloating,
@@ -16,46 +16,40 @@ import {
 } from '@floating-ui/react-dom-interactions'
 import { useQuery } from '@tanstack/react-query'
 import { displayAmount } from 'utils'
-import { loadStripe, PaymentIntent } from '@stripe/stripe-js'
+import { PaymentIntent } from '@stripe/stripe-js'
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
 import Select from 'react-select'
 import type { Countries, Price } from 'types'
 import { useUserContext } from 'context'
 import Stripe from 'stripe'
-import { getSubscription, getCustomer } from '../../../../context/UserContext/subscriptions'
+import {
+  getSubscription,
+  getCustomer,
+  fetchCountries,
+} from '../../../../context/UserContext/subscriptions'
 import {
   IconCloseStyled,
   IconChevronStyled,
   CheckoutModalStyled,
   InputContainerStyled,
   ButtonStyled,
+  getCustomStyles,
+  ErrorStyled,
+  TextStyled,
+} from './styled'
+import {
   LabelStyled,
-  InputStyled,
+  AddressInputStyled,
   FormStyled,
   CardElementStyled,
   AddressStyled,
   AddressInputsStyled,
   AddressRowStyled,
-  getCustomStyles,
-  ErrorStyled,
-  TextStyled,
-} from './styled'
+} from '../styled'
 import { Success } from './Success'
 import { LeftPanel } from './LeftPanel'
 import { PaymentMethod } from './../Billing/PaymentMethod'
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
-
-const fetchCountries = async () => {
-  const { data, error } = await supabase.from<Countries>('countries').select()
-  if (error) {
-    throw new Error(error.message)
-  }
-  // await awaitTimeout(5000)
-  const options = data.map((country) => {
-    return { value: country.country_code, label: country.country_name }
-  })
-  return options
-}
 
 interface SubscribeProps {
   renderTrigger: any
@@ -73,6 +67,10 @@ type FormData = {
   state: string
   cardElement: any
 }
+
+//////////////////////////
+// 🍔 Subscribe component
+//////////////////////////
 
 const Subscribe = ({ renderTrigger, prices, billingInterval }: SubscribeProps) => {
   logger('Checkout rerender')
@@ -174,7 +172,10 @@ const Subscribe = ({ renderTrigger, prices, billingInterval }: SubscribeProps) =
     formState: { errors },
   } = useForm<FormData>()
 
-  const watchCountry = watch('country', { value: 'US', label: '' })
+  const watchCountry = watch('country', {
+    value: 'US',
+    label: '',
+  })
   const watchBillingInterval = watch(
     'billingInterval',
     billingIntervalOptions.find((price) => price.value == billingInterval)
@@ -191,6 +192,10 @@ const Subscribe = ({ renderTrigger, prices, billingInterval }: SubscribeProps) =
   // Initialize an instance of stripe.
   const stripe = useStripe()
   const elements = useElements()
+
+  //////////////////////////
+  // 🏓 useEffect
+  //////////////////////////
 
   useEffect(() => {
     setValue(
@@ -222,6 +227,12 @@ const Subscribe = ({ renderTrigger, prices, billingInterval }: SubscribeProps) =
   }, [watchCountry])
 
   useEffect(() => {
+    if (billingInfo?.customer?.address?.country) {
+      setValue(
+        'country',
+        countries.find((country) => country.value == billingInfo.customer.address.country)
+      )
+    }
     if (billingInfo?.customer?.address?.city) {
       setValue('city', billingInfo.customer.address.city)
     }
@@ -237,7 +248,7 @@ const Subscribe = ({ renderTrigger, prices, billingInterval }: SubscribeProps) =
     if (billingInfo?.card?.billing_details?.name) {
       setValue('name', billingInfo.card.billing_details.name)
     }
-  }, [billingInfo])
+  }, [billingInfo, open])
 
   useEffect(() => {
     if (!open) {
@@ -279,7 +290,7 @@ const Subscribe = ({ renderTrigger, prices, billingInterval }: SubscribeProps) =
   }, [])
 
   //////////////////////////
-  // Submit
+  // 💸 Submit form
   //////////////////////////
 
   const submitCheckout: SubmitHandler<FormData> = async (data) => {
@@ -339,7 +350,6 @@ const Subscribe = ({ renderTrigger, prices, billingInterval }: SubscribeProps) =
         },
       })
       if (error) {
-        // setMessage(error.message)
         setMessages('There was an error processing your payment, please try again')
         setFormProcessing(false)
         return
@@ -400,42 +410,9 @@ const Subscribe = ({ renderTrigger, prices, billingInterval }: SubscribeProps) =
     }
   }
 
-  const PaymentInformation = () => {
-    return (
-      <InputContainerStyled>
-        <LabelStyled>Payment information</LabelStyled>
-        {billingInfoIsLoading ? (
-          <Skeleton />
-        ) : billingInfo?.card ? (
-          <PaymentMethod
-            billingInfo={billingInfo}
-            isLoading={billingInfoIsLoading}
-            showCardOnly={true}
-          />
-        ) : (
-          <CardElementStyled
-            onReady={(element) => {
-              setCardElemetReady(true)
-            }}
-            isFocused={cardElemetFocused}
-            isReady={cardElemetReady}
-            onFocus={() => setCardElemetFocused(true)}
-            onBlur={() => setCardElemetFocused(false)}
-            options={{
-              hidePostalCode: true,
-              style: customStylesCardElement.current,
-            }}
-            onChange={({ empty, complete, error }) => {
-              setCardElemetComplete(complete)
-            }}
-          />
-        )}
-      </InputContainerStyled>
-    )
-  }
-
-  logger('Errors:')
-  logger(errors)
+  //////////////////////////
+  // 🚀 Return
+  //////////////////////////
 
   return (
     <FloatingNode id={nodeId}>
@@ -496,7 +473,7 @@ const Subscribe = ({ renderTrigger, prices, billingInterval }: SubscribeProps) =
                             <AddressStyled>
                               <LabelStyled>Billing information</LabelStyled>
                               <AddressInputsStyled>
-                                <InputStyled
+                                <AddressInputStyled
                                   borderRadius='8px 8px 0 0'
                                   hasError={!!errors.name}
                                   type='text'
@@ -514,6 +491,15 @@ const Subscribe = ({ renderTrigger, prices, billingInterval }: SubscribeProps) =
                                     <Select
                                       placeholder='Country'
                                       options={countries}
+                                      defaultValue={
+                                        billingInfo
+                                          ? countries.find(
+                                              (country) =>
+                                                country.value ==
+                                                billingInfo.customer.address.country
+                                            )
+                                          : ''
+                                      }
                                       components={{
                                         IndicatorSeparator: null,
                                         DropdownIndicator: ({ innerProps }) => (
@@ -530,7 +516,7 @@ const Subscribe = ({ renderTrigger, prices, billingInterval }: SubscribeProps) =
                                     />
                                   )}
                                 />
-                                <InputStyled
+                                <AddressInputStyled
                                   borderRadius='0px'
                                   hasError={!!errors.address}
                                   type='text'
@@ -540,7 +526,7 @@ const Subscribe = ({ renderTrigger, prices, billingInterval }: SubscribeProps) =
                                     required: { value: true, message: 'Required' },
                                   })}
                                 />
-                                <InputStyled
+                                <AddressInputStyled
                                   borderRadius='0px'
                                   hasError={!!errors.city}
                                   type='text'
@@ -552,7 +538,7 @@ const Subscribe = ({ renderTrigger, prices, billingInterval }: SubscribeProps) =
                                 />
                                 <AddressRowStyled>
                                   {(watchCountry || !watchCountry) && (
-                                    <InputStyled
+                                    <AddressInputStyled
                                       borderRadius='0 0 0 8px'
                                       hasError={!!errors.zip}
                                       type='text'
@@ -567,7 +553,7 @@ const Subscribe = ({ renderTrigger, prices, billingInterval }: SubscribeProps) =
                                       })}
                                     />
                                   )}
-                                  <InputStyled
+                                  <AddressInputStyled
                                     borderRadius='0 0 8px 0'
                                     hasError={!!errors.state}
                                     type='text'
@@ -580,7 +566,35 @@ const Subscribe = ({ renderTrigger, prices, billingInterval }: SubscribeProps) =
                                 </AddressRowStyled>
                               </AddressInputsStyled>
                             </AddressStyled>
-                            <PaymentInformation />
+                            <InputContainerStyled>
+                              <LabelStyled>Payment information</LabelStyled>
+                              {billingInfoIsLoading ? (
+                                <Skeleton />
+                              ) : billingInfo?.card ? (
+                                <PaymentMethod
+                                  billingInfo={billingInfo}
+                                  isLoading={billingInfoIsLoading}
+                                  showCardOnly={true}
+                                />
+                              ) : (
+                                <CardElementStyled
+                                  onReady={(element) => {
+                                    setCardElemetReady(true)
+                                  }}
+                                  isFocused={cardElemetFocused}
+                                  isReady={cardElemetReady}
+                                  onFocus={() => setCardElemetFocused(true)}
+                                  onBlur={() => setCardElemetFocused(false)}
+                                  options={{
+                                    hidePostalCode: true,
+                                    style: customStylesCardElement.current,
+                                  }}
+                                  onChange={({ empty, complete, error }) => {
+                                    setCardElemetComplete(complete)
+                                  }}
+                                />
+                              )}
+                            </InputContainerStyled>
                           </>
                         )}
                         <ButtonStyled

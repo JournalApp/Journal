@@ -1,7 +1,12 @@
-import { isDev, logger } from 'utils'
-import type { Subscription, CreateSubscriptionProps, CancelSubscriptionProps } from 'types'
+import { isDev, logger, supabase } from 'utils'
+import type {
+  Subscription,
+  CreateSubscriptionProps,
+  CancelSubscriptionProps,
+  BillingInfo,
+  Countries,
+} from 'types'
 import Stripe from 'stripe'
-import { BillingInfo } from 'types'
 
 const getCustomer = async (access_token: string) => {
   logger('getCustomer')
@@ -73,4 +78,37 @@ const resumeSubscription = async ({ access_token, subscriptionId }: CancelSubscr
   })
 }
 
-export { getSubscription, createSubscription, cancelSubscription, resumeSubscription, getCustomer }
+const createSetupIntent = async ({ access_token }: CreateSubscriptionProps) => {
+  logger('createSetupIntent')
+  const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
+  const { clientSecret } = await fetch(`${url}/api/v1/setupintent`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${access_token}`,
+    },
+  }).then((r) => r.json())
+  return { clientSecret }
+}
+
+const fetchCountries = async () => {
+  const { data, error } = await supabase.from<Countries>('countries').select()
+  if (error) {
+    throw new Error(error.message)
+  }
+  // await awaitTimeout(5000)
+  const options = data.map((country) => {
+    return { value: country.country_code, label: country.country_name }
+  })
+  return options
+}
+
+export {
+  getSubscription,
+  createSubscription,
+  cancelSubscription,
+  resumeSubscription,
+  getCustomer,
+  createSetupIntent,
+  fetchCountries,
+}
