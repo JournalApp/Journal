@@ -70,6 +70,11 @@ interface CreateSubscriptionProps {
   address?: Stripe.Address
 }
 
+interface AddCardProps {
+  access_token: string
+  address: Stripe.Address
+}
+
 interface CancelSubscriptionProps {
   access_token: string
   subscriptionId: string
@@ -88,5 +93,6 @@ export {
   Countries,
   CreateSubscriptionProps,
   CancelSubscriptionProps,
+  AddCardProps,
   BillingInfo,
 }

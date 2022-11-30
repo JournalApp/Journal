@@ -28,6 +28,9 @@ import {
   Offline,
 } from './styled'
 import { useUserContext } from 'context'
+import { useQuery } from '@tanstack/react-query'
+import { loadStripe, PaymentIntent, Stripe } from '@stripe/stripe-js'
+import { Elements } from '@stripe/react-stripe-js'
 
 interface SettingsDialogProps {
   setOpenSettings: React.MutableRefObject<any>
@@ -36,11 +39,24 @@ interface SettingsDialogProps {
 
 const SettingsDialog = ({ setOpenSettings, returnFocus }: SettingsDialogProps) => {
   const [open, setOpen] = useState(true)
+  const [stripePromise, setStripePromise] = useState<Promise<Stripe> | null>(null)
   const firstRender = useRef(true)
   const initialFocus = useRef<HTMLButtonElement>(null)
   const nodeId = useFloatingNodeId()
   const isOnline = useIsOnline()
   const { subscription } = useUserContext()
+
+  useQuery({
+    queryKey: ['stripePromise'],
+    enabled: !!open,
+    queryFn: async () => {
+      const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
+      const { publishableKey } = await fetch(`${url}/api/v1/config`).then((r) => r.json())
+      // setPrices(prices)
+      setStripePromise(() => loadStripe(publishableKey))
+      return publishableKey
+    },
+  })
 
   const { floating, context, refs } = useFloating({
     open,
@@ -103,43 +119,45 @@ const SettingsDialog = ({ setOpenSettings, returnFocus }: SettingsDialogProps) =
               }}
             >
               <FloatingFocusManager context={context}>
-                <TabsStyled
-                  ref={floating}
-                  {...getFloatingProps()}
-                  defaultValue='tab1'
-                  orientation='vertical'
-                >
-                  <ListStyled>
-                    <SettingsTitleStyled>Settings</SettingsTitleStyled>
-                    {subscription.current == null && (
-                      <MenuItemStyled ref={initialFocus} value='tab1'>
-                        Upgrade
-                      </MenuItemStyled>
-                    )}
-                    <MenuItemStyled value='tab2'>Earn credit</MenuItemStyled>
-                    <MenuItemStyled value='tab3'>Billing</MenuItemStyled>
-                  </ListStyled>
-                  {isOnline ? (
-                    <>
+                <Elements stripe={stripePromise}>
+                  <TabsStyled
+                    ref={floating}
+                    {...getFloatingProps()}
+                    defaultValue='tab1'
+                    orientation='vertical'
+                  >
+                    <ListStyled>
+                      <SettingsTitleStyled>Settings</SettingsTitleStyled>
                       {subscription.current == null && (
-                        <ContentStyled value='tab1'>
-                          <UpgradeTabContent />
-                        </ContentStyled>
+                        <MenuItemStyled ref={initialFocus} value='tab1'>
+                          Upgrade
+                        </MenuItemStyled>
                       )}
-                      <ContentStyled value='tab2'>
-                        <EarnTabContent />
-                      </ContentStyled>
-                      <ContentStyled value='tab3'>
-                        <BillingTabContent />
-                      </ContentStyled>
-                    </>
-                  ) : (
-                    <Offline>
-                      <Icon name='Offline' tintColor={theme('color.popper.main', 0.2)} /> Please go
-                      online to manage your settings.
-                    </Offline>
-                  )}
-                </TabsStyled>
+                      <MenuItemStyled value='tab2'>Earn credit</MenuItemStyled>
+                      <MenuItemStyled value='tab3'>Billing</MenuItemStyled>
+                    </ListStyled>
+                    {isOnline ? (
+                      <>
+                        {subscription.current == null && (
+                          <ContentStyled value='tab1'>
+                            <UpgradeTabContent />
+                          </ContentStyled>
+                        )}
+                        <ContentStyled value='tab2'>
+                          <EarnTabContent />
+                        </ContentStyled>
+                        <ContentStyled value='tab3'>
+                          <BillingTabContent />
+                        </ContentStyled>
+                      </>
+                    ) : (
+                      <Offline>
+                        <Icon name='Offline' tintColor={theme('color.popper.main', 0.2)} /> Please
+                        go online to manage your settings.
+                      </Offline>
+                    )}
+                  </TabsStyled>
+                </Elements>
               </FloatingFocusManager>
             </FloatingOverlay>
           )}

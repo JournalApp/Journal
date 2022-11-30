@@ -5,6 +5,9 @@ import { CancelOrResume } from '../CancelOrResume'
 import styled from 'styled-components'
 import { theme } from 'themes'
 import type { Subscription } from 'types'
+import { fetchProducts, calcYearlyPlanSavings } from '../../../../context/UserContext/subscriptions'
+import { useQuery } from '@tanstack/react-query'
+import * as Const from 'consts'
 import {
   HeaderStyled,
   TextStyled,
@@ -25,6 +28,25 @@ interface PlanProps {
 }
 
 const Plan = ({ subscription }: PlanProps) => {
+  const {
+    isLoading,
+    isError,
+    data: prices,
+    error,
+  } = useQuery({
+    queryKey: ['prices'],
+    queryFn: fetchProducts,
+    cacheTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled:
+      subscription?.prices?.products.id == Const.productWriterId &&
+      subscription?.prices?.interval == 'month',
+  })
+
+  const savings = prices
+    ? calcYearlyPlanSavings(prices.filter((price) => price.product_id == Const.productWriterId))
+    : ''
+
   return (
     <>
       <HeaderStyled>Plan</HeaderStyled>
@@ -55,7 +77,7 @@ const Plan = ({ subscription }: PlanProps) => {
               />
             ) : (
               <>
-                <ActionStyled>Change to yearly (save 20%)</ActionStyled>
+                <ActionStyled>Change to yearly (save {savings})</ActionStyled>
                 <CancelOrResume
                   action='cancel'
                   renderTrigger={({ close, ...rest }: any) => (

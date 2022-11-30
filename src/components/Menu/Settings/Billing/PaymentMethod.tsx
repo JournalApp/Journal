@@ -1,6 +1,7 @@
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
 import { Icon } from 'components'
 import { theme } from 'themes'
+import { AddCard } from '../AddCard'
 import { logger, capitalize, stripeEpochToDate, isDev } from 'utils'
 import {
   HeaderStyled,
@@ -50,7 +51,13 @@ const PaymentMethod = ({ billingInfo, isLoading, showCardOnly = false }: Payment
             </ActionsStyled>
           ) : (
             <ActionsStyled>
-              <ActionStyled>Add card</ActionStyled>
+              <AddCard
+                renderTrigger={({ close, ...rest }: any) => (
+                  <ActionStyled onClick={close} {...rest}>
+                    Add card
+                  </ActionStyled>
+                )}
+              />
             </ActionsStyled>
           ))}
       </ContentStyled>

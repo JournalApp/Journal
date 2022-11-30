@@ -26,17 +26,9 @@ import {
   getSubscription,
   getCustomer,
   fetchCountries,
+  calcYearlyPlanSavings,
 } from '../../../../context/UserContext/subscriptions'
-import {
-  IconCloseStyled,
-  IconChevronStyled,
-  CheckoutModalStyled,
-  InputContainerStyled,
-  ButtonStyled,
-  getCustomStyles,
-  ErrorStyled,
-  TextStyled,
-} from './styled'
+import { CheckoutModalStyled, ButtonStyled, TextStyled } from './styled'
 import {
   LabelStyled,
   AddressInputStyled,
@@ -45,6 +37,11 @@ import {
   AddressStyled,
   AddressInputsStyled,
   AddressRowStyled,
+  ErrorStyled,
+  InputContainerStyled,
+  getCustomStyles,
+  IconCloseStyled,
+  IconChevronStyled,
 } from '../styled'
 import { Success } from './Success'
 import { LeftPanel } from './LeftPanel'
@@ -73,7 +70,7 @@ type FormData = {
 //////////////////////////
 
 const Subscribe = ({ renderTrigger, prices, billingInterval }: SubscribeProps) => {
-  logger('Checkout rerender')
+  logger('Subscribe rerender')
   const [open, setOpen] = useState(false)
   const nodeId = useFloatingNodeId()
   const [subscriptionId, setSubscriptionId] = useState<string | null>(null)
@@ -145,6 +142,10 @@ const Subscribe = ({ renderTrigger, prices, billingInterval }: SubscribeProps) =
     label: string
   }
 
+  const savings = prices
+    ? calcYearlyPlanSavings(prices.filter((price) => price.product_id == Const.productWriterId))
+    : ''
+
   const yearlyPrice = prices
     ? prices.filter(
         (price) => price.product_id == Const.productWriterId && price.interval == 'year'
@@ -156,7 +157,7 @@ const Subscribe = ({ renderTrigger, prices, billingInterval }: SubscribeProps) =
       )[0]?.unit_amount
     : 0
   const billingIntervalOptions: PricingOption[] = [
-    { value: 'year', label: `Yearly – $${yearlyPrice / 100} / year (save 20%)` },
+    { value: 'year', label: `Yearly – $${yearlyPrice / 100} / year (save ${savings})` },
     { value: 'month', label: `Monthly – $${monthlyPrice / 100} / month` },
   ]
 
@@ -227,7 +228,7 @@ const Subscribe = ({ renderTrigger, prices, billingInterval }: SubscribeProps) =
   }, [watchCountry])
 
   useEffect(() => {
-    if (billingInfo?.customer?.address?.country) {
+    if (billingInfo?.customer?.address?.country && countries) {
       setValue(
         'country',
         countries.find((country) => country.value == billingInfo.customer.address.country)
@@ -337,24 +338,30 @@ const Subscribe = ({ renderTrigger, prices, billingInterval }: SubscribeProps) =
       return
     }
 
-    if (isCardPayment && clientSecret) {
-      // 2. Create payment using clientSecret
-      // if clientSecret is empty, stripe didn't create a invoice
-      const cardElement = elements.getElement(CardElement)
-      let { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: billingInfo?.card?.id || {
-          card: cardElement,
-          billing_details: {
-            name: data.name,
+    if (isCardPayment) {
+      if (clientSecret) {
+        // 2. Create payment using clientSecret
+        // if clientSecret is empty, stripe didn't create a invoice
+        const cardElement = elements.getElement(CardElement)
+        let { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+          payment_method: billingInfo?.card?.id || {
+            card: cardElement,
+            billing_details: {
+              name: data.name,
+            },
           },
-        },
-      })
-      if (error) {
-        setMessages('There was an error processing your payment, please try again')
-        setFormProcessing(false)
-        return
+        })
+        if (error) {
+          setMessages('There was an error processing your payment, please try again')
+          setFormProcessing(false)
+          return
+        }
+        setPaymentIntent(paymentIntent)
+      } else {
+        // TODO handle case for not reaching min charge amount
+        // Charge is > 0, but stripe did not charge as charge is < $0.50
+        // If card field was visible, save card for future use (SetupIntent)
       }
-      setPaymentIntent(paymentIntent)
     } else {
       setSubscriptionCreated(true)
     }

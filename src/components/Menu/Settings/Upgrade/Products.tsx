@@ -10,14 +10,7 @@ import type { Price } from 'types'
 import * as Const from 'consts'
 import { useUserContext } from 'context'
 import { Subscribe } from '../Subscribe'
-import { loadStripe, PaymentIntent, Stripe } from '@stripe/stripe-js'
-import {
-  Elements,
-  CardElement,
-  PaymentElement,
-  useStripe,
-  useElements,
-} from '@stripe/react-stripe-js'
+import { fetchProducts } from '../../../../context/UserContext/subscriptions'
 
 const PlansSectionStyled = styled.div`
   display: grid;
@@ -219,15 +212,6 @@ function calcPercentage(limit: number, current: number, min = 0, max = 100) {
   }
 }
 
-const fetchProducts = async () => {
-  const { data, error } = await supabase.from<Price>('prices').select('*,  products(*)')
-  if (error) {
-    throw new Error(error.message)
-  }
-  // await awaitTimeout(2000)
-  return data
-}
-
 const UsedEntries = () => {
   const { session } = useUserContext()
   const { isLoading, isError, data, error } = useQuery({
@@ -253,18 +237,6 @@ const UsedEntries = () => {
 
 const Products = () => {
   const [billingInterval, setBillingInterval] = useState<'year' | 'month'>('year')
-  const [stripePromise, setStripePromise] = useState<Promise<Stripe> | null>(null)
-
-  useQuery({
-    queryKey: ['stripePromise'],
-    queryFn: async () => {
-      const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
-      const { publishableKey } = await fetch(`${url}/api/v1/config`).then((r) => r.json())
-      // setPrices(prices)
-      setStripePromise(() => loadStripe(publishableKey))
-      return publishableKey
-    },
-  })
 
   const {
     isLoading,
@@ -351,24 +323,21 @@ const Products = () => {
               <label htmlFor='s1'>Billed yearly</label>
             </SwitchStyled>
           </PriceContainerStyled>
-          {/* {stripePromise && ( */}
-          <Elements stripe={stripePromise}>
-            <Subscribe
-              billingInterval={billingInterval}
-              prices={prices}
-              renderTrigger={({ close, ...rest }: any) => (
-                <PrimaryButtonStyled
-                  bgColor={'color.productWriter.main'}
-                  textColor={'color.productWriter.popper'}
-                  onClick={close}
-                  {...rest}
-                >
-                  Upgrade
-                </PrimaryButtonStyled>
-              )}
-            />
-          </Elements>
-          {/* )} */}
+
+          <Subscribe
+            billingInterval={billingInterval}
+            prices={prices}
+            renderTrigger={({ close, ...rest }: any) => (
+              <PrimaryButtonStyled
+                bgColor={'color.productWriter.main'}
+                textColor={'color.productWriter.popper'}
+                onClick={close}
+                {...rest}
+              >
+                Upgrade
+              </PrimaryButtonStyled>
+            )}
+          />
         </PlanStyled>
       </SkeletonTheme>
     </PlansSectionStyled>

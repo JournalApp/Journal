@@ -3,8 +3,10 @@ import type {
   Subscription,
   CreateSubscriptionProps,
   CancelSubscriptionProps,
+  AddCardProps,
   BillingInfo,
   Countries,
+  Price,
 } from 'types'
 import Stripe from 'stripe'
 
@@ -78,7 +80,7 @@ const resumeSubscription = async ({ access_token, subscriptionId }: CancelSubscr
   })
 }
 
-const createSetupIntent = async ({ access_token }: CreateSubscriptionProps) => {
+const createSetupIntent = async ({ access_token, address }: AddCardProps) => {
   logger('createSetupIntent')
   const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
   const { clientSecret } = await fetch(`${url}/api/v1/setupintent`, {
@@ -87,6 +89,9 @@ const createSetupIntent = async ({ access_token }: CreateSubscriptionProps) => {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${access_token}`,
     },
+    body: JSON.stringify({
+      address,
+    }),
   }).then((r) => r.json())
   return { clientSecret }
 }
@@ -103,6 +108,26 @@ const fetchCountries = async () => {
   return options
 }
 
+const calcYearlyPlanSavings = (prices: Price[]) => {
+  const yearlyPrice = prices
+    ? prices.filter((price) => price.interval == 'year')[0]?.unit_amount
+    : 0
+  const monthlyPrice = prices
+    ? prices.filter((price) => price.interval == 'month')[0]?.unit_amount
+    : 0
+
+  const percent = (1 - yearlyPrice / (monthlyPrice * 12)) * 100
+  return `${Math.round(percent)}%`
+}
+
+const fetchProducts = async () => {
+  const { data, error } = await supabase.from<Price>('prices').select('*,  products(*)')
+  if (error) {
+    throw new Error(error.message)
+  }
+  return data
+}
+
 export {
   getSubscription,
   createSubscription,
@@ -111,4 +136,6 @@ export {
   getCustomer,
   createSetupIntent,
   fetchCountries,
+  calcYearlyPlanSavings,
+  fetchProducts,
 }
