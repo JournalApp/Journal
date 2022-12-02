@@ -14,6 +14,7 @@ import {
   getSubscription,
   getCustomer,
   fetchCountries,
+  deletePreviousCards,
   createSetupIntent,
 } from '../../../../context/UserContext/subscriptions'
 import {
@@ -46,8 +47,10 @@ loadStripe.setLoadParameters({ advancedFraudSignals: false })
 
 interface ModalProps {
   setOpen: React.Dispatch<React.SetStateAction<boolean>>
+  isUpdate: boolean
   billingInfo: BillingInfo
   billingInfoIsLoading: boolean
+  refetchBillingInfo: any
   countries: {
     value: string
     label: string
@@ -68,7 +71,14 @@ type FormData = {
 // 🍔 AddCard Modal component
 //////////////////////////
 
-const Modal = ({ setOpen, billingInfo, billingInfoIsLoading, countries }: ModalProps) => {
+const Modal = ({
+  setOpen,
+  billingInfo,
+  billingInfoIsLoading,
+  countries,
+  isUpdate,
+  refetchBillingInfo,
+}: ModalProps) => {
   logger('AddCard Modal rerender')
 
   const [cardElemetFocused, setCardElemetFocused] = useState(false)
@@ -110,6 +120,12 @@ const Modal = ({ setOpen, billingInfo, billingInfoIsLoading, countries }: ModalP
       trigger('zip')
     }
   }, [watchCountry])
+
+  useEffect(() => {
+    if (success) {
+      setOpen(false)
+    }
+  }, [success])
 
   useEffect(() => {
     if (billingInfo?.customer?.address?.country && countries) {
@@ -157,7 +173,7 @@ const Modal = ({ setOpen, billingInfo, billingInfoIsLoading, countries }: ModalP
   }, [])
 
   //////////////////////////
-  // 💸 Submit form
+  // 💳 Submit form
   //////////////////////////
 
   const submitCard: SubmitHandler<FormData> = async (data) => {
@@ -193,7 +209,7 @@ const Modal = ({ setOpen, billingInfo, billingInfoIsLoading, countries }: ModalP
     // 2. Save card using clientSecret
     const cardElement = elements.getElement(CardElement)
 
-    let { error } = await stripe.confirmCardSetup(clientSecret, {
+    let { setupIntent, error } = await stripe.confirmCardSetup(clientSecret, {
       payment_method: {
         card: cardElement,
         billing_details: {
@@ -204,20 +220,27 @@ const Modal = ({ setOpen, billingInfo, billingInfoIsLoading, countries }: ModalP
 
     if (error) {
       logger(error.message)
-      setMessages('There was an error when saving your card, please try again')
+      setMessages('There was an error when saving your card, please try again.')
       setFormProcessing(false)
       return
     }
 
-    // TODO
-    // Handle success
+    if (setupIntent) {
+      try {
+        await deletePreviousCards(session.access_token)
+      } catch {}
+      await refetchBillingInfo()
+      setSuccess(true)
+    }
   }
 
   const submitButtonText = () => {
-    if (formProcessing) {
-      return 'Processing...'
+    if (success) {
+      return 'Done'
+    } else if (formProcessing) {
+      return isUpdate ? 'Updating...' : 'Adding...'
     } else {
-      return 'Update/Add'
+      return isUpdate ? 'Update' : 'Add'
     }
   }
 
@@ -228,7 +251,7 @@ const Modal = ({ setOpen, billingInfo, billingInfoIsLoading, countries }: ModalP
   return (
     <>
       <IconCloseStyled onClick={() => setOpen(false)} />
-      <Title>Add payment method</Title>
+      <Title>{isUpdate ? 'Update ' : 'Add '}payment method</Title>
       <SkeletonTheme baseColor={theme('color.popper.pure', 0.6)} enableAnimation={false}>
         <FormStyled onSubmit={handleSubmit(submitCard)}>
           <AddressStyled>
@@ -327,12 +350,6 @@ const Modal = ({ setOpen, billingInfo, billingInfoIsLoading, countries }: ModalP
             <LabelStyled>Payment information</LabelStyled>
             {billingInfoIsLoading ? (
               <Skeleton />
-            ) : billingInfo?.card ? (
-              <PaymentMethod
-                billingInfo={billingInfo}
-                isLoading={billingInfoIsLoading}
-                showCardOnly={true}
-              />
             ) : (
               <CardElementStyled
                 onReady={(element) => {
@@ -367,7 +384,7 @@ const Modal = ({ setOpen, billingInfo, billingInfoIsLoading, countries }: ModalP
                 {submitButtonText()}
               </ButtonStyled>
             </ActionsWrapperStyled>
-            <ErrorStyled>{messages}</ErrorStyled>
+            {messages && <ErrorStyled>{messages}</ErrorStyled>}
           </div>
         </FormStyled>
       </SkeletonTheme>

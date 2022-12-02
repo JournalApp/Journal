@@ -18,6 +18,15 @@ const getCustomer = async (access_token: string) => {
   }).then((r) => r.json())) as BillingInfo
 }
 
+const deletePreviousCards = async (access_token: string) => {
+  logger('deletePreviousCards')
+  const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
+  await fetch(`${url}/api/v1/cards`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${access_token}` },
+  })
+}
+
 const getSubscription = async (user_id: string, access_token: string) => {
   logger('getSubscription')
   const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
@@ -138,4 +147,5 @@ export {
   fetchCountries,
   calcYearlyPlanSavings,
   fetchProducts,
+  deletePreviousCards,
 }

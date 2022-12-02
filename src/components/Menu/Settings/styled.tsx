@@ -227,6 +227,7 @@ const ErrorStyled = styled.div`
   font-weight: 500;
   font-size: 14px;
   line-height: 24px;
+  margin-top: 16px;
   color: ${theme('color.error.main')};
 `
 

@@ -27,13 +27,14 @@ import {
 
 interface AddCardProps {
   renderTrigger: any
+  isUpdate?: boolean
 }
 
 //////////////////////////
 // 🍔 AddCard component
 //////////////////////////
 
-const AddCard = ({ renderTrigger }: AddCardProps) => {
+const AddCard = ({ renderTrigger, isUpdate = false }: AddCardProps) => {
   logger('AddCard rerender')
   const { session, subscription, createSubscription } = useUserContext()
   const [stripePromise, setStripePromise] = useState<any | null>(null)
@@ -45,7 +46,11 @@ const AddCard = ({ renderTrigger }: AddCardProps) => {
     queryFn: fetchCountries,
   })
 
-  const { isLoading: billingInfoIsLoading, data: billingInfo } = useQuery({
+  const {
+    isLoading: billingInfoIsLoading,
+    data: billingInfo,
+    refetch: refetchBillingInfo,
+  } = useQuery({
     queryKey: ['billingInfo'],
     queryFn: async () => getCustomer(session.access_token),
   })
@@ -117,9 +122,11 @@ const AddCard = ({ renderTrigger }: AddCardProps) => {
               <CheckoutModalStyled ref={floating} {...getFloatingProps()}>
                 <Elements stripe={stripePromise}>
                   <Modal
+                    isUpdate={isUpdate}
                     setOpen={setOpen}
                     billingInfo={billingInfo}
                     billingInfoIsLoading={billingInfoIsLoading}
+                    refetchBillingInfo={refetchBillingInfo}
                     countries={countries}
                   />
                 </Elements>
