@@ -4,6 +4,8 @@ import { theme, LightThemeItemKey, BaseThemeItemKey } from 'themes'
 import { Icon } from 'components'
 import * as Switch from '@radix-ui/react-switch'
 import { logger, supabase, awaitTimeout, isDev } from 'utils'
+import { Stripe } from '@stripe/stripe-js'
+import { Elements } from '@stripe/react-stripe-js'
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
 import { useQuery } from '@tanstack/react-query'
 import type { Price } from 'types'
@@ -11,6 +13,7 @@ import * as Const from 'consts'
 import { useUserContext } from 'context'
 import { Subscribe } from '../Subscribe'
 import { fetchProducts } from '../../../../context/UserContext/subscriptions'
+import { loadStripe } from '@stripe/stripe-js/pure'
 
 const PlansSectionStyled = styled.div`
   display: grid;
@@ -185,11 +188,15 @@ const PrimaryButtonStyled = styled.button<PrimaryButtonStyledProps>`
   }
 `
 
-const SecondaryButtonStyled = styled.button`
+interface SecondaryButtonStyledProps {
+  textColor?: LightThemeItemKey | BaseThemeItemKey
+}
+
+const SecondaryButtonStyled = styled.button<SecondaryButtonStyledProps>`
   font-weight: 500;
   font-size: 14px;
   line-height: 17px;
-  color: ${theme('color.popper.main')};
+  color: ${(props) => (props.textColor ? theme(props.textColor) : theme('color.popper.main'))};
   background-color: transparent;
   display: flex;
   align-items: flex-end;
@@ -197,10 +204,21 @@ const SecondaryButtonStyled = styled.button`
   padding: 8px 12px;
   border-radius: 6px;
   width: fit-content;
-  border: 1px solid ${theme('color.popper.main')};
+  border: ${(props) =>
+    props.textColor
+      ? `1px solid ${theme(props.textColor)}`
+      : `1px solid ${theme('color.popper.main')}`};
   outline: 0;
   transition: box-shadow ${theme('animation.time.normal')} ease;
   opacity: 0.8;
+  &:disabled {
+    opacity: 0.6;
+    border: ${(props) =>
+      props.textColor
+        ? `1px solid ${theme(props.textColor, 0.6)}`
+        : `1px solid ${theme('color.popper.main', 0.6)}`};
+    cursor: default;
+  }
 `
 
 function calcPercentage(limit: number, current: number, min = 0, max = 100) {
@@ -237,6 +255,18 @@ const UsedEntries = () => {
 
 const Products = () => {
   const [billingInterval, setBillingInterval] = useState<'year' | 'month'>('year')
+  const [stripePromise, setStripePromise] = useState<any | null>(null)
+  const { subscription } = useUserContext()
+
+  useQuery({
+    queryKey: ['stripePromise'],
+    queryFn: async () => {
+      const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
+      const { publishableKey } = await fetch(`${url}/api/v1/config`).then((r) => r.json())
+      setStripePromise(() => loadStripe(publishableKey))
+      return publishableKey
+    },
+  })
 
   const {
     isLoading,
@@ -274,13 +304,19 @@ const Products = () => {
             <sub>{isLoading || isError ? <Skeleton width='40%' /> : 'Try it out'}</sub>
           </PlanTitleStyled>
           <UsedEntries />
-          <PriceContainerStyled>
-            <PriceStyled>$0</PriceStyled>
-          </PriceContainerStyled>
-          <SecondaryButtonStyled disabled>
-            <Icon name='Check' size={16} />
-            Current plan
-          </SecondaryButtonStyled>
+          {subscription.current == null && (
+            <PriceContainerStyled>
+              <PriceStyled>$0</PriceStyled>
+            </PriceContainerStyled>
+          )}
+          {subscription.current == null ? (
+            <SecondaryButtonStyled disabled>
+              <Icon name='Check' size={16} />
+              Current plan
+            </SecondaryButtonStyled>
+          ) : (
+            <SecondaryButtonStyled disabled>Not active</SecondaryButtonStyled>
+          )}
         </PlanStyled>
       </SkeletonTheme>
       <SkeletonTheme baseColor={theme('color.popper.pure', 0.6)} enableAnimation={false}>
@@ -306,38 +342,48 @@ const Products = () => {
           <PlansLimitsBoxStyled>
             Unlimited entries<Infinity>∞</Infinity>
           </PlansLimitsBoxStyled>
-          <PriceContainerStyled>
-            <PriceStyled>
-              {isLoading || isError ? <Skeleton width='25%' /> : displayWriterPrice()}
-            </PriceStyled>
-            <SwitchStyled turnedOn={billingInterval == 'year'}>
-              <SwitchBgStyled
-                id='s1'
-                checked={billingInterval == 'year'}
-                onCheckedChange={(checked) => {
-                  checked ? setBillingInterval('year') : setBillingInterval('month')
-                }}
-              >
-                <SwitchThumbStyled />
-              </SwitchBgStyled>
-              <label htmlFor='s1'>Billed yearly</label>
-            </SwitchStyled>
-          </PriceContainerStyled>
-
-          <Subscribe
-            billingInterval={billingInterval}
-            prices={prices}
-            renderTrigger={({ close, ...rest }: any) => (
-              <PrimaryButtonStyled
-                bgColor={'color.productWriter.main'}
-                textColor={'color.productWriter.popper'}
-                onClick={close}
-                {...rest}
-              >
-                Upgrade
-              </PrimaryButtonStyled>
-            )}
-          />
+          {subscription.current == null && (
+            <PriceContainerStyled>
+              <PriceStyled>
+                {isLoading || isError ? <Skeleton width='25%' /> : displayWriterPrice()}
+              </PriceStyled>
+              <SwitchStyled turnedOn={billingInterval == 'year'}>
+                <SwitchBgStyled
+                  id='s1'
+                  checked={billingInterval == 'year'}
+                  onCheckedChange={(checked) => {
+                    checked ? setBillingInterval('year') : setBillingInterval('month')
+                  }}
+                >
+                  <SwitchThumbStyled />
+                </SwitchBgStyled>
+                <label htmlFor='s1'>Billed yearly</label>
+              </SwitchStyled>
+            </PriceContainerStyled>
+          )}
+          <Elements stripe={stripePromise}>
+            <Subscribe
+              billingInterval={billingInterval}
+              prices={prices}
+              renderTrigger={({ close, ...rest }: any) =>
+                subscription.current == null ? (
+                  <PrimaryButtonStyled
+                    bgColor={'color.productWriter.main'}
+                    textColor={'color.productWriter.popper'}
+                    onClick={close}
+                    {...rest}
+                  >
+                    Upgrade
+                  </PrimaryButtonStyled>
+                ) : (
+                  <SecondaryButtonStyled disabled textColor={'color.productWriter.main'}>
+                    <Icon name='Check' size={16} tintColor={theme('color.productWriter.main')} />
+                    Current plan
+                  </SecondaryButtonStyled>
+                )
+              }
+            />
+          </Elements>
         </PlanStyled>
       </SkeletonTheme>
     </PlansSectionStyled>

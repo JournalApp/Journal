@@ -14,7 +14,7 @@ import {
   FloatingPortal,
 } from '@floating-ui/react-dom-interactions'
 import { useQuery } from '@tanstack/react-query'
-import { loadStripe, PaymentIntent } from '@stripe/stripe-js'
+import { PaymentIntent } from '@stripe/stripe-js'
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
 import Select from 'react-select'
 import type { Countries, Price } from 'types'
