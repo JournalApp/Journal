@@ -60,7 +60,7 @@ const CancelOrResume = ({ action, renderTrigger }: CancelOrResumeProps) => {
       return await getSubscription(session?.user.id, session.access_token)
     },
     refetchInterval: (data) => {
-      console.log(data)
+      logger(data)
       const cancel_at_period_end = action == 'cancel' ? true : false
       if (data?.status == 'active' && data?.cancel_at_period_end == cancel_at_period_end) {
         logger('Subscription with cancel_at_period_end received!')
@@ -162,6 +162,14 @@ const CancelOrResume = ({ action, renderTrigger }: CancelOrResumeProps) => {
     }
   }
 
+  const planInterval = () => {
+    if (subscription.current?.prices?.interval) {
+      return `${subscription.current.prices.interval}ly`
+    } else {
+      return ''
+    }
+  }
+
   return (
     <FloatingNode id={nodeId}>
       {renderTrigger({ close: () => setOpen(false), ref: reference, ...getReferenceProps() })}
@@ -183,7 +191,8 @@ const CancelOrResume = ({ action, renderTrigger }: CancelOrResumeProps) => {
                   <>
                     <TitleStyled>Oh no, cancel your plan?</TitleStyled>
                     <DescriptionStyled>
-                      If you proceed with canceling your plan, it will still remain active utill{' '}
+                      If you proceed with canceling your {planInterval()} plan, it will still remain
+                      active utill{' '}
                       {dayjs(subscription.current.current_period_end).format('MMM D, YYYY')}.
                     </DescriptionStyled>
                     <ActionsWrapperStyled>
@@ -206,7 +215,8 @@ const CancelOrResume = ({ action, renderTrigger }: CancelOrResumeProps) => {
                   <>
                     <TitleStyled>Yeah, resume your plan?</TitleStyled>
                     <DescriptionStyled>
-                      If you proceed with resuming your montly plan, your next billing will be on{' '}
+                      If you proceed with resuming your {planInterval()} plan, your next billing
+                      will be on{' '}
                       {dayjs(subscription.current.current_period_end).format('MMM D, YYYY')}.
                     </DescriptionStyled>
                     <ActionsWrapperStyled>

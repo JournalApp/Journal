@@ -218,6 +218,9 @@ const Modal = ({
       },
     })
 
+    logger('setupIntent:')
+    logger(setupIntent)
+
     if (error) {
       logger(error.message)
       setMessages('There was an error when saving your card, please try again.')

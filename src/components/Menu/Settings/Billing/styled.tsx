@@ -36,8 +36,12 @@ const ActionsStyled = styled.div`
   row-gap: 2px;
   gap: 4px;
 `
+type ActionStyledProps = {
+  isHidden?: boolean
+}
 
-const ActionStyled = styled.button`
+const ActionStyled = styled.button<ActionStyledProps>`
+  ${(props) => (props.isHidden ? 'display: none;' : '')};
   font-weight: 400;
   font-size: 12px;
   line-height: 15px;

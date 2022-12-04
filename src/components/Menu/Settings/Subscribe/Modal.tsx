@@ -543,7 +543,7 @@ const Modal = ({
                 {submitButtonText()}
               </ButtonStyled>
               {billingInfo ? <ChargeSummary /> : <Skeleton />}
-              <ErrorStyled>{messages}</ErrorStyled>
+              {messages && <ErrorStyled>{messages}</ErrorStyled>}
             </FormStyled>
           </SkeletonTheme>
         </>

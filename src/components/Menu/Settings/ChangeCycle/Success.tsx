@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef } from 'react'
 import { Icon } from 'components'
 import styled, { keyframes } from 'styled-components'
 import { theme } from 'themes'
+import { useQuery } from '@tanstack/react-query'
+import { getCustomer } from '../../../../context/UserContext/subscriptions'
+import { useUserContext } from 'context'
 
 const WrapperStyled = styled.div`
   padding: 16px 48px;
@@ -44,17 +47,20 @@ const ButtonStyled = styled.button`
 `
 
 const Success = () => {
+  const { session } = useUserContext()
+  useQuery({
+    queryKey: ['billingInfo'],
+    queryFn: async () => getCustomer(session.access_token),
+  })
+
   return (
     <WrapperStyled>
       <Icon name='Check' size={48} tintColor={theme('color.success.main')} />
       <MessageStyled>
-        Upgrade successful,
+        Success,
         <br />
         you are all set!
       </MessageStyled>
-      {/* <ButtonStyled onClick={() => window.electronAPI.reloadWindow()}>
-        Back to journaling
-      </ButtonStyled> */}
     </WrapperStyled>
   )
 }

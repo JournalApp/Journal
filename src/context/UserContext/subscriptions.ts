@@ -2,7 +2,8 @@ import { isDev, logger, supabase } from 'utils'
 import type {
   Subscription,
   CreateSubscriptionProps,
-  CancelSubscriptionProps,
+  UpdateSubscriptionProps,
+  PreviewInvoiceProps,
   AddCardProps,
   BillingInfo,
   Countries,
@@ -62,19 +63,22 @@ const createSubscription = async ({ access_token, priceId, address }: CreateSubs
   return { subscriptionId, clientSecret }
 }
 
-const cancelSubscription = async ({ access_token, subscriptionId }: CancelSubscriptionProps) => {
+const cancelSubscription = async ({ access_token, subscriptionId }: UpdateSubscriptionProps) => {
   logger('cancelSubscription')
   const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
   await fetch(`${url}/api/v1/subscription/${subscriptionId}`, {
-    method: 'DELETE',
+    method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${access_token}`,
     },
+    body: JSON.stringify({
+      action: 'cancel',
+    }),
   })
 }
 
-const resumeSubscription = async ({ access_token, subscriptionId }: CancelSubscriptionProps) => {
+const resumeSubscription = async ({ access_token, subscriptionId }: UpdateSubscriptionProps) => {
   logger('cancelSubscription')
   const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
   await fetch(`${url}/api/v1/subscription/${subscriptionId}`, {
@@ -87,6 +91,40 @@ const resumeSubscription = async ({ access_token, subscriptionId }: CancelSubscr
       action: 'resume',
     }),
   })
+}
+
+const cancelSubscriptionImmediately = async ({
+  access_token,
+  subscriptionId,
+}: UpdateSubscriptionProps) => {
+  logger('cancelSubscription')
+  const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
+  await fetch(`${url}/api/v1/subscription/${subscriptionId}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${access_token}`,
+    },
+  })
+}
+
+const updateSubscriptionToYearly = async ({
+  access_token,
+  subscriptionId,
+}: UpdateSubscriptionProps) => {
+  logger('updateSubscriptionToYearly')
+  const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
+  const { clientSecret } = await fetch(`${url}/api/v1/subscription/${subscriptionId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${access_token}`,
+    },
+    body: JSON.stringify({
+      action: 'toYearly',
+    }),
+  }).then((r) => r.json())
+  return { clientSecret }
 }
 
 const createSetupIntent = async ({ access_token, address }: AddCardProps) => {
@@ -137,15 +175,30 @@ const fetchProducts = async () => {
   return data
 }
 
+const previewInvoice = async ({ access_token }: PreviewInvoiceProps) => {
+  logger('previewInvoice')
+  const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
+  const { invoice } = await fetch(`${url}/api/v1/invoice-preview`, {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${access_token}`,
+    },
+  }).then((r) => r.json())
+  return invoice as Stripe.Invoice
+}
+
 export {
   getSubscription,
   createSubscription,
   cancelSubscription,
+  cancelSubscriptionImmediately,
   resumeSubscription,
+  updateSubscriptionToYearly,
   getCustomer,
   createSetupIntent,
   fetchCountries,
   calcYearlyPlanSavings,
   fetchProducts,
   deletePreviousCards,
+  previewInvoice,
 }

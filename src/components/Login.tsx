@@ -105,7 +105,7 @@ const LoginWithToken = () => {
     logger(e.target.value)
     try {
       const url = new URL(e.target.value)
-      console.log(url.host)
+      logger(url.host)
       const refreshToken = url.searchParams.get('refresh_token')
       const { error } = await supabase.auth.signIn({ refreshToken })
       if (error) {
