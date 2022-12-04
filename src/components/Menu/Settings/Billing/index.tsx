@@ -33,7 +33,7 @@ const BillingTabContent = () => {
       <SectionTitleStyled>Billing</SectionTitleStyled>
       <Balance billingInfo={billingInfo} isLoading={isLoading} />
       <Divider />
-      <Plan subscription={subscription.current} billingInfo={billingInfo} isLoading={isLoading} />
+      <Plan subscription={subscription} billingInfo={billingInfo} isLoading={isLoading} />
       <Divider />
       <PaymentMethod billingInfo={billingInfo} isLoading={isLoading} />
       <Divider />

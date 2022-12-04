@@ -33,17 +33,16 @@ import { PaymentIntent, Stripe } from '@stripe/stripe-js'
 import { Elements } from '@stripe/react-stripe-js'
 
 interface SettingsDialogProps {
-  setOpenSettings: React.MutableRefObject<any>
   returnFocus: React.MutableRefObject<HTMLButtonElement>
 }
 
-const SettingsDialog = ({ setOpenSettings, returnFocus }: SettingsDialogProps) => {
-  const [open, setOpen] = useState(true)
+const SettingsDialog = ({ returnFocus }: SettingsDialogProps) => {
+  const [open, setOpen] = useState(false)
   const firstRender = useRef(true)
   const initialFocus = useRef<HTMLButtonElement>(null)
   const nodeId = useFloatingNodeId()
   const isOnline = useIsOnline()
-  const { subscription } = useUserContext()
+  const { subscription, invokeOpenSettings } = useUserContext()
 
   const { floating, context, refs } = useFloating({
     open,
@@ -67,8 +66,7 @@ const SettingsDialog = ({ setOpenSettings, returnFocus }: SettingsDialogProps) =
   }
 
   useEffect(() => {
-    setOpenSettings.current = setOpen
-
+    invokeOpenSettings.current = setOpen
     document.addEventListener('keydown', handleCloseEsc)
     return () => {
       document.removeEventListener('keydown', handleCloseEsc)
@@ -115,9 +113,9 @@ const SettingsDialog = ({ setOpenSettings, returnFocus }: SettingsDialogProps) =
                   <ListStyled>
                     <SettingsTitleStyled>Settings</SettingsTitleStyled>
                     <MenuItemStyled ref={initialFocus} value='tab1'>
-                      {subscription.current == null ? 'Upgrade' : 'Plans'}
+                      {subscription == null ? 'Upgrade' : 'Plans'}
                     </MenuItemStyled>
-                    <MenuItemStyled value='tab2'>Earn credit</MenuItemStyled>
+                    {/* <MenuItemStyled value='tab2'>Earn credit</MenuItemStyled> */}
                     <MenuItemStyled value='tab3'>Billing</MenuItemStyled>
                   </ListStyled>
                   {isOnline ? (
@@ -125,9 +123,9 @@ const SettingsDialog = ({ setOpenSettings, returnFocus }: SettingsDialogProps) =
                       <ContentStyled value='tab1'>
                         <UpgradeTabContent />
                       </ContentStyled>
-                      <ContentStyled value='tab2'>
+                      {/* <ContentStyled value='tab2'>
                         <EarnTabContent />
-                      </ContentStyled>
+                      </ContentStyled> */}
                       <ContentStyled value='tab3'>
                         <BillingTabContent />
                       </ContentStyled>

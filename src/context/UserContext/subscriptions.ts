@@ -1,4 +1,4 @@
-import { isDev, logger, supabase } from 'utils'
+import { isDev, logger, supabase, awaitTimeout } from 'utils'
 import type {
   Subscription,
   CreateSubscriptionProps,
@@ -38,6 +38,7 @@ const getSubscription = async (user_id: string, access_token: string) => {
   logger('getSubscription response:')
   if (Object.keys(subscription).length === 0) {
     logger('null')
+    window.electronAPI.user.saveSubscription(user_id, null)
     return null
   } else {
     logger(subscription)

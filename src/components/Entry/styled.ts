@@ -48,4 +48,44 @@ const MiniDate = styled.div`
   line-height: 16px;
 `
 
-export { Container, MainWrapper, MiniDate }
+const LimitReachedWrapperStyled = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`
+
+const LimitReachedTextStyled = styled.div`
+  opacity: 0.4;
+`
+
+const UpgradeButtonStyled = styled.button`
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 24px;
+  padding: 2px 8px;
+  color: ${theme('color.primary.main')};
+  border: 1px solid ${theme('color.primary.main')};
+  border-radius: 6px;
+  width: fit-content;
+  background: transparent;
+  cursor: pointer;
+  outline: 0;
+  &:hover,
+  &:focus {
+    box-shadow: 0 0 0 3px ${theme('color.primary.main', 0.2)};
+    transition: box-shadow ${theme('animation.time.normal')} ease;
+  }
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+`
+
+export {
+  Container,
+  MainWrapper,
+  MiniDate,
+  UpgradeButtonStyled,
+  LimitReachedTextStyled,
+  LimitReachedWrapperStyled,
+}

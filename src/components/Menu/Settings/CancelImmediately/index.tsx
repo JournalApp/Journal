@@ -62,7 +62,6 @@ const CancelImmediately = ({ renderTrigger }: CancelImmediatelyProps) => {
       logger(data)
       if (data == null) {
         logger('Subscription cencelled!')
-        subscription.current = data
         setPoolingSubscription(false)
         setSuccess(true)
         return false
@@ -117,7 +116,7 @@ const CancelImmediately = ({ renderTrigger }: CancelImmediatelyProps) => {
     try {
       await cancelSubscriptionImmediately({
         access_token: session.access_token,
-        subscriptionId: subscription.current.id,
+        subscriptionId: subscription.id,
       })
 
       setIsCanceled(true)

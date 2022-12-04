@@ -12,11 +12,12 @@ import Stripe from 'stripe'
 
 interface UserContextInterface {
   session: Session
-  subscription: React.MutableRefObject<Subscription | null>
+  subscription: Subscription | null
   authError: string
   signOut: () => void
   quitAndInstall: () => void
   getSecretKey: () => Promise<CryptoKey>
+  invokeOpenSettings: React.MutableRefObject<any>
   serverTimeNow: () => string
   createSubscription: ({
     access_token,
@@ -31,13 +32,13 @@ export function UserProvider({ children }: any) {
   logger('UserProvider re-render')
   const [session, setSession] = useState<Session | null>(null)
   const [authError, setAuthError] = useState('')
+  const invokeOpenSettings = useRef<any | null>({})
   const secretKey = useRef(null)
   const serverClientTimeDelta = useRef(0) //  server time - client time = delta
-  const subscription = useRef<Subscription | null>(null)
   const {
     isStale: isSubscriptionDataStale,
     isSuccess: isSubscriptionDataFetched,
-    data: subscriptionData,
+    data: subscription,
   } = useQuery({
     queryKey: ['subscription', session?.user.id],
     initialData: window.electronAPI.user.getSubscription(session?.user.id),
@@ -46,22 +47,6 @@ export function UserProvider({ children }: any) {
     },
     enabled: !!session?.access_token,
   })
-
-  if (isSubscriptionDataStale) {
-    logger('Using subscriptionData from SQLite')
-  }
-
-  if (isSubscriptionDataFetched) {
-    logger(`subscriptionData received`)
-    logger(subscriptionData)
-    if (subscriptionData == null) {
-      logger('Free plan. Fetched subscriptionData == null')
-    } else {
-      logger(`User has product: ${subscriptionData.prices.product_id}`)
-      logger(`Is Writer: ${Const.productWriterId == subscriptionData.prices.product_id}`)
-    }
-    subscription.current = subscriptionData
-  }
 
   window.electronAPI.handleOpenUrl(async (event: any, value: any) => {
     const url = new URL(value)
@@ -210,6 +195,7 @@ export function UserProvider({ children }: any) {
     authError,
     signOut,
     quitAndInstall,
+    invokeOpenSettings,
     getSecretKey,
     serverTimeNow,
     createSubscription,

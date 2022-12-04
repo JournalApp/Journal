@@ -12,7 +12,7 @@ const TabsStyled = styled(Tabs.Root)`
   grid-template-columns: 192px auto;
   background-color: ${theme('color.popper.surface')};
   width: -webkit-fill-available;
-  max-width: 1000px;
+  max-width: 900px;
   height: -webkit-fill-available;
   max-height: 600px;
   padding: 0;

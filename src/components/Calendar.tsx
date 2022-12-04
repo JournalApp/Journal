@@ -9,6 +9,8 @@ import { createDays, getYearsSince, logger, entryHasNoContent } from 'utils'
 import { Icon } from 'components'
 import { defaultContent } from 'config'
 import type { Entry, Day } from 'types'
+import * as Const from 'consts'
+
 interface ContainerProps {
   isOpen: CalendarOpen
 }
@@ -215,7 +217,7 @@ const Calendar = () => {
   } = useEntriesContext()
   const [days, setDaysInternal] = useState([])
   const [daysWithNoContent, setDaysWithNoContent] = useState<string[]>([])
-  const { session, serverTimeNow } = useUserContext()
+  const { session, serverTimeNow, subscription, invokeOpenSettings } = useUserContext()
   const today = new Date()
 
   logger('Calendar render')
@@ -290,7 +292,18 @@ const Calendar = () => {
         event: 'calendar scroll-to-day',
       })
     } else {
+      // Open settings if limit is hit
+      if (subscription == null) {
+        const limit = Const.entriesLimit
+        const count = await window.electronAPI.cache.getEntriesCount(session.user.id)
+        if (count > limit) {
+          invokeOpenSettings.current(true)
+          return
+        }
+      }
+
       logger('no such day, adding...')
+
       const user_id = session.user.id
       const modified_at = serverTimeNow()
       const entryToInsert: Entry = {

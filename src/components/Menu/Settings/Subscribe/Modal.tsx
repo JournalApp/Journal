@@ -95,7 +95,6 @@ const Modal = ({
     refetchInterval: (data) => {
       if (data?.status == 'active' && data?.id == subscriptionId) {
         logger('Active subscription received!')
-        subscription.current = data
         setPoolingSubscription(false)
         setSuccess(true)
         return false
@@ -309,6 +308,8 @@ const Modal = ({
         // TODO handle case for not reaching min charge amount
         // Charge is > 0, but stripe did not charge as charge is < $0.50
         // If card field was visible, save card for future use (SetupIntent)
+        // For now, just don't save the card and set subs as created
+        setSubscriptionCreated(true)
       }
     } else {
       setSubscriptionCreated(true)

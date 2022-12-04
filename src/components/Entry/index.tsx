@@ -14,13 +14,14 @@ import {
 } from '@udecode/plate'
 import { CONFIG, defaultContent } from 'config'
 import { countEntryWords } from 'utils'
-import { supabase, logger } from 'utils'
+import { supabase, logger, awaitTimeout } from 'utils'
 import { useUserContext, useEntriesContext } from 'context'
 import { Container, MainWrapper, MiniDate } from './styled'
 import { theme } from 'themes'
 import { resetBlockTypePlugin } from '../../config/resetBlockTypePlugin'
 import type { Entry, Day } from 'types'
-
+import * as Const from 'consts'
+import { LimitReached } from './LimitReached'
 import {
   createPlateUI,
   ELEMENT_H3,
@@ -63,13 +64,14 @@ const EntryItem = ({ entryDay, cachedEntry, entriesObserver }: EntryBlockProps) 
   const wordCount = useRef(countEntryWords(cachedEntry ? cachedEntry.content : ''))
   const [initialValue, setInitialValue] = useState(cachedEntry?.content ?? defaultContent)
   const [shouldFocus, setShouldFocus] = useState(isToday(entryDay))
+  const [freePlanLimitReached, setFreePlanLimitReached] = useState(false)
   const contextMenuVisible = useRef(false)
   const toggleContextMenu = useRef(null)
   const setEditorFocusedContextMenu = useRef(null)
   const setEditorFocusedFormatToolbar = useRef(null)
   const debugValue = useRef(cachedEntry?.content ?? [])
   const editorRef = useRef(null)
-  const { session, signOut, getSecretKey, serverTimeNow } = useUserContext()
+  const { session, subscription, serverTimeNow } = useUserContext()
   const {
     editorsRef,
     userEntries,
@@ -177,6 +179,20 @@ const EntryItem = ({ entryDay, cachedEntry, entriesObserver }: EntryBlockProps) 
     return <></>
   }
 
+  const checkPlanLimits = async () => {
+    await awaitTimeout(5000)
+    logger('checkPlanLimits')
+    if (isToday(entryDay) && subscription == null) {
+      const limit = Const.entriesLimit
+      const count = await window.electronAPI.cache.getEntriesCount(session.user.id)
+      if (count > limit) {
+        setFreePlanLimitReached(true)
+      }
+    } else {
+      setFreePlanLimitReached(false)
+    }
+  }
+
   //////////////////////////
   // ⛰ useEffect on mount
   //////////////////////////
@@ -191,6 +207,9 @@ const EntryItem = ({ entryDay, cachedEntry, entriesObserver }: EntryBlockProps) 
       editorRef.current.scrollIntoView({ block: 'start' })
     }
 
+    // Plan limits
+    checkPlanLimits()
+
     // Remove observers
     return () => {
       logger('Entry unmounted')
@@ -204,6 +223,10 @@ const EntryItem = ({ entryDay, cachedEntry, entriesObserver }: EntryBlockProps) 
       }
     }
   }, [])
+
+  useEffect(() => {
+    checkPlanLimits()
+  }, [subscription])
 
   const debounceSaveEntry = () => {
     clearTimeout(saveDebounceTimer.current)
@@ -347,25 +370,29 @@ const EntryItem = ({ entryDay, cachedEntry, entriesObserver }: EntryBlockProps) 
     <Container ref={editorRef} id={`${entryDay}-entry`}>
       <MainWrapper>
         <MiniDate>{showMiniDate(entryDay)}</MiniDate>
-        <Plate
-          id={id}
-          editableProps={editableProps}
-          initialValue={initialValue}
-          onChange={onChangeDebug}
-          plugins={plugins}
-        >
-          <ContextMenu
-            setIsEditorFocused={setEditorFocusedContextMenu}
-            setContextMenuVisible={setContextMenuVisible}
-            toggleContextMenu={toggleContextMenu}
-          />
-          <FormatToolbar
-            setIsEditorFocused={setEditorFocusedFormatToolbar}
-            isContextMenuVisible={isContextMenuVisible}
-          />
-          {shouldFocus && <ShouldFocus />}
-          <EditorRefAssign />
-        </Plate>
+        {freePlanLimitReached ? (
+          <LimitReached />
+        ) : (
+          <Plate
+            id={id}
+            editableProps={editableProps}
+            initialValue={initialValue}
+            onChange={onChangeDebug}
+            plugins={plugins}
+          >
+            <ContextMenu
+              setIsEditorFocused={setEditorFocusedContextMenu}
+              setContextMenuVisible={setContextMenuVisible}
+              toggleContextMenu={toggleContextMenu}
+            />
+            <FormatToolbar
+              setIsEditorFocused={setEditorFocusedFormatToolbar}
+              isContextMenuVisible={isContextMenuVisible}
+            />
+            {shouldFocus && <ShouldFocus />}
+            <EditorRefAssign />
+          </Plate>
+        )}
       </MainWrapper>
       <EntryAside wordCount={wordCount} date={entryDay} />
     </Container>

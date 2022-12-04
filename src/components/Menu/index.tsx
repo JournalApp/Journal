@@ -122,9 +122,8 @@ const Menu = () => {
   logger('Menu re-render')
   const [open, setOpen] = useState(false)
   const [updateDownloaded, setUpdateDownloaded] = useState(false)
-  const { session, signOut, quitAndInstall } = useUserContext()
+  const { session, signOut, quitAndInstall, invokeOpenSettings } = useUserContext()
   const setOpenAppearanceToolbar = useRef<any | null>({})
-  const setOpenSettings = useRef<any | null>({})
   const returnFocus = useRef<HTMLButtonElement>(null)
 
   window.electronAPI.onUpdateDownloaded(() => {
@@ -158,7 +157,7 @@ const Menu = () => {
             <ItemTitle>Appearance</ItemTitle>
           </Item>
           <Divider />
-          <Item onSelect={setOpenSettings.current}>
+          <Item onSelect={invokeOpenSettings.current}>
             <Icon name='Settings' />
             <ItemTitle>Settings</ItemTitle>
           </Item>
@@ -188,7 +187,7 @@ const Menu = () => {
         returnFocus={returnFocus}
         setOpenAppearanceToolbar={setOpenAppearanceToolbar}
       />
-      <SettingsDialog returnFocus={returnFocus} setOpenSettings={setOpenSettings} />
+      <SettingsDialog returnFocus={returnFocus} />
     </>
   )
 }

@@ -9,7 +9,7 @@ const UpgradeTabContent = () => {
   return (
     <>
       <SectionTitleStyled>
-        {subscription.current == null ? 'Upgrade your plan' : 'Plans'}
+        {subscription == null ? 'Upgrade your plan' : 'Plans'}
       </SectionTitleStyled>
       <Products />
       <Features />

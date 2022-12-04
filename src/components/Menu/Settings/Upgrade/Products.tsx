@@ -26,6 +26,7 @@ const PlansSectionStyled = styled.div`
 interface PlanStyledProps {
   bgColor?: string
   textColor?: string
+  isActive?: boolean
 }
 
 const PlanStyled = styled.div<PlanStyledProps>`
@@ -36,6 +37,7 @@ const PlanStyled = styled.div<PlanStyledProps>`
   color: ${(props) => (props.textColor ? props.textColor : theme('color.popper.main'))};
   border-radius: 12px;
   padding: 16px;
+  ${(props) => (props.isActive ? 'grid-column: 1;' : '')};
 `
 
 const PlanTitleStyled = styled.div`
@@ -304,12 +306,12 @@ const Products = () => {
             <sub>{isLoading || isError ? <Skeleton width='40%' /> : 'Try it out'}</sub>
           </PlanTitleStyled>
           <UsedEntries />
-          {subscription.current == null && (
+          {subscription == null && (
             <PriceContainerStyled>
               <PriceStyled>$0</PriceStyled>
             </PriceContainerStyled>
           )}
-          {subscription.current == null ? (
+          {subscription == null ? (
             <SecondaryButtonStyled disabled>
               <Icon name='Check' size={16} />
               Current plan
@@ -321,6 +323,7 @@ const Products = () => {
       </SkeletonTheme>
       <SkeletonTheme baseColor={theme('color.popper.pure', 0.6)} enableAnimation={false}>
         <PlanStyled
+          isActive={subscription != null}
           bgColor={theme('color.productWriter.surface')}
           textColor={theme('color.productWriter.main')}
         >
@@ -342,7 +345,7 @@ const Products = () => {
           <PlansLimitsBoxStyled>
             Unlimited entries<Infinity>∞</Infinity>
           </PlansLimitsBoxStyled>
-          {subscription.current == null && (
+          {subscription == null && (
             <PriceContainerStyled>
               <PriceStyled>
                 {isLoading || isError ? <Skeleton width='25%' /> : displayWriterPrice()}
@@ -366,7 +369,7 @@ const Products = () => {
               billingInterval={billingInterval}
               prices={prices}
               renderTrigger={({ close, ...rest }: any) =>
-                subscription.current == null ? (
+                subscription == null ? (
                   <PrimaryButtonStyled
                     bgColor={'color.productWriter.main'}
                     textColor={'color.productWriter.popper'}

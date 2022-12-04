@@ -64,7 +64,6 @@ const CancelOrResume = ({ action, renderTrigger }: CancelOrResumeProps) => {
       const cancel_at_period_end = action == 'cancel' ? true : false
       if (data?.status == 'active' && data?.cancel_at_period_end == cancel_at_period_end) {
         logger('Subscription with cancel_at_period_end received!')
-        subscription.current = data
         setPoolingSubscription(false)
         setSuccess(true)
         return false
@@ -120,13 +119,13 @@ const CancelOrResume = ({ action, renderTrigger }: CancelOrResumeProps) => {
       if (action == 'cancel') {
         await cancelSubscription({
           access_token: session.access_token,
-          subscriptionId: subscription.current.id,
+          subscriptionId: subscription.id,
         })
       }
       if (action == 'resume') {
         await resumeSubscription({
           access_token: session.access_token,
-          subscriptionId: subscription.current.id,
+          subscriptionId: subscription.id,
         })
       }
       setIsCanceledOrResumed(true)
@@ -163,8 +162,8 @@ const CancelOrResume = ({ action, renderTrigger }: CancelOrResumeProps) => {
   }
 
   const planInterval = () => {
-    if (subscription.current?.prices?.interval) {
-      return `${subscription.current.prices.interval}ly`
+    if (subscription?.prices?.interval) {
+      return `${subscription.prices.interval}ly`
     } else {
       return ''
     }
@@ -192,8 +191,7 @@ const CancelOrResume = ({ action, renderTrigger }: CancelOrResumeProps) => {
                     <TitleStyled>Oh no, cancel your plan?</TitleStyled>
                     <DescriptionStyled>
                       If you proceed with canceling your {planInterval()} plan, it will still remain
-                      active utill{' '}
-                      {dayjs(subscription.current.current_period_end).format('MMM D, YYYY')}.
+                      active utill {dayjs(subscription.current_period_end).format('MMM D, YYYY')}.
                     </DescriptionStyled>
                     <ActionsWrapperStyled>
                       <ButtonDestructiveStyled
@@ -216,8 +214,7 @@ const CancelOrResume = ({ action, renderTrigger }: CancelOrResumeProps) => {
                     <TitleStyled>Yeah, resume your plan?</TitleStyled>
                     <DescriptionStyled>
                       If you proceed with resuming your {planInterval()} plan, your next billing
-                      will be on{' '}
-                      {dayjs(subscription.current.current_period_end).format('MMM D, YYYY')}.
+                      will be on {dayjs(subscription.current_period_end).format('MMM D, YYYY')}.
                     </DescriptionStyled>
                     <ActionsWrapperStyled>
                       <ButtonGhostStyled

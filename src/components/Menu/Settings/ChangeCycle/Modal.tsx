@@ -87,7 +87,6 @@ const Modal = ({ setOpen, prices, billingInfo, billingInfoIsLoading }: ChangeCyc
     refetchInterval: (data) => {
       if (data?.status == 'active' && data?.prices?.interval == 'year') {
         logger('Active yearly subscription received!')
-        subscription.current = data
         setPoolingSubscription(false)
         setSuccess(true)
         return false
@@ -134,7 +133,7 @@ const Modal = ({ setOpen, prices, billingInfo, billingInfoIsLoading }: ChangeCyc
     try {
       const { clientSecret } = await updateSubscriptionToYearly({
         access_token: session.access_token,
-        subscriptionId: subscription.current.id,
+        subscriptionId: subscription.id,
       })
 
       if (clientSecret) {
