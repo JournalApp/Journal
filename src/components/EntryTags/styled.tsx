@@ -163,7 +163,7 @@ const StyledEditTagInput = styled.input`
   height: 26px;
   width: -webkit-fill-available;
   outline: 0;
-  padding: 3px 80px 5px 40px;
+  padding: 4px 80px 4px 40px;
   border-radius: 8px;
   border: 1px solid ${theme('color.popper.input')};
   background-color: ${theme('color.popper.surface')};

@@ -91,7 +91,23 @@ const Action = styled.button`
   }
 `
 
-const ConfirmationModal = ({ action, children }: any) => {
+interface ConfirmationModalProps {
+  action: any
+  children: any
+  titleText: string
+  descriptionText?: string
+  confirmActionText?: string
+  cancelActionText?: string
+}
+
+const ConfirmationModal = ({
+  action,
+  children,
+  titleText,
+  descriptionText = '',
+  confirmActionText = 'Confirm',
+  cancelActionText = 'Cancel',
+}: any) => {
   const [open, setOpen] = React.useState(false)
   const closeRef = useRef<HTMLButtonElement>(null)
 
@@ -114,12 +130,12 @@ const ConfirmationModal = ({ action, children }: any) => {
       <Dialog.Portal>
         <Overlay>
           <Content>
-            <Title>Remove this tag permanently?</Title>
-            <Description>This tag will be removed from all entries</Description>
+            <Title>{titleText}</Title>
+            <Description>{descriptionText}</Description>
             <Actions>
-              <Action onMouseDown={(e) => performAction(e)}>Remove</Action>
+              <Action onMouseDown={(e) => performAction(e)}>{confirmActionText}</Action>
               <Close ref={closeRef} onMouseDown={(e) => close(e)}>
-                Close
+                {cancelActionText}
               </Close>
             </Actions>
           </Content>

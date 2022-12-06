@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react'
 import styled, { css } from 'styled-components'
 import dayjs from 'dayjs'
 import { usePlateEditorState, useEventPlateId } from '@udecode/plate'
-import { ContextMenu, FormatToolbar, EntryAside } from 'components'
+import { ContextMenu, FormatToolbar } from 'components'
+import { EntryAside } from './EntryAside'
 import { createPluginFactory, useOnClickOutside, deselectEditor } from '@udecode/plate'
 import { select, deselect, getNodeString } from '@udecode/plate'
 import {
@@ -394,7 +395,11 @@ const EntryItem = ({ entryDay, cachedEntry, entriesObserver }: EntryBlockProps) 
           </Plate>
         )}
       </MainWrapper>
-      <EntryAside wordCount={wordCount} date={entryDay} />
+      <EntryAside
+        freePlanLimitReached={freePlanLimitReached}
+        wordCount={wordCount}
+        date={entryDay}
+      />
     </Container>
   )
 }

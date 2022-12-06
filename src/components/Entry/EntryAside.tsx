@@ -5,6 +5,7 @@ import dayjs from 'dayjs'
 import { ordinal, breakpoints, logger, arrayEquals } from 'utils'
 import { Icon, EntryTags } from 'components'
 import { useEntriesContext } from 'context'
+import { EntryMenu } from './EntryMenu'
 
 const AsideDay = styled.p`
   padding: 0;
@@ -58,6 +59,7 @@ const Aside = styled.div`
 const AsideMenu = styled.div`
   width: 40px;
   padding-top: 24px;
+  padding-bottom: 6px;
   display: flex;
   flex-direction: column;
   @media ${breakpoints.s} {
@@ -68,21 +70,14 @@ const AsideMenu = styled.div`
 const AsideMenuStickyContainer = styled.div`
   position: sticky;
   top: 48px;
-  text-align: center;
+  display: flex;
+  justify-content: center;
 `
 
-const Remove = styled((props) => <Icon {...props} />)`
-  position: sticky;
-  top: 48px;
+const Trigger = styled((props) => <Icon {...props} />)`
   -webkit-app-region: no-drag;
-  cursor: pointer;
-  right: -27px;
-  top: 3px;
   opacity: 0.5;
   transition: opacity ${theme('animation.time.normal')};
-  &:hover {
-    opacity: 0.8;
-  }
 `
 
 const isToday = (day: any) => {
@@ -110,24 +105,25 @@ const showDate = (day: any) => {
 type EntryAsideProps = {
   date: string
   wordCount: React.MutableRefObject<number>
+  freePlanLimitReached: boolean
 }
 
-function EntryAside({ date, wordCount }: EntryAsideProps) {
-  const { deleteEntry } = useEntriesContext()
-
+function EntryAside({ date, wordCount, freePlanLimitReached }: EntryAsideProps) {
   return (
     <>
       <Aside>
         <AsideStickyContainer>
           <AsideMain>{showDate(date)}</AsideMain>
-          <AsideMeta>
-            <EntryTags date={date} />
-          </AsideMeta>
+          <AsideMeta>{!freePlanLimitReached && <EntryTags date={date} />}</AsideMeta>
         </AsideStickyContainer>
       </Aside>
       <AsideMenu>
         <AsideMenuStickyContainer>
-          {!isToday(date) && <Remove name='Cross' size={16} onClick={() => deleteEntry(date)} />}
+          <EntryMenu
+            wordCount={wordCount}
+            date={date}
+            renderTrigger={() => <Trigger name='Chevron' size={8} />}
+          />
         </AsideMenuStickyContainer>
       </AsideMenu>
     </>

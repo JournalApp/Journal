@@ -90,11 +90,15 @@ export function EntriesProvider({ children }: any) {
   }
 
   const deleteEntry = async (day: string) => {
-    logger(`Removing day ${day}`)
-    const i = userEntries.current.findIndex((e) => e.day == day)
-    userEntries.current.splice(i, 1)
-    rerenderEntriesAndCalendar()
-    cacheUpdateEntryProperty({ sync_status: 'pending_delete' }, { user_id: session.user.id, day })
+    if (typeof day == 'string') {
+      logger(`Removing day ${day}`)
+      const i = userEntries.current.findIndex((e) => e.day == day)
+      userEntries.current.splice(i, 1)
+      rerenderEntriesAndCalendar()
+      cacheUpdateEntryProperty({ sync_status: 'pending_delete' }, { user_id: session.user.id, day })
+    } else {
+      logger('Day is not a string')
+    }
   }
 
   const rerenderEntriesWithTag = async (tag_id: string) => {

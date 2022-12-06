@@ -20,7 +20,7 @@ import {
 import { useEntriesContext, useUserContext } from 'context'
 import { ListItemTagColorPicker } from './ListItemTagColorPicker'
 import { Tag, EntryTag, EntryTagProperty, ListItemType } from 'types'
-import { ConfirmationModal } from './ConfirmationModal'
+import { ConfirmationModal } from 'components'
 
 const StyledWrapper = styled.div``
 
@@ -126,7 +126,13 @@ function ListItemTag({
             tagEditColorRef={tagEditColorRef}
           />
           <StyledEditTagButtonsContainer>
-            <ConfirmationModal action={deleteTag}>
+            <ConfirmationModal
+              action={deleteTag}
+              titleText='Remove this tag permanently?'
+              descriptionText='This tag will be removed from all entries.'
+              confirmActionText='Remove'
+              cancelActionText='Close'
+            >
               <StyledTrashIcon />
             </ConfirmationModal>
             <StyledCancelIcon onClick={() => exitTagEditing()} />
