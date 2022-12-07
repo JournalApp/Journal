@@ -221,7 +221,7 @@ const FeedbackWidgetContainer = styled.div`
   position: fixed;
   bottom: 0;
   right: 0;
-  z-index: 1000;
+  z-index: 150;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -269,7 +269,7 @@ const FeedbackForm = styled.form<FormProps>`
   box-shadow: ${theme('style.shadow')};
   width: 350px;
   padding: 16px;
-  z-index: 9999;
+  z-index: 150;
   font-size: 16px;
   font-weight: 600;
   font-style: normal;
@@ -295,7 +295,7 @@ const ThankYouScreen = styled.div<FormProps>`
   box-shadow: 0px 2px 49px -13px rgb(0 0 0 / 12%);
   width: 350px;
   padding: 16px 16px 64px 16px;
-  z-index: 9999;
+  z-index: 150;
   text-align: center;
   pointer-events: all;
   visibility: hidden;
@@ -609,7 +609,7 @@ function FeedbackWidget() {
           showForm(e)
         }}
       >
-        Give feedback
+        Feedback
       </GiveFeedbackButton>
     </FeedbackWidgetContainer>
   )

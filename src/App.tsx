@@ -8,6 +8,7 @@ import {
   FadeOut,
   ScrollToToday,
   FeedbackWidget,
+  Prompts,
   Splash,
 } from 'components'
 import { AppearanceProvider, EntriesProvider, UserProvider } from 'context'
@@ -135,6 +136,7 @@ function App() {
             <TrafficLightMenu />
             <Calendar />
             <ScrollToToday />
+            <Prompts />
             <FeedbackWidget />
             <NoDragScrollBars />
             <Container>
