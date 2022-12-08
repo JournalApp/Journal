@@ -59,7 +59,6 @@ const AppearanceToolbarWrapperStyled = styled.div`
   right: 0;
   display: flex;
   justify-content: center;
-  z-index: 9999;
   @media ${breakpoints.s} {
     transform: scale(0.9);
     bottom: 60px;

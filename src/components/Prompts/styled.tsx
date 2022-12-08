@@ -9,6 +9,8 @@ interface PromptWindowStyledProps {
 }
 
 const PromptWindowStyled = styled.div<PromptWindowStyledProps>`
+  opacity: var(--prompt-opacity);
+  transition: opacity ${theme('animation.time.fast')};
   position: fixed;
   display: flex;
   flex-direction: column;
@@ -30,12 +32,13 @@ const PromptWindowStyled = styled.div<PromptWindowStyledProps>`
 interface PromptStyledProps {
   isVisible: boolean
   isExpanded: boolean
+  isSelected: boolean
 }
 
 const PromptStyled = styled.div<PromptStyledProps>`
   transition: all ${theme('animation.time.long')} cubic-bezier(0.17, 0.56, 0.18, 0.97);
   display: flex;
-  padding: ${(props) => (props.isVisible ? '24px' : '0px 24px')};
+  padding: ${(props) => (props.isVisible ? '16px 28px' : '0px 28px')};
   visibility: ${(props) => (props.isVisible ? 'visible' : 'hidden')};
   max-height: ${(props) => (props.isExpanded ? ' 400px' : props.isVisible ? '168px' : '0')};
   opacity: ${(props) => (props.isVisible ? 1 : 0)};
@@ -44,6 +47,10 @@ const PromptStyled = styled.div<PromptStyledProps>`
   gap: 8px;
   border-radius: 6px;
   ${(props) => (props.isExpanded ? 'cursor: pointer;' : '')};
+  ${(props) =>
+    props.isExpanded && props.isSelected
+      ? `background-color: ${theme('color.popper.hover')};`
+      : ''};
   &:hover {
     background-color: ${(props) =>
       props.isExpanded ? theme('color.popper.hover') : 'transparent'};
@@ -82,7 +89,12 @@ const PromptsButtonStyled = styled.div`
   }
 `
 
-const PromptTitleStyled = styled.div<PromptStyledProps>`
+interface PromptTitleStyledProps {
+  isVisible: boolean
+  isExpanded: boolean
+}
+
+const PromptTitleStyled = styled.div<PromptTitleStyledProps>`
   display: flex;
   align-items: center;
   gap: 2px;
@@ -102,7 +114,12 @@ const PromptTitleStyled = styled.div<PromptStyledProps>`
   }
 `
 
-const PromptContentStyled = styled.div<PromptStyledProps>`
+interface PromptContentStyledProps {
+  isVisible: boolean
+  isExpanded: boolean
+}
+
+const PromptContentStyled = styled.div<PromptContentStyledProps>`
   font-weight: 500;
   font-size: 16px;
   line-height: 24px;

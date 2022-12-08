@@ -73,10 +73,12 @@ const AppearanceToolbar = ({ setOpenAppearanceToolbar, returnFocus }: Appearance
       firstRender.current = false
     } else {
       if (open) {
+        document.documentElement.style.setProperty('--prompt-opacity', '0')
         setTimeout(() => {
           initialFocus.current.focus()
         }, 100)
       } else {
+        document.documentElement.style.setProperty('--prompt-opacity', '1')
         setTimeout(() => {
           returnFocus.current.focus()
         }, 100)
@@ -89,7 +91,7 @@ const AppearanceToolbar = ({ setOpenAppearanceToolbar, returnFocus }: Appearance
       <FloatingNode id={nodeId}>
         <FloatingPortal>
           {open && (
-            <FloatingOverlay>
+            <FloatingOverlay style={{ zIndex: 300 }}>
               <FloatingFocusManager context={context}>
                 <AppearanceToolbarWrapperStyled ref={floating} {...getFloatingProps()}>
                   <AppearanceToolbarStyled ref={initialFocus}>

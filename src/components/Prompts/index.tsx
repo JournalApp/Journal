@@ -67,12 +67,21 @@ const Prompts = () => {
     }),
   ])
 
-  const selectPrompt = (id: string) => {
+  const selectPrompt = (e: React.MouseEvent, id: string) => {
+    e.preventDefault()
+    e.stopPropagation()
+
     logger(`selectPrompt ${id}`)
     if (expanded) {
       setSelectedId(id)
       setExpanded(false)
     }
+  }
+
+  const expandPromptsList = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setExpanded(!expanded)
   }
 
   return (
@@ -84,15 +93,16 @@ const Prompts = () => {
             {PromptsData.map((prompt) => {
               return (
                 <PromptStyled
-                  onClick={() => selectPrompt(prompt.id)}
+                  onMouseDown={(e) => selectPrompt(e, prompt.id)}
                   isExpanded={expanded}
+                  isSelected={prompt.id == selectedId}
                   isVisible={expanded || prompt.id == selectedId}
                   key={prompt.id}
                 >
                   <PromptTitleStyled
                     isExpanded={expanded}
                     isVisible={expanded || prompt.id == selectedId}
-                    onClick={() => setExpanded(!expanded)}
+                    onMouseDown={(e) => expandPromptsList(e)}
                   >
                     <div>{prompt.title}</div>
                     {!expanded && <ChevronStyled />}

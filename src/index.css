@@ -2,6 +2,7 @@
   --color-text-100: rgba(55, 55, 55, 1);
   --color-text-50: #666666;
   --color-main-surface: #e5e5e5;
+  --prompt-opacity: 1;
 }
 
 @font-face {
