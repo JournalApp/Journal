@@ -3,6 +3,7 @@ import styled, { keyframes } from 'styled-components'
 import { theme } from 'themes'
 import { Icon } from 'components'
 import { supabase, isUnauthorized, logger } from 'utils'
+import { useQuery } from '@tanstack/react-query'
 import { useUserContext } from 'context'
 import {
   useFloating,
@@ -19,41 +20,67 @@ import {
 import {
   PromptStyled,
   PromptsButtonStyled,
+  PromptsCloseButtonStyled,
   PromptTitleStyled,
   PromptContentStyled,
   PromptWindowStyled,
   ChevronStyled,
 } from './styled'
 import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote'
+import type { Prompt } from 'types'
 
-const PromptsData = [
-  {
-    id: '1',
-    title: 'Morning kickstart',
-    content: `What's the 1 thing I need to do?`,
-  },
-  {
-    id: '2',
-    title: 'Your monthly reflection',
-    content: `What's 1 thing I'm grateful for?
-    What's 1 thing I'm excited about?`,
-  },
-  {
-    id: '3',
-    title: 'Bottleneck analysis',
-    content: `What's 1 thing I'm excited about? What's 1 thing I'm excited about?`,
-  },
-  {
-    id: '4',
-    title: 'The evening shutdown',
-    content: `What were the biggest wins of the day?`,
-  },
-]
+const fetchPrompts = async () => {
+  const { data, error } = await supabase.from<Prompt>('prompts').select()
+  if (error) {
+    throw new Error(error.message)
+  }
+  // await awaitTimeout(5000)
+  return data
+}
+
+const getCachedPrompts = () => {
+  const data = window.electronAPI.app.getKey('prompts')
+  if (data) {
+    try {
+      return JSON.parse(data) as Prompt[]
+    } catch (error) {
+      logger(error)
+      return null
+    }
+  } else {
+    return null
+  }
+}
+
+const cachePrompts = (prompts: Prompt[]) => {
+  try {
+    window.electronAPI.app.setKey({ prompts: JSON.stringify(prompts) })
+  } catch (e) {
+    logger(e)
+  }
+}
 
 const Prompts = () => {
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
+  const [beforeOpen, setBeforeOpen] = useState(true)
   const [expanded, setExpanded] = useState(false)
-  const [selectedId, setSelectedId] = useState('1')
+  const [selectedId, setSelectedId] = useState(1)
+
+  const { data: prompts } = useQuery({
+    queryKey: ['prompts'],
+    queryFn: async () => fetchPrompts(),
+    initialData: getCachedPrompts(),
+    onSuccess: (data) => cachePrompts(data),
+    enabled: open == true,
+  })
+
+  useEffect(() => {
+    logger(prompts)
+  }, [prompts])
+
+  useEffect(() => {
+    logger(`Prompts ${open ? 'open' : 'close'}`)
+  }, [open])
 
   const { floating, context, refs } = useFloating({
     open: expanded,
@@ -67,7 +94,7 @@ const Prompts = () => {
     }),
   ])
 
-  const selectPrompt = (e: React.MouseEvent, id: string) => {
+  const selectPrompt = (e: React.MouseEvent, id: number) => {
     e.preventDefault()
     e.stopPropagation()
 
@@ -78,6 +105,26 @@ const Prompts = () => {
     }
   }
 
+  const openPrompts = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (open) {
+      closePrompts(e)
+    } else {
+      setOpen(true)
+    }
+  }
+
+  const closePrompts = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setBeforeOpen(false)
+    setTimeout(() => {
+      setOpen(false)
+      setBeforeOpen(true)
+    }, 400)
+  }
+
   const expandPromptsList = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -86,11 +133,16 @@ const Prompts = () => {
 
   return (
     <>
-      <PromptsButtonStyled>Prompts</PromptsButtonStyled>
+      <PromptsButtonStyled onMouseDown={(e) => openPrompts(e)}>Prompts</PromptsButtonStyled>
       <FloatingPortal>
-        {open && (
-          <PromptWindowStyled isExpanded={expanded} ref={floating} {...getFloatingProps()}>
-            {PromptsData.map((prompt) => {
+        {open && prompts && (
+          <PromptWindowStyled
+            isExpanded={expanded}
+            beforeOpen={beforeOpen}
+            ref={floating}
+            {...getFloatingProps()}
+          >
+            {prompts.map((prompt) => {
               return (
                 <PromptStyled
                   onMouseDown={(e) => selectPrompt(e, prompt.id)}
@@ -116,6 +168,9 @@ const Prompts = () => {
                 </PromptStyled>
               )
             })}
+            <PromptsCloseButtonStyled onMouseDown={(e) => closePrompts(e)}>
+              Hide
+            </PromptsCloseButtonStyled>
           </PromptWindowStyled>
         )}
       </FloatingPortal>

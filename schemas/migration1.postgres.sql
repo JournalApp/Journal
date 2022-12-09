@@ -421,6 +421,26 @@ values
   ('HK', 'Hong Kong');
 
 /**
+ * PROMPTS
+ * Content for prompts for all users
+ */
+create table
+  prompts (
+    id serial unique not null,
+    title text not null,
+    content text not null,
+    primary key (id)
+  );
+
+alter table
+  prompts enable row level security;
+
+create policy
+  "Anyone can read prompts" on prompts for
+select
+  using (true);
+
+/**
  * REALTIME SUBSCRIPTIONS
  * Only allow realtime listening on public tables.
  */

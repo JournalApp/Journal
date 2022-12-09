@@ -4,8 +4,31 @@ import { theme } from 'themes'
 import { breakpoints } from 'utils'
 import { Icon } from 'components'
 
+const reveal = keyframes`
+  0% {
+    bottom: -30px;
+    opacity: 0;
+  }
+  100% {
+    bottom: 0;
+    opacity: var(--prompt-opacity);
+  }
+`
+
+const hide = keyframes`
+  0% {
+    bottom: 0;
+    opacity: var(--prompt-opacity);
+  }
+  100% {
+    bottom: -30px;
+    opacity: 0;
+  }
+`
+
 interface PromptWindowStyledProps {
   isExpanded: boolean
+  beforeOpen: boolean
 }
 
 const PromptWindowStyled = styled.div<PromptWindowStyledProps>`
@@ -27,6 +50,10 @@ const PromptWindowStyled = styled.div<PromptWindowStyledProps>`
   border-radius: 8px;
   box-shadow: ${theme('style.shadow')};
   -webkit-app-region: no-drag;
+  animation-name: ${(props) => (props.beforeOpen ? reveal : hide)};
+  animation-duration: ${theme('animation.time.long')};
+  animation-timing-function: cubic-bezier(0.03, 0.54, 0.12, 1);
+  animation-fill-mode: both;
 `
 
 interface PromptStyledProps {
@@ -39,6 +66,9 @@ const PromptStyled = styled.div<PromptStyledProps>`
   transition: all ${theme('animation.time.long')} cubic-bezier(0.17, 0.56, 0.18, 0.97);
   display: flex;
   padding: ${(props) => (props.isVisible ? '16px 28px' : '0px 28px')};
+  @media ${breakpoints.s} {
+    padding: ${(props) => (props.isVisible ? '16px 12px' : '0px 12px')};
+  }
   visibility: ${(props) => (props.isVisible ? 'visible' : 'hidden')};
   max-height: ${(props) => (props.isExpanded ? ' 400px' : props.isVisible ? '168px' : '0')};
   opacity: ${(props) => (props.isVisible ? 1 : 0)};
@@ -70,7 +100,29 @@ const ChevronStyled = styled((props) => <Icon name='Chevron' size={16} {...props
 const PromptsButtonStyled = styled.div`
   position: fixed;
   bottom: 8px;
-  right: 76px;
+  right: 8px;
+  padding: 2px 6px;
+  line-height: 16px;
+  border-radius: 100px;
+  font-size: 12px;
+  background-color: transparent;
+  border: 0;
+  color: ${theme('color.primary.main')};
+  z-index: 110;
+  opacity: 0.3;
+  outline: 0;
+  cursor: pointer;
+  transition: all ${theme('animation.time.normal')};
+  &:hover {
+    opacity: 0.7;
+    background-color: ${theme('color.primary.hover')};
+  }
+`
+
+const PromptsCloseButtonStyled = styled.div`
+  position: fixed;
+  bottom: 8px;
+  right: 8px;
   padding: 2px 6px;
   line-height: 16px;
   border-radius: 100px;
@@ -100,6 +152,7 @@ const PromptTitleStyled = styled.div<PromptTitleStyledProps>`
   gap: 2px;
   font-weight: 400;
   width: fit-content;
+  max-width: 75ch;
   font-size: 12px;
   line-height: 18px;
   color: ${theme('color.primary.main')};
@@ -123,12 +176,14 @@ const PromptContentStyled = styled.div<PromptContentStyledProps>`
   font-weight: 500;
   font-size: 16px;
   line-height: 24px;
+  max-width: 75ch;
   opacity: ${(props) => (props.isExpanded ? 0.9 : 0.7)};
 `
 
 export {
   PromptStyled,
   PromptsButtonStyled,
+  PromptsCloseButtonStyled,
   PromptTitleStyled,
   PromptWindowStyled,
   PromptContentStyled,

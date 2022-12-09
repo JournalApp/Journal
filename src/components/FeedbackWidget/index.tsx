@@ -221,7 +221,7 @@ const FeedbackWidgetContainer = styled.div`
   position: fixed;
   bottom: 0;
   right: 0;
-  z-index: 150;
+  z-index: 100;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -235,7 +235,7 @@ const FeedbackWidgetContainer = styled.div`
 const GiveFeedbackButton = styled.div`
   position: fixed;
   bottom: 8px;
-  right: 8px;
+  right: 70px;
   padding: 2px 6px;
   line-height: 16px;
   border-radius: 100px;
@@ -244,13 +244,12 @@ const GiveFeedbackButton = styled.div`
   border: 0;
   color: ${theme('color.primary.main')};
   z-index: 100;
-  opacity: 0.3;
+  opacity: 0;
   outline: 0;
   cursor: pointer;
   transition: all ${theme('animation.time.normal')};
   &:hover {
-    opacity: 0.7;
-    background-color: ${theme('color.primary.hover')};
+    opacity: 0.5;
   }
 `
 
@@ -306,6 +305,9 @@ const ThankYouScreen = styled.div<FormProps>`
     props.visible
       ? 'visibility 0s, opacity 0.2s, margin-bottom 0.2s;'
       : 'visibility 0s linear 0.2s, opacity 0.2s, margin-bottom 0.2s;'};
+  & svg {
+    pointer-events: none;
+  }
 `
 
 const FormFieldsContainer = styled.div`
@@ -609,7 +611,7 @@ function FeedbackWidget() {
           showForm(e)
         }}
       >
-        Feedback
+        Give feedback
       </GiveFeedbackButton>
     </FeedbackWidgetContainer>
   )
