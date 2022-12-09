@@ -70,7 +70,7 @@ const PromptStyled = styled.div<PromptStyledProps>`
     padding: ${(props) => (props.isVisible ? '16px 12px' : '0px 12px')};
   }
   visibility: ${(props) => (props.isVisible ? 'visible' : 'hidden')};
-  max-height: ${(props) => (props.isExpanded ? ' 400px' : props.isVisible ? '168px' : '0')};
+  max-height: ${(props) => (props.isExpanded ? ' 400px' : props.isVisible ? '170px' : '0')};
   opacity: ${(props) => (props.isVisible ? 1 : 0)};
   overflow-y: ${(props) => (props.isExpanded ? 'visible' : 'scroll')};
   flex-direction: column;
@@ -87,7 +87,7 @@ const PromptStyled = styled.div<PromptStyledProps>`
   }
 `
 
-const ChevronStyled = styled((props) => <Icon name='Chevron' size={16} {...props} />)`
+const ChevronStyled = styled((props) => <Icon name='Chevron' size={8} {...props} />)`
   opacity: 0.8;
   cursor: pointer;
   transition: all ${theme('animation.time.fast')};
@@ -149,7 +149,7 @@ interface PromptTitleStyledProps {
 const PromptTitleStyled = styled.div<PromptTitleStyledProps>`
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   font-weight: 400;
   width: fit-content;
   max-width: 75ch;
