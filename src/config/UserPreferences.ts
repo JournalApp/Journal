@@ -31,12 +31,18 @@ const calendarOpenMap = {
 }
 type CalendarOpen = keyof typeof calendarOpenMap
 
+type PromptsOpen = 'opened' | 'closed'
+
+type PromptSelectedId = number
+
 const defaultUserPreferences = {
   fontSize: 'normal' as FontSize,
   fontFace: 'inter' as FontFace,
   theme: 'light' as ColorTheme,
   calendarOpen: 'closed' as CalendarOpen,
   spellCheckEnabled: 'true' as SpellCheckEnabled,
+  promptsOpen: 'closed' as PromptsOpen,
+  promptSelectedId: 1 as PromptSelectedId,
 }
 
 const baseTheme = {
@@ -114,4 +120,6 @@ export {
   FontFace,
   CalendarOpen,
   SpellCheckEnabled,
+  PromptsOpen,
+  PromptSelectedId,
 }

@@ -21,6 +21,8 @@ import {
   FontFace,
   FontSize,
   CalendarOpen,
+  PromptsOpen,
+  PromptSelectedId,
   SpellCheckEnabled,
   getBaseThemeWithOverrides,
 } from 'config'
@@ -45,11 +47,25 @@ declare global {
 }
 
 const userPreferences = window.electronAPI.preferences.getAll()
+
 const initialColorTheme: ColorTheme = userPreferences?.theme || defaultUserPreferences.theme
+
 const initialFontFace: FontFace = userPreferences?.fontFace || defaultUserPreferences.fontFace
+
 const initialFontSize: FontSize = userPreferences?.fontSize || defaultUserPreferences.fontSize
+
 const initialCalendarOpen: CalendarOpen =
   userPreferences?.calendarOpen || defaultUserPreferences.calendarOpen
+
+const initialPromptsOpen: PromptsOpen =
+  userPreferences?.promptsOpen || defaultUserPreferences.promptsOpen
+
+if (userPreferences?.promptSelectedId && typeof userPreferences.promptSelectedId == 'string') {
+  userPreferences.promptSelectedId = parseInt(userPreferences.promptSelectedId)
+}
+const initialPromptSelectedId: PromptSelectedId =
+  userPreferences?.promptSelectedId || defaultUserPreferences.promptSelectedId
+
 const initialSpellCheckEnabled: SpellCheckEnabled =
   userPreferences?.spellCheckEnabled || defaultUserPreferences.spellCheckEnabled
 
@@ -136,7 +152,10 @@ function App() {
             <TrafficLightMenu />
             <Calendar />
             <ScrollToToday />
-            <Prompts />
+            <Prompts
+              initialPromptsOpen={initialPromptsOpen}
+              initialPromptSelectedId={initialPromptSelectedId}
+            />
             <FeedbackWidget />
             <NoDragScrollBars />
             <Container>

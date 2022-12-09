@@ -7,8 +7,6 @@ import { useQuery } from '@tanstack/react-query'
 import { useUserContext } from 'context'
 import {
   useFloating,
-  FloatingTree,
-  FloatingOverlay,
   useInteractions,
   useDismiss,
   useClick,
@@ -28,6 +26,7 @@ import {
 } from './styled'
 import { MDXRemote } from 'next-mdx-remote'
 import type { Prompt } from 'types'
+import type { PromptsOpen, PromptSelectedId } from 'config'
 
 const fetchPrompts = async () => {
   const { data, error } = await supabase.from<Prompt>('prompts').select()
@@ -70,22 +69,30 @@ const components = {
   p: (props: any) => <p {...props} />,
 }
 
-const Prompts = () => {
-  const [open, setOpen] = useState(false)
+interface PromptsProps {
+  initialPromptsOpen: PromptsOpen
+  initialPromptSelectedId: PromptSelectedId
+}
+
+const Prompts = ({ initialPromptsOpen, initialPromptSelectedId }: PromptsProps) => {
+  const [open, setOpen] = useState<PromptsOpen>(initialPromptsOpen)
   const [beforeOpen, setBeforeOpen] = useState(true)
   const [expanded, setExpanded] = useState(false)
-  const [selectedId, setSelectedId] = useState(1)
+  const [selectedId, setSelectedId] = useState<PromptSelectedId>(initialPromptSelectedId)
+  const { session } = useUserContext()
 
   const { data: prompts } = useQuery({
     queryKey: ['prompts'],
     queryFn: fetchPrompts,
     initialData: getCachedPrompts,
     onSuccess: (data) => cachePrompts(data),
-    enabled: open == true,
+    enabled: open == 'opened',
   })
 
   useEffect(() => {
-    logger(prompts)
+    if (!prompts.some((prompt) => prompt.id == selectedId)) {
+      setSelectedId(1)
+    }
   }, [prompts])
 
   useEffect(() => {
@@ -112,27 +119,43 @@ const Prompts = () => {
     if (expanded) {
       setSelectedId(id)
       setExpanded(false)
+      window.electronAPI.preferences.set(session.user.id, { promptSelectedId: `${id}` })
+      window.electronAPI.capture({
+        distinctId: session.user.id,
+        event: 'prompts select',
+        properties: { id },
+      })
     }
   }
 
   const openPrompts = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    if (open) {
-      closePrompts(e)
-    } else {
-      setOpen(true)
-    }
+    const action: PromptsOpen = 'opened'
+    setOpen(action)
+    window.electronAPI.preferences.set(session.user.id, { promptsOpen: action })
+    window.electronAPI.capture({
+      distinctId: session.user.id,
+      event: 'prompts toggle',
+      properties: { action },
+    })
   }
 
   const closePrompts = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
+    const action: PromptsOpen = 'closed'
     setBeforeOpen(false)
     setTimeout(() => {
-      setOpen(false)
+      setOpen('closed')
       setBeforeOpen(true)
     }, 400)
+    window.electronAPI.preferences.set(session.user.id, { promptsOpen: action })
+    window.electronAPI.capture({
+      distinctId: session.user.id,
+      event: 'prompts toggle',
+      properties: { action },
+    })
   }
 
   const expandPromptsList = (e: React.MouseEvent) => {
@@ -145,7 +168,7 @@ const Prompts = () => {
     <>
       <PromptsButtonStyled onMouseDown={(e) => openPrompts(e)}>Prompts</PromptsButtonStyled>
       <FloatingPortal>
-        {open && prompts && (
+        {open == 'opened' && prompts && (
           <PromptWindowStyled
             isExpanded={expanded}
             beforeOpen={beforeOpen}
