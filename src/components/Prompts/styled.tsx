@@ -178,6 +178,9 @@ const PromptContentStyled = styled.div<PromptContentStyledProps>`
   line-height: 24px;
   max-width: 75ch;
   opacity: ${(props) => (props.isExpanded ? 0.9 : 0.7)};
+  & p {
+    margin: 0;
+  }
 `
 
 export {

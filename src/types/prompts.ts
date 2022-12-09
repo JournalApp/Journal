@@ -1,7 +1,7 @@
 type Prompt = {
   id: number
   title: string
-  content: string
+  content: any
 }
 
 export { Prompt }

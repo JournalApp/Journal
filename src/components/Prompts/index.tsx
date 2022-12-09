@@ -26,7 +26,7 @@ import {
   PromptWindowStyled,
   ChevronStyled,
 } from './styled'
-import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote'
+import { MDXRemote } from 'next-mdx-remote'
 import type { Prompt } from 'types'
 
 const fetchPrompts = async () => {
@@ -35,6 +35,12 @@ const fetchPrompts = async () => {
     throw new Error(error.message)
   }
   // await awaitTimeout(5000)
+  await Promise.all(
+    data.map(
+      async (prompt) =>
+        (prompt.content = await window.electronAPI.mdxSerialize(prompt.content ?? ''))
+    )
+  )
   return data
 }
 
@@ -60,6 +66,10 @@ const cachePrompts = (prompts: Prompt[]) => {
   }
 }
 
+const components = {
+  p: (props: any) => <p {...props} />,
+}
+
 const Prompts = () => {
   const [open, setOpen] = useState(false)
   const [beforeOpen, setBeforeOpen] = useState(true)
@@ -68,8 +78,8 @@ const Prompts = () => {
 
   const { data: prompts } = useQuery({
     queryKey: ['prompts'],
-    queryFn: async () => fetchPrompts(),
-    initialData: getCachedPrompts(),
+    queryFn: fetchPrompts,
+    initialData: getCachedPrompts,
     onSuccess: (data) => cachePrompts(data),
     enabled: open == true,
   })
@@ -163,7 +173,7 @@ const Prompts = () => {
                     isExpanded={expanded}
                     isVisible={expanded || prompt.id == selectedId}
                   >
-                    {prompt.content}
+                    <MDXRemote {...prompt.content} components={components} />
                   </PromptContentStyled>
                 </PromptStyled>
               )
