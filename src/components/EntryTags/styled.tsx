@@ -323,6 +323,9 @@ const StyledTagsInput = styled.input<EditModeProps>`
   &:hover {
     opacity: 1;
   }
+  &::placeholder {
+    color: ${theme('color.secondary.main', 0.6)};
+  }
 `
 
 interface TagProps extends EditModeProps {

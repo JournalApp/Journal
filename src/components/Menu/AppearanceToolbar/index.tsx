@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { theme, lightTheme, darkTheme } from 'themes'
+import { lightTheme, darkTheme, forestTheme, cappuccinoTheme } from 'themes'
 import { useAppearanceContext, AppearanceContextInterface } from 'context'
 import {
   useFloating,
@@ -17,11 +17,14 @@ import {
   AppearanceToolbarWrapperStyled,
   AppearanceToolbarStyled,
   ToggleButtonStyled,
+  ToggleButtonSmallStyled,
   ToggleGroupStyled,
+  ToggleGroupNestedStyled,
   ToggleFontAStyled,
   ToggleFontAAStyled,
   ToggleFontAAAStyled,
   ColorSwatchStyled,
+  ColorSwatchSmallStyled,
   HorizontalDividerStyled,
 } from './styled'
 
@@ -138,6 +141,26 @@ const AppearanceToolbar = ({ setOpenAppearanceToolbar, returnFocus }: Appearance
                           fillColor={`rgba(${darkTheme.color.primary.surface},1)`}
                         />
                       </ToggleButtonStyled>
+                      <ToggleGroupNestedStyled>
+                        <ToggleButtonSmallStyled
+                          value='cappuccino'
+                          padding='8px'
+                          disabled={colorTheme == 'cappuccino'}
+                        >
+                          <ColorSwatchSmallStyled
+                            fillColor={`rgba(${cappuccinoTheme.color.primary.surface},1)`}
+                          />
+                        </ToggleButtonSmallStyled>
+                        <ToggleButtonSmallStyled
+                          value='forest'
+                          padding='8px'
+                          disabled={colorTheme == 'forest'}
+                        >
+                          <ColorSwatchSmallStyled
+                            fillColor={`rgba(${forestTheme.color.primary.surface},1)`}
+                          />
+                        </ToggleButtonSmallStyled>
+                      </ToggleGroupNestedStyled>
                     </ToggleGroupStyled>
                     <HorizontalDividerStyled />
                     <ToggleGroupStyled

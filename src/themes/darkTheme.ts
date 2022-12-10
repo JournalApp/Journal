@@ -96,6 +96,10 @@ const darkTheme = {
       brown: darkPalette.tags['brown'],
       navy: darkPalette.tags['navy'],
     },
+    code: {
+      main: darkPalette.neutral[100],
+      surface: darkPalette.neutral[100],
+    },
     productFree: {
       main: '227, 227, 227',
       surface: '74, 74, 74',

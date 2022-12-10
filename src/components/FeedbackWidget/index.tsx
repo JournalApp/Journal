@@ -126,6 +126,7 @@ const TextArea = styled.textarea<TextAreaProps>`
     }
   }
   &::placeholder {
+    color: ${theme('color.primary.main')};
     opacity: 0.6;
   }
 `

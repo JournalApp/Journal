@@ -27,6 +27,7 @@ import {
   createPlateUI,
   ELEMENT_H3,
   MARK_HIGHLIGHT,
+  MARK_CODE,
   withProps,
   StyledElement,
   Plate,
@@ -319,6 +320,21 @@ const EntryItem = ({ entryDay, cachedEntry, entriesObserver }: EntryBlockProps) 
               font-size: 1.25em;
               font-weight: 500;
               line-height: 1.3;
+            `,
+          },
+        }),
+        [MARK_CODE]: withProps(StyledElement, {
+          as: 'code',
+          styles: {
+            root: css`
+              white-space: pre-wrap;
+              font-size: 85%;
+              font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+              background-color: ${theme('color.code.surface', 0.1)};
+              color: ${theme('color.code.main')};
+              border-radius: 3px;
+              padding: 0.2em 0.4em;
+              line-height: normal;
             `,
           },
         }),

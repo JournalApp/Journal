@@ -260,10 +260,11 @@ const getCustomStyles = ({ borderRadius, hasError }: getCustomStylesProps) => {
         backgroundColor: theme('color.popper.hover'),
       },
     }),
-    menuList: (provided: any) => ({ ...provided, padding: 4, boxShadow: theme('style.shadow') }),
+    menuList: (provided: any) => ({ ...provided, padding: 4 }),
     menu: (provided: any) => ({
       ...provided,
       backgroundColor: theme('color.popper.pure'),
+      boxShadow: `0px 0px 0px 1px ${theme('color.popper.border')}`,
       borderRadius: 12,
       border: 0,
     }),

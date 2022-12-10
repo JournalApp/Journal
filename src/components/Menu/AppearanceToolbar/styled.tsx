@@ -52,6 +52,41 @@ const ToggleButtonStyled = styled(({ padding, fontName, ...props }) => (
   }
 `
 
+const ToggleButtonSmallStyled = styled(({ padding, fontName, ...props }) => (
+  <Toolbar.ToggleItem {...props} />
+))<ToggleButtonProps>`
+  height: 22px;
+  font-size: 14px;
+  line-height: 14px;
+  min-width: 22px;
+  display: flex;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+  font-family: ${(props) => (props.fontName ? props.fontName : 'inherit')};
+  border-radius: 100px;
+  cursor: pointer;
+  border: 1px solid ${theme('color.popper.border')};
+  background-color: ${theme('color.popper.surface')};
+  color: ${theme('color.popper.disabled')};
+  transition: ${theme('animation.time.normal')};
+  &:disabled {
+    cursor: initial;
+  }
+  &:focus {
+    outline: 0;
+  }
+  &:hover {
+    border: 1px solid ${theme('color.popper.disabled')};
+  }
+  &[data-state='on'] {
+    opacity: 1;
+    border: 1px solid ${theme('color.popper.main')};
+    border: 1px solid ${theme('color.popper.main')};
+    color: ${theme('color.popper.main')};
+  }
+`
+
 const AppearanceToolbarWrapperStyled = styled.div`
   position: fixed;
   bottom: 80px;
@@ -88,6 +123,13 @@ const ToggleGroupStyled = styled(Toolbar.ToggleGroup)`
   display: flex;
 `
 
+const ToggleGroupNestedStyled = styled.div`
+  width: 22px;
+  gap: 4px;
+  display: flex;
+  flex-direction: column;
+`
+
 const ToggleFontAStyled = styled(ToggleButtonStyled)`
   font-size: 13px;
 `
@@ -110,6 +152,13 @@ const ColorSwatchStyled = styled.div<ColorSwatchProps>`
   background-color: ${(props) => props.fillColor};
 `
 
+const ColorSwatchSmallStyled = styled.div<ColorSwatchProps>`
+  height: 14px;
+  width: 14px;
+  border-radius: 100px;
+  background-color: ${(props) => props.fillColor};
+`
+
 const HorizontalDividerStyled = styled(Toolbar.Separator)`
   background-color: ${theme('color.popper.border')};
   width: 1px;
@@ -120,10 +169,13 @@ export {
   AppearanceToolbarWrapperStyled,
   AppearanceToolbarStyled,
   ToggleButtonStyled,
+  ToggleButtonSmallStyled,
   ToggleGroupStyled,
+  ToggleGroupNestedStyled,
   ToggleFontAStyled,
   ToggleFontAAStyled,
   ToggleFontAAAStyled,
   ColorSwatchStyled,
+  ColorSwatchSmallStyled,
   HorizontalDividerStyled,
 }

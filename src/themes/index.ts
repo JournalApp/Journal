@@ -1,5 +1,7 @@
 import { lightTheme } from './lightTheme'
 import { darkTheme } from './darkTheme'
+import { forestTheme } from './forestTheme'
+import { cappuccinoTheme } from './cappuccinoTheme'
 import { baseTheme } from 'config'
 
 type RecursiveKeyOf<TObj extends object> = {
@@ -31,4 +33,14 @@ const getCSSVar = (itemKey: LightThemeItemKey | BaseThemeItemKey) => {
   return itemKey.split('.').reduce((acc, key) => acc + '-' + key, '-')
 }
 
-export { theme, getCSSVar, lightTheme, darkTheme, baseTheme, LightThemeItemKey, BaseThemeItemKey }
+export {
+  theme,
+  getCSSVar,
+  lightTheme,
+  darkTheme,
+  baseTheme,
+  forestTheme,
+  cappuccinoTheme,
+  LightThemeItemKey,
+  BaseThemeItemKey,
+}

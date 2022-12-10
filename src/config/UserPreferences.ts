@@ -1,4 +1,4 @@
-import { lightTheme, darkTheme } from 'themes'
+import { lightTheme, darkTheme, forestTheme, cappuccinoTheme } from 'themes'
 
 const fontSizeMap = {
   small: 18,
@@ -16,6 +16,8 @@ type FontFace = keyof typeof fontFaceMap
 const colorThemeMap = {
   light: lightTheme,
   dark: darkTheme,
+  forest: forestTheme,
+  cappuccino: cappuccinoTheme,
 }
 type ColorTheme = keyof typeof colorThemeMap
 
