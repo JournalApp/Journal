@@ -133,6 +133,24 @@ const AppearanceToolbar = ({ setOpenAppearanceToolbar, returnFocus }: Appearance
                         />
                       </ToggleButtonStyled>
                       <ToggleButtonStyled
+                        value='cappuccino'
+                        padding='8px'
+                        disabled={colorTheme == 'cappuccino'}
+                      >
+                        <ColorSwatchStyled
+                          fillColor={`rgba(${cappuccinoTheme.color.primary.surface},1)`}
+                        />
+                      </ToggleButtonStyled>
+                      <ToggleButtonStyled
+                        value='forest'
+                        padding='8px'
+                        disabled={colorTheme == 'forest'}
+                      >
+                        <ColorSwatchStyled
+                          fillColor={`rgba(${forestTheme.color.primary.surface},1)`}
+                        />
+                      </ToggleButtonStyled>
+                      <ToggleButtonStyled
                         value='dark'
                         padding='8px'
                         disabled={colorTheme == 'dark'}
@@ -141,7 +159,7 @@ const AppearanceToolbar = ({ setOpenAppearanceToolbar, returnFocus }: Appearance
                           fillColor={`rgba(${darkTheme.color.primary.surface},1)`}
                         />
                       </ToggleButtonStyled>
-                      <ToggleGroupNestedStyled>
+                      {/* <ToggleGroupNestedStyled>
                         <ToggleButtonSmallStyled
                           value='cappuccino'
                           padding='8px'
@@ -160,7 +178,7 @@ const AppearanceToolbar = ({ setOpenAppearanceToolbar, returnFocus }: Appearance
                             fillColor={`rgba(${forestTheme.color.primary.surface},1)`}
                           />
                         </ToggleButtonSmallStyled>
-                      </ToggleGroupNestedStyled>
+                      </ToggleGroupNestedStyled> */}
                     </ToggleGroupStyled>
                     <HorizontalDividerStyled />
                     <ToggleGroupStyled

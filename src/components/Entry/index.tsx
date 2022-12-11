@@ -347,7 +347,7 @@ const EntryItem = ({ entryDay, cachedEntry, entriesObserver }: EntryBlockProps) 
               border-radius: 100px;
               padding: 3px 5px;
               margin: -5px;
-              mix-blend-mode: ${theme('color.highlight.blendMode')};
+              mix-blend-mode: ${theme('style.highlightBlendMode')};
             `,
           },
         }),

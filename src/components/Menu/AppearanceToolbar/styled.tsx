@@ -34,7 +34,7 @@ const ToggleButtonStyled = styled(({ padding, fontName, ...props }) => (
   border: 1px solid ${theme('color.popper.border')};
   background-color: ${theme('color.popper.surface')};
   color: ${theme('color.popper.disabled')};
-  transition: ${theme('animation.time.normal')};
+  transition: opacity ${theme('animation.time.normal')};
   &:disabled {
     cursor: initial;
   }
@@ -42,6 +42,7 @@ const ToggleButtonStyled = styled(({ padding, fontName, ...props }) => (
     outline: 0;
   }
   &:hover {
+    transition: border ${theme('animation.time.normal')};
     border: 1px solid ${theme('color.popper.disabled')};
   }
   &[data-state='on'] {
@@ -111,7 +112,7 @@ const AppearanceToolbarStyled = styled(Toolbar.Root)`
   display: flex;
   box-shadow: ${theme('style.shadow')};
   background-color: ${theme('color.popper.surface')};
-  transition: ${theme('animation.time.normal')};
+  transition: 0;
   animation-name: ${reveal};
   animation-duration: ${theme('animation.time.normal')};
   animation-timing-function: ${theme('animation.timingFunction.dynamic')};

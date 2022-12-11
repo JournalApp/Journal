@@ -69,6 +69,7 @@ const AsideMenu = styled.div`
 
 const AsideMenuStickyContainer = styled.div`
   position: sticky;
+  -webkit-app-region: no-drag;
   top: 48px;
   display: flex;
   justify-content: center;

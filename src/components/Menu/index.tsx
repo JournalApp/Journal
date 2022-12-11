@@ -83,7 +83,7 @@ const MenuButton = styled(DropdownMenu.Trigger)<MenuButtonProps>`
   z-index: 9999;
   -webkit-app-region: no-drag;
   box-shadow: ${theme('style.shadow')};
-  transition: ${theme('animation.time.normal')};
+  transition: 0;
   background-color: ${(props) =>
     props.open ? theme('color.secondary.main') : theme('color.secondary.surface')};
   & * {
@@ -92,6 +92,7 @@ const MenuButton = styled(DropdownMenu.Trigger)<MenuButtonProps>`
   }
   &:focus,
   &:hover {
+    transition: background-color ${theme('animation.time.normal')};
     outline: none;
     border: 0;
     background-color: ${theme('color.secondary.hover')};
