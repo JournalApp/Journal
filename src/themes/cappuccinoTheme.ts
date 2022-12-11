@@ -5,7 +5,7 @@ const cappuccinoPalette = {
   neutral: {
     '0': '255, 255, 255',
     '10': '247, 246, 241', // popper
-    '15': '242, 237, 228', // hover, inverted, toggle group bg
+    '15': '243, 240, 233', // hover, inverted, toggle group bg
     '20': '239, 233, 222', // hover on inverted, border
     '25': '233, 227, 216', // bg
     '30': '226, 217, 200', // secondary surface

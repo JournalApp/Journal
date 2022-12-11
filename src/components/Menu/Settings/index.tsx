@@ -16,6 +16,7 @@ import {
 } from '@floating-ui/react-dom-interactions'
 import { UpgradeTabContent } from './Upgrade'
 import { BillingTabContent } from './Billing'
+import { ImportExportTabContent } from './ImportExport'
 import { EarnTabContent } from './Earn'
 import { useIsOnline } from 'hooks'
 import { Icon } from 'components'
@@ -112,22 +113,26 @@ const SettingsDialog = ({ returnFocus }: SettingsDialogProps) => {
                 >
                   <ListStyled>
                     <SettingsTitleStyled>Settings</SettingsTitleStyled>
-                    <MenuItemStyled ref={initialFocus} value='tab1'>
+                    <MenuItemStyled ref={initialFocus} value='tab-upgrade'>
                       {subscription == null ? 'Upgrade' : 'Plans'}
                     </MenuItemStyled>
                     {/* <MenuItemStyled value='tab2'>Earn credit</MenuItemStyled> */}
-                    <MenuItemStyled value='tab3'>Billing</MenuItemStyled>
+                    <MenuItemStyled value='tab-billing'>Billing</MenuItemStyled>
+                    <MenuItemStyled value='tab-importexport'>Export</MenuItemStyled>
                   </ListStyled>
                   {isOnline ? (
                     <>
-                      <ContentStyled value='tab1'>
+                      <ContentStyled value='tab-upgrade'>
                         <UpgradeTabContent />
                       </ContentStyled>
                       {/* <ContentStyled value='tab2'>
                         <EarnTabContent />
                       </ContentStyled> */}
-                      <ContentStyled value='tab3'>
+                      <ContentStyled value='tab-billing'>
                         <BillingTabContent />
+                      </ContentStyled>
+                      <ContentStyled value='tab-importexport'>
+                        <ImportExportTabContent />
                       </ContentStyled>
                     </>
                   ) : (

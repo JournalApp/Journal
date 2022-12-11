@@ -32,6 +32,7 @@ interface PlanStyledProps {
 const PlanStyled = styled.div<PlanStyledProps>`
   display: flex;
   flex-direction: column;
+  min-width: 160px;
   gap: 16px;
   background-color: ${(props) => (props.bgColor ? props.bgColor : 'transparent')};
   color: ${(props) => (props.textColor ? props.textColor : theme('color.popper.main'))};

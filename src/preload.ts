@@ -15,6 +15,9 @@ const electronAPI = {
   mdxSerialize: async (source: string) => {
     return (await ipcRenderer.invoke('mdx-serialize', source)) as MDXRemoteSerializeResult
   },
+  saveFile: async (data: string, format: 'txt' | 'json') => {
+    await ipcRenderer.invoke('journal-export', data, format)
+  },
   cache: {
     // Entry
     async addOrUpdateEntry(entry: Entry) {

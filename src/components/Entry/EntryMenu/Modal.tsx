@@ -86,7 +86,7 @@ const Modal = ({ setOpenModal, action }: ModalProps) => {
               <ActionsWrapperStyled>
                 <ButtonDestructiveStyled onClick={() => action()}>Remove</ButtonDestructiveStyled>
                 <ButtonGhostStyled ref={actionRef} onClick={() => setOpenModal(false)}>
-                  Close
+                  Cancel
                 </ButtonGhostStyled>
               </ActionsWrapperStyled>
             </ModalStyled>

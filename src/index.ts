@@ -10,6 +10,7 @@ import { serializeError, deserializeError } from 'serialize-error'
 import type { Tag, EntryTag } from 'types'
 
 require('./services/mdx')
+require('./services/saveFile')
 
 var openUrl = ''
 
