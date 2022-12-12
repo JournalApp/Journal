@@ -175,6 +175,10 @@ function EntryTags({ date }: EntryTagsProps) {
         return [...prev, entryTag]
       }
     })
+    window.electronAPI.capture({
+      distinctId: session.user.id,
+      event: 'tag add',
+    })
   }
 
   const removeEntryTag = (entryTagTagId: string) => {
@@ -195,6 +199,10 @@ function EntryTags({ date }: EntryTagsProps) {
         )
         return prev.filter((el) => el.tag_id != entryTagTagId)
       }
+    })
+    window.electronAPI.capture({
+      distinctId: session.user.id,
+      event: 'tag remove',
     })
   }
 
@@ -243,6 +251,11 @@ function EntryTags({ date }: EntryTagsProps) {
     setResults([...searchTag(name)])
 
     generateRandomTagColor()
+
+    window.electronAPI.capture({
+      distinctId: session.user.id,
+      event: 'tag create',
+    })
   }
 
   const handleSelect = async (e: any, item: ListItemType) => {
@@ -284,6 +297,10 @@ function EntryTags({ date }: EntryTagsProps) {
         setTimeout(() => sel.refs.reference.current.focus(), 100)
       }
       setEditMode(true)
+      window.electronAPI.capture({
+        distinctId: session.user.id,
+        event: 'tag edit-mode',
+      })
     }
   }
 
@@ -291,6 +308,11 @@ function EntryTags({ date }: EntryTagsProps) {
     const result = Array.from(list)
     const [removed] = result.splice(startIndex, 1)
     result.splice(endIndex, 0, removed)
+
+    window.electronAPI.capture({
+      distinctId: session.user.id,
+      event: 'tag reorder',
+    })
 
     return result
   }

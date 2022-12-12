@@ -65,7 +65,7 @@ function ListItemTag({
   const tagEditColorRef = useRef(tag.color)
   const { userTags, cacheAddOrUpdateTag, cacheUpdateTagProperty, rerenderEntriesWithTag } =
     useEntriesContext()
-  const { serverTimeNow } = useUserContext()
+  const { session, serverTimeNow } = useUserContext()
   // const inputRef = useRef<HTMLInputElement>(null)
 
   // logger('ListItemTag rerender')
@@ -88,6 +88,10 @@ function ListItemTag({
     userTags.current[i].name = name
     userTags.current[i].color = color
     rerenderEntriesWithTag(tag.id)
+    window.electronAPI.capture({
+      distinctId: session.user.id,
+      event: 'tag update',
+    })
   }
 
   const deleteTag = () => {
@@ -101,6 +105,10 @@ function ListItemTag({
       return t.id != tag.id
     })
     rerenderEntriesWithTag(tag.id)
+    window.electronAPI.capture({
+      distinctId: session.user.id,
+      event: 'tag delete',
+    })
   }
 
   let isEditingOtherTag = tagIndexEditing != null && tagIndexEditing != i
@@ -162,6 +170,10 @@ function ListItemTag({
                 }
               }, 100)
               logger('onMouseDown StyledEditTag')
+              window.electronAPI.capture({
+                distinctId: session.user.id,
+                event: 'tag edit',
+              })
             } else {
               handleSelect(e, { type: 'tag', value: tag })
             }

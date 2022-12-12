@@ -23,6 +23,7 @@ import {
 } from './styled'
 import type { Tag } from 'types'
 import { logger } from 'src/utils'
+import { useUserContext } from 'context'
 
 type ListItemTagColorPickerProps = {
   tag: Tag
@@ -40,6 +41,7 @@ function ListItemTagColorPicker({
   tagEditColorRef,
 }: ListItemTagColorPickerProps) {
   const [selectedColor, setSelectedColor] = useState<Tag['color']>(tagEditColorRef.current)
+  const { session } = useUserContext()
   const { floating, strategy, reference, x, y, context } = useFloating<HTMLInputElement>({
     placement: 'left-start',
     open: colorPickerOpen,
@@ -54,6 +56,11 @@ function ListItemTagColorPicker({
     setSelectedColor(color)
     logger('handleColorSelect')
     toggleOpen(e)
+    window.electronAPI.capture({
+      distinctId: session.user.id,
+      event: 'tag edit color select',
+      properties: { color },
+    })
   }
 
   const toggleOpen = (e: any) => {
