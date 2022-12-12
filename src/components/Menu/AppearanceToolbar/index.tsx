@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { lightTheme, darkTheme, forestTheme, cappuccinoTheme } from 'themes'
-import { useAppearanceContext, AppearanceContextInterface } from 'context'
+import { useAppearanceContext, AppearanceContextInterface, useUserContext } from 'context'
 import {
   useFloating,
   FloatingTree,
@@ -35,6 +35,7 @@ interface AppearanceToolbarProps {
 
 const AppearanceToolbar = ({ setOpenAppearanceToolbar, returnFocus }: AppearanceToolbarProps) => {
   const [open, setOpen] = useState(false)
+  const { session } = useUserContext()
   const firstRender = useRef(true)
   const initialFocus = useRef<HTMLDivElement>(null)
   const nodeId = useFloatingNodeId()
@@ -86,6 +87,12 @@ const AppearanceToolbar = ({ setOpenAppearanceToolbar, returnFocus }: Appearance
           returnFocus.current.focus()
         }, 100)
       }
+    }
+    if (open) {
+      window.electronAPI.capture({
+        distinctId: session.user.id,
+        event: 'appearance open',
+      })
     }
   }, [open])
 

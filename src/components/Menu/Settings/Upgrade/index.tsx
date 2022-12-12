@@ -5,7 +5,16 @@ import { Products } from './Products'
 import { useUserContext } from 'context'
 
 const UpgradeTabContent = () => {
-  const { subscription } = useUserContext()
+  const { session, subscription } = useUserContext()
+
+  useEffect(() => {
+    window.electronAPI.capture({
+      distinctId: session.user.id,
+      event: 'settings view-tab',
+      properties: { tab: 'upgrade' },
+    })
+  }, [])
+
   return (
     <>
       <SectionTitleStyled>

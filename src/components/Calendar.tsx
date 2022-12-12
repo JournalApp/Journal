@@ -235,6 +235,14 @@ const Calendar = () => {
     setDaysWithNoContent([...daysWithNoContent])
   }
 
+  const deleteEntryHandler = (day: string) => {
+    deleteEntry(day)
+    window.electronAPI.capture({
+      distinctId: session.user.id,
+      event: 'calendar delete-entry',
+    })
+  }
+
   //////////////////////////
   // ⛰ useEffect on mount
   //////////////////////////
@@ -396,7 +404,7 @@ const Calendar = () => {
                                   <Remove
                                     name='Cross'
                                     size={16}
-                                    onClick={() => deleteEntry(today)}
+                                    onClick={() => deleteEntryHandler(today)}
                                   />
                                 )}
                             </Day>

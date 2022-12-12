@@ -93,13 +93,23 @@ const Subscribe = ({ renderTrigger, prices, billingInterval }: SubscribeProps) =
     }
   }, [])
 
+  useEffect(() => {
+    if (open) {
+      window.electronAPI.capture({
+        distinctId: session.user.id,
+        event: 'settings upgrade upgrade-cta',
+        properties: { plan: 'Writer' },
+      })
+    }
+  }, [open])
+
   //////////////////////////
   // 🚀 Return
   //////////////////////////
 
   return (
     <FloatingNode id={nodeId}>
-      {renderTrigger({ close: () => setOpen(false), ref: reference, ...getReferenceProps() })}
+      {renderTrigger({ open: () => setOpen(true), ref: reference, ...getReferenceProps() })}
       <FloatingPortal>
         {open && (
           <FloatingOverlay

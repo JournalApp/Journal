@@ -91,13 +91,23 @@ const ChangeCycle = ({ renderTrigger, prices }: SubscribeProps) => {
     }
   }, [])
 
+  useEffect(() => {
+    if (open) {
+      window.electronAPI.capture({
+        distinctId: session.user.id,
+        event: 'settings billing plan',
+        properties: { action: 'upgrade-to-yearly' },
+      })
+    }
+  }, [open])
+
   //////////////////////////
   // 🚀 Return
   //////////////////////////
 
   return (
     <FloatingNode id={nodeId}>
-      {renderTrigger({ close: () => setOpen(false), ref: reference, ...getReferenceProps() })}
+      {renderTrigger({ open: () => setOpen(true), ref: reference, ...getReferenceProps() })}
       <FloatingPortal>
         {open && (
           <FloatingOverlay

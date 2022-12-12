@@ -113,6 +113,16 @@ const CancelOrResume = ({ action, renderTrigger }: CancelOrResumeProps) => {
     }
   }, [success])
 
+  useEffect(() => {
+    if (open) {
+      window.electronAPI.capture({
+        distinctId: session.user.id,
+        event: 'settings billing plan',
+        properties: { action },
+      })
+    }
+  }, [open])
+
   const cancelOrResume = async () => {
     setIsCancelingOrResuming(true)
     try {
@@ -171,7 +181,7 @@ const CancelOrResume = ({ action, renderTrigger }: CancelOrResumeProps) => {
 
   return (
     <FloatingNode id={nodeId}>
-      {renderTrigger({ close: () => setOpen(false), ref: reference, ...getReferenceProps() })}
+      {renderTrigger({ open: () => setOpen(true), ref: reference, ...getReferenceProps() })}
       <FloatingPortal>
         {open && (
           <FloatingOverlay

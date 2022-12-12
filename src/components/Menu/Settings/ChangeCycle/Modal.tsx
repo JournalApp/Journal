@@ -105,6 +105,25 @@ const Modal = ({ setOpen, prices, billingInfo, billingInfoIsLoading }: ChangeCyc
     },
   })
 
+  useEffect(() => {
+    if (messages) {
+      window.electronAPI.capture({
+        distinctId: session.user.id,
+        event: 'settings billing plan upgrade-to-yearly error',
+        properties: { message: messages },
+      })
+    }
+  }, [messages])
+
+  useEffect(() => {
+    if (success) {
+      window.electronAPI.capture({
+        distinctId: session.user.id,
+        event: 'settings billing plan upgrade-to-yearly success',
+      })
+    }
+  }, [success])
+
   const savings = prices
     ? calcYearlyPlanSavings(prices.filter((price) => price.product_id == Const.productWriterId))
     : ''

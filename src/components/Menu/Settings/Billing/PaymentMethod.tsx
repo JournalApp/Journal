@@ -63,8 +63,8 @@ const PaymentMethod = ({ billingInfo, isLoading, showCardOnly = false }: Payment
             <ActionsStyled>
               <AddCard
                 isUpdate={true}
-                renderTrigger={({ close, ...rest }: any) => (
-                  <ActionStyled onClick={close} {...rest}>
+                renderTrigger={({ open, ...rest }: any) => (
+                  <ActionStyled onClick={open} {...rest}>
                     Update
                   </ActionStyled>
                 )}
@@ -74,8 +74,8 @@ const PaymentMethod = ({ billingInfo, isLoading, showCardOnly = false }: Payment
             <ActionsStyled>
               <Elements stripe={stripePromise}>
                 <AddCard
-                  renderTrigger={({ close, ...rest }: any) => (
-                    <ActionStyled onClick={close} {...rest}>
+                  renderTrigger={({ open, ...rest }: any) => (
+                    <ActionStyled onClick={open} {...rest}>
                       Add card
                     </ActionStyled>
                   )}

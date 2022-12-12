@@ -100,13 +100,23 @@ const AddCard = ({ renderTrigger, isUpdate = false }: AddCardProps) => {
     }
   }, [])
 
+  useEffect(() => {
+    if (open) {
+      window.electronAPI.capture({
+        distinctId: session.user.id,
+        event: 'settings billing payment-method',
+        properties: { action: isUpdate ? 'update' : 'add' },
+      })
+    }
+  }, [open])
+
   //////////////////////////
   // 🚀 Return
   //////////////////////////
 
   return (
     <FloatingNode id={nodeId}>
-      {renderTrigger({ close: () => setOpen(true), ref: reference, ...getReferenceProps() })}
+      {renderTrigger({ open: () => setOpen(true), ref: reference, ...getReferenceProps() })}
       <FloatingPortal>
         {open && (
           <FloatingOverlay

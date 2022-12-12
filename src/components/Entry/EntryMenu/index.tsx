@@ -141,8 +141,18 @@ const EntryMenu = ({ renderTrigger, wordCount, date }: EntryMenuProps) => {
   const [lastModifiedAt, setLastModifiedAt] = useState('')
   const [dayNo, setDayNo] = useState(0)
   const { userEntries, deleteEntry } = useEntriesContext()
+  const { session } = useUserContext()
 
   const returnFocus = useRef<HTMLButtonElement>(null)
+
+  const deleteEntryHandler = (day: string) => {
+    deleteEntry(day)
+    window.electronAPI.capture({
+      distinctId: session.user.id,
+      event: 'entry entry-menu item',
+      properties: { action: 'delete-entry' },
+    })
+  }
 
   useEffect(() => {
     if (open) {
@@ -155,6 +165,10 @@ const EntryMenu = ({ renderTrigger, wordCount, date }: EntryMenuProps) => {
       if (isToday(date)) {
         setDayNo(userEntries.current.length)
       }
+      window.electronAPI.capture({
+        distinctId: session.user.id,
+        event: 'entry entry-menu open',
+      })
     }
   }, [open])
 
@@ -195,7 +209,7 @@ const EntryMenu = ({ renderTrigger, wordCount, date }: EntryMenuProps) => {
               onSelect={() => {
                 if (wordCount.current == 0) {
                   setTimeout(() => {
-                    deleteEntry(date)
+                    deleteEntryHandler(date)
                   }, 200)
                 } else {
                   setOpenModal(true)
@@ -208,7 +222,7 @@ const EntryMenu = ({ renderTrigger, wordCount, date }: EntryMenuProps) => {
           </>
         )}
       </DropdownStyled>
-      {openModal && <Modal action={() => deleteEntry(date)} setOpenModal={setOpenModal} />}
+      {openModal && <Modal action={() => deleteEntryHandler(date)} setOpenModal={setOpenModal} />}
     </DropdownMenu.Root>
   )
 }

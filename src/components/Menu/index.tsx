@@ -139,6 +139,15 @@ const Menu = () => {
     signOut()
   }
 
+  useEffect(() => {
+    if (open) {
+      window.electronAPI.capture({
+        distinctId: session.user.id,
+        event: 'menu open',
+      })
+    }
+  }, [open])
+
   return (
     <>
       <DropdownMenu.Root onOpenChange={(open) => setOpen(open)}>

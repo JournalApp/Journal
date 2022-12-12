@@ -162,6 +162,10 @@ const Prompts = ({ initialPromptsOpen, initialPromptSelectedId }: PromptsProps) 
     e.preventDefault()
     e.stopPropagation()
     setExpanded(!expanded)
+    window.electronAPI.capture({
+      distinctId: session.user.id,
+      event: 'prompts expand',
+    })
   }
 
   return (

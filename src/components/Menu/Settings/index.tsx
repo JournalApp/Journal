@@ -43,7 +43,7 @@ const SettingsDialog = ({ returnFocus }: SettingsDialogProps) => {
   const initialFocus = useRef<HTMLButtonElement>(null)
   const nodeId = useFloatingNodeId()
   const isOnline = useIsOnline()
-  const { subscription, invokeOpenSettings } = useUserContext()
+  const { session, subscription, invokeOpenSettings } = useUserContext()
 
   const { floating, context, refs } = useFloating({
     open,
@@ -82,6 +82,10 @@ const SettingsDialog = ({ returnFocus }: SettingsDialogProps) => {
         setTimeout(() => {
           initialFocus.current.focus()
         }, 100)
+        window.electronAPI.capture({
+          distinctId: session.user.id,
+          event: 'settings open',
+        })
       } else {
         setTimeout(() => {
           returnFocus.current.focus()

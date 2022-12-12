@@ -116,6 +116,26 @@ const Modal = ({
   //////////////////////////
 
   useEffect(() => {
+    if (messages) {
+      window.electronAPI.capture({
+        distinctId: session.user.id,
+        event: 'settings billing payment-method error',
+        properties: { action: isUpdate ? 'update' : 'add', message: messages },
+      })
+    }
+  }, [messages])
+
+  useEffect(() => {
+    if (success) {
+      window.electronAPI.capture({
+        distinctId: session.user.id,
+        event: 'settings billing payment-method success',
+        properties: { action: isUpdate ? 'update' : 'add' },
+      })
+    }
+  }, [success])
+
+  useEffect(() => {
     if (getValues('zip')) {
       trigger('zip')
     }

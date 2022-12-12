@@ -98,8 +98,8 @@ const Plan = ({ subscription, billingInfo, isLoading }: PlanProps) => {
             {subscription.cancel_at_period_end ? (
               <CancelOrResume
                 action='resume'
-                renderTrigger={({ close, ...rest }: any) => (
-                  <ActionStyled onClick={close} {...rest}>
+                renderTrigger={({ open, ...rest }: any) => (
+                  <ActionStyled onClick={open} {...rest}>
                     Resume plan
                   </ActionStyled>
                 )}
@@ -108,8 +108,8 @@ const Plan = ({ subscription, billingInfo, isLoading }: PlanProps) => {
               <>
                 {subscription.status == 'past_due' ? (
                   <CancelImmediately
-                    renderTrigger={({ close, ...rest }: any) => (
-                      <ActionStyled onClick={close} {...rest}>
+                    renderTrigger={({ open, ...rest }: any) => (
+                      <ActionStyled onClick={open} {...rest}>
                         Cancel plan
                       </ActionStyled>
                     )}
@@ -118,10 +118,10 @@ const Plan = ({ subscription, billingInfo, isLoading }: PlanProps) => {
                   <>
                     <ChangeCycle
                       prices={prices}
-                      renderTrigger={({ close, ...rest }: any) => (
+                      renderTrigger={({ open, ...rest }: any) => (
                         <ActionStyled
                           isHidden={subscription.prices.interval == 'year'}
-                          onClick={close}
+                          onClick={open}
                           {...rest}
                         >
                           Change to yearly (save {savings})
@@ -130,8 +130,8 @@ const Plan = ({ subscription, billingInfo, isLoading }: PlanProps) => {
                     />
                     <CancelOrResume
                       action='cancel'
-                      renderTrigger={({ close, ...rest }: any) => (
-                        <ActionStyled onClick={close} {...rest}>
+                      renderTrigger={({ open, ...rest }: any) => (
+                        <ActionStyled onClick={open} {...rest}>
                           Cancel plan
                         </ActionStyled>
                       )}

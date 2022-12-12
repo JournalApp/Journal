@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { theme } from 'themes'
 import { logger, supabase, stripeEpochToDate, isDev } from 'utils'
 import { SectionTitleStyled } from '../styled'
 import { useQuery } from '@tanstack/react-query'
 import { useUserContext } from 'context'
 import { getCustomer } from '../../../../context/UserContext/subscriptions'
-import type { PaymentMethodProps } from './types'
 import { PaymentMethod } from './PaymentMethod'
 import { Receipts } from './Receipts'
 import { Plan } from './Plan'
@@ -23,6 +21,14 @@ const BillingTabContent = () => {
     queryKey: ['billingInfo'],
     queryFn: async () => getCustomer(session.access_token),
   })
+
+  useEffect(() => {
+    window.electronAPI.capture({
+      distinctId: session.user.id,
+      event: 'settings view-tab',
+      properties: { tab: 'billing' },
+    })
+  }, [])
 
   useEffect(() => {
     logger(billingInfo)

@@ -3,7 +3,7 @@ import { theme } from 'themes'
 import { logger } from 'utils'
 import { SectionTitleStyled } from '../styled'
 import { serialize } from 'remark-slate'
-import { useEntriesContext } from 'context'
+import { useEntriesContext, useUserContext } from 'context'
 import type { Entry } from 'types'
 import { plateNodeTypes } from './nodeTypes'
 import styled from 'styled-components'
@@ -109,13 +109,32 @@ const exportJson = (entries: Entry[]) => {
 const ImportExportTabContent = () => {
   logger('ImportExport re-render')
   const { userEntries } = useEntriesContext()
+  const { session } = useUserContext()
+
+  useEffect(() => {
+    window.electronAPI.capture({
+      distinctId: session.user.id,
+      event: 'settings view-tab',
+      properties: { tab: 'export' },
+    })
+  }, [])
 
   const exportTxtHandler = () => {
     exportTxt(userEntries.current)
+    window.electronAPI.capture({
+      distinctId: session.user.id,
+      event: 'settings export-journal',
+      properties: { format: 'txt' },
+    })
   }
 
   const exportJsonHandler = () => {
     exportJson(userEntries.current)
+    window.electronAPI.capture({
+      distinctId: session.user.id,
+      event: 'settings export-journal',
+      properties: { format: 'json' },
+    })
   }
 
   return (

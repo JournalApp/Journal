@@ -259,7 +259,7 @@ const UsedEntries = () => {
 const Products = () => {
   const [billingInterval, setBillingInterval] = useState<'year' | 'month'>('year')
   const [stripePromise, setStripePromise] = useState<any | null>(null)
-  const { subscription } = useUserContext()
+  const { session, subscription } = useUserContext()
 
   useQuery({
     queryKey: ['stripePromise'],
@@ -357,6 +357,10 @@ const Products = () => {
                   checked={billingInterval == 'year'}
                   onCheckedChange={(checked) => {
                     checked ? setBillingInterval('year') : setBillingInterval('month')
+                    window.electronAPI.capture({
+                      distinctId: session.user.id,
+                      event: 'settings upgrade toggle-billing-interval',
+                    })
                   }}
                 >
                   <SwitchThumbStyled />
@@ -369,12 +373,12 @@ const Products = () => {
             <Subscribe
               billingInterval={billingInterval}
               prices={prices}
-              renderTrigger={({ close, ...rest }: any) =>
+              renderTrigger={({ open, ...rest }: any) =>
                 subscription == null ? (
                   <PrimaryButtonStyled
                     bgColor={'color.productWriter.main'}
                     textColor={'color.productWriter.popper'}
-                    onClick={close}
+                    onClick={open}
                     {...rest}
                   >
                     Upgrade

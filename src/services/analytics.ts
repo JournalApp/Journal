@@ -44,6 +44,7 @@ const capture = async ({ distinctId, event, properties, type }: EventMessage) =>
     }
   } else {
     logger(`capture ${event}${type ? ' of type ' + type : ''} (not capturing)`)
+    if (properties) logger(properties)
   }
 }
 

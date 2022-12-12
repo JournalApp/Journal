@@ -8,6 +8,8 @@ import { nanoid } from 'nanoid'
 import { logger, supabase, awaitTimeout } from 'utils'
 import Skeleton from 'react-loading-skeleton'
 import { useQuery } from '@tanstack/react-query'
+import { useUserContext } from 'context'
+import { onlyText } from 'react-children-utilities'
 
 const Chevron = styled(Icon)`
   transition: transform ${theme('animation.time.normal')};
@@ -102,23 +104,6 @@ const SkeletonContainer = styled.div`
   }
 `
 
-const components = {
-  h2: (props: any) => <H2 {...props} />,
-  Acc: (props: any) => <Accordion.Root type='multiple' {...props} />,
-  AccItem: (props: any) => <AccordionItem value={nanoid(5)} {...props} />,
-  AccTitle: ({ children, ...rest }: any) => (
-    <>
-      <AccordionHeader {...rest}>
-        <AccordionTrigger>
-          <TriggerLabel>{children}</TriggerLabel>
-          <Chevron name='Chevron' type='down' size={16} />
-        </AccordionTrigger>
-      </AccordionHeader>
-    </>
-  ),
-  AccContent: (props: any) => <AccordionContent {...props} />,
-}
-
 const fetchFeaturesAndFAQ = async () => {
   const { data, error } = await supabase
     .from('website_pages')
@@ -134,10 +119,36 @@ const fetchFeaturesAndFAQ = async () => {
 
 const Features = () => {
   logger('Features rerender')
+  const { session } = useUserContext()
   const { isLoading, isError, data, error } = useQuery({
     queryKey: ['features'],
     queryFn: fetchFeaturesAndFAQ,
   })
+
+  const captureAccordionClick = (feature: string) => {
+    window.electronAPI.capture({
+      distinctId: session.user.id,
+      event: 'settings upgrade feature-expand',
+      properties: { feature },
+    })
+  }
+
+  const components = {
+    h2: (props: any) => <H2 {...props} />,
+    Acc: (props: any) => <Accordion.Root type='multiple' {...props} />,
+    AccItem: (props: any) => <AccordionItem value={nanoid(5)} {...props} />,
+    AccTitle: ({ children, ...rest }: any) => (
+      <>
+        <AccordionHeader onClick={() => captureAccordionClick(onlyText(children))} {...rest}>
+          <AccordionTrigger>
+            <TriggerLabel>{children}</TriggerLabel>
+            <Chevron name='Chevron' type='down' size={16} />
+          </AccordionTrigger>
+        </AccordionHeader>
+      </>
+    ),
+    AccContent: (props: any) => <AccordionContent {...props} />,
+  }
 
   if (isLoading) {
     return (

@@ -4,11 +4,20 @@ import { UpgradeButtonStyled, LimitReachedTextStyled, LimitReachedWrapperStyled 
 
 const LimitReached = () => {
   const { invokeOpenSettings } = useUserContext()
+  const { session } = useUserContext()
+
+  const onClickHandler = () => {
+    invokeOpenSettings.current(true)
+    window.electronAPI.capture({
+      distinctId: session.user.id,
+      event: 'entry upgrade-cta',
+    })
+  }
 
   return (
     <LimitReachedWrapperStyled>
       <LimitReachedTextStyled>Free plan limit reached...</LimitReachedTextStyled>
-      <UpgradeButtonStyled onClick={invokeOpenSettings.current}>Upgrade</UpgradeButtonStyled>
+      <UpgradeButtonStyled onClick={onClickHandler}>Upgrade</UpgradeButtonStyled>
     </LimitReachedWrapperStyled>
   )
 }

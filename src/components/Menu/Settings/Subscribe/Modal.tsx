@@ -159,6 +159,25 @@ const Modal = ({
   //////////////////////////
 
   useEffect(() => {
+    if (messages) {
+      window.electronAPI.capture({
+        distinctId: session.user.id,
+        event: 'settings upgrade-form error',
+        properties: { message: messages },
+      })
+    }
+  }, [messages])
+
+  useEffect(() => {
+    if (success) {
+      window.electronAPI.capture({
+        distinctId: session.user.id,
+        event: 'settings upgrade-form success',
+      })
+    }
+  }, [success])
+
+  useEffect(() => {
     setValue(
       'billingInterval',
       billingIntervalOptions.find((price) => price.value == billingInterval)

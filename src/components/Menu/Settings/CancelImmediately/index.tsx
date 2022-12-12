@@ -140,9 +140,18 @@ const CancelImmediately = ({ renderTrigger }: CancelImmediatelyProps) => {
     }
   }
 
+  const setOpenHandler = () => {
+    setOpen(true)
+    window.electronAPI.capture({
+      distinctId: session.user.id,
+      event: 'settings billing plan',
+      properties: { action: 'cancel-immediately' },
+    })
+  }
+
   return (
     <FloatingNode id={nodeId}>
-      {renderTrigger({ close: () => setOpen(false), ref: reference, ...getReferenceProps() })}
+      {renderTrigger({ open: () => setOpenHandler(), ref: reference, ...getReferenceProps() })}
       <FloatingPortal>
         {open && (
           <FloatingOverlay
