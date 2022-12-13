@@ -125,11 +125,11 @@ const Features = () => {
     queryFn: fetchFeaturesAndFAQ,
   })
 
-  const captureAccordionClick = (feature: string) => {
+  const captureAccordionClick = (item: string) => {
     window.electronAPI.capture({
       distinctId: session.user.id,
       event: 'settings upgrade feature-expand',
-      properties: { feature },
+      properties: { item },
     })
   }
 
