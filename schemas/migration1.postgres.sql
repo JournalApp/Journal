@@ -152,11 +152,12 @@ from
 -- /////////////////////////////
 -- no need for this table
 drop table if exists
-  profiles
-  /** 
-   * USERS
-   * Note: This table contains user data. Users should only be able to view and update their own data.
-   */
+  profiles;
+
+/** 
+ * USERS
+ * Note: This table contains user data. Users should only be able to view and update their own data.
+ */
 create table
   users (
     -- UUID from auth.users

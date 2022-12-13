@@ -90,8 +90,10 @@ const Prompts = ({ initialPromptsOpen, initialPromptSelectedId }: PromptsProps) 
   })
 
   useEffect(() => {
-    if (!prompts.some((prompt) => prompt.id == selectedId)) {
-      setSelectedId(1)
+    if (prompts && Array.isArray(prompts)) {
+      if (!prompts.some((prompt) => prompt.id == selectedId)) {
+        setSelectedId(1)
+      }
     }
   }, [prompts])
 
