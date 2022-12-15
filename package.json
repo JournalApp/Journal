@@ -1,7 +1,7 @@
 {
   "name": "journal",
   "productName": "Journal",
-  "version": "1.0.0-beta.6",
+  "version": "1.0.0",
   "description": "Beautiful journal app",
   "main": ".webpack/main",
   "scripts": {
@@ -27,14 +27,14 @@
             ]
           }
         ],
-        "_osxSign": {
+        "osxSign": {
           "identity": "Developer ID Application: Jarek Ceborski (74KJSS44RR)",
           "hardened-runtime": true,
           "entitlements": "entitlements.plist",
           "entitlements-inherit": "entitlements.plist",
           "signature-flags": "library"
         },
-        "_osxNotarize": {
+        "osxNotarize": {
           "appleId": "support@journal.do",
           "appleIdPassword": "bnfe-dcsa-ewhr-vemk"
         }

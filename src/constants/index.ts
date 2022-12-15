@@ -1,3 +1,5 @@
-export const productWriterId = 'prod_MaCerQCQryctSx'
+import { isDev } from '../utils'
+
+export const productWriterId = isDev() ? 'prod_MaCerQCQryctSx' : 'prod_Mz9pjbqvffW1in'
 export const entriesLimit = 30
-export const betaEndDate = '2021-10-05' // TODO update to actual date
+export const betaEndDate = isDev() ? '2021-10-05' : '2022-12-15'

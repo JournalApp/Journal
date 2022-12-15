@@ -61,14 +61,16 @@ const PaymentMethod = ({ billingInfo, isLoading, showCardOnly = false }: Payment
             <Skeleton />
           ) : card ? (
             <ActionsStyled>
-              <AddCard
-                isUpdate={true}
-                renderTrigger={({ open, ...rest }: any) => (
-                  <ActionStyled onClick={open} {...rest}>
-                    Update
-                  </ActionStyled>
-                )}
-              />
+              <Elements stripe={stripePromise}>
+                <AddCard
+                  isUpdate={true}
+                  renderTrigger={({ open, ...rest }: any) => (
+                    <ActionStyled onClick={open} {...rest}>
+                      Update
+                    </ActionStyled>
+                  )}
+                />
+              </Elements>
             </ActionsStyled>
           ) : (
             <ActionsStyled>

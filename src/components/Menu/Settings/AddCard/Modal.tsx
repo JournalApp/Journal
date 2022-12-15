@@ -301,7 +301,7 @@ const Modal = ({
                     defaultValue={
                       billingInfo && countries
                         ? countries.find(
-                            (country) => country.value == billingInfo.customer.address.country
+                            (country) => country.value == billingInfo?.customer?.address?.country
                           )
                         : ''
                     }
