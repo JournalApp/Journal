@@ -1,5 +1,5 @@
 -- Create a table for journals_catalog
-create table
+create table if not exists
   journals_catalog (
     user_id text,
     journal_id int default 0,
@@ -20,21 +20,17 @@ from
   users
 where
   true on conflict (user_id, journal_id)
-do
-  nothing;
+do nothing;
 
 -- update table journals to enable multiple journals per user
 -- In SQLite, you can not use the ALTER TABLE statement to drop a primary key.
 -- Instead, you must create a new table with the primary key removed and copy the data into this new table.
 pragma foreign_keys = off;
 
-begin
-  transaction;
+begin transaction;
 
-alter table
-  journals
-rename to
-  old_journals;
+alter table journals
+rename to old_journals;
 
 create table
   journals (
@@ -67,7 +63,7 @@ commit;
 pragma foreign_keys = on;
 
 -- Create a table for Tags
-create table
+create table if not exists
   tags (
     user_id text,
     journal_id int default 0,
@@ -83,7 +79,7 @@ create table
   );
 
 -- Create a table for Public Journal Tags
-create table
+create table if not exists
   entries_tags (
     user_id text,
     day date,
@@ -100,7 +96,5 @@ create table
   );
 
 -- Add subscription column to cache it
-alter table
-  users
-add
-  subscription text;
+alter table users
+add subscription text;

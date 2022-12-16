@@ -53,6 +53,9 @@ const schemaVersions = {
   '1.0.0-beta.4': 1,
   '1.0.0-beta.5': 1,
   '1.0.0-beta.6': 2,
+  '1.0.0': 2,
+  '1.0.1': 2,
+  '1.0.2': 2,
 }
 
 const runMigrations = () => {
@@ -93,6 +96,16 @@ const runMigrations = () => {
 // Triggers
 //////////////////////////
 
+const initRemoveTriggers = () => {
+  const db = getDB()
+  db.prepare('DROP TRIGGER IF EXISTS entry_updated;').run()
+  db.prepare('DROP TRIGGER IF EXISTS entry_inserted;').run()
+  db.prepare('DROP TRIGGER IF EXISTS tag_updated;').run()
+  db.prepare('DROP TRIGGER IF EXISTS tag_inserted;').run()
+  db.prepare('DROP TRIGGER IF EXISTS entry_tag_inserted;').run()
+  db.prepare('DROP TRIGGER IF EXISTS entry_tag_updated;').run()
+}
+
 const addTriggers = () => {
   const db = getDB()
 
@@ -101,13 +114,11 @@ const addTriggers = () => {
     sqliteEvents.emit('sqlite-entry-event')
   })
   // Entry updated
-  db.prepare('DROP TRIGGER IF EXISTS entry_updated;').run()
   db.prepare(
     "CREATE TRIGGER entry_updated AFTER UPDATE ON journals WHEN NEW.sync_status = 'pending_update' or NEW.sync_status = 'pending_delete' BEGIN SELECT emitEntryEvent(); END"
   ).run()
 
   // Entry inserted
-  db.prepare('DROP TRIGGER IF EXISTS entry_inserted;').run()
   db.prepare(
     "CREATE TRIGGER entry_inserted AFTER INSERT ON journals WHEN NEW.sync_status = 'pending_insert' BEGIN SELECT emitEntryEvent(); END"
   ).run()
@@ -118,25 +129,21 @@ const addTriggers = () => {
   })
 
   // Tag updated
-  db.prepare('DROP TRIGGER IF EXISTS tag_updated;').run()
   db.prepare(
     "CREATE TRIGGER tag_updated AFTER UPDATE ON tags WHEN NEW.sync_status = 'pending_update' or NEW.sync_status = 'pending_delete' BEGIN SELECT emitTagEvent(); END"
   ).run()
 
   // Tag inserted
-  db.prepare('DROP TRIGGER IF EXISTS tag_inserted;').run()
   db.prepare(
     "CREATE TRIGGER tag_inserted AFTER INSERT ON tags WHEN NEW.sync_status = 'pending_insert' BEGIN SELECT emitTagEvent(); END"
   ).run()
 
   // Entry tag inserted
-  db.prepare('DROP TRIGGER IF EXISTS entry_tag_inserted;').run()
   db.prepare(
     "CREATE TRIGGER entry_tag_inserted AFTER INSERT ON entries_tags WHEN NEW.sync_status = 'pending_insert' BEGIN SELECT emitTagEvent(); END"
   ).run()
 
   // Entry tag updated
-  db.prepare('DROP TRIGGER IF EXISTS entry_tag_updated;').run()
   db.prepare(
     "CREATE TRIGGER entry_tag_updated AFTER UPDATE ON entries_tags WHEN NEW.sync_status = 'pending_update' or NEW.sync_status = 'pending_delete' BEGIN SELECT emitTagEvent(); END"
   ).run()
@@ -147,8 +154,16 @@ const addTriggers = () => {
 //////////////////////////
 
 try {
+  logger('🏓 getDB')
   getDB()
+
+  logger('🏓 initRemoveTriggers')
+  initRemoveTriggers()
+
+  logger('🏓 runMigrations')
   runMigrations()
+
+  logger('🏓 addTriggers')
   addTriggers()
 } catch (error) {
   logger(error)
