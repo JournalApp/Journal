@@ -8,6 +8,7 @@ import { createPluginFactory, useOnClickOutside, deselectEditor } from '@udecode
 import { select, deselect, getNodeString } from '@udecode/plate'
 import {
   focusEditor,
+  isEditorFocused,
   usePlateEditorRef,
   getPlateActions,
   withPlate,
@@ -357,21 +358,28 @@ const EntryItem = ({ entryDay, cachedEntry, entriesObserver }: EntryBlockProps) 
 
   const rerenderEntry = () => {
     logger(`rerenderEntry on ${entryDay}`)
-    const entry = userEntries.current.find((e) => e.day == entryDay) as any
-    if (entry) {
-      const newEditor = withPlate(createTEditor(), { id, plugins })
-      getPlateActions(id).value(entry.content)
-      getPlateActions(id).editor(newEditor)
-      editorsRef.current[entryDay] = newEditor
+    if (editorsRef.current[entryDay]) {
+      const isFocused = isEditorFocused(editorsRef.current[entryDay])
+      const entry = userEntries.current.find((e) => e.day == entryDay) as any
+      if (entry) {
+        setInitialValue(entry.content)
+        const newEditor = withPlate(createTEditor(), { id, plugins })
+        getPlateActions(id).value(entry.content)
+        getPlateActions(id).editor(newEditor)
+        editorsRef.current[entryDay] = newEditor
+        if (isFocused) {
+          setShouldFocus(true)
+        }
 
-      // Word count
-      const previousWordCount = wordCount.current
-      const currentWordCount = countEntryWords(entry.content)
-      if (!!previousWordCount != !!currentWordCount) {
-        logger('Changed to has content or to has no content')
-        rerenderCalendar()
+        // Word count
+        const previousWordCount = wordCount.current
+        const currentWordCount = countEntryWords(entry.content)
+        if (!!previousWordCount != !!currentWordCount) {
+          logger('Changed to has content or to has no content')
+          rerenderCalendar()
+        }
+        wordCount.current = currentWordCount
       }
-      wordCount.current = currentWordCount
     }
   }
 

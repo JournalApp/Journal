@@ -339,6 +339,7 @@ const syncEntries = async ({
 }: syncEntriesProps) => {
   logger('🗓 🗓 🗓 syncEntries starts')
   try {
+    let today = dayjs().format('YYYY-MM-DD') as Day
     const secretKey = await getSecretKey()
     // init things to update at the end of sync
     let daysHaveChanged = false
@@ -477,6 +478,7 @@ const syncEntries = async ({
     if (daysHaveChanged) {
       logger(`Invoking rerender bacuse days have changed`)
       await rerenderEntriesAndCalendar()
+      rerenderEntry(today)
     }
 
     // Force sync Tags and EntryTags

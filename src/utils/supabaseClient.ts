@@ -19,8 +19,8 @@ const supabaseEnv = {
   },
 }
 
-const { supabaseUrl } = supabaseEnv[isDev() ? 'stg' : 'prod']
-const { supabaseAnonKey } = supabaseEnv[isDev() ? 'stg' : 'prod']
+const { supabaseUrl } = supabaseEnv[isDev() ? 'local' : 'prod']
+const { supabaseAnonKey } = supabaseEnv[isDev() ? 'local' : 'prod']
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
