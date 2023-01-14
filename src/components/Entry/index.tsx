@@ -235,7 +235,7 @@ const EntryItem = ({ entryDay, cachedEntry, entriesObserver }: EntryBlockProps) 
     clearTimeout(saveDebounceTimer.current)
     saveDebounceTimer.current = setTimeout(() => {
       saveEntry(entryDay, debugValue.current)
-    }, 3000)
+    }, 1000)
   }
 
   const editableProps = {

@@ -187,19 +187,6 @@ const RangeVisible = styled.div`
   opacity: 0.3;
 `
 
-const Remove = styled((props) => <Icon {...props} />)`
-  position: relative;
-  top: -27px;
-  -webkit-app-region: no-drag;
-  cursor: pointer;
-  right: -24px;
-  opacity: 0.5;
-  transition: opacity ${theme('animation.time.normal')};
-  &:hover {
-    opacity: 0.8;
-  }
-`
-
 const withLeadingZero = (num: number) => {
   return (num < 10 ? '0' : '') + num
 }
@@ -209,9 +196,7 @@ const Calendar = () => {
   const {
     cacheAddOrUpdateEntry,
     rerenderEntriesAndCalendar,
-    deleteEntry,
     editorsRef,
-    invokeForceSaveEntry,
     invokeRerenderCalendar,
     userEntries,
   } = useEntriesContext()
@@ -233,14 +218,6 @@ const Calendar = () => {
     }) as Day[]
     setDaysInternal([...new Set([...daysInCache, today])].sort())
     setDaysWithNoContent([...daysWithNoContent])
-  }
-
-  const deleteEntryHandler = (day: string) => {
-    deleteEntry(day)
-    window.electronAPI.capture({
-      distinctId: session.user.id,
-      event: 'calendar delete-entry',
-    })
   }
 
   //////////////////////////
@@ -398,15 +375,6 @@ const Calendar = () => {
                               >
                                 <DayLabel>{day}</DayLabel>
                               </DayButton>
-                              {daysWithNoContent.some((el) => el == today) &&
-                                !isToday(year, month, day) &&
-                                hasEntry(today) && (
-                                  <Remove
-                                    name='Cross'
-                                    size={16}
-                                    onClick={() => deleteEntryHandler(today)}
-                                  />
-                                )}
                             </Day>
                           )
                         )

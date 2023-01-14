@@ -156,7 +156,9 @@ const syncPendingUpdateEntries = async ({
             if (dayjs(entryOnServer[0].created_at).isSame(entry.created_at)) {
               logger('Entry created_at are the same')
               if (entryOnServer[0].revision != entry.revision) {
-                logger('Entry revision mismatch -> reverting to supabase version')
+                logger(
+                  `Entry revision mismatch -> reverting to supabase version (supabase: ${entryOnServer[0].revision}, sqlite:${entry.revision})`
+                )
                 const { contentDecrypted } = await decryptEntry(
                   entryOnServer[0].content,
                   entryOnServer[0].iv,

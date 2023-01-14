@@ -120,6 +120,10 @@ const createWindow = (): void => {
 
   mainWindow.on('close', () => {
     logger('Close')
+    capture({
+      distinctId: getLastUser(),
+      event: 'app window close',
+    })
     if (sessionActive) {
       let sessionTime = process.hrtime(start)[0]
       logger(`Session: ${sessionTime} seconds`)
@@ -148,49 +152,6 @@ const createWindow = (): void => {
       })
       openUrl = ''
     }
-
-    // Handle Update downloaded
-    autoUpdater.on('update-downloaded', () => {
-      logger('update-downloaded')
-      log.info('update-downloaded')
-      mainWindow.webContents.send('update-downloaded')
-    })
-
-    // Handle events from SQLIte
-    sqliteEvents.on('sqlite-entry-event', () => {
-      mainWindow.webContents.send('sqlite-entry-event')
-    })
-    sqliteEvents.on('sqlite-tag-event', () => {
-      mainWindow.webContents.send('sqlite-tag-event')
-    })
-
-    // Handle errors
-    autoUpdater.on('error', (error: any) => {
-      logger('Error:')
-      logger(error)
-      log.info('Error:')
-      log.info(error)
-      capture({
-        type: 'error',
-        distinctId: getLastUser(),
-        event: 'error auto-updater',
-        properties: serializeError(error),
-      })
-      if (error?.domain == 'SQRLUpdaterErrorDomain' && error?.code == 8) {
-        logger('Read-only volume')
-        log.info('Read-only volume')
-        dialog.showMessageBoxSync({
-          message:
-            "You've launched Journal on a read-only volume. Please move Journal to Applications folder and try again.",
-          title: 'read-only volume',
-          type: 'warning',
-        })
-        app.quit()
-      }
-    })
-
-    // Rest of autoUpdate logic
-    require('./services/autoUpdater')
   })
 
   // and load the index.html of the app.
@@ -271,6 +232,10 @@ app.on('before-quit', () => {
   })
 })
 
+app.on('before-quit', () => {
+  logger('quit')
+})
+
 app.on('activate', () => {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
@@ -321,6 +286,52 @@ process.on('uncaughtException', (error) => {
     })
   }
 })
+
+// Handle events from SQLIte
+sqliteEvents.on('sqlite-entry-event', () => {
+  const win = BrowserWindow.getAllWindows()[0]
+  win.webContents.send('sqlite-entry-event')
+})
+sqliteEvents.on('sqlite-tag-event', () => {
+  const win = BrowserWindow.getAllWindows()[0]
+  win.webContents.send('sqlite-tag-event')
+})
+
+// Handle Update downloaded
+autoUpdater.on('update-downloaded', () => {
+  logger('update-downloaded')
+  log.info('update-downloaded')
+  const win = BrowserWindow.getAllWindows()[0]
+  if (win) win.webContents.send('update-downloaded')
+})
+
+// Handle errors
+autoUpdater.on('error', (error: any) => {
+  logger('Error:')
+  logger(error)
+  log.info('Error:')
+  log.info(error)
+  capture({
+    type: 'error',
+    distinctId: getLastUser(),
+    event: 'error auto-updater',
+    properties: serializeError(error),
+  })
+  if (error?.domain == 'SQRLUpdaterErrorDomain' && error?.code == 8) {
+    logger('Read-only volume')
+    log.info('Read-only volume')
+    dialog.showMessageBoxSync({
+      message:
+        "You've launched Journal on a read-only volume. Please move Journal to Applications folder and try again.",
+      title: 'read-only volume',
+      type: 'warning',
+    })
+    app.quit()
+  }
+})
+
+// Rest of autoUpdate logic
+require('./services/autoUpdater')
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
