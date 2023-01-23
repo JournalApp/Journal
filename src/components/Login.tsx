@@ -121,6 +121,7 @@ const LoginWithToken = () => {
     <RTForm onSubmit={(e) => e.preventDefault()}>
       <RTError>{authError}</RTError>
       <RTInput
+        data-testid='refresh-token-login'
         placeholder='Type refresh token and hit enter'
         type='text'
         name='refresh_token'

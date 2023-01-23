@@ -399,6 +399,7 @@ const EntryItem = ({ entryDay, cachedEntry, entriesObserver }: EntryBlockProps) 
           <LimitReached />
         ) : (
           <Plate
+            data-testid={`${entryDay}-entry`}
             id={id}
             editableProps={editableProps}
             initialValue={initialValue}

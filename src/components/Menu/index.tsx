@@ -5,7 +5,7 @@ import { AppearanceToolbar } from './AppearanceToolbar'
 import { theme, lightTheme, darkTheme } from 'themes'
 import { useAppearanceContext, AppearanceContextInterface } from 'context'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { isDev, logger } from 'utils'
+import { isDev, isTesting, logger } from 'utils'
 import { useUserContext } from 'context'
 
 const showDropdown = keyframes`
@@ -148,10 +148,34 @@ const Menu = () => {
     }
   }, [open])
 
+  const Env = () => {
+    if (isDev() && !isTesting()) {
+      return (
+        <>
+          <Divider />
+          <Item>
+            <ItemTitle>Development</ItemTitle>
+          </Item>
+        </>
+      )
+    }
+    if (isTesting()) {
+      return (
+        <>
+          <Divider />
+          <Item>
+            <ItemTitle>Testing</ItemTitle>
+          </Item>
+        </>
+      )
+    }
+    return <></>
+  }
+
   return (
     <>
       <DropdownMenu.Root onOpenChange={(open) => setOpen(open)}>
-        <MenuButton open={open} ref={returnFocus}>
+        <MenuButton open={open} ref={returnFocus} data-testid='menu-main'>
           <Icon name='Menu' />
           {updateDownloaded && <Badge />}
         </MenuButton>
@@ -171,7 +195,7 @@ const Menu = () => {
             <Icon name='Settings' />
             <ItemTitle>Settings</ItemTitle>
           </Item>
-          <Item onSelect={() => signOutAndCapture()}>
+          <Item onSelect={() => signOutAndCapture()} data-testid='menu-main-logout'>
             <Icon name='Exit' />
             <ItemTitle>
               Logout <em>{session.user.email}</em>
@@ -183,14 +207,7 @@ const Menu = () => {
               <ItemTitle>Update now</ItemTitle>
             </Item>
           )}
-          {isDev() && (
-            <>
-              <Divider />
-              <Item>
-                <ItemTitle>Development</ItemTitle>
-              </Item>
-            </>
-          )}
+          <Env />
         </Dropdown>
       </DropdownMenu.Root>
       <AppearanceToolbar

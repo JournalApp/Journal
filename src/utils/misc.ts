@@ -1,6 +1,19 @@
 import type { PostgrestError } from '@supabase/supabase-js'
 import { getNodeString } from '@udecode/plate'
 
+function isRenderer() {
+  // running in a web browser
+  if (typeof process === 'undefined') return true
+
+  // node-integration is disabled
+  if (!process) return true
+
+  // We're in node.js somehow
+  if (!process.type) return false
+
+  return process.type === 'renderer'
+}
+
 function shallowEqual(object1: any, object2: any) {
   const keys1 = Object.keys(object1)
   const keys2 = Object.keys(object2)
@@ -87,7 +100,15 @@ function ordinal(n: number) {
 }
 
 function isDev() {
-  return process.env.NODE_ENV == 'development'
+  return process.env.NODE_ENV == 'development' || isTesting()
+}
+
+function isTesting() {
+  if (isRenderer()) {
+    return window.electronAPI.isTesting()
+  } else {
+    return process.argv.includes('testing')
+  }
 }
 
 function isUnauthorized(error: PostgrestError) {
@@ -152,6 +173,7 @@ export {
   alphaToHex,
   ordinal,
   isDev,
+  isTesting,
   isUnauthorized,
   isUniqueViolation,
   isForeignKeyViolation,

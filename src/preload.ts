@@ -8,6 +8,7 @@ const electronAPI = {
   onCopy: (callback: any) => ipcRenderer.on('copy', callback),
   onUpdateDownloaded: (callback: any) => ipcRenderer.on('update-downloaded', callback),
   onEntryPending: (callback: any) => ipcRenderer.on('sqlite-entry-event', callback),
+  onTestSetDate: (callback: any) => ipcRenderer.on('test-set-date', callback),
   onTagPending: (callback: any) => ipcRenderer.on('sqlite-tag-event', callback),
   async capture({ distinctId, event, properties, type }: EventMessage) {
     await ipcRenderer.invoke('analytics-capture', { distinctId, event, properties, type })
@@ -176,6 +177,9 @@ const electronAPI = {
   },
   quitAndInstall() {
     ipcRenderer.send('electron-quit-and-install')
+  },
+  isTesting() {
+    return ipcRenderer.sendSync('is-testing') as boolean
   },
 }
 

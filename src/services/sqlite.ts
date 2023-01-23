@@ -7,7 +7,7 @@ import schema_2 from '../sql/schema.2.sqlite.sql'
 import migration_0to1 from '../sql/migration.0-to-1.sql'
 import migration_1to2 from '../sql/migration.1-to-2.sql'
 import { betaEndDate } from '../constants'
-import { logger, isDev } from '../utils'
+import { logger, isDev, isTesting } from '../utils'
 import type { Day, Entry, Tag, EntryTag, EntryTagProperty, Subscription } from 'types'
 import { EventEmitter } from 'events'
 const sqliteEvents = new EventEmitter()
@@ -16,7 +16,7 @@ var database: BetterSqlite3.Database
 
 const getDB = () => {
   if (!database) {
-    const dbName = isDev() ? 'cache-dev.db' : 'cache.db'
+    const dbName = isTesting() ? 'cache-test.db' : isDev() ? 'cache-dev.db' : 'cache.db'
     const dbPath = app.getPath('userData') + '/' + dbName
     try {
       database = new Database(dbPath, { fileMustExist: true })

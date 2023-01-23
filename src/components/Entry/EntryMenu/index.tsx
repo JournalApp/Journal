@@ -174,7 +174,7 @@ const EntryMenu = ({ renderTrigger, wordCount, date }: EntryMenuProps) => {
 
   return (
     <DropdownMenu.Root onOpenChange={(open) => setOpen(open)}>
-      <MenuButtonStyled open={open} ref={returnFocus}>
+      <MenuButtonStyled open={open} ref={returnFocus} data-testid={`menu-day-${date}`}>
         {renderTrigger()}
       </MenuButtonStyled>
       <DropdownStyled
@@ -206,6 +206,7 @@ const EntryMenu = ({ renderTrigger, wordCount, date }: EntryMenuProps) => {
           <>
             <Divider />
             <ItemStyled
+              data-testid={`menu-day-${date}-remove`}
               onSelect={() => {
                 if (wordCount.current == 0) {
                   setTimeout(() => {

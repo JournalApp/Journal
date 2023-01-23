@@ -31,6 +31,25 @@ import { serializeError } from 'serialize-error'
 import { isDev } from 'utils'
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query'
 
+window.electronAPI.onTestSetDate((event: any, message: number) => {
+  // @ts-ignore Extend Date constructor to default to fakeNow
+  Date = class extends Date {
+    // @ts-ignore
+    constructor(...args) {
+      if (args.length === 0) {
+        super(message)
+      } else {
+        // @ts-ignore
+        super(...args)
+      }
+    }
+  }
+  // Override Date.now() to start from fakeNow
+  const __DateNowOffset = message - Date.now()
+  const __DateNow = Date.now
+  Date.now = () => __DateNow() + __DateNowOffset
+})
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

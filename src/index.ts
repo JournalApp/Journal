@@ -5,7 +5,7 @@ import log from 'electron-log'
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer'
 import { getLastUser, getAppBounds, setAppBounds, sqliteEvents } from './services/sqlite'
 import { capture } from './services/analytics'
-import { isDev, logger } from './utils'
+import { isDev, isTesting, logger } from './utils'
 import { serializeError, deserializeError } from 'serialize-error'
 import type { Tag, EntryTag } from 'types'
 
@@ -158,7 +158,7 @@ const createWindow = (): void => {
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY)
 
   // Open the DevTools.
-  if (isDev()) {
+  if (isDev() && !isTesting()) {
     mainWindow.webContents.openDevTools()
     installExtension(REACT_DEVELOPER_TOOLS)
       .then((name) => console.log(`Added Extension:  ${name}`))
@@ -219,9 +219,7 @@ app.on('ready', createWindow)
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
+  app.quit()
 })
 
 app.on('before-quit', () => {
@@ -286,6 +284,36 @@ process.on('uncaughtException', (error) => {
     })
   }
 })
+
+ipcMain.on('is-testing', function (event) {
+  event.returnValue = process.argv.includes('testing')
+})
+
+// Time simulation in testing only
+if (process.argv.includes('testing')) {
+  ipcMain.on('test-set-date', function (date) {
+    const win = BrowserWindow.getAllWindows()[0]
+    win.webContents.send('test-set-date', date)
+
+    // @ts-ignore Extend Date constructor to default to fakeNow
+    Date = class extends Date {
+      // @ts-ignore
+      constructor(...args) {
+        if (args.length === 0) {
+          // @ts-ignore
+          super(date)
+        } else {
+          // @ts-ignore
+          super(...args)
+        }
+      }
+    }
+    // @ts-ignore Override Date.now() to start from fakeNow
+    const __DateNowOffset = date - Date.now()
+    const __DateNow = Date.now
+    Date.now = () => __DateNow() + __DateNowOffset
+  })
+}
 
 // Handle events from SQLIte
 sqliteEvents.on('sqlite-entry-event', () => {

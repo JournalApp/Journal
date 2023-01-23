@@ -30,7 +30,7 @@ const TrafficLightMenu = () => {
   return (
     <Container>
       <Icon name='TrafficLightOutline' />
-      <ToggleButton onClick={() => toggleIsCalendarOpen()}>
+      <ToggleButton data-testid='calendar-toggle' onClick={() => toggleIsCalendarOpen()}>
         <Icon name='TrafficLightCalendar' type={isCalendarOpen == 'opened' ? 'on' : 'off'} />
       </ToggleButton>
     </Container>
