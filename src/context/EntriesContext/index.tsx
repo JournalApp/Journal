@@ -2,10 +2,10 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import dayjs from 'dayjs'
 import { useUserContext } from 'context'
 import { electronAPIType } from '../../preload'
-import { defaultContent } from 'config'
-import { supabase, isUnauthorized, logger, isArrayEmpty } from 'utils'
+import { supabase, logger } from 'utils'
 import { PlateEditor } from '@udecode/plate'
 import type { Day, Entry, Tag, EntryTag } from 'types'
+import type { RealtimeSubscription } from '@supabase/supabase-js'
 import {
   syncEntries,
   cacheAddOrUpdateEntry,
@@ -20,6 +20,7 @@ import {
   cacheUpdateEntryTagProperty,
   syncTags,
 } from './tags'
+import { initRealtimeEntries, initRealtimeTags, initRealtimeEntryTags } from './realtime'
 
 interface EntriesContextInterface {
   userEntries: React.MutableRefObject<Entry[]>
@@ -72,6 +73,11 @@ export function EntriesProvider({ children }: any) {
   // EntryTags
   const userEntryTags = useRef<EntryTag[]>([])
   const initialEntryTagsFetchDone = useRef(false)
+
+  // Realtime
+  const realtimeEntriesSub = useRef<RealtimeSubscription | null>(null)
+  const realtimeTagsSub = useRef<RealtimeSubscription | null>(null)
+  const realtimeEntryTagsSub = useRef<RealtimeSubscription | null>(null)
 
   logger('EntriesContext render')
 
@@ -247,6 +253,61 @@ export function EntriesProvider({ children }: any) {
     // Set handeler for SQLite trigger
     window.electronAPI.onTagPending(onTagPending)
 
+    // Realtime Entries
+    function syncEntriesRealtime() {
+      initialEntriesFetchDone.current = false
+      syncEntries(syncEntriesArgs)
+    }
+
+    initRealtimeEntries({
+      userEntries,
+      realtimeEntriesSub,
+      user_id: session.user.id,
+      onUpdate: syncEntriesRealtime,
+    })
+
+    // Realtime Tags
+    function syncTagsRealtime() {
+      initialTagsFetchDone.current = false
+      syncTags(syncTagsArgs)
+    }
+
+    initRealtimeTags({
+      userTags,
+      realtimeTagsSub,
+      user_id: session.user.id,
+      onUpdate: syncTagsRealtime,
+    })
+
+    // Realtime Entry Tags
+    function syncEntryTagsRealtime() {
+      initialEntryTagsFetchDone.current = false
+      syncTags(syncTagsArgs)
+    }
+
+    initRealtimeEntryTags({
+      userEntryTags,
+      realtimeEntryTagsSub,
+      user_id: session.user.id,
+      onUpdate: syncEntryTagsRealtime,
+    })
+
+    // Sync all TO and FROM
+    function syncAll() {
+      logger('syncAll')
+      initialEntriesFetchDone.current = false
+      initialTagsFetchDone.current = false
+      initialEntryTagsFetchDone.current = false
+      syncTags(syncTagsArgs)
+      syncEntries(syncEntriesArgs)
+    }
+
+    // Sync all when back online
+    window.addEventListener('online', syncAll)
+
+    // Sync all after waking from sleep
+    window.electronAPI.onPowerMonitorResume(syncAll)
+
     return () => {
       clearInterval(hasNewDayCome)
       if (syncEntriesInterval.current) {
@@ -257,6 +318,9 @@ export function EntriesProvider({ children }: any) {
         clearInterval(syncTagsInterval.current)
         syncTagsInterval.current = null
       }
+      // Realtime unsubscribe
+      supabase.removeAllSubscriptions()
+      window.removeEventListener('online', syncAll)
     }
   }, [])
 

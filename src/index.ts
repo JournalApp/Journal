@@ -1,4 +1,13 @@
-import { app, BrowserWindow, autoUpdater, ipcMain, shell, dialog } from 'electron'
+import {
+  app,
+  net,
+  BrowserWindow,
+  autoUpdater,
+  ipcMain,
+  shell,
+  dialog,
+  powerMonitor,
+} from 'electron'
 import path from 'path'
 import url from 'url'
 import log from 'electron-log'
@@ -289,6 +298,14 @@ ipcMain.on('is-testing', function (event) {
   event.returnValue = process.argv.includes('testing')
 })
 
+ipcMain.on('power-monitor-idle-state', function (event) {
+  event.returnValue = powerMonitor.getSystemIdleState(100)
+})
+
+ipcMain.on('net-is-online', function (event) {
+  event.returnValue = net.isOnline()
+})
+
 // Time simulation in testing only
 if (process.argv.includes('testing')) {
   ipcMain.on('test-set-date', function (date) {
@@ -314,6 +331,12 @@ if (process.argv.includes('testing')) {
     Date.now = () => __DateNow() + __DateNowOffset
   })
 }
+
+powerMonitor.on('resume', () => {
+  logger('Resume from sleep')
+  const win = BrowserWindow.getAllWindows()[0]
+  win.webContents.send('power-monitor-resume')
+})
 
 // Handle events from SQLIte
 sqliteEvents.on('sqlite-entry-event', () => {

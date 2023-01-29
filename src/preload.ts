@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer, clipboard } from 'electron'
+import { contextBridge, ipcRenderer } from 'electron'
 import { EventMessage } from './services/analytics'
 import type { Entry, Tag, EntryTag, EntryTagProperty, Subscription } from 'types'
 import { MDXRemoteSerializeResult } from 'next-mdx-remote'
@@ -8,6 +8,7 @@ const electronAPI = {
   onCopy: (callback: any) => ipcRenderer.on('copy', callback),
   onUpdateDownloaded: (callback: any) => ipcRenderer.on('update-downloaded', callback),
   onEntryPending: (callback: any) => ipcRenderer.on('sqlite-entry-event', callback),
+  onPowerMonitorResume: (callback: any) => ipcRenderer.on('power-monitor-resume', callback),
   onTestSetDate: (callback: any) => ipcRenderer.on('test-set-date', callback),
   onTagPending: (callback: any) => ipcRenderer.on('sqlite-tag-event', callback),
   async capture({ distinctId, event, properties, type }: EventMessage) {
@@ -180,6 +181,12 @@ const electronAPI = {
   },
   isTesting() {
     return ipcRenderer.sendSync('is-testing') as boolean
+  },
+  getSystemIdleState() {
+    return ipcRenderer.sendSync('power-monitor-idle-state') as string
+  },
+  isOnline() {
+    return ipcRenderer.sendSync('net-is-online') as boolean
   },
 }
 

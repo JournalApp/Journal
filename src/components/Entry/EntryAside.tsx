@@ -62,8 +62,12 @@ const AsideMenu = styled.div`
   padding-bottom: 6px;
   display: flex;
   flex-direction: column;
+  transition: padding ${theme('animation.time.normal')};
   @media ${breakpoints.s} {
     display: none;
+  }
+  @media ${breakpoints.xl} {
+    padding-right: var(--appearance-entriesOffset);
   }
 `
 

@@ -66,3 +66,32 @@ export async function supabaseGetEntry(user_id: string, day: string) {
   await client.end()
   return entry.rows[0]
 }
+
+export async function supabaseCopyEntryToDayBefore(user_id: string, day: string) {
+  const client = new Client(supabaseConn)
+  await client.connect()
+  await client.query(
+    `insert into journals (user_id, day, created_at, modified_at, content, iv, revision) select user_id, day - interval '1' day, created_at, modified_at, content, iv, revision from journals where user_id ='${user_id}' and day = '${day}'`
+  )
+  await client.end()
+}
+
+export async function supabaseCopyEntryContent(user_id: string, dayFrom: string, dayTo: string) {
+  const client = new Client(supabaseConn)
+  await client.connect()
+  const entryFrom = await client.query(
+    `select * from journals where user_id = '${user_id}' and day = '${dayFrom}'`
+  )
+  await client.query(
+    `UPDATE journals SET content = subquery.content, iv = subquery.iv, revision = revision + 1 FROM (SELECT content, iv FROM journals WHERE user_id = '${user_id}' and day = '${dayFrom}') AS subquery WHERE user_id = '${user_id}' and day = '${dayTo}'`
+  )
+
+  await client.end()
+}
+
+export async function supabaseDeleteEntry(user_id: string, day: string) {
+  const client = new Client(supabaseConn)
+  await client.connect()
+  await client.query(`delete from journals where user_id ='${user_id}' and day = '${day}'`)
+  await client.end()
+}
