@@ -11,11 +11,15 @@
     "make-test": "electron-forge make --targets=@electron-forge/maker-dmg",
     "make-all": "electron-forge make --arch=x64 --platform=darwin && electron-forge make --arch=arm64 --platform=darwin",
     "make-arm64": "electron-forge make --arch=arm64 --platform=darwin",
+    "make-x64": "electron-forge make --arch=x64 --platform=darwin",
     "publish": "electron-forge publish",
     "lint": "eslint --ext .ts,.tsx .",
     "test-main": "xvfb-maybe npx playwright test main.test.ts",
     "test-offline": "xvfb-maybe npx playwright test offline.test.ts",
-    "test-realtime": "xvfb-maybe npx playwright test realtime.test.ts"
+    "test-realtime": "xvfb-maybe npx playwright test realtime.test.ts",
+    "rebuild-sqlite-x64": "electron-rebuild -f --version 22.0.2 --module-dir node_modules/better-sqlite3 --arch=x86_64",
+    "rebuild-x64": "electron-rebuild -f --version 22.0.2 --arch=x86_64",
+    "rebuild": "electron-rebuild -f --version 22.0.2"
   },
   "keywords": [],
   "author": "Jarek Ceborski",
@@ -102,17 +106,14 @@
       ]
     }
   },
-  "overrides": {
-    "node-abi": "^3.31.0"
-  },
   "devDependencies": {
-    "@electron-forge/cli": "^6.0.4",
-    "@electron-forge/maker-deb": "^6.0.4",
-    "@electron-forge/maker-dmg": "^6.0.4",
-    "@electron-forge/maker-rpm": "^6.0.4",
-    "@electron-forge/maker-squirrel": "^6.0.4",
-    "@electron-forge/maker-zip": "^6.0.4",
-    "@electron-forge/plugin-webpack": "^6.0.4",
+    "@electron-forge/cli": "6.0.0",
+    "@electron-forge/maker-deb": "6.0.0",
+    "@electron-forge/maker-dmg": "6.0.0",
+    "@electron-forge/maker-rpm": "6.0.0",
+    "@electron-forge/maker-squirrel": "6.0.0",
+    "@electron-forge/maker-zip": "6.0.0",
+    "@electron-forge/plugin-webpack": "6.0.0",
     "@electron/asar": "^3.2.2",
     "@faker-js/faker": "^7.5.0",
     "@playwright/test": "^1.29.2",

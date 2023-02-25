@@ -1,6 +1,16 @@
 {
-  "currentRelease": "1.0.4",
+  "currentRelease": "1.0.5",
   "releases": [
+    {
+      "version": "1.0.5",
+      "updateTo": {
+        "version": "1.0.5",
+        "pub_date": "2023-02-01T17:00:00+00:00",
+        "notes": "https://desktop.journal.do/darwin/x64/Journal-1.0.5-x64.dmg",
+        "name": "1.0.5",
+        "url": "https://desktop.journal.do/darwin/x64/Journal-darwin-x64-1.0.5.zip"
+      }
+    },
     {
       "version": "1.0.4",
       "updateTo": {

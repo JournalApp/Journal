@@ -81,7 +81,7 @@ const entriesObserver = new IntersectionObserver(onIntersection, {
 })
 
 const EntryMemo = React.memo(EntryItem, (prevProps, nextProps) => {
-  console.info('New memo compare')
+  logger('New memo compare')
   if (prevProps.entryDay === nextProps.entryDay) {
     return true
   }
