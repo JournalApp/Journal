@@ -3,7 +3,7 @@ import { isDev } from './'
 
 const supabaseEnv = {
   local: {
-    supabaseUrl: 'http://localhost:8000',
+    supabaseUrl: 'https://supabase.journal.local:8443',
     supabaseAnonKey:
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRuZmRhdW9vd3lycHhxb2RvbXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NTQ1MzEzOTUsImV4cCI6MTk3MDEwNzM5NX0.XYkcWry-Eqm0-Hvq-arndEGhQn_yJvGF85-NNf9Sbvk',
   },

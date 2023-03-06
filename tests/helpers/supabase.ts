@@ -11,23 +11,26 @@ const apikey =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRuZmRhdW9vd3lycHhxb2RvbXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NTQ1MzEzOTUsImV4cCI6MTk3MDEwNzM5NX0.XYkcWry-Eqm0-Hvq-arndEGhQn_yJvGF85-NNf9Sbvk'
 
 export async function supabaseLoginUser(email: string) {
-  const data = await fetch('http://localhost:8000/auth/v1/token?grant_type=password', {
-    method: 'POST',
-    body: JSON.stringify({
-      email,
-      password: '123456',
-    }),
-    headers: {
-      apikey,
-      'Content-Type': 'application/json',
-    },
-  }).then((r) => r.json())
+  const data = await fetch(
+    'https://supabase.journal.local:8443/auth/v1/token?grant_type=password',
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        email,
+        password: '123456',
+      }),
+      headers: {
+        apikey,
+        'Content-Type': 'application/json',
+      },
+    }
+  ).then((r) => r.json())
   const { refresh_token } = data
   return refresh_token
 }
 
 export async function supabaseRegisterUser(email: string) {
-  const data = await fetch('http://localhost:8000/auth/v1/signup', {
+  const data = await fetch('https://supabase.journal.local:8443/auth/v1/signup', {
     method: 'POST',
     body: JSON.stringify({
       email,
