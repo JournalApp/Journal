@@ -186,7 +186,7 @@
     "react-beautiful-dnd": "^13.1.0",
     "react-children-utilities": "^2.8.0",
     "react-dom": "^17.0.2",
-    "react-hook-form": "^7.31.3",
+    "react-hook-form": "^7.52.2",
     "react-loading-skeleton": "^3.1.0",
     "react-merge-refs": "^2.0.1",
     "react-select": "^5.6.0",
