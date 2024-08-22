@@ -1,7 +1,7 @@
-import React from 'react'
-import styled, { keyframes } from 'styled-components'
-import { theme } from 'themes'
-import { Icon } from 'components'
+import React from 'react';
+import styled, { keyframes } from 'styled-components';
+import { theme } from '@/themes';
+import { Icon } from '@/components';
 
 interface EditModeProps {
   editMode: boolean
@@ -14,14 +14,14 @@ const StyledWrapper = styled.div<EditModeProps>`
   &:hover {
     opacity: 1;
   }
-`
+`;
 
 const StyledTagsInputWrapper = styled.div<EditModeProps>`
   padding: 4px 0 8px 0;
   position: relative;
   width: ${(props) => (props.editMode ? '100%' : '16px')};
   transition: width ${theme('animation.time.veryFast')} ${theme('animation.timingFunction.dynamic')};
-`
+`;
 
 const showDropdown = keyframes`
   0% {
@@ -29,7 +29,7 @@ const showDropdown = keyframes`
   }
   100% {
     opacity: 1;
-  }`
+  }`;
 
 const StyledPopover = styled.div`
   padding: 4px;
@@ -46,7 +46,7 @@ const StyledPopover = styled.div`
   overflow-y: scroll;
   max-width: 400px;
   min-width: 150px;
-`
+`;
 
 const StyledEditTagColorPickerPopover = styled.div`
   padding: 8px;
@@ -62,7 +62,7 @@ const StyledEditTagColorPickerPopover = styled.div`
   animation-duration: ${theme('animation.time.normal')};
   -webkit-app-region: no-drag;
   position: absolute;
-`
+`;
 
 const hide = keyframes`
   0% {
@@ -72,7 +72,7 @@ const hide = keyframes`
     visibility: hidden;
     opacity: 0;
   }
-`
+`;
 
 const show = keyframes`
   0% {
@@ -82,13 +82,13 @@ const show = keyframes`
     visibility: visible;
     opacity: 0.5;
   }
-`
+`;
 
 type ScrollIconProps = {
   isVisible: boolean
-}
+};
 
-const StyledScrollDownIcon = styled(({ isVisible, ...rest }) => (
+const StyledScrollDownIcon = styled(({ ...rest }) => (
   <Icon name='Chevron' type='down' size={8} {...rest} />
 ))<ScrollIconProps>`
   cursor: pointer;
@@ -107,8 +107,8 @@ const StyledScrollDownIcon = styled(({ isVisible, ...rest }) => (
   &:hover {
     opacity: 0.8;
   }
-`
-const StyledScrollUpIcon = styled(({ isVisible, ...rest }) => (
+`;
+const StyledScrollUpIcon = styled(({ ...rest }) => (
   <Icon name='Chevron' size={8} type='up' {...rest} />
 ))<ScrollIconProps>`
   cursor: pointer;
@@ -127,22 +127,22 @@ const StyledScrollUpIcon = styled(({ isVisible, ...rest }) => (
   &:hover {
     opacity: 0.8;
   }
-`
+`;
 
 const StyledDivider = styled.div`
   background-color: ${theme('color.popper.border')};
   height: 1px;
   margin: 4px 12px;
-`
+`;
 type TagIsAddedProps = {
   current: boolean
-}
+};
 
-const StyledTagListItemIsAdded = styled(({ current, ...props }) => (
+const StyledTagListItemIsAdded = styled(({ ...props }) => (
   <Icon name='Check' {...props} />
 ))<TagIsAddedProps>`
   visibility: ${(props) => (props.current ? 'inherit' : 'hidden')};
-`
+`;
 
 const StyledEditTag = styled.div`
   display: flex;
@@ -156,7 +156,7 @@ const StyledEditTag = styled.div`
     opacity: 1 !important;
     background-color: ${theme('color.popper.border')};
   }
-`
+`;
 
 const StyledEditTagInput = styled.input`
   font-size: 14px;
@@ -172,7 +172,7 @@ const StyledEditTagInput = styled.input`
     box-shadow: 0 0 0 3px ${theme('color.popper.border')};
     transition: box-shadow ${theme('animation.time.normal')} ease;
   }
-`
+`;
 
 const StyledEditTagButtonsContainer = styled.div`
   display: inline-flex;
@@ -180,7 +180,7 @@ const StyledEditTagButtonsContainer = styled.div`
   margin-top: 6px;
   right: 8px;
   z-index: 1;
-`
+`;
 
 const StyledEditTagColorPickerContainer = styled.div`
   display: inline-flex;
@@ -190,7 +190,7 @@ const StyledEditTagColorPickerContainer = styled.div`
   left: 16px;
   z-index: 1;
   align-items: center;
-`
+`;
 
 const StyledColorPickerChevronIcon = styled((props) => (
   <Icon name='Chevron' size={16} {...props} />
@@ -201,7 +201,7 @@ const StyledColorPickerChevronIcon = styled((props) => (
     opacity: 1;
     color: ${theme('color.primary.main')};
   }
-`
+`;
 
 const StyledOKIcon = styled((props) => <Icon name='Check' {...props} />)`
   opacity: 0.8;
@@ -210,7 +210,7 @@ const StyledOKIcon = styled((props) => <Icon name='Check' {...props} />)`
     opacity: 1;
     color: ${theme('color.primary.main')};
   }
-`
+`;
 
 const StyledCancelIcon = styled((props) => <Icon name='Cross' {...props} />)`
   opacity: 0.8;
@@ -219,7 +219,7 @@ const StyledCancelIcon = styled((props) => <Icon name='Cross' {...props} />)`
     opacity: 1;
     color: ${theme('color.primary.main')};
   }
-`
+`;
 
 const StyledTrashIcon = styled((props) => <Icon name='Trash' {...props} />)`
   opacity: 0.5;
@@ -230,7 +230,7 @@ const StyledTrashIcon = styled((props) => <Icon name='Trash' {...props} />)`
       stroke: ${theme('color.error.main')};
     }
   }
-`
+`;
 
 const StyledTagListItemTitle = styled.span<TagIsAddedProps>`
   font-size: 14px;
@@ -241,7 +241,7 @@ const StyledTagListItemTitle = styled.span<TagIsAddedProps>`
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
-`
+`;
 
 interface StyledItemProps {
   isActive?: boolean
@@ -275,7 +275,7 @@ const StyledItem = styled.div<StyledItemProps>`
       opacity: 0.5;
     }
   }
-`
+`;
 
 const StyledNoTags = styled.div`
   font-size: 14px;
@@ -283,7 +283,7 @@ const StyledNoTags = styled.div`
   padding: 8px;
   font-style: italic;
   opacity: 0.8;
-`
+`;
 
 const StyledItemColorPicker = styled.div<StyledItemProps>`
   white-space: nowrap;
@@ -300,7 +300,7 @@ const StyledItemColorPicker = styled.div<StyledItemProps>`
         : `1px solid ${theme('color.popper.input')}`};
     outline: none;
   }
-`
+`;
 
 const StyledTagsInput = styled.input<EditModeProps>`
   font-size: 14px;
@@ -326,7 +326,7 @@ const StyledTagsInput = styled.input<EditModeProps>`
   &::placeholder {
     color: ${theme('color.secondary.main', 0.6)};
   }
-`
+`;
 
 interface TagProps extends EditModeProps {
   maxWidth?: number
@@ -344,14 +344,14 @@ const StyledTag = styled.div<TagProps>`
   gap: 4px;
   background-color: ${(props) => (props.editMode ? theme('color.pure') : theme('color.pure', 0.4))};
   border-radius: 100px;
-`
+`;
 
 const StyledTagHandle = styled.div`
   -webkit-app-region: no-drag;
   border: 0;
   outline: 0;
   margin-bottom: 2px;
-`
+`;
 
 const StyledTagTitle = styled.span`
   font-size: 14px;
@@ -360,7 +360,7 @@ const StyledTagTitle = styled.span`
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
-`
+`;
 
 interface TagColorDotProps {
   fillColor: string
@@ -373,7 +373,7 @@ const StyledTagColorDot = styled.div<TagColorDotProps>`
   min-width: ${(props) => (props.size ? `${props.size}px` : '6px')};
   border-radius: 100px;
   background-color: ${(props) => props.fillColor};
-`
+`;
 
 const StyledPlusIcon = styled((props) => <Icon {...props} />)`
   position: absolute;
@@ -381,7 +381,7 @@ const StyledPlusIcon = styled((props) => <Icon {...props} />)`
   margin-top: 5px;
   left: 4px;
   z-index: 1;
-`
+`;
 
 const StyledRemoveTagIcon = styled((props) => <Icon name='Cross' size={12} {...props} />)`
   opacity: 0.5;
@@ -391,7 +391,7 @@ const StyledRemoveTagIcon = styled((props) => <Icon name='Cross' size={12} {...p
   &:hover {
     opacity: 1;
   }
-`
+`;
 
 export {
   StyledWrapper,
@@ -421,4 +421,4 @@ export {
   StyledEditTagColorPickerPopover,
   StyledItemColorPicker,
   StyledNoTags,
-}
+};

@@ -1,24 +1,24 @@
-import React, { useState, useEffect, useRef } from 'react'
-import styled, { keyframes } from 'styled-components'
-import { theme } from 'themes'
-import { Icon } from 'components'
-import * as Accordion from '@radix-ui/react-accordion'
-import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote'
-import { nanoid } from 'nanoid'
-import { logger, supabase, awaitTimeout } from 'utils'
-import Skeleton from 'react-loading-skeleton'
-import { useQuery } from '@tanstack/react-query'
-import { useUserContext } from 'context'
-import { onlyText } from 'react-children-utilities'
+import React from 'react';
+import styled, { keyframes } from 'styled-components';
+import { theme } from '@/themes';
+import { Icon } from '@/components';
+import * as Accordion from '@radix-ui/react-accordion';
+import { MDXRemote } from 'next-mdx-remote';
+import { nanoid } from 'nanoid';
+import { logger, supabase } from '@/utils';
+import Skeleton from 'react-loading-skeleton';
+import { useQuery } from '@tanstack/react-query';
+import { useUserContext } from '@/context';
+import { onlyText } from 'react-children-utilities';
 
 const Chevron = styled(Icon)`
   transition: transform ${theme('animation.time.normal')};
   [data-state='open'] & {
     transform: rotate(180deg);
   }
-`
+`;
 
-const AccordionItem = styled(Accordion.Item)``
+const AccordionItem = styled(Accordion.Item)``;
 
 const Open = keyframes`
   0% {
@@ -31,7 +31,7 @@ const Open = keyframes`
     opacity: 0.8;
     padding-bottom: 16px;
   }
-`
+`;
 
 const Close = keyframes`
   0% {
@@ -44,7 +44,7 @@ const Close = keyframes`
     opacity: 0;
     padding-bottom: 8px;
   }
-`
+`;
 
 const AccordionContent = styled(Accordion.Content)`
   font-weight: 400;
@@ -61,11 +61,11 @@ const AccordionContent = styled(Accordion.Content)`
     animation: ${Close} ${theme('animation.time.normal')} ease-out;
     animation-fill-mode: both;
   }
-`
+`;
 
 const AccordionHeader = styled(Accordion.Header)`
   margin: 0;
-`
+`;
 
 const AccordionTrigger = styled(Accordion.Trigger)`
   display: flex;
@@ -81,11 +81,11 @@ const AccordionTrigger = styled(Accordion.Trigger)`
   font-weight: 500;
   font-size: 12px;
   line-height: 20px;
-`
+`;
 
 const TriggerLabel = styled.span`
   flex-grow: 1;
-`
+`;
 
 const H2 = styled.div`
   font-weight: 500;
@@ -95,43 +95,43 @@ const H2 = styled.div`
   color: ${theme('color.popper.main')};
   margin-bottom: 16px;
   margin-top: 25px;
-`
+`;
 
 const SkeletonContainer = styled.div`
   display: block;
   & span {
     margin: 4px 0;
   }
-`
+`;
 
 const fetchFeaturesAndFAQ = async () => {
   const { data, error } = await supabase
     .from('website_pages')
     .select('content')
     .eq('page', 'pricing')
-    .single()
+    .single();
   if (error) {
-    throw new Error(error.message)
+    throw new Error(error.message);
   }
   // await awaitTimeout(2000)
-  return await window.electronAPI.mdxSerialize(data?.content ?? '')
-}
+  return await window.electronAPI.mdxSerialize(data?.content ?? '');
+};
 
 const Features = () => {
-  logger('Features rerender')
-  const { session } = useUserContext()
-  const { isLoading, isError, data, error } = useQuery({
+  logger('Features rerender');
+  const { session } = useUserContext();
+  const { isLoading, isError, data } = useQuery({
     queryKey: ['features'],
     queryFn: fetchFeaturesAndFAQ,
-  })
+  });
 
   const captureAccordionClick = (item: string) => {
     window.electronAPI.capture({
       distinctId: session.user.id,
       event: 'settings upgrade feature-expand',
       properties: { item },
-    })
-  }
+    });
+  };
 
   const components = {
     h2: (props: any) => <H2 {...props} />,
@@ -148,7 +148,7 @@ const Features = () => {
       </>
     ),
     AccContent: (props: any) => <AccordionContent {...props} />,
-  }
+  };
 
   if (isLoading) {
     return (
@@ -161,14 +161,14 @@ const Features = () => {
           enableAnimation={false}
         />
       </SkeletonContainer>
-    )
+    );
   }
 
   if (isError) {
-    return <></>
+    return <></>;
   }
 
-  return <MDXRemote {...data} components={components} />
-}
+  return <MDXRemote {...data} components={components} />;
+};
 
-export { Features }
+export { Features };

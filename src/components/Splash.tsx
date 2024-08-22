@@ -1,6 +1,5 @@
-import React from 'react'
-import styled, { keyframes } from 'styled-components'
-import { theme } from 'themes'
+import styled, { keyframes } from 'styled-components';
+import { theme } from '@/themes';
 
 const hide = keyframes`
   0% {
@@ -13,7 +12,7 @@ const hide = keyframes`
     opacity: 0;
     visibility: hidden;
   }
-`
+`;
 
 const Splash = styled.div`
   position: fixed;
@@ -29,6 +28,6 @@ const Splash = styled.div`
   animation-timing-function: cubic-bezier(0.17, 0.18, 0.41, 0.99);
   animation-fill-mode: forwards;
   animation-delay: ${theme('animation.time.long')};
-`
+`;
 
-export { Splash }
+export { Splash };

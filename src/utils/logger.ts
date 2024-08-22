@@ -1,9 +1,9 @@
-import { isDev } from './misc'
+import { isDev } from './misc';
 
-const logger = (data: any) => {
+const logger = (data: unknown) => {
   if (isDev()) {
-    console.log(data)
+    console.log(data);
   }
-}
+};
 
-export { logger }
+export { logger };

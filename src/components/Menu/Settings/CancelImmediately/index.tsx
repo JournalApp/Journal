@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { theme, getCSSVar } from 'themes'
-import { logger, supabase, getZipRegexByCountry, isDev, awaitTimeout } from 'utils'
-import * as Const from 'consts'
+import React, { useState, useEffect } from 'react';
+import { theme } from '@/themes';
+import { logger } from '@/utils';
 import {
   useFloating,
   FloatingOverlay,
@@ -12,142 +11,133 @@ import {
   useFloatingNodeId,
   FloatingNode,
   FloatingPortal,
-} from '@floating-ui/react-dom-interactions'
-import { useQuery } from '@tanstack/react-query'
-import { PaymentIntent } from '@stripe/stripe-js'
-import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
-import Select from 'react-select'
-import type { Countries, Price } from 'types'
-import { useUserContext } from 'context'
-import Stripe from 'stripe'
+} from '@floating-ui/react-dom-interactions';
+import { useQuery } from '@tanstack/react-query';
+import { useUserContext } from '@/context';
 import {
   cancelSubscriptionImmediately,
   getSubscription,
-  resumeSubscription,
-} from '../../../../context/UserContext/subscriptions'
+} from '../../../../context/UserContext/subscriptions';
 import {
-  IconCloseStyled,
   ModalStyled,
   ButtonDestructiveStyled,
   ButtonStyled,
-  ButtonGhostStyled,
   TitleStyled,
   DescriptionStyled,
   ActionsWrapperStyled,
-} from './styled'
-import dayjs from 'dayjs'
+} from './styled';
 
 interface CancelImmediatelyProps {
   renderTrigger: any
 }
 
 const CancelImmediately = ({ renderTrigger }: CancelImmediatelyProps) => {
-  logger('CancelOrResume rerender')
-  const { session, subscription } = useUserContext()
-  const [isCanceling, setIsCanceling] = useState(false)
-  const [isCanceled, setIsCanceled] = useState(false)
-  const [poolingSubscription, setPoolingSubscription] = useState(false)
-  const [success, setSuccess] = useState(false)
-  const [open, setOpen] = useState(false)
-  const nodeId = useFloatingNodeId()
+  logger('CancelOrResume rerender');
+  const { session, subscription } = useUserContext();
+  const [isCanceling, setIsCanceling] = useState(false);
+  const [isCanceled, setIsCanceled] = useState(false);
+  const [poolingSubscription, setPoolingSubscription] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [open, setOpen] = useState(false);
+  const nodeId = useFloatingNodeId();
 
   useQuery({
     queryKey: ['subscription', session?.user.id],
     queryFn: async () => {
-      setPoolingSubscription(true)
-      logger('setPoolingSubscription(true)')
-      return await getSubscription(session?.user.id, session.access_token)
+      setPoolingSubscription(true);
+      logger('setPoolingSubscription(true)');
+      return await getSubscription(session?.user.id, session.access_token);
     },
     refetchInterval: (data) => {
-      logger(data)
+      logger(data);
       if (data == null) {
-        logger('Subscription cencelled!')
-        setPoolingSubscription(false)
-        setSuccess(true)
-        return false
+        logger('Subscription cencelled!');
+        setPoolingSubscription(false);
+        setSuccess(true);
+        return false;
       } else {
-        logger('Still there is a subscription...')
-        return 2000
+        logger('Still there is a subscription...');
+        return 2000;
       }
     },
     refetchIntervalInBackground: true,
     enabled: isCanceled == true,
-  })
+  });
 
   const { reference, floating, context, refs } = useFloating({
     open,
     onOpenChange: setOpen,
     nodeId,
-  })
+  });
 
   const { getReferenceProps, getFloatingProps } = useInteractions([
     useClick(context),
     useDismiss(context, {
       escapeKey: false,
     }),
-  ])
+  ]);
 
   const handleCloseEsc = (e: any) => {
     if (e.key == 'Escape') {
       if (refs.floating.current && refs.floating.current.contains(document.activeElement)) {
-        setOpen(false)
+        setOpen(false);
       }
     }
-  }
+  };
 
   useEffect(() => {
-    logger('✅ addEventListener')
-    document.addEventListener('keydown', handleCloseEsc)
+    logger('✅ addEventListener');
+    document.addEventListener('keydown', handleCloseEsc);
 
     return () => {
-      logger('❌ removeEventListener')
-      document.removeEventListener('keydown', handleCloseEsc)
-    }
-  }, [])
+      logger('❌ removeEventListener');
+      document.removeEventListener('keydown', handleCloseEsc);
+    };
+  }, []);
 
   useEffect(() => {
     if (success) {
-      setOpen(false)
+      setOpen(false);
     }
-  }, [success])
+  }, [success]);
 
   const cancelOrResume = async () => {
-    setIsCanceling(true)
+    setIsCanceling(true);
     try {
       await cancelSubscriptionImmediately({
         access_token: session.access_token,
         subscriptionId: subscription.id,
-      })
+      });
 
-      setIsCanceled(true)
-      setIsCanceling(false)
+      setIsCanceled(true);
+      setIsCanceling(false);
     } catch (error) {
-      logger(error)
-      setIsCanceling(false)
-      setIsCanceled(false)
+      logger(error);
+      setIsCanceling(false);
+      setIsCanceled(false);
     }
-  }
+  };
 
   const cancelButtonText = () => {
     if (success) {
-      return 'Done'
+      return 'Done';
     } else if (poolingSubscription) {
-      return 'Finalizing...'
+      return 'Finalizing...';
     } else if (isCanceling) {
-      return 'Canceling...'
+      return 'Canceling...';
     } else {
-      return 'Cancel plan'
+      return 'Cancel plan';
     }
-  }
+  };
 
   const setOpenHandler = () => {
-    setOpen(true)
+    setOpen(true);
     window.electronAPI.capture({
       distinctId: session.user.id,
       event: 'settings billing plan',
       properties: { action: 'cancel-immediately' },
-    })
-  }
+    });
+  };
 
   return (
     <FloatingNode id={nodeId}>
@@ -189,7 +179,7 @@ const CancelImmediately = ({ renderTrigger }: CancelImmediatelyProps) => {
         )}
       </FloatingPortal>
     </FloatingNode>
-  )
-}
+  );
+};
 
-export { CancelImmediately }
+export { CancelImmediately };

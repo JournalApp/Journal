@@ -1,6 +1,6 @@
-import React from 'react'
+import React from 'react';
 
-export function UpdateNow({ tintColor, ...props }: any) {
+export function UpdateNow({ ...props }: any) {
   return (
     <svg width={16} height={16} fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
       <path
@@ -21,5 +21,5 @@ export function UpdateNow({ tintColor, ...props }: any) {
         </linearGradient>
       </defs>
     </svg>
-  )
+  );
 }

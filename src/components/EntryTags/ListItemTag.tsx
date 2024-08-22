@@ -1,8 +1,8 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import styled, { keyframes } from 'styled-components'
-import { theme } from 'themes'
-import { logger } from 'utils'
-import { Icon } from '../Icon'
+import React, { useRef } from 'react';
+import styled from 'styled-components';
+import { theme } from '@/themes';
+import { logger } from '@/utils';
+import { Icon } from '../Icon';
 import {
   StyledItem,
   StyledTagColorDot,
@@ -12,17 +12,15 @@ import {
   StyledEditTagInput,
   StyledOKIcon,
   StyledEditTagButtonsContainer,
-  StyledEditTagColorPickerContainer,
-  StyledColorPickerChevronIcon,
   StyledCancelIcon,
   StyledTrashIcon,
-} from './styled'
-import { useEntriesContext, useUserContext } from 'context'
-import { ListItemTagColorPicker } from './ListItemTagColorPicker'
-import { Tag, EntryTag, EntryTagProperty, ListItemType } from 'types'
-import { ConfirmationModal } from 'components'
+} from './styled';
+import { useEntriesContext, useUserContext } from '@/context';
+import { ListItemTagColorPicker } from './ListItemTagColorPicker';
+import { Tag, EntryTag, ListItemType } from '@/types';
+import { ConfirmationModal } from '@/components';
 
-const StyledWrapper = styled.div``
+const StyledWrapper = styled.div``;
 
 type ListItemTagProps = {
   i: number
@@ -41,7 +39,7 @@ type ListItemTagProps = {
   handleSelect: (e: any, item: ListItemType) => void
   tagsInputRef: React.MutableRefObject<HTMLInputElement>
   getItemProps: any
-}
+};
 
 function ListItemTag({
   i,
@@ -61,58 +59,58 @@ function ListItemTag({
   tagsInputRef,
   getItemProps,
 }: ListItemTagProps) {
-  const editButtonRef = useRef<HTMLInputElement>(null)
-  const tagEditColorRef = useRef(tag.color)
-  const { userTags, cacheAddOrUpdateTag, cacheUpdateTagProperty, rerenderEntriesWithTag } =
-    useEntriesContext()
-  const { session, serverTimeNow } = useUserContext()
+  const editButtonRef = useRef<HTMLInputElement>(null);
+  const tagEditColorRef = useRef(tag.color);
+  const { userTags, cacheUpdateTagProperty, rerenderEntriesWithTag } =
+    useEntriesContext();
+  const { session, serverTimeNow } = useUserContext();
   // const inputRef = useRef<HTMLInputElement>(null)
 
   // logger('ListItemTag rerender')
 
   const exitTagEditing = () => {
-    tagEditColorRef.current = tag.color
-    tagsInputRef.current.focus()
-    setTagIndexEditing(null)
-  }
+    tagEditColorRef.current = tag.color;
+    tagsInputRef.current.focus();
+    setTagIndexEditing(null);
+  };
 
   const updateTag = () => {
-    const name = tagEditingInputRef.current.value
-    if (!name) return
-    const modified_at = serverTimeNow()
-    const sync_status = 'pending_update'
-    const color = tagEditColorRef.current
-    exitTagEditing()
-    cacheUpdateTagProperty({ name, modified_at, sync_status, color }, tag.id)
-    const i = userTags.current.findIndex((t) => t.id == tag.id)
-    userTags.current[i].name = name
-    userTags.current[i].color = color
-    rerenderEntriesWithTag(tag.id)
+    const name = tagEditingInputRef.current.value;
+    if (!name) return;
+    const modified_at = serverTimeNow();
+    const sync_status = 'pending_update';
+    const color = tagEditColorRef.current;
+    exitTagEditing();
+    cacheUpdateTagProperty({ name, modified_at, sync_status, color }, tag.id);
+    const i = userTags.current.findIndex((t) => t.id == tag.id);
+    userTags.current[i].name = name;
+    userTags.current[i].color = color;
+    rerenderEntriesWithTag(tag.id);
     window.electronAPI.capture({
       distinctId: session.user.id,
       event: 'tag update',
-    })
-  }
+    });
+  };
 
   const deleteTag = () => {
-    exitTagEditing()
-    const modified_at = serverTimeNow()
-    const sync_status = 'pending_delete'
-    tag.sync_status = sync_status
-    tag.modified_at = modified_at
-    cacheUpdateTagProperty({ modified_at, sync_status }, tag.id)
+    exitTagEditing();
+    const modified_at = serverTimeNow();
+    const sync_status = 'pending_delete';
+    tag.sync_status = sync_status;
+    tag.modified_at = modified_at;
+    cacheUpdateTagProperty({ modified_at, sync_status }, tag.id);
     userTags.current = userTags.current.filter((t) => {
-      return t.id != tag.id
-    })
-    rerenderEntriesWithTag(tag.id)
+      return t.id != tag.id;
+    });
+    rerenderEntriesWithTag(tag.id);
     window.electronAPI.capture({
       distinctId: session.user.id,
       event: 'tag delete',
-    })
-  }
+    });
+  };
 
-  let isEditingOtherTag = tagIndexEditing != null && tagIndexEditing != i
-  let isInTags = !!entryTags.find((t) => t.tag_id == tag.id)
+  const isEditingOtherTag = tagIndexEditing != null && tagIndexEditing != i;
+  const isInTags = !!entryTags.find((t) => t.tag_id == tag.id);
   return (
     <>
       {tagIndexEditing == i && (
@@ -123,7 +121,7 @@ function ListItemTag({
             size={10}
             maxLength={80}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') updateTag()
+              if (e.key === 'Enter') updateTag();
             }}
           ></StyledEditTagInput>
           <ListItemTagColorPicker
@@ -151,8 +149,8 @@ function ListItemTag({
       <StyledItem
         id={`${date}-${tag.name}-${tag.id}`}
         ref={(node) => {
-          listRef.current[i] = node
-          listIndexToItemType.current[i] = { type: 'tag', value: tag }
+          listRef.current[i] = node;
+          listIndexToItemType.current[i] = { type: 'tag', value: tag };
         }}
         isActive={activeIndex == i}
         isDisabled={isEditingOtherTag}
@@ -161,29 +159,29 @@ function ListItemTag({
         {...getItemProps({
           onMouseDown(e: any) {
             if (editButtonRef.current.contains(e.target)) {
-              e.stopPropagation()
-              e.preventDefault()
-              setTagIndexEditing(i)
+              e.stopPropagation();
+              e.preventDefault();
+              setTagIndexEditing(i);
               setTimeout(() => {
-                if (!!tagEditingInputRef.current) {
-                  tagEditingInputRef.current.select()
+                if (tagEditingInputRef.current) {
+                  tagEditingInputRef.current.select();
                 }
-              }, 100)
-              logger('onMouseDown StyledEditTag')
+              }, 100);
+              logger('onMouseDown StyledEditTag');
               window.electronAPI.capture({
                 distinctId: session.user.id,
                 event: 'tag edit',
-              })
+              });
             } else {
-              handleSelect(e, { type: 'tag', value: tag })
+              handleSelect(e, { type: 'tag', value: tag });
             }
           },
           onFocus() {
-            logger('StyledItem sel.refs.reference.current.focus()')
-            tagsInputRef.current.focus()
+            logger('StyledItem sel.refs.reference.current.focus()');
+            tagsInputRef.current.focus();
           },
-          onKeyDown(e: any) {
-            logger('onKeyDown StyledItem')
+          onKeyDown() {
+            logger('onKeyDown StyledItem');
           },
         })}
       >
@@ -199,7 +197,7 @@ function ListItemTag({
         )}
       </StyledItem>
     </>
-  )
+  );
 }
 
-export { ListItemTag }
+export { ListItemTag };

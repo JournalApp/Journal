@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { Icon } from 'components'
-import styled, { keyframes } from 'styled-components'
-import { theme } from 'themes'
+import React from 'react';
+import { Icon } from '@/components';
+import styled from 'styled-components';
+import { theme } from '@/themes';
 
 const WrapperStyled = styled.div`
   padding: 16px 48px;
@@ -9,14 +9,14 @@ const WrapperStyled = styled.div`
   align-items: center;
   gap: 24px;
   flex-direction: column;
-`
+`;
 
 const MessageStyled = styled.div`
   color: ${theme('color.popper.main')};
   text-align: center;
   line-height: 20px;
   font-size: 14px;
-`
+`;
 
 const ButtonStyled = styled.button`
   font-weight: 500;
@@ -41,7 +41,7 @@ const ButtonStyled = styled.button`
   &:focus {
     box-shadow: 0 0 0 4px ${theme('color.popper.main', 0.15)};
   }
-`
+`;
 
 const Success = () => {
   return (
@@ -56,7 +56,7 @@ const Success = () => {
         Back to journaling
       </ButtonStyled> */}
     </WrapperStyled>
-  )
-}
+  );
+};
 
-export { Success }
+export { Success };

@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react'
-import styled, { keyframes } from 'styled-components'
-import { theme } from 'themes'
+import React from 'react';
+import styled from 'styled-components';
+import { theme } from '@/themes';
 
 const LeftPanelStyled = styled.div`
   width: 260px;
@@ -12,7 +12,7 @@ const LeftPanelStyled = styled.div`
     opacity: 0.6;
     font-style: normal;
   }
-`
+`;
 
 const LeftPanel = () => {
   return (
@@ -27,7 +27,7 @@ const LeftPanel = () => {
         limits
       </em>
     </LeftPanelStyled>
-  )
-}
+  );
+};
 
-export { LeftPanel }
+export { LeftPanel };

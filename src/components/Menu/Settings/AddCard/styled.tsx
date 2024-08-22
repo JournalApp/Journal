@@ -1,14 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react'
-import styled, { keyframes } from 'styled-components'
-import { theme } from 'themes'
-import { Icon } from 'components'
+import styled from 'styled-components';
+import { theme } from '@/themes';
 
 const FormStyled = styled.form`
   width: 368px;
   display: flex;
   flex-direction: column;
   gap: 16px;
-`
+`;
 
 const Title = styled.div`
   font-style: normal;
@@ -16,13 +14,13 @@ const Title = styled.div`
   font-size: 18px;
   line-height: 28px;
   letter-spacing: -0.03em;
-`
+`;
 
 const TextStyled = styled.div`
   font-weight: 500;
   font-size: 14px;
   line-height: 24px;
-`
+`;
 
 const CheckoutModalStyled = styled.div`
   background-color: ${theme('color.popper.surface')};
@@ -35,12 +33,12 @@ const CheckoutModalStyled = styled.div`
   margin: 48px 8px 8px 8px;
   border-radius: 8px;
   -webkit-app-region: no-drag;
-`
+`;
 const ActionsWrapperStyled = styled.div`
   display: flex;
   gap: 16px;
   height: 40px;
-`
+`;
 
 const ButtonStyled = styled.button`
   background-color: ${theme('color.popper.main')};
@@ -67,7 +65,7 @@ const ButtonStyled = styled.button`
     opacity: 0.6;
     cursor: default;
   }
-`
+`;
 
 const ButtonGhostStyled = styled.button`
   font-weight: 400;
@@ -93,7 +91,7 @@ const ButtonGhostStyled = styled.button`
     opacity: 0.6;
     cursor: default;
   }
-`
+`;
 
 export {
   TextStyled,
@@ -103,4 +101,4 @@ export {
   ActionsWrapperStyled,
   ButtonGhostStyled,
   FormStyled,
-}
+};

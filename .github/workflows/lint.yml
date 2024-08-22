@@ -1,0 +1,34 @@
+name: Test and release
+
+# Run the workflow when a Pull Request is opened or when changes are pushed to master
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    # runs-on: ${{ matrix.os }}
+    runs-on: macos-latest
+    # strategy:
+    #     matrix:
+    #         os: [macos-latest, ubuntu-latest, windows-latest]
+
+    steps:
+      # Fetch the latest commit
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+       # Install package dependencies
+      - name: Install
+        run: npm ci
+
+        # Run lint
+      - name: Lint
+        run: yarn lint

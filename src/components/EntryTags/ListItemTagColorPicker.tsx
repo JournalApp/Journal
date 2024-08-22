@@ -1,29 +1,21 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { theme, lightTheme } from 'themes'
+import React, { useState } from 'react';
+import { theme, lightTheme } from '@/themes';
 import {
   useFloating,
   offset,
-  FloatingTree,
-  useListNavigation,
-  useInteractions,
-  useDismiss,
   FloatingFocusManager,
-  useFocus,
-  useFloatingNodeId,
-  FloatingNode,
   FloatingPortal,
-} from '@floating-ui/react-dom-interactions'
+} from '@floating-ui/react-dom-interactions';
 import {
   StyledEditTagColorPickerPopover,
   StyledEditTagColorPickerContainer,
   StyledColorPickerChevronIcon,
   StyledTagColorDot,
-  StyledItem,
   StyledItemColorPicker,
-} from './styled'
-import type { Tag } from 'types'
-import { logger } from 'src/utils'
-import { useUserContext } from 'context'
+} from './styled';
+import type { Tag } from '@/types';
+import { logger } from 'src/utils';
+import { useUserContext } from '@/context';
 
 type ListItemTagColorPickerProps = {
   tag: Tag
@@ -31,49 +23,48 @@ type ListItemTagColorPickerProps = {
   colorPickerOpen: boolean
   setColorPickerOpen: any
   tagEditColorRef: React.MutableRefObject<Tag['color']>
-}
+};
 
 function ListItemTagColorPicker({
-  tag,
   inputRef,
   colorPickerOpen,
   setColorPickerOpen,
   tagEditColorRef,
 }: ListItemTagColorPickerProps) {
-  const [selectedColor, setSelectedColor] = useState<Tag['color']>(tagEditColorRef.current)
-  const { session } = useUserContext()
+  const [selectedColor, setSelectedColor] = useState<Tag['color']>(tagEditColorRef.current);
+  const { session } = useUserContext();
   const { floating, strategy, reference, x, y, context } = useFloating<HTMLInputElement>({
     placement: 'left-start',
     open: colorPickerOpen,
     onOpenChange: setColorPickerOpen,
     middleware: [offset({ crossAxis: 0, mainAxis: 20 })],
-  })
+  });
 
   const handleColorSelect = (e: any, color: Tag['color']) => {
-    e.preventDefault()
-    e.stopPropagation()
-    tagEditColorRef.current = color
-    setSelectedColor(color)
-    logger('handleColorSelect')
-    toggleOpen(e)
+    e.preventDefault();
+    e.stopPropagation();
+    tagEditColorRef.current = color;
+    setSelectedColor(color);
+    logger('handleColorSelect');
+    toggleOpen(e);
     window.electronAPI.capture({
       distinctId: session.user.id,
       event: 'tag edit color select',
       properties: { color },
-    })
-  }
+    });
+  };
 
   const toggleOpen = (e: any) => {
-    e.stopPropagation()
+    e.stopPropagation();
     if (colorPickerOpen) {
-      setColorPickerOpen(false)
+      setColorPickerOpen(false);
       setTimeout(() => {
-        inputRef.current.focus()
-      }, 100)
+        inputRef.current.focus();
+      }, 100);
     } else {
-      setColorPickerOpen(true)
+      setColorPickerOpen(true);
     }
-  }
+  };
 
   return (
     <>
@@ -111,7 +102,7 @@ function ListItemTagColorPicker({
         )}
       </FloatingPortal>
     </>
-  )
+  );
 }
 
-export { ListItemTagColorPicker }
+export { ListItemTagColorPicker };

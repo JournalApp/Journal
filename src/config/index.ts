@@ -1,5 +1,5 @@
-import { AutoformatPlugin, PlatePlugin } from '@udecode/plate'
-import { autoformatRules } from './autoformat/autoformatRules'
+import { AutoformatPlugin, PlatePlugin } from '@udecode/plate';
+import { autoformatRules } from './autoformat/autoformatRules';
 
 interface Config {
   autoformat: Partial<PlatePlugin<AutoformatPlugin>>
@@ -13,7 +13,7 @@ export const defaultContent = [
       },
     ],
   },
-]
+];
 
 export const CONFIG: Config = {
   autoformat: {
@@ -21,6 +21,6 @@ export const CONFIG: Config = {
       rules: autoformatRules,
     },
   },
-}
+};
 
-export * from './UserPreferences'
+export * from './UserPreferences';

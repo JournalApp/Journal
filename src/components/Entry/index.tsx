@@ -1,30 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react'
-import styled, { css } from 'styled-components'
-import dayjs from 'dayjs'
-import { usePlateEditorState, useEventPlateId } from '@udecode/plate'
-import { ContextMenu, FormatToolbar } from 'components'
-import { EntryAside } from './EntryAside'
-import { createPluginFactory, useOnClickOutside, deselectEditor } from '@udecode/plate'
-import { select, deselect, getNodeString } from '@udecode/plate'
+import React, { useState, useEffect, useRef } from 'react';
+import  { css } from 'styled-components';
+import dayjs from 'dayjs';
 import {
+  usePlateEditorState,
+  useEventPlateId ,
+  createPluginFactory,
+  deselectEditor ,
+  select,
   focusEditor,
   isEditorFocused,
-  usePlateEditorRef,
   getPlateActions,
   withPlate,
   createTEditor,
-} from '@udecode/plate'
-import { CONFIG, defaultContent } from 'config'
-import { countEntryWords } from 'utils'
-import { supabase, logger, awaitTimeout } from 'utils'
-import { useUserContext, useEntriesContext } from 'context'
-import { Container, MainWrapper, MiniDate } from './styled'
-import { theme } from 'themes'
-import { resetBlockTypePlugin } from '../../config/resetBlockTypePlugin'
-import type { Entry, Day } from 'types'
-import * as Const from 'consts'
-import { LimitReached } from './LimitReached'
-import {
   createPlateUI,
   ELEMENT_H3,
   MARK_HIGHLIGHT,
@@ -32,9 +19,7 @@ import {
   withProps,
   StyledElement,
   Plate,
-  createBlockquotePlugin,
   createBoldPlugin,
-  createCodeBlockPlugin,
   createCodePlugin,
   createHeadingPlugin,
   createItalicPlugin,
@@ -47,9 +32,20 @@ import {
   createAutoformatPlugin,
   createResetNodePlugin,
   createHighlightPlugin,
-} from '@udecode/plate'
+} from '@udecode/plate';
+import { ContextMenu, FormatToolbar } from '@/components';
+import { EntryAside } from './EntryAside';
+import { CONFIG, defaultContent } from '@/config';
+import { countEntryWords, logger, awaitTimeout } from '@/utils';
+import { useUserContext, useEntriesContext } from '@/context';
+import { Container, MainWrapper, MiniDate } from './styled';
+import { theme } from '@/themes';
+import { resetBlockTypePlugin } from '../../config/resetBlockTypePlugin';
+import type { Entry, Day } from '@/types';
+import * as Const from '@/constants';
+import { LimitReached } from './LimitReached';
 
-const MARK_HAND_STRIKETHROUGH = 'hand-strikethrough'
+const MARK_HAND_STRIKETHROUGH = 'hand-strikethrough';
 
 type EntryBlockProps = {
   entryDay: Day
@@ -57,87 +53,86 @@ type EntryBlockProps = {
   entriesObserver: IntersectionObserver
   cachedEntry?: any
   ref?: any
-}
+};
 
 const isToday = (day: any) => {
-  return day.toString() == dayjs().format('YYYY-MM-DD')
-}
+  return day.toString() == dayjs().format('YYYY-MM-DD');
+};
 
 const EntryItem = ({ entryDay, cachedEntry, entriesObserver }: EntryBlockProps) => {
-  const wordCount = useRef(countEntryWords(cachedEntry ? cachedEntry.content : ''))
-  const [initialValue, setInitialValue] = useState(cachedEntry?.content ?? defaultContent)
-  const [shouldFocus, setShouldFocus] = useState(isToday(entryDay))
-  const [freePlanLimitReached, setFreePlanLimitReached] = useState(false)
-  const contextMenuVisible = useRef(false)
-  const toggleContextMenu = useRef(null)
-  const setEditorFocusedContextMenu = useRef(null)
-  const setEditorFocusedFormatToolbar = useRef(null)
-  const debugValue = useRef(cachedEntry?.content ?? [])
-  const editorRef = useRef(null)
-  const { session, subscription, serverTimeNow } = useUserContext()
+  const wordCount = useRef(countEntryWords(cachedEntry ? cachedEntry.content : ''));
+  const [initialValue, setInitialValue] = useState(cachedEntry?.content ?? defaultContent);
+  const [shouldFocus, setShouldFocus] = useState(isToday(entryDay));
+  const [freePlanLimitReached, setFreePlanLimitReached] = useState(false);
+  const contextMenuVisible = useRef(false);
+  const toggleContextMenu = useRef(null);
+  const setEditorFocusedContextMenu = useRef(null);
+  const setEditorFocusedFormatToolbar = useRef(null);
+  const debugValue = useRef(cachedEntry?.content ?? []);
+  const editorRef = useRef<HTMLDivElement | null>(null);
+  const { session, subscription, serverTimeNow } = useUserContext();
   const {
     editorsRef,
     userEntries,
     invokeForceSaveEntry,
     invokeRerenderEntry,
     cacheAddOrUpdateEntry,
-    cacheUpdateEntry,
     cacheUpdateEntryProperty,
     rerenderCalendar,
-  } = useEntriesContext()
-  const saveDebounceTimer = useRef<NodeJS.Timeout | null>(null)
-  const id = `${entryDay}-editor`
+  } = useEntriesContext();
+  const saveDebounceTimer = useRef<NodeJS.Timeout | null>(null);
+  const id = `${entryDay}-editor`;
 
-  logger(`Entry render`)
+  logger(`Entry render`);
 
   const setEditorFocused = (focused: boolean) => {
     if (setEditorFocusedContextMenu.current) {
-      setEditorFocusedContextMenu.current(focused)
+      setEditorFocusedContextMenu.current(focused);
     }
     if (setEditorFocusedFormatToolbar.current) {
-      setEditorFocusedFormatToolbar.current(focused)
+      setEditorFocusedFormatToolbar.current(focused);
     }
-  }
+  };
 
   const setContextMenuVisible = (val: boolean) => {
-    contextMenuVisible.current = val
-  }
+    contextMenuVisible.current = val;
+  };
 
   const isContextMenuVisible = () => {
-    return contextMenuVisible.current
-  }
+    return contextMenuVisible.current;
+  };
 
   const onChangeDebug = (newValue: any) => {
-    debugValue.current = newValue
+    debugValue.current = newValue;
 
     if (userEntries.current.some((entry) => entry.day == entryDay)) {
-      const i = userEntries.current.findIndex((e) => e.day == entryDay)
-      userEntries.current[i].content = newValue
+      const i = userEntries.current.findIndex((e) => e.day == entryDay);
+      userEntries.current[i].content = newValue;
     }
 
-    const previousWordCount = wordCount.current
-    const currentWordCount = countEntryWords(newValue)
+    const previousWordCount = wordCount.current;
+    const currentWordCount = countEntryWords(newValue);
     if (!!previousWordCount != !!currentWordCount) {
-      logger('Changed to has content or to has no content')
-      rerenderCalendar()
+      logger('Changed to has content or to has no content');
+      rerenderCalendar();
     }
 
-    wordCount.current = currentWordCount
-  }
+    wordCount.current = currentWordCount;
+  };
 
   const saveEntry = async (day: Day, contentJson: any) => {
-    const user_id = session.user.id
-    const modified_at = serverTimeNow()
-    const content = JSON.stringify(contentJson)
-    logger(`Save entry day: ${day}, modified_at: ${modified_at}`)
+    const user_id = session.user.id;
+    const modified_at = serverTimeNow();
+    const content = JSON.stringify(contentJson);
+    logger(`Save entry day: ${day}, modified_at: ${modified_at}`);
     if (userEntries.current.some((entry) => entry.day == day)) {
-      logger('Entry exists, updating...')
+      logger('Entry exists, updating...');
       cacheUpdateEntryProperty(
         { modified_at, content, sync_status: 'pending_update' },
         { user_id, day }
-      )
+      );
     } else {
-      logger('Entry doesnt exist, inserting...')
+      logger('Entry doesnt exist, inserting...');
       const entryToInsert: Entry = {
         user_id,
         day,
@@ -146,102 +141,102 @@ const EntryItem = ({ entryDay, cachedEntry, entriesObserver }: EntryBlockProps) 
         content,
         revision: 0,
         sync_status: 'pending_insert',
-      }
+      };
       // Cache: save
-      cacheAddOrUpdateEntry({ ...entryToInsert })
+      cacheAddOrUpdateEntry({ ...entryToInsert });
 
       // Local state: add entry
-      entryToInsert.content = contentJson
-      userEntries.current.push({ ...entryToInsert })
+      entryToInsert.content = contentJson;
+      userEntries.current.push({ ...entryToInsert });
     }
-  }
+  };
 
   const forceSaveEntry = async () => {
-    await saveEntry(entryDay, debugValue.current)
-  }
+    await saveEntry(entryDay, debugValue.current);
+  };
 
   const ShouldFocus = () => {
-    const editor = usePlateEditorState(useEventPlateId())
+    const editor = usePlateEditorState(useEventPlateId());
     useEffect(() => {
-      focusEditor(editor)
+      focusEditor(editor);
       select(editor, {
         path: [0, 0],
         offset: 0,
-      })
-      setShouldFocus(false)
-      logger(`Focus set to ${entryDay}`)
-    }, [])
-    return <></>
-  }
+      });
+      setShouldFocus(false);
+      logger(`Focus set to ${entryDay}`);
+    }, []);
+    return <></>;
+  };
 
   const EditorRefAssign = () => {
-    const editor = usePlateEditorState(useEventPlateId())
+    const editor = usePlateEditorState(useEventPlateId());
     if (editor) {
-      editorsRef.current[entryDay] = editor
+      editorsRef.current[entryDay] = editor;
     }
-    return <></>
-  }
+    return <></>;
+  };
 
   const checkPlanLimits = async () => {
-    await awaitTimeout(5000)
-    logger('checkPlanLimits')
+    await awaitTimeout(5000);
+    logger('checkPlanLimits');
     if (isToday(entryDay) && subscription == null) {
-      const limit = Const.entriesLimit
-      const count = await window.electronAPI.cache.getEntriesCount(session.user.id)
+      const limit = Const.entriesLimit;
+      const count = await window.electronAPI.cache.getEntriesCount(session.user.id);
       if (count > limit) {
-        setFreePlanLimitReached(true)
+        setFreePlanLimitReached(true);
       }
     } else {
-      setFreePlanLimitReached(false)
+      setFreePlanLimitReached(false);
     }
-  }
+  };
 
   //////////////////////////
   // ⛰ useEffect on mount
   //////////////////////////
 
   useEffect(() => {
-    invokeForceSaveEntry.current[entryDay] = forceSaveEntry
-    invokeRerenderEntry.current[entryDay] = rerenderEntry
-    entriesObserver.observe(editorRef.current)
+    invokeForceSaveEntry.current[entryDay] = forceSaveEntry;
+    invokeRerenderEntry.current[entryDay] = rerenderEntry;
+    entriesObserver.observe(editorRef.current);
 
     // Scroll to entry if Today
     if (entryDay == dayjs().format('YYYY-MM-DD')) {
-      editorRef.current.scrollIntoView({ block: 'start' })
+      editorRef.current.scrollIntoView({ block: 'start' });
     }
 
     // Plan limits
-    checkPlanLimits()
+    checkPlanLimits();
 
     // Remove observers
     return () => {
-      logger('Entry unmounted')
+      logger('Entry unmounted');
       if (editorRef.current) {
-        entriesObserver.unobserve(editorRef.current)
+        entriesObserver.unobserve(editorRef.current);
         // resizeObserver.unobserve(editorRef.current)
       }
       if (saveDebounceTimer.current) {
-        clearTimeout(saveDebounceTimer.current)
-        saveDebounceTimer.current = null
+        clearTimeout(saveDebounceTimer.current);
+        saveDebounceTimer.current = null;
       }
-    }
-  }, [])
+    };
+  }, []);
 
   useEffect(() => {
-    checkPlanLimits()
-  }, [subscription])
+    checkPlanLimits();
+  }, [subscription]);
 
   const debounceSaveEntry = () => {
-    clearTimeout(saveDebounceTimer.current)
+    clearTimeout(saveDebounceTimer.current);
     saveDebounceTimer.current = setTimeout(() => {
-      saveEntry(entryDay, debugValue.current)
-    }, 1000)
-  }
+      saveEntry(entryDay, debugValue.current);
+    }, 1000);
+  };
 
   const editableProps = {
     placeholder: "What's on your mind…",
     autoFocus: false,
-  }
+  };
 
   // Plugin
 
@@ -249,33 +244,33 @@ const EntryItem = ({ entryDay, cachedEntry, entriesObserver }: EntryBlockProps) 
     key: 'events-editor-for-toolbar',
     handlers: {
       onFocus: (editor) => (e) => {
-        logger('Focus')
-        setEditorFocused(true)
+        logger('Focus');
+        setEditorFocused(true);
       },
       onBlur: (editor) => () => {
-        logger('Blur')
-        setEditorFocused(false)
+        logger('Blur');
+        setEditorFocused(false);
         // Deselect to avoid 2 context menus visible on separate entries
-        deselectEditor(editor)
+        deselectEditor(editor);
         // deselect(editor)
       },
       onChange: (editor) => () => {
-        logger('Change')
-        const isContentChange = editor.operations.some((op) => 'set_selection' !== op.type)
+        logger('Change');
+        const isContentChange = editor.operations.some((op) => 'set_selection' !== op.type);
         if (isContentChange) {
-          debounceSaveEntry()
+          debounceSaveEntry();
         }
       },
       onContextMenu: () => (e) => {
         // Invoke function in ContextMenu using Ref
-        toggleContextMenu.current(e)
+        toggleContextMenu.current(e);
       },
     },
-  })
+  });
 
   const createHandStrikethroughPlugin = createPluginFactory({
     key: MARK_HAND_STRIKETHROUGH,
-  })
+  });
 
   const plugins = createPlugins(
     [
@@ -354,42 +349,42 @@ const EntryItem = ({ entryDay, cachedEntry, entriesObserver }: EntryBlockProps) 
         }),
       }),
     }
-  )
+  );
 
   const rerenderEntry = () => {
-    logger(`rerenderEntry on ${entryDay}`)
+    logger(`rerenderEntry on ${entryDay}`);
     if (editorsRef.current[entryDay]) {
-      const isFocused = isEditorFocused(editorsRef.current[entryDay])
-      const entry = userEntries.current.find((e) => e.day == entryDay) as any
+      const isFocused = isEditorFocused(editorsRef.current[entryDay]);
+      const entry = userEntries.current.find((e) => e.day == entryDay) as any;
       if (entry) {
-        setInitialValue(entry.content)
-        const newEditor = withPlate(createTEditor(), { id, plugins })
-        getPlateActions(id).value(entry.content)
-        getPlateActions(id).editor(newEditor)
-        editorsRef.current[entryDay] = newEditor
+        setInitialValue(entry.content);
+        const newEditor = withPlate(createTEditor(), { id, plugins });
+        getPlateActions(id).value(entry.content);
+        getPlateActions(id).editor(newEditor);
+        editorsRef.current[entryDay] = newEditor;
         if (isFocused) {
-          setShouldFocus(true)
+          setShouldFocus(true);
         }
 
         // Word count
-        const previousWordCount = wordCount.current
-        const currentWordCount = countEntryWords(entry.content)
+        const previousWordCount = wordCount.current;
+        const currentWordCount = countEntryWords(entry.content);
         if (!!previousWordCount != !!currentWordCount) {
-          logger('Changed to has content or to has no content')
-          rerenderCalendar()
+          logger('Changed to has content or to has no content');
+          rerenderCalendar();
         }
-        wordCount.current = currentWordCount
+        wordCount.current = currentWordCount;
       }
     }
-  }
+  };
 
   const showMiniDate = (day: any) => {
     if (isToday(day)) {
-      return 'Today'
+      return 'Today';
     } else {
-      return dayjs(dayjs(day.toString(), 'YYYY-MM-DD')).format('D MMMM YYYY')
+      return dayjs(dayjs(day.toString(), 'YYYY-MM-DD')).format('D MMMM YYYY');
     }
-  }
+  };
 
   return (
     <Container ref={editorRef} id={`${entryDay}-entry`}>
@@ -426,7 +421,7 @@ const EntryItem = ({ entryDay, cachedEntry, entriesObserver }: EntryBlockProps) 
         date={entryDay}
       />
     </Container>
-  )
-}
+  );
+};
 
-export { EntryItem }
+export { EntryItem };

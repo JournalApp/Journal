@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react'
-import styled, { keyframes } from 'styled-components'
-import { Icon } from 'components'
+import React, { useState, useEffect } from 'react';
+import styled, { keyframes } from 'styled-components';
+import { Icon } from '@/components';
 
 interface RatingEmojiContainerProps {
   borderRadius?: string
@@ -21,7 +21,7 @@ const RatingEmojiContainer = styled.div<RatingEmojiContainerProps>`
     transition: 0.1s ease-out;
     padding: 8px;
   }
-`
+`;
 
 const emojiJump = keyframes`
   0% {
@@ -33,7 +33,7 @@ const emojiJump = keyframes`
   100% {
     transform: scale(1.4);
   }
-`
+`;
 
 const IconEmoji = styled((props) => <Icon {...props} />)`
   cursor: pointer;
@@ -44,7 +44,7 @@ const IconEmoji = styled((props) => <Icon {...props} />)`
     animation-timing-function: cubic-bezier(0.17, 0.18, 0.41, 0.99);
     animation-fill-mode: both;
   }
-`
+`;
 
 type RatingEmojiControlProps = {
   onClickFunc: (type: string) => void
@@ -55,46 +55,46 @@ type RatingEmojiControlProps = {
   // setCachedEntry: (property: string, value: any) => void
   // shouldScrollToDay: (day: string) => boolean
   // clearScrollToDay: () => void
-}
+};
 
 function RatingEmojiControl({ onClickFunc, shouldReset }: RatingEmojiControlProps) {
-  const emojis = ['angry', 'thinking', 'neutral', 'happy', 'love']
+  const emojis = ['angry', 'thinking', 'neutral', 'happy', 'love'];
 
-  const [hover, setHover] = useState('')
-  const [selected, setSelected] = useState('')
+  const [hover, setHover] = useState('');
+  const [selected, setSelected] = useState('');
 
   function whatStyle(type: string) {
     if (hover) {
       if (hover == type) {
-        return { transform: 'scale(1.4)' }
+        return { transform: 'scale(1.4)' };
       } else {
-        return { transform: 'scale(1)' }
+        return { transform: 'scale(1)' };
       }
     }
     if (selected) {
       if (selected == type) {
-        return { transform: 'scale(1.4)' }
+        return { transform: 'scale(1.4)' };
       } else {
-        return { opacity: '0.5' }
+        return { opacity: '0.5' };
       }
     }
   }
 
   function onClick(type: string) {
-    setSelected(type)
-    onClickFunc(type)
+    setSelected(type);
+    onClickFunc(type);
   }
 
   function onKeyPress(e: React.KeyboardEvent<HTMLElement>, type: string) {
     if (e.key == 'Enter') {
-      setSelected(type)
-      onClickFunc(type)
+      setSelected(type);
+      onClickFunc(type);
     }
   }
 
   useEffect(() => {
-    setSelected('')
-  }, [shouldReset])
+    setSelected('');
+  }, [shouldReset]);
 
   return (
     <RatingEmojiContainer>
@@ -113,7 +113,7 @@ function RatingEmojiControl({ onClickFunc, shouldReset }: RatingEmojiControlProp
         />
       ))}
     </RatingEmojiContainer>
-  )
+  );
 }
 
-export { RatingEmojiControl }
+export { RatingEmojiControl };

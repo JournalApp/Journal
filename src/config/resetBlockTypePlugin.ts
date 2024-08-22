@@ -5,13 +5,12 @@ import {
   isBlockAboveEmpty,
   isSelectionAtBlockStart,
   ResetNodePlugin,
-} from '@udecode/plate'
-import { PlatePlugin } from '@udecode/plate'
+ PlatePlugin } from '@udecode/plate';
 
 const resetBlockTypesCommonRule = {
   types: [ELEMENT_BLOCKQUOTE, ELEMENT_TODO_LI],
   defaultType: ELEMENT_PARAGRAPH,
-}
+};
 
 export const resetBlockTypePlugin: Partial<PlatePlugin<ResetNodePlugin>> = {
   options: {
@@ -28,4 +27,4 @@ export const resetBlockTypePlugin: Partial<PlatePlugin<ResetNodePlugin>> = {
       },
     ],
   },
-}
+};

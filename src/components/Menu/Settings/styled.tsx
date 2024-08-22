@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react'
-import * as Tabs from '@radix-ui/react-tabs'
-import styled, { keyframes } from 'styled-components'
-import { theme } from 'themes'
-import { breakpoints } from 'utils'
-import { CardElement } from '@stripe/react-stripe-js'
-import { Icon } from 'components'
+import React from 'react';
+import * as Tabs from '@radix-ui/react-tabs';
+import styled from 'styled-components';
+import { theme } from '@/themes';
+import { CardElement } from '@stripe/react-stripe-js';
+import { Icon } from '@/components';
 
 const TabsStyled = styled(Tabs.Root)`
   display: grid;
@@ -19,14 +18,14 @@ const TabsStyled = styled(Tabs.Root)`
   margin: 48px 8px 8px 8px;
   border-radius: 8px;
   -webkit-app-region: no-drag;
-`
+`;
 
 const ContentStyled = styled(Tabs.Content)`
   padding: 24px 32px;
   overflow: scroll;
   flex-grow: 1;
   outline: 0;
-`
+`;
 
 const Offline = styled.div`
   font-size: 14px;
@@ -40,7 +39,7 @@ const Offline = styled.div`
   outline: 0;
   color: ${theme('color.popper.main', 0.6)};
   text-align: center;
-`
+`;
 
 const MenuItemStyled = styled(Tabs.Trigger)`
   font-size: 13px;
@@ -68,7 +67,7 @@ const MenuItemStyled = styled(Tabs.Trigger)`
     opacity: 1;
     background-color: ${theme('color.popper.active')};
   }
-`
+`;
 
 const ListStyled = styled(Tabs.List)`
   display: flex;
@@ -77,7 +76,7 @@ const ListStyled = styled(Tabs.List)`
   flex-direction: column;
   background-color: ${theme('color.popper.inverted')};
   border-radius: 8px 0 0 8px;
-`
+`;
 
 const SettingsTitleStyled = styled.div`
   font-style: normal;
@@ -85,7 +84,7 @@ const SettingsTitleStyled = styled.div`
   font-size: 14px;
   line-height: 20px;
   padding: 16px 12px;
-`
+`;
 
 const SectionTitleStyled = styled.div`
   font-style: normal;
@@ -95,7 +94,7 @@ const SectionTitleStyled = styled.div`
   padding: 0;
   margin-bottom: 24px;
   letter-spacing: -0.03em;
-`
+`;
 
 const LabelStyled = styled.div`
   margin-bottom: 8px;
@@ -107,7 +106,7 @@ const LabelStyled = styled.div`
   line-height: 16px;
   white-space: nowrap;
   pointer-events: none;
-`
+`;
 
 interface CardElementProps {
   isFocused: boolean
@@ -137,7 +136,7 @@ const CardElementStyled = styled(CardElement)<CardElementProps>`
   &::placeholder {
     opacity: 0.6;
   }
-`
+`;
 
 interface InputProps {
   borderRadius?: string
@@ -169,7 +168,7 @@ const AddressInputStyled = styled.input<InputProps>`
     opacity: 0.6;
     color: ${(props) => (props.hasError ? theme('color.error.main') : theme('color.primary.main'))};
   }
-`
+`;
 
 const FormStyled = styled.form`
   width: 368px;
@@ -177,13 +176,13 @@ const FormStyled = styled.form`
   display: flex;
   flex-direction: column;
   gap: 16px;
-`
+`;
 
 const AddressStyled = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0;
-`
+`;
 const AddressInputsStyled = styled.div`
   display: flex;
   flex-direction: column;
@@ -200,11 +199,11 @@ const AddressInputsStyled = styled.div`
     transition: all ${theme('animation.time.normal')};
     box-shadow: 0 0 0 2px ${theme('color.popper.main', 0.1)};
   }
-`
+`;
 
 const AddressRowStyled = styled.div`
   display: flex;
-`
+`;
 
 const IconCloseStyled = styled((props) => <Icon name='Cross' {...props} />)`
   position: absolute;
@@ -216,12 +215,12 @@ const IconCloseStyled = styled((props) => <Icon name='Cross' {...props} />)`
     opacity: 1;
     color: ${theme('color.primary.main')};
   }
-`
+`;
 
 const IconChevronStyled = styled((props) => <Icon name='Chevron' {...props} />)`
   padding-right: 8px;
   opacity: 0.6;
-`
+`;
 
 const ErrorStyled = styled.div`
   font-weight: 500;
@@ -229,13 +228,13 @@ const ErrorStyled = styled.div`
   line-height: 24px;
   margin-top: 16px;
   color: ${theme('color.error.main')};
-`
+`;
 
 const InputContainerStyled = styled.div`
   position: relative;
   display: flex;
   flex-direction: column;
-`
+`;
 
 interface getCustomStylesProps {
   borderRadius?: string
@@ -296,25 +295,25 @@ const getCustomStyles = ({ borderRadius, hasError }: getCustomStylesProps) => {
         backgroundColor: theme('color.popper.pure', 0.9),
       },
     }),
-    placeholder: (provided: any, state: any) => ({
+    placeholder: (provided: any) => ({
       ...provided,
       color: hasError ? theme('color.error.main') : theme('color.popper.main'),
       opacity: 0.6,
     }),
-    input: (provided: any, state: any) => ({
+    input: (provided: any) => ({
       ...provided,
       color: theme('color.popper.main'),
       padding: 0,
     }),
     singleValue: (provided: any, state: any) => {
-      const opacity = state.isDisabled ? 0.5 : 1
-      const transition = 'opacity 300ms'
-      const padding = 0
-      const color = theme('color.popper.main')
-      return { ...provided, opacity, transition, padding, color }
+      const opacity = state.isDisabled ? 0.5 : 1;
+      const transition = 'opacity 300ms';
+      const padding = 0;
+      const color = theme('color.popper.main');
+      return { ...provided, opacity, transition, padding, color };
     },
-  }
-}
+  };
+};
 
 export {
   TabsStyled,
@@ -336,4 +335,4 @@ export {
   getCustomStyles,
   IconCloseStyled,
   IconChevronStyled,
-}
+};

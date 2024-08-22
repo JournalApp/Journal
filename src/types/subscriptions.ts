@@ -1,4 +1,4 @@
-import Stripe from 'stripe'
+import Stripe from 'stripe';
 
 interface Product {
   id: string /* primary key */
@@ -38,7 +38,7 @@ interface Price {
   products?: Product
 }
 
-interface PriceWithProduct extends Price {}
+type PriceWithProduct = Price;
 
 interface Subscription {
   id: string /* primary key */
@@ -100,4 +100,7 @@ export {
   PreviewInvoiceProps,
   AddCardProps,
   BillingInfo,
-}
+  ProductWithPrice,
+  PriceWithProduct,
+  UserDetails,
+};

@@ -1,6 +1,6 @@
-import { AutoformatRule, ELEMENT_DEFAULT } from '@udecode/plate'
-import { DIGITS, DIGITS_WITH_SPACE } from './autoformatConstants'
-import { formatText } from './autoformatUtils'
+import { AutoformatRule, ELEMENT_DEFAULT } from '@udecode/plate';
+import { DIGITS, DIGITS_WITH_SPACE } from './autoformatConstants';
+import { formatText } from './autoformatUtils';
 
 const multiplicationWithoutSpace: AutoformatRule[] = DIGITS.map((digit) => ({
   type: ELEMENT_DEFAULT,
@@ -9,7 +9,7 @@ const multiplicationWithoutSpace: AutoformatRule[] = DIGITS.map((digit) => ({
   trigger: [...DIGITS, ...DIGITS_WITH_SPACE],
   insertTrigger: true,
   format: (editor) => formatText(editor, `${digit}×`),
-}))
+}));
 
 const multiplicationWithSpace: AutoformatRule[] = DIGITS.map((digit) => ({
   type: ELEMENT_DEFAULT,
@@ -18,9 +18,9 @@ const multiplicationWithSpace: AutoformatRule[] = DIGITS.map((digit) => ({
   trigger: [...DIGITS, ...DIGITS_WITH_SPACE],
   insertTrigger: true,
   format: (editor) => formatText(editor, `${digit} ×`),
-}))
+}));
 
 export const autoformatMultiplication: AutoformatRule[] = [
   ...multiplicationWithoutSpace,
   ...multiplicationWithSpace,
-]
+];

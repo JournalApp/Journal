@@ -1,26 +1,22 @@
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
-import { logger, capitalize, stripeEpochToDate, displayAmount } from 'utils'
-import { theme } from 'themes'
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import { capitalize, stripeEpochToDate, displayAmount } from '@/utils';
+import { theme } from '@/themes';
 import {
   HeaderStyled,
   TextStyled,
-  ActionsStyled,
-  ActionStyled,
-  ContentStyled,
-  CardStyled,
   ReceiptsRowStyled,
   ReceiptsTableStyled,
   ReceiptsCellStyled,
   DownloadStyled,
-} from './styled'
-import type { PaymentMethodProps } from './types'
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
-dayjs.extend(relativeTime)
+} from './styled';
+import type { PaymentMethodProps } from './types';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+dayjs.extend(relativeTime);
 
 const Receipts = ({ billingInfo, isLoading }: PaymentMethodProps) => {
   const Items = () => {
-    const { invoices } = billingInfo
+    const { invoices } = billingInfo;
     return (
       <>
         {invoices.filter((invoice) => invoice.status == 'paid').length == 0 ? (
@@ -43,20 +39,20 @@ const Receipts = ({ billingInfo, isLoading }: PaymentMethodProps) => {
                       <DownloadStyled href={invoice.invoice_pdf}>PDF↓</DownloadStyled>
                     </ReceiptsCellStyled>
                   </ReceiptsRowStyled>
-                )
+                );
               })}
           </ReceiptsTableStyled>
         )}
       </>
-    )
-  }
+    );
+  };
 
   return (
     <SkeletonTheme baseColor={theme('color.popper.pure', 0.6)} enableAnimation={false}>
       <HeaderStyled>Receipts</HeaderStyled>
       <TextStyled>{isLoading ? <Skeleton count={3} height='24px' /> : <Items />}</TextStyled>
     </SkeletonTheme>
-  )
-}
+  );
+};
 
-export { Receipts }
+export { Receipts };

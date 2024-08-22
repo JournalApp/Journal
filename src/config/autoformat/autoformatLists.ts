@@ -2,13 +2,9 @@ import {
   AutoformatRule,
   ELEMENT_LI,
   ELEMENT_OL,
-  ELEMENT_TODO_LI,
   ELEMENT_UL,
-  setNodes,
-  TElement,
-  TTodoListItemElement,
-} from '@udecode/plate'
-import { clearBlockFormat, formatList } from './autoformatUtils'
+} from '@udecode/plate';
+import { clearBlockFormat, formatList } from './autoformatUtils';
 
 export const autoformatLists: AutoformatRule[] = [
   {
@@ -43,4 +39,4 @@ export const autoformatLists: AutoformatRule[] = [
   //       }
   //     ),
   // },
-]
+];

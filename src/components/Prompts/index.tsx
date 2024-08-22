@@ -1,20 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react'
-import styled, { keyframes } from 'styled-components'
-import { theme } from 'themes'
-import { Icon } from 'components'
-import { supabase, isUnauthorized, logger } from 'utils'
-import { useQuery } from '@tanstack/react-query'
-import { useUserContext } from 'context'
+import React, { useState, useEffect } from 'react';
+import { supabase, logger } from '@/utils';
+import { useQuery } from '@tanstack/react-query';
+import { useUserContext } from '@/context';
 import {
   useFloating,
   useInteractions,
   useDismiss,
   useClick,
-  FloatingFocusManager,
-  useFloatingNodeId,
-  FloatingNode,
   FloatingPortal,
-} from '@floating-ui/react-dom-interactions'
+} from '@floating-ui/react-dom-interactions';
 import {
   PromptStyled,
   PromptsButtonStyled,
@@ -23,15 +17,15 @@ import {
   PromptContentStyled,
   PromptWindowStyled,
   ChevronStyled,
-} from './styled'
-import { MDXRemote } from 'next-mdx-remote'
-import type { Prompt } from 'types'
-import type { PromptsOpen, PromptSelectedId } from 'config'
+} from './styled';
+import { MDXRemote } from 'next-mdx-remote';
+import type { Prompt } from '@/types';
+import type { PromptsOpen, PromptSelectedId } from '@/config';
 
 const fetchPrompts = async () => {
-  const { data, error } = await supabase.from<Prompt>('prompts').select()
+  const { data, error } = await supabase.from<Prompt>('prompts').select();
   if (error) {
-    throw new Error(error.message)
+    throw new Error(error.message);
   }
   // await awaitTimeout(5000)
   await Promise.all(
@@ -39,35 +33,35 @@ const fetchPrompts = async () => {
       async (prompt) =>
         (prompt.content = await window.electronAPI.mdxSerialize(prompt.content ?? ''))
     )
-  )
-  return data
-}
+  );
+  return data;
+};
 
 const getCachedPrompts = () => {
-  const data = window.electronAPI.app.getKey('prompts')
+  const data = window.electronAPI.app.getKey('prompts');
   if (data) {
     try {
-      return JSON.parse(data) as Prompt[]
+      return JSON.parse(data) as Prompt[];
     } catch (error) {
-      logger(error)
-      return null
+      logger(error);
+      return null;
     }
   } else {
-    return null
+    return null;
   }
-}
+};
 
 const cachePrompts = (prompts: Prompt[]) => {
   try {
-    window.electronAPI.app.setKey({ prompts: JSON.stringify(prompts) })
+    window.electronAPI.app.setKey({ prompts: JSON.stringify(prompts) });
   } catch (e) {
-    logger(e)
+    logger(e);
   }
-}
+};
 
 const components = {
   p: (props: any) => <p {...props} />,
-}
+};
 
 interface PromptsProps {
   initialPromptsOpen: PromptsOpen
@@ -75,11 +69,11 @@ interface PromptsProps {
 }
 
 const Prompts = ({ initialPromptsOpen, initialPromptSelectedId }: PromptsProps) => {
-  const [open, setOpen] = useState<PromptsOpen>(initialPromptsOpen)
-  const [beforeOpen, setBeforeOpen] = useState(true)
-  const [expanded, setExpanded] = useState(false)
-  const [selectedId, setSelectedId] = useState<PromptSelectedId>(initialPromptSelectedId)
-  const { session } = useUserContext()
+  const [open, setOpen] = useState<PromptsOpen>(initialPromptsOpen);
+  const [beforeOpen, setBeforeOpen] = useState(true);
+  const [expanded, setExpanded] = useState(false);
+  const [selectedId, setSelectedId] = useState<PromptSelectedId>(initialPromptSelectedId);
+  const { session } = useUserContext();
 
   const { data: prompts } = useQuery({
     queryKey: ['prompts'],
@@ -87,88 +81,88 @@ const Prompts = ({ initialPromptsOpen, initialPromptSelectedId }: PromptsProps) 
     initialData: getCachedPrompts,
     onSuccess: (data) => cachePrompts(data),
     enabled: open == 'opened',
-  })
+  });
 
   useEffect(() => {
     if (prompts && Array.isArray(prompts)) {
       if (!prompts.some((prompt) => prompt.id == selectedId)) {
-        setSelectedId(1)
+        setSelectedId(1);
       }
     }
-  }, [prompts])
+  }, [prompts]);
 
   useEffect(() => {
-    logger(`Prompts ${open ? 'open' : 'close'}`)
-  }, [open])
+    logger(`Prompts ${open ? 'open' : 'close'}`);
+  }, [open]);
 
-  const { floating, context, refs } = useFloating({
+  const { floating, context } = useFloating({
     open: expanded,
     onOpenChange: setExpanded,
-  })
+  });
 
   const { getFloatingProps } = useInteractions([
     useClick(context),
     useDismiss(context, {
       escapeKey: true,
     }),
-  ])
+  ]);
 
   const selectPrompt = (e: React.MouseEvent, id: number) => {
-    e.preventDefault()
-    e.stopPropagation()
+    e.preventDefault();
+    e.stopPropagation();
 
-    logger(`selectPrompt ${id}`)
+    logger(`selectPrompt ${id}`);
     if (expanded) {
-      setSelectedId(id)
-      setExpanded(false)
-      window.electronAPI.preferences.set(session.user.id, { promptSelectedId: `${id}` })
+      setSelectedId(id);
+      setExpanded(false);
+      window.electronAPI.preferences.set(session.user.id, { promptSelectedId: `${id}` });
       window.electronAPI.capture({
         distinctId: session.user.id,
         event: 'prompts select',
         properties: { id },
-      })
+      });
     }
-  }
+  };
 
   const openPrompts = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    const action: PromptsOpen = 'opened'
-    setOpen(action)
-    window.electronAPI.preferences.set(session.user.id, { promptsOpen: action })
+    e.preventDefault();
+    e.stopPropagation();
+    const action: PromptsOpen = 'opened';
+    setOpen(action);
+    window.electronAPI.preferences.set(session.user.id, { promptsOpen: action });
     window.electronAPI.capture({
       distinctId: session.user.id,
       event: 'prompts toggle',
       properties: { action },
-    })
-  }
+    });
+  };
 
   const closePrompts = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    const action: PromptsOpen = 'closed'
-    setBeforeOpen(false)
+    e.preventDefault();
+    e.stopPropagation();
+    const action: PromptsOpen = 'closed';
+    setBeforeOpen(false);
     setTimeout(() => {
-      setOpen('closed')
-      setBeforeOpen(true)
-    }, 400)
-    window.electronAPI.preferences.set(session.user.id, { promptsOpen: action })
+      setOpen('closed');
+      setBeforeOpen(true);
+    }, 400);
+    window.electronAPI.preferences.set(session.user.id, { promptsOpen: action });
     window.electronAPI.capture({
       distinctId: session.user.id,
       event: 'prompts toggle',
       properties: { action },
-    })
-  }
+    });
+  };
 
   const expandPromptsList = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setExpanded(!expanded)
+    e.preventDefault();
+    e.stopPropagation();
+    setExpanded(!expanded);
     window.electronAPI.capture({
       distinctId: session.user.id,
       event: 'prompts expand',
-    })
-  }
+    });
+  };
 
   return (
     <>
@@ -205,7 +199,7 @@ const Prompts = ({ initialPromptsOpen, initialPromptSelectedId }: PromptsProps) 
                     <MDXRemote {...prompt.content} components={components} />
                   </PromptContentStyled>
                 </PromptStyled>
-              )
+              );
             })}
             <PromptsCloseButtonStyled onMouseDown={(e) => closePrompts(e)}>
               Hide
@@ -214,7 +208,7 @@ const Prompts = ({ initialPromptsOpen, initialPromptSelectedId }: PromptsProps) 
         )}
       </FloatingPortal>
     </>
-  )
-}
+  );
+};
 
-export { Prompts }
+export { Prompts };

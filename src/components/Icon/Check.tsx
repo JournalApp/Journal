@@ -1,5 +1,5 @@
-import React from 'react'
-import { theme } from 'themes'
+import React from 'react';
+import { theme } from '@/themes';
 
 export function Check({ tintColor, size = 24, ...props }: any) {
   switch (size) {
@@ -20,7 +20,7 @@ export function Check({ tintColor, size = 24, ...props }: any) {
             </clipPath>
           </defs>
         </svg>
-      )
+      );
     case 24:
       return (
         <svg width={24} height={24} fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
@@ -31,7 +31,7 @@ export function Check({ tintColor, size = 24, ...props }: any) {
             strokeLinejoin='round'
           />
         </svg>
-      )
+      );
     case 16:
       return (
         <svg width={16} height={16} fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
@@ -42,8 +42,8 @@ export function Check({ tintColor, size = 24, ...props }: any) {
             strokeLinejoin='round'
           />
         </svg>
-      )
+      );
     default:
-      return <></>
+      return <></>;
   }
 }

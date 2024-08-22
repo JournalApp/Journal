@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { theme } from 'themes'
-import { logger } from 'utils'
+import React, { useState, useEffect, useRef } from 'react';
+import { theme } from '@/themes';
+import { logger } from '@/utils';
 import {
   useFloating,
   FloatingOverlay,
@@ -11,17 +11,15 @@ import {
   useFloatingNodeId,
   FloatingNode,
   FloatingPortal,
-} from '@floating-ui/react-dom-interactions'
+} from '@floating-ui/react-dom-interactions';
 import {
-  IconCloseStyled,
   ModalStyled,
   ButtonDestructiveStyled,
-  ButtonStyled,
   ButtonGhostStyled,
   TitleStyled,
   DescriptionStyled,
   ActionsWrapperStyled,
-} from './styled'
+} from './styled';
 
 interface ModalProps {
   setOpenModal: React.Dispatch<React.SetStateAction<boolean>>
@@ -29,43 +27,43 @@ interface ModalProps {
 }
 
 const Modal = ({ setOpenModal, action }: ModalProps) => {
-  const [open, setOpen] = useState(true)
-  const actionRef = useRef(null)
-  const nodeId = useFloatingNodeId()
+  const [open, setOpen] = useState(true);
+  const actionRef = useRef(null);
+  const nodeId = useFloatingNodeId();
 
-  const { reference, floating, context, refs } = useFloating({
+  const { floating, context, refs } = useFloating({
     open,
     onOpenChange: setOpen,
     nodeId,
-  })
+  });
 
-  const { getReferenceProps, getFloatingProps } = useInteractions([
+  const { getFloatingProps } = useInteractions([
     useClick(context),
     useDismiss(context, {
       escapeKey: false,
     }),
-  ])
+  ]);
 
   const handleCloseEsc = (e: any) => {
     if (e.key == 'Escape') {
       if (refs.floating.current && refs.floating.current.contains(document.activeElement)) {
-        setOpenModal(false)
+        setOpenModal(false);
       }
     }
-  }
+  };
 
   useEffect(() => {
-    logger('✅ addEventListener')
-    document.addEventListener('keydown', handleCloseEsc)
+    logger('✅ addEventListener');
+    document.addEventListener('keydown', handleCloseEsc);
     setTimeout(() => {
-      actionRef.current.focus()
-    }, 200)
+      actionRef.current.focus();
+    }, 200);
 
     return () => {
-      logger('❌ removeEventListener')
-      document.removeEventListener('keydown', handleCloseEsc)
-    }
-  }, [])
+      logger('❌ removeEventListener');
+      document.removeEventListener('keydown', handleCloseEsc);
+    };
+  }, []);
 
   return (
     <FloatingNode id={nodeId}>
@@ -94,7 +92,7 @@ const Modal = ({ setOpenModal, action }: ModalProps) => {
         </FloatingOverlay>
       </FloatingPortal>
     </FloatingNode>
-  )
-}
+  );
+};
 
-export { Modal }
+export { Modal };

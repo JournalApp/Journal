@@ -1,5 +1,5 @@
-import React from 'react'
-import { theme } from 'themes'
+import React from 'react';
+import { theme } from '@/themes';
 
 export function Edit({ tintColor, size, ...props }: any) {
   switch (size) {
@@ -13,6 +13,6 @@ export function Edit({ tintColor, size, ...props }: any) {
             strokeLinejoin='round'
           />
         </svg>
-      )
+      );
   }
 }

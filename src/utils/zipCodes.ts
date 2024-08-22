@@ -1771,11 +1771,11 @@ const zipCodes = [
     Format: '- no codes -',
     Regex: '',
   },
-]
+];
 
 const getZipRegexByCountry = (contry: string) => {
-  let item = zipCodes.find((el) => el.ISO == contry)
-  return item?.Regex || ''
-}
+  const item = zipCodes.find((el) => el.ISO == contry);
+  return item?.Regex || '';
+};
 
-export { getZipRegexByCountry }
+export { getZipRegexByCountry };

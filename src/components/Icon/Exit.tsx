@@ -1,5 +1,4 @@
-import React from 'react'
-import { theme } from 'themes'
+import React from 'react';
 
 // export function Exit({ tintColor, ...props }: any) {
 //   return (
@@ -14,7 +13,7 @@ import { theme } from 'themes'
 //   )
 // }
 
-export function Exit({ tintColor, ...props }: any) {
+export function Exit({ ...props }: any) {
   return (
     <svg width={16} height={16} fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
       <g clipPath='url(#prefix__clip0_1614_2242)'>
@@ -40,5 +39,5 @@ export function Exit({ tintColor, ...props }: any) {
         </clipPath>
       </defs>
     </svg>
-  )
+  );
 }

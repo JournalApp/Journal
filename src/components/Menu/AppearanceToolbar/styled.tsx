@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react'
-import * as Toolbar from '@radix-ui/react-toolbar'
-import styled, { keyframes } from 'styled-components'
-import { theme } from 'themes'
-import { breakpoints } from 'utils'
+import React from 'react';
+import * as Toolbar from '@radix-ui/react-toolbar';
+import styled, { keyframes } from 'styled-components';
+import { theme } from '@/themes';
+import { breakpoints } from '@/utils';
 
 const reveal = keyframes`
   0% {
@@ -13,7 +13,7 @@ const reveal = keyframes`
     margin-bottom: 0px;
     opacity: 1;
   }
-`
+`;
 
 interface ToggleButtonProps {
   padding?: string
@@ -51,9 +51,9 @@ const ToggleButtonStyled = styled(({ padding, fontName, ...props }) => (
     border: 1px solid ${theme('color.popper.main')};
     color: ${theme('color.popper.main')};
   }
-`
+`;
 
-const ToggleButtonSmallStyled = styled(({ padding, fontName, ...props }) => (
+const ToggleButtonSmallStyled = styled(({ ...props }) => (
   <Toolbar.ToggleItem {...props} />
 ))<ToggleButtonProps>`
   height: 22px;
@@ -86,7 +86,7 @@ const ToggleButtonSmallStyled = styled(({ padding, fontName, ...props }) => (
     border: 1px solid ${theme('color.popper.main')};
     color: ${theme('color.popper.main')};
   }
-`
+`;
 
 const AppearanceToolbarWrapperStyled = styled.div`
   position: fixed;
@@ -103,7 +103,7 @@ const AppearanceToolbarWrapperStyled = styled.div`
     transform: scale(0.7);
     bottom: 40px;
   }
-`
+`;
 
 const AppearanceToolbarStyled = styled(Toolbar.Root)`
   padding: 12px;
@@ -118,30 +118,30 @@ const AppearanceToolbarStyled = styled(Toolbar.Root)`
   animation-timing-function: ${theme('animation.timingFunction.dynamic')};
   animation-fill-mode: both;
   -webkit-app-region: no-drag;
-`
+`;
 const ToggleGroupStyled = styled(Toolbar.ToggleGroup)`
   gap: 8px;
   display: flex;
-`
+`;
 
 const ToggleGroupNestedStyled = styled.div`
   width: 22px;
   gap: 4px;
   display: flex;
   flex-direction: column;
-`
+`;
 
 const ToggleFontAStyled = styled(ToggleButtonStyled)`
   font-size: 13px;
-`
+`;
 
 const ToggleFontAAStyled = styled(ToggleButtonStyled)`
   font-size: 16px;
-`
+`;
 
 const ToggleFontAAAStyled = styled(ToggleButtonStyled)`
   font-size: 22px;
-`
+`;
 interface ColorSwatchProps {
   fillColor: string
 }
@@ -151,20 +151,20 @@ const ColorSwatchStyled = styled.div<ColorSwatchProps>`
   width: 31px;
   border-radius: 100px;
   background-color: ${(props) => props.fillColor};
-`
+`;
 
 const ColorSwatchSmallStyled = styled.div<ColorSwatchProps>`
   height: 14px;
   width: 14px;
   border-radius: 100px;
   background-color: ${(props) => props.fillColor};
-`
+`;
 
 const HorizontalDividerStyled = styled(Toolbar.Separator)`
   background-color: ${theme('color.popper.border')};
   width: 1px;
   margin: 4px 8px;
-`
+`;
 
 export {
   AppearanceToolbarWrapperStyled,
@@ -179,4 +179,4 @@ export {
   ColorSwatchStyled,
   ColorSwatchSmallStyled,
   HorizontalDividerStyled,
-}
+};

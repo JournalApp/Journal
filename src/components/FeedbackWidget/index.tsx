@@ -1,16 +1,16 @@
-import React, { useState, useEffect, useCallback } from 'react'
-import styled, { keyframes } from 'styled-components'
-import { theme } from 'themes'
-import { Icon } from 'components'
-import { RatingEmojiControl } from './RatingEmojiControl'
-import { useForm } from 'react-hook-form'
-import { supabase, isUnauthorized, logger } from 'utils'
-import { useUserContext } from 'context'
+import React, { useState, useEffect, useCallback } from 'react';
+import styled, { keyframes } from 'styled-components';
+import { theme } from '@/themes';
+import { Icon } from '@/components';
+import { RatingEmojiControl } from './RatingEmojiControl';
+import { useForm } from 'react-hook-form';
+import { supabase, isUnauthorized, logger } from '@/utils';
+import { useUserContext } from '@/context';
 
 const InputContainer = styled.div`
   position: relative;
   display: flex;
-`
+`;
 
 const Label = styled.label`
   position: absolute;
@@ -26,7 +26,7 @@ const Label = styled.label`
   line-height: 16px;
   white-space: nowrap;
   pointer-events: none;
-`
+`;
 
 const LabelOptional = styled.label`
   position: absolute;
@@ -42,13 +42,13 @@ const LabelOptional = styled.label`
   font-style: normal;
   line-height: 16px;
   white-space: nowrap;
-`
+`;
 
 const LabelErrorRating = styled.label`
   position: absolute;
   padding: 4px 8px;
   border-radius: 12px;
-  margin: 2px ​8px;
+  margin: 2px 8px;
   top: 0;
   right: 0;
   color: ${theme('color.error.main')};
@@ -57,7 +57,7 @@ const LabelErrorRating = styled.label`
   font-style: normal;
   line-height: 16px;
   white-space: nowrap;
-`
+`;
 
 const LabelError = styled.label`
   position: absolute;
@@ -72,7 +72,7 @@ const LabelError = styled.label`
   font-style: normal;
   line-height: 16px;
   white-space: nowrap;
-`
+`;
 
 const CTA = styled.button`
   border-radius: 100px;
@@ -82,7 +82,7 @@ const CTA = styled.button`
   color: ${theme('color.primary.surface')};
   padding: 6px 14px;
   cursor: pointer;
-`
+`;
 
 interface TextAreaProps {
   rows: any
@@ -129,7 +129,7 @@ const TextArea = styled.textarea<TextAreaProps>`
     color: ${theme('color.primary.main')};
     opacity: 0.6;
   }
-`
+`;
 
 const Input = styled.input`
   padding: 37px 16px 13px 16px;
@@ -171,7 +171,7 @@ const Input = styled.input`
   &::placeholder {
     opacity: 0.6;
   }
-`
+`;
 
 const Title = styled.h3`
   font-style: normal;
@@ -181,7 +181,7 @@ const Title = styled.h3`
   letter-spacing: -0.03em;
   color: ${theme('color.primary.main')};
   margin: 0;
-`
+`;
 const ThankYou = styled.h2`
   font-size: 24px;
   color: ${theme('color.primary.main')};
@@ -191,7 +191,7 @@ const ThankYou = styled.h2`
   line-height: 32px;
   margin: 32px 0 8px 0;
   letter-spacing: -1px;
-`
+`;
 const Body = styled.p`
   color: ${theme('color.primary.main')};
   font-size: 16px;
@@ -200,14 +200,14 @@ const Body = styled.p`
   line-height: 28px;
   opacity: 0.6;
   margin: 0;
-`
+`;
 
 const RatingInput = styled.input`
   visibility: hidden;
   width: 0;
   height: 0;
   display: none;
-`
+`;
 
 const reveal = keyframes`
   0% {
@@ -216,7 +216,7 @@ const reveal = keyframes`
   100% {
     bottom: 0;
   }
-`
+`;
 
 const FeedbackWidgetContainer = styled.div`
   position: fixed;
@@ -231,7 +231,7 @@ const FeedbackWidgetContainer = styled.div`
   animation-duration: 0.4s;
   animation-timing-function: cubic-bezier(0.64, 0.01, 0.71, 1.17);
   animation-fill-mode: both;
-`
+`;
 
 const GiveFeedbackButton = styled.div`
   position: fixed;
@@ -252,7 +252,7 @@ const GiveFeedbackButton = styled.div`
   &:hover {
     opacity: 0.5;
   }
-`
+`;
 
 interface FormProps {
   visible: boolean
@@ -282,7 +282,7 @@ const FeedbackForm = styled.form<FormProps>`
     props.visible
       ? 'visibility 0s, opacity 0.2s, margin-bottom 0.2s;'
       : 'visibility 0s linear 0.2s, opacity 0.2s, margin-bottom 0.2s;'};
-`
+`;
 
 const ThankYouScreen = styled.div<FormProps>`
   -webkit-app-region: no-drag;
@@ -309,7 +309,7 @@ const ThankYouScreen = styled.div<FormProps>`
   & svg {
     pointer-events: none;
   }
-`
+`;
 
 const FormFieldsContainer = styled.div`
   ${InputContainer}:first-child {
@@ -328,7 +328,7 @@ const FormFieldsContainer = styled.div`
       border-bottom-right-radius: 12px;
     }
   }
-`
+`;
 
 const showEmojiRating = keyframes`
   0% {
@@ -339,7 +339,7 @@ const showEmojiRating = keyframes`
     height: 100px;
     opacity: 1;
   }
-`
+`;
 
 const hideEmojiRating = keyframes`
  0% {
@@ -350,7 +350,7 @@ const hideEmojiRating = keyframes`
     height: 0;
     opacity: 0;
   }
-`
+`;
 
 interface InputProps {
   visible: boolean
@@ -364,21 +364,21 @@ const InputContainerAnimated = styled.div<InputProps>`
   animation-duration: 0.2s;
   animation-timing-function: cubic-bezier(0.17, 0.18, 0.41, 0.99);
   animation-fill-mode: both;
-`
+`;
 
 const FormHeader = styled.div`
   display: grid;
   grid-template-columns: auto 24px;
   column-gap: 8px;
   padding: 8px 8px 0 16px;
-`
+`;
 const FormFooter = styled.div`
   display: grid;
   grid-template-columns: auto 85px;
   column-gap: 8px;
   padding: 16px 0 0 16px;
   align-items: center;
-`
+`;
 
 const FormErrorMessage = styled.p`
   color: ${theme('color.error.main')};
@@ -387,7 +387,7 @@ const FormErrorMessage = styled.p`
   font-size: 14px;
   line-height: 18px;
   margin: 0;
-`
+`;
 
 const feedbackTypeMap = {
   experience: {
@@ -402,24 +402,24 @@ const feedbackTypeMap = {
     inputLabel: 'Idea',
     inputPlaceholder: 'Type your idea here...',
   },
-}
+};
 
-type Keys = keyof typeof feedbackTypeMap
-type Values = typeof feedbackTypeMap[Keys]
+type Keys = keyof typeof feedbackTypeMap;
+type Values = typeof feedbackTypeMap[Keys];
 
 type FormData = {
   feedbackType: Keys
   rating: string
   feedback: string
   email: string
-}
+};
 
 function FeedbackWidget() {
-  const [formVisible, setFormVisible] = useState(false)
-  const [formMessage, setFormMessage] = useState([])
-  const [formSubmitted, setFormSubmitted] = useState(false)
-  const [formSubmitting, setFormSubmitting] = useState(false)
-  const { session, signOut } = useUserContext()
+  const [formVisible, setFormVisible] = useState(false);
+  const [formMessage, setFormMessage] = useState([]);
+  const [formSubmitted, setFormSubmitted] = useState(false);
+  const [formSubmitting, setFormSubmitting] = useState(false);
+  const { session, signOut } = useUserContext();
   const {
     register,
     handleSubmit,
@@ -434,18 +434,18 @@ function FeedbackWidget() {
     formState: { errors, isDirty },
   } = useForm<FormData>({
     defaultValues: { feedbackType: 'experience', email: session.user.email },
-  })
+  });
 
-  const watchFeedbackType = watch('feedbackType')
+  const watchFeedbackType = watch('feedbackType');
 
   const submitFeedback = async (data: any) => {
-    const grades = ['angry', 'thinking', 'neutral', 'happy', 'love']
-    const rating = grades.findIndex((r) => r == data.rating) + 1
+    const grades = ['angry', 'thinking', 'neutral', 'happy', 'love'];
+    const rating = grades.findIndex((r) => r == data.rating) + 1;
 
-    setFormMessage([])
-    setFormSubmitting(true)
+    setFormMessage([]);
+    setFormSubmitting(true);
 
-    let { error } = await supabase
+    const { error } = await supabase
       .from('feedback')
       .insert(
         [
@@ -458,69 +458,69 @@ function FeedbackWidget() {
         ],
         { returning: 'minimal' }
       )
-      .single()
+      .single();
 
-    setFormSubmitting(false)
+    setFormSubmitting(false);
 
     if (error) {
-      logger(error)
-      if (isUnauthorized(error)) signOut()
-      setFormMessage(['error', 'Error, try again later'])
+      logger(error);
+      if (isUnauthorized(error)) signOut();
+      setFormMessage(['error', 'Error, try again later']);
     }
 
-    setFormSubmitted(true)
-    setFormVisible(false)
-  }
+    setFormSubmitted(true);
+    setFormVisible(false);
+  };
 
   const showForm = (e?: React.MouseEvent<HTMLElement, MouseEvent>) => {
-    e?.preventDefault()
-    setFormVisible(true)
-    setFormSubmitted(false)
+    e?.preventDefault();
+    setFormVisible(true);
+    setFormSubmitted(false);
     window.electronAPI.capture({
       distinctId: session.user.id,
       event: 'feedback open',
-    })
-  }
+    });
+  };
 
   const closeForm = (e?: React.MouseEvent<HTMLElement, MouseEvent>) => {
-    e?.preventDefault()
-    setFormVisible(false)
-  }
+    e?.preventDefault();
+    setFormVisible(false);
+  };
 
   const closeThankYou = (e?: React.MouseEvent<HTMLElement, MouseEvent>) => {
-    e?.preventDefault()
-    setFormSubmitted(false)
-  }
+    e?.preventDefault();
+    setFormSubmitted(false);
+  };
 
   const escFunction = useCallback((event) => {
     if (event.keyCode === 27) {
-      closeForm()
-      closeThankYou()
+      closeForm();
+      closeThankYou();
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
-    document.addEventListener('keydown', escFunction)
+    document.addEventListener('keydown', escFunction);
     return () => {
-      document.removeEventListener('keydown', escFunction)
-    }
-  }, [escFunction])
+      document.removeEventListener('keydown', escFunction);
+    };
+  }, [escFunction]);
 
   useEffect(() => {
-    resetField('rating')
-    clearErrors()
-    setFormMessage([])
-  }, [watchFeedbackType])
+    resetField('rating');
+    clearErrors();
+    setFormMessage([]);
+  }, [watchFeedbackType]);
 
   useEffect(() => {
     setTimeout(() => {
-      reset()
+      reset();
       if (formVisible) {
-        setFocus('feedback', { shouldSelect: true })
+        setFocus('feedback', { shouldSelect: true });
       }
-    }, 200)
-    setFormMessage([])
-  }, [formVisible])
+    }, 200);
+    setFormMessage([]);
+  }, [formVisible]);
 
   return (
     <FeedbackWidgetContainer>
@@ -576,7 +576,7 @@ function FeedbackWidget() {
             <Input
               {...register('email', {
                 pattern: {
-                  value: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g,
+                  value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/g,
                   message: 'Check format',
                 },
                 onBlur: (e) => setValue('email', e.target.value.trim(), { shouldValidate: true }),
@@ -609,13 +609,13 @@ function FeedbackWidget() {
       </ThankYouScreen>
       <GiveFeedbackButton
         onClick={(e) => {
-          showForm(e)
+          showForm(e);
         }}
       >
         Give feedback
       </GiveFeedbackButton>
     </FeedbackWidgetContainer>
-  )
+  );
 }
 
-export { FeedbackWidget }
+export { FeedbackWidget };

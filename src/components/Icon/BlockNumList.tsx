@@ -1,5 +1,5 @@
-import React from 'react'
-import { theme } from 'themes'
+import React from 'react';
+import { theme } from '@/themes';
 
 export function BlockNumList({ tintColor, ...props }: any) {
   return (
@@ -14,5 +14,5 @@ export function BlockNumList({ tintColor, ...props }: any) {
         fill={tintColor || theme('color.primary.main')}
       />
     </svg>
-  )
+  );
 }

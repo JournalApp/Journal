@@ -1,7 +1,7 @@
-import React from 'react'
-import { Icon } from 'components'
-import { theme } from 'themes'
-import styled from 'styled-components'
+import React from 'react';
+import { Icon } from '@/components';
+import { theme } from '@/themes';
+import styled from 'styled-components';
 
 const ItemWrapper = styled.button`
   display: flex;
@@ -17,10 +17,10 @@ const ItemWrapper = styled.button`
   &:hover {
     background-color: ${theme('color.popper.hover')};
   }
-`
+`;
 type ItemCurrentProps = {
   current: boolean
-}
+};
 
 const ItemTitle = styled.span<ItemCurrentProps>`
   font-size: 14px;
@@ -29,20 +29,20 @@ const ItemTitle = styled.span<ItemCurrentProps>`
   line-height: 20px;
   flex-grow: 1;
   text-align: left;
-`
+`;
 
-const ItemCurrent = styled(({ current, ...props }) => (
+const ItemCurrent = styled(({ ...props }) => (
   <Icon name='Check' {...props} />
 ))<ItemCurrentProps>`
   visibility: ${(props) => (props.current ? 'visible' : 'hidden')};
-`
+`;
 
 type ItemProps = {
   onMouseDown: (e: any) => void
   icon: string
   current: boolean
   children: string
-}
+};
 
 const BlockTypeSelectItem = ({ onMouseDown, icon, current = false, children }: ItemProps) => {
   return (
@@ -51,7 +51,7 @@ const BlockTypeSelectItem = ({ onMouseDown, icon, current = false, children }: I
       <ItemTitle current={current}>{children}</ItemTitle>
       <ItemCurrent current={current} />
     </ItemWrapper>
-  )
-}
+  );
+};
 
-export { BlockTypeSelectItem }
+export { BlockTypeSelectItem };

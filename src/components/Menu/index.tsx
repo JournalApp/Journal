@@ -1,12 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react'
-import styled, { keyframes } from 'styled-components'
-import { Icon, SettingsDialog } from 'components'
-import { AppearanceToolbar } from './AppearanceToolbar'
-import { theme, lightTheme, darkTheme } from 'themes'
-import { useAppearanceContext, AppearanceContextInterface } from 'context'
-import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { isDev, isTesting, logger } from 'utils'
-import { useUserContext } from 'context'
+import React, { useState, useEffect, useRef } from 'react';
+import styled, { keyframes } from 'styled-components';
+import { Icon, SettingsDialog } from '@/components';
+import { AppearanceToolbar } from './AppearanceToolbar';
+import { theme } from '@/themes';
+import {  useUserContext } from '@/context';
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import { isDev, isTesting, logger } from '@/utils';
 
 const showDropdown = keyframes`
   0% {
@@ -14,9 +13,9 @@ const showDropdown = keyframes`
   }
   100% {
     opacity: 1;
-  }`
+  }`;
 
-interface MenuProps {
+export interface MenuProps {
   posX?: string
   posY?: string
   pos?: string
@@ -31,7 +30,7 @@ const Dropdown = styled(DropdownMenu.Content)`
   animation-name: ${showDropdown};
   animation-duration: ${theme('animation.time.normal')};
   -webkit-app-region: no-drag;
-`
+`;
 
 const Item = styled(DropdownMenu.Item)`
   display: flex;
@@ -49,7 +48,7 @@ const Item = styled(DropdownMenu.Item)`
     outline: none;
     background-color: ${theme('color.popper.hover')};
   }
-`
+`;
 
 const ItemTitle = styled.span`
   flex-grow: 1;
@@ -65,7 +64,7 @@ const ItemTitle = styled.span`
     opacity: 0.6;
     font-style: normal;
   }
-`
+`;
 
 interface MenuButtonProps {
   open: boolean
@@ -100,7 +99,7 @@ const MenuButton = styled(DropdownMenu.Trigger)<MenuButtonProps>`
       transition: ${theme('animation.time.normal')};
     }
   }
-`
+`;
 
 const Badge = styled.div`
   position: absolute;
@@ -111,42 +110,42 @@ const Badge = styled.div`
   right: -4px;
   border-radius: 100px;
   border: 2px solid ${theme('color.primary.surface')};
-`
+`;
 
 const Divider = styled(DropdownMenu.Separator)`
   background-color: ${theme('color.popper.border')};
   height: 1px;
   margin: 4px 12px;
-`
+`;
 
 const Menu = () => {
-  logger('Menu re-render')
-  const [open, setOpen] = useState(false)
-  const [updateDownloaded, setUpdateDownloaded] = useState(false)
-  const { session, signOut, quitAndInstall, invokeOpenSettings } = useUserContext()
-  const setOpenAppearanceToolbar = useRef<any | null>({})
-  const returnFocus = useRef<HTMLButtonElement>(null)
+  logger('Menu re-render');
+  const [open, setOpen] = useState(false);
+  const [updateDownloaded, setUpdateDownloaded] = useState(false);
+  const { session, signOut, quitAndInstall, invokeOpenSettings } = useUserContext();
+  const setOpenAppearanceToolbar = useRef<any | null>({});
+  const returnFocus = useRef<HTMLButtonElement>(null);
 
   window.electronAPI.onUpdateDownloaded(() => {
-    setUpdateDownloaded(true)
-  })
+    setUpdateDownloaded(true);
+  });
 
   const signOutAndCapture = () => {
     window.electronAPI.capture({
       distinctId: session.user.id,
       event: 'user signout',
-    })
-    signOut()
-  }
+    });
+    signOut();
+  };
 
   useEffect(() => {
     if (open) {
       window.electronAPI.capture({
         distinctId: session.user.id,
         event: 'menu open',
-      })
+      });
     }
-  }, [open])
+  }, [open]);
 
   const Env = () => {
     if (isDev() && !isTesting()) {
@@ -157,7 +156,7 @@ const Menu = () => {
             <ItemTitle>Development</ItemTitle>
           </Item>
         </>
-      )
+      );
     }
     if (isTesting()) {
       return (
@@ -167,10 +166,10 @@ const Menu = () => {
             <ItemTitle>Testing</ItemTitle>
           </Item>
         </>
-      )
+      );
     }
-    return <></>
-  }
+    return <></>;
+  };
 
   return (
     <>
@@ -216,7 +215,7 @@ const Menu = () => {
       />
       <SettingsDialog returnFocus={returnFocus} />
     </>
-  )
-}
+  );
+};
 
-export { Menu }
+export { Menu };

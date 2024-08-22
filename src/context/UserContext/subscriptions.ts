@@ -1,4 +1,4 @@
-import { isDev, logger, supabase, awaitTimeout } from 'utils'
+import { isDev, logger, supabase } from '@/utils';
 import type {
   Subscription,
   CreateSubscriptionProps,
@@ -8,48 +8,48 @@ import type {
   BillingInfo,
   Countries,
   Price,
-} from 'types'
-import Stripe from 'stripe'
+} from '@/types';
+import Stripe from 'stripe';
 
 const getCustomer = async (access_token: string) => {
-  logger('getCustomer')
-  const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
+  logger('getCustomer');
+  const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do';
   return (await fetch(`${url}/api/v1/customer`, {
     headers: { Authorization: `Bearer ${access_token}` },
-  }).then((r) => r.json())) as BillingInfo
-}
+  }).then((r) => r.json())) as BillingInfo;
+};
 
 const deletePreviousCards = async (access_token: string) => {
-  logger('deletePreviousCards')
-  const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
+  logger('deletePreviousCards');
+  const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do';
   await fetch(`${url}/api/v1/cards`, {
     method: 'DELETE',
     headers: { Authorization: `Bearer ${access_token}` },
-  })
-}
+  });
+};
 
 const getSubscription = async (user_id: string, access_token: string) => {
-  logger('getSubscription')
-  const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
+  logger('getSubscription');
+  const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do';
   const response = await fetch(`${url}/api/v1/subscription`, {
     headers: { Authorization: `Bearer ${access_token}` },
-  })
-  const subscription = await response.json()
-  logger('getSubscription response:')
+  });
+  const subscription = await response.json();
+  logger('getSubscription response:');
   if (Object.keys(subscription).length === 0) {
-    logger('null')
-    window.electronAPI.user.saveSubscription(user_id, null)
-    return null
+    logger('null');
+    window.electronAPI.user.saveSubscription(user_id, null);
+    return null;
   } else {
-    logger(subscription)
-    window.electronAPI.user.saveSubscription(user_id, subscription)
-    return subscription as Subscription
+    logger(subscription);
+    window.electronAPI.user.saveSubscription(user_id, subscription);
+    return subscription as Subscription;
   }
-}
+};
 
 const createSubscription = async ({ access_token, priceId, address }: CreateSubscriptionProps) => {
-  logger('createSubscription')
-  const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
+  logger('createSubscription');
+  const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do';
   const { subscriptionId, clientSecret } = await fetch(`${url}/api/v1/subscription`, {
     method: 'POST',
     headers: {
@@ -60,13 +60,13 @@ const createSubscription = async ({ access_token, priceId, address }: CreateSubs
       priceId,
       ...(address && { address }),
     }),
-  }).then((r) => r.json())
-  return { subscriptionId, clientSecret }
-}
+  }).then((r) => r.json());
+  return { subscriptionId, clientSecret };
+};
 
 const cancelSubscription = async ({ access_token, subscriptionId }: UpdateSubscriptionProps) => {
-  logger('cancelSubscription')
-  const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
+  logger('cancelSubscription');
+  const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do';
   await fetch(`${url}/api/v1/subscription/${subscriptionId}`, {
     method: 'PATCH',
     headers: {
@@ -76,12 +76,12 @@ const cancelSubscription = async ({ access_token, subscriptionId }: UpdateSubscr
     body: JSON.stringify({
       action: 'cancel',
     }),
-  })
-}
+  });
+};
 
 const resumeSubscription = async ({ access_token, subscriptionId }: UpdateSubscriptionProps) => {
-  logger('cancelSubscription')
-  const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
+  logger('cancelSubscription');
+  const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do';
   await fetch(`${url}/api/v1/subscription/${subscriptionId}`, {
     method: 'PATCH',
     headers: {
@@ -91,30 +91,30 @@ const resumeSubscription = async ({ access_token, subscriptionId }: UpdateSubscr
     body: JSON.stringify({
       action: 'resume',
     }),
-  })
-}
+  });
+};
 
 const cancelSubscriptionImmediately = async ({
   access_token,
   subscriptionId,
 }: UpdateSubscriptionProps) => {
-  logger('cancelSubscription')
-  const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
+  logger('cancelSubscription');
+  const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do';
   await fetch(`${url}/api/v1/subscription/${subscriptionId}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${access_token}`,
     },
-  })
-}
+  });
+};
 
 const updateSubscriptionToYearly = async ({
   access_token,
   subscriptionId,
 }: UpdateSubscriptionProps) => {
-  logger('updateSubscriptionToYearly')
-  const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
+  logger('updateSubscriptionToYearly');
+  const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do';
   const { clientSecret } = await fetch(`${url}/api/v1/subscription/${subscriptionId}`, {
     method: 'PATCH',
     headers: {
@@ -124,13 +124,13 @@ const updateSubscriptionToYearly = async ({
     body: JSON.stringify({
       action: 'toYearly',
     }),
-  }).then((r) => r.json())
-  return { clientSecret }
-}
+  }).then((r) => r.json());
+  return { clientSecret };
+};
 
 const createSetupIntent = async ({ access_token, address }: AddCardProps) => {
-  logger('createSetupIntent')
-  const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
+  logger('createSetupIntent');
+  const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do';
   const { clientSecret } = await fetch(`${url}/api/v1/setupintent`, {
     method: 'POST',
     headers: {
@@ -140,53 +140,53 @@ const createSetupIntent = async ({ access_token, address }: AddCardProps) => {
     body: JSON.stringify({
       address,
     }),
-  }).then((r) => r.json())
-  return { clientSecret }
-}
+  }).then((r) => r.json());
+  return { clientSecret };
+};
 
 const fetchCountries = async () => {
-  const { data, error } = await supabase.from<Countries>('countries').select()
+  const { data, error } = await supabase.from<Countries>('countries').select();
   if (error) {
-    throw new Error(error.message)
+    throw new Error(error.message);
   }
   // await awaitTimeout(5000)
   const options = data.map((country) => {
-    return { value: country.country_code, label: country.country_name }
-  })
-  return options
-}
+    return { value: country.country_code, label: country.country_name };
+  });
+  return options;
+};
 
 const calcYearlyPlanSavings = (prices: Price[]) => {
   const yearlyPrice = prices
     ? prices.filter((price) => price.interval == 'year')[0]?.unit_amount
-    : 0
+    : 0;
   const monthlyPrice = prices
     ? prices.filter((price) => price.interval == 'month')[0]?.unit_amount
-    : 0
+    : 0;
 
-  const percent = (1 - yearlyPrice / (monthlyPrice * 12)) * 100
-  return `${Math.round(percent)}%`
-}
+  const percent = (1 - yearlyPrice / (monthlyPrice * 12)) * 100;
+  return `${Math.round(percent)}%`;
+};
 
 const fetchProducts = async () => {
-  const { data, error } = await supabase.from<Price>('prices').select('*,  products(*)')
+  const { data, error } = await supabase.from<Price>('prices').select('*,  products(*)');
   if (error) {
-    throw new Error(error.message)
+    throw new Error(error.message);
   }
-  return data
-}
+  return data;
+};
 
 const previewInvoice = async ({ access_token }: PreviewInvoiceProps) => {
-  logger('previewInvoice')
-  const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
+  logger('previewInvoice');
+  const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do';
   const { invoice } = await fetch(`${url}/api/v1/invoice-preview`, {
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${access_token}`,
     },
-  }).then((r) => r.json())
-  return invoice as Stripe.Invoice
-}
+  }).then((r) => r.json());
+  return invoice as Stripe.Invoice;
+};
 
 export {
   getSubscription,
@@ -202,4 +202,4 @@ export {
   fetchProducts,
   deletePreviousCards,
   previewInvoice,
-}
+};

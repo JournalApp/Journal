@@ -1,6 +1,6 @@
-import React from 'react'
-import styled from 'styled-components'
-import { theme } from 'themes'
+import React from 'react';
+import styled from 'styled-components';
+import { theme } from '@/themes';
 
 const FadeTop = styled.div`
   position: fixed;
@@ -16,7 +16,7 @@ const FadeTop = styled.div`
     ${theme('color.primary.surface')} 30%,
     ${theme('color.primary.surface', 0)} 100%
   );
-`
+`;
 // background: linear-gradient(180deg, #e0e0e0 0%, #e0e0e0 35%, rgba(224, 224, 224, 0) 100%);
 
 const FadeDown = styled.div`
@@ -33,7 +33,7 @@ const FadeDown = styled.div`
     ${theme('color.primary.surface')} 30%,
     ${theme('color.primary.surface', 0)} 100%
   );
-`
+`;
 
 function FadeOut() {
   return (
@@ -41,7 +41,7 @@ function FadeOut() {
       <FadeTop />
       <FadeDown />
     </>
-  )
+  );
 }
 
-export { FadeOut }
+export { FadeOut };

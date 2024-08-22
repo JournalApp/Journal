@@ -1,6 +1,6 @@
-import * as React from 'react'
+import * as React from 'react';
 
-type Emoji = 'angry' | 'thinking' | 'neutral' | 'happy' | 'love'
+type Emoji = 'angry' | 'thinking' | 'neutral' | 'happy' | 'love';
 
 interface RatingEmojiProps {
   type: Emoji
@@ -43,7 +43,7 @@ function RatingEmoji({ type, ...props }: RatingEmojiProps) {
             fill='#444444'
           />
         </svg>
-      )
+      );
     case 'thinking':
       return (
         <svg
@@ -83,7 +83,7 @@ function RatingEmoji({ type, ...props }: RatingEmojiProps) {
             fill='#E2AC4B'
           />
         </svg>
-      )
+      );
     case 'neutral':
       return (
         <svg
@@ -111,7 +111,7 @@ function RatingEmoji({ type, ...props }: RatingEmojiProps) {
             fill='#444444'
           />
         </svg>
-      )
+      );
     case 'happy':
       return (
         <svg
@@ -147,7 +147,7 @@ function RatingEmoji({ type, ...props }: RatingEmojiProps) {
             fill='#FA645A'
           />
         </svg>
-      )
+      );
     case 'love':
       return (
         <svg
@@ -183,10 +183,10 @@ function RatingEmoji({ type, ...props }: RatingEmojiProps) {
             fill='#FA645A'
           />
         </svg>
-      )
+      );
     default:
-      return ''
+      return '';
   }
 }
 
-export { RatingEmoji }
+export { RatingEmoji };

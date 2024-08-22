@@ -1,19 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react'
-import styled, { keyframes } from 'styled-components'
-import { theme, LightThemeItemKey, BaseThemeItemKey } from 'themes'
-import { Icon } from 'components'
-import * as Switch from '@radix-ui/react-switch'
-import { logger, supabase, awaitTimeout, isDev } from 'utils'
-import { Stripe } from '@stripe/stripe-js'
-import { Elements } from '@stripe/react-stripe-js'
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
-import { useQuery } from '@tanstack/react-query'
-import type { Price } from 'types'
-import * as Const from 'consts'
-import { useUserContext } from 'context'
-import { Subscribe } from '../Subscribe'
-import { fetchProducts } from '../../../../context/UserContext/subscriptions'
-import { loadStripe } from '@stripe/stripe-js/pure'
+import React, { useState } from 'react';
+import styled from 'styled-components';
+import { theme, LightThemeItemKey, BaseThemeItemKey } from '@/themes';
+import { Icon } from '@/components';
+import * as Switch from '@radix-ui/react-switch';
+import { isDev } from '@/utils';
+import { Elements } from '@stripe/react-stripe-js';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import { useQuery } from '@tanstack/react-query';
+import * as Const from '@/constants';
+import { useUserContext } from '@/context';
+import { Subscribe } from '../Subscribe';
+import { fetchProducts } from '../../../../context/UserContext/subscriptions';
+import { loadStripe } from '@stripe/stripe-js/pure';
 
 const PlansSectionStyled = styled.div`
   display: grid;
@@ -21,7 +19,7 @@ const PlansSectionStyled = styled.div`
   grid-auto-columns: 1fr;
   gap: 16px;
   margin-bottom: 40px;
-`
+`;
 
 interface PlanStyledProps {
   bgColor?: string
@@ -39,7 +37,7 @@ const PlanStyled = styled.div<PlanStyledProps>`
   border-radius: 12px;
   padding: 16px;
   ${(props) => (props.isActive ? 'grid-column: 1;' : '')};
-`
+`;
 
 const PlanTitleStyled = styled.div`
   font-style: normal;
@@ -56,7 +54,7 @@ const PlanTitleStyled = styled.div`
     line-height: 18px;
     opacity: 0.8;
   }
-`
+`;
 
 const PlansLimitsBoxStyled = styled.div`
   display: flex;
@@ -69,7 +67,7 @@ const PlansLimitsBoxStyled = styled.div`
   padding: 8px 12px 12px 12px;
   border-radius: 8px;
   background-color: ${theme('color.pure', 0.3)};
-`
+`;
 
 interface PlansProgressBarStyledProps {
   progress?: string
@@ -86,20 +84,20 @@ const PlansProgressBarStyled = styled.div<PlansProgressBarStyledProps>`
     height: 3px;
     border-radius: 3px;
   }
-`
+`;
 
-const Infinity = styled.div`
+const StyledInfinity = styled.div`
   font-style: normal;
   font-weight: 400;
   font-size: 12px;
   line-height: 15px;
   margin-bottom: -4px;
-`
+`;
 
 const PriceContainerStyled = styled.div`
   display: flex;
   align-items: center;
-`
+`;
 
 const PriceStyled = styled.div`
   flex-grow: 1;
@@ -107,7 +105,7 @@ const PriceStyled = styled.div`
   font-size: 14px;
   line-height: 28px;
   letter-spacing: -0.03em;
-`
+`;
 
 interface SwitchStyledProps {
   turnedOn: boolean
@@ -132,7 +130,7 @@ const SwitchStyled = styled.div<SwitchStyledProps>`
   & label {
     cursor: pointer;
   }
-`
+`;
 
 const SwitchBgStyled = styled(Switch.Root)`
   all: unset;
@@ -144,7 +142,7 @@ const SwitchBgStyled = styled(Switch.Root)`
   &[data-state='checked'] {
     background-color: ${theme('color.productWriter.main')};
   }
-`
+`;
 
 const SwitchThumbStyled = styled(Switch.Thumb)`
   display: block;
@@ -159,7 +157,7 @@ const SwitchThumbStyled = styled(Switch.Thumb)`
     transform: translateX(8px);
     background-color: ${theme('color.productWriter.popper')};
   }
-`
+`;
 
 interface PrimaryButtonStyledProps {
   bgColor?: LightThemeItemKey | BaseThemeItemKey
@@ -189,7 +187,7 @@ const PrimaryButtonStyled = styled.button<PrimaryButtonStyledProps>`
     box-shadow: 0 0 0 2px
       ${(props) => (props.bgColor ? theme(props.bgColor, 0.15) : theme('color.popper.main', 0.15))};
   }
-`
+`;
 
 interface SecondaryButtonStyledProps {
   textColor?: LightThemeItemKey | BaseThemeItemKey
@@ -222,28 +220,28 @@ const SecondaryButtonStyled = styled.button<SecondaryButtonStyledProps>`
         : `1px solid ${theme('color.popper.main', 0.6)}`};
     cursor: default;
   }
-`
+`;
 
 function calcPercentage(limit: number, current: number, min = 0, max = 100) {
   if (current == 0) {
-    return 100
+    return 100;
   } else {
-    let val = Math.round((current / limit) * 100)
-    return val < min ? min : val > max ? max : val
+    const val = Math.round((current / limit) * 100);
+    return val < min ? min : val > max ? max : val;
   }
 }
 
 const UsedEntries = () => {
-  const { session } = useUserContext()
-  const { isLoading, isError, data, error } = useQuery({
+  const { session } = useUserContext();
+  const { isLoading, isError, data } = useQuery({
     queryKey: ['entriesCount'],
     queryFn: async () => {
-      return await window.electronAPI.cache.getEntriesCount(session.user.id)
+      return await window.electronAPI.cache.getEntriesCount(session.user.id);
     },
-  })
+  });
 
   if (isLoading || isError) {
-    return <></>
+    return <></>;
   }
 
   return (
@@ -253,23 +251,23 @@ const UsedEntries = () => {
         <div></div>
       </PlansProgressBarStyled>
     </PlansLimitsBoxStyled>
-  )
-}
+  );
+};
 
 const Products = () => {
-  const [billingInterval, setBillingInterval] = useState<'year' | 'month'>('year')
-  const [stripePromise, setStripePromise] = useState<any | null>(null)
-  const { session, subscription } = useUserContext()
+  const [billingInterval, setBillingInterval] = useState<'year' | 'month'>('year');
+  const [stripePromise, setStripePromise] = useState<any | null>(null);
+  const { session, subscription } = useUserContext();
 
   useQuery({
     queryKey: ['stripePromise'],
     queryFn: async () => {
-      const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
-      const { publishableKey } = await fetch(`${url}/api/v1/config`).then((r) => r.json())
-      setStripePromise(() => loadStripe(publishableKey))
-      return publishableKey
+      const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do';
+      const { publishableKey } = await fetch(`${url}/api/v1/config`).then((r) => r.json());
+      setStripePromise(() => loadStripe(publishableKey));
+      return publishableKey;
     },
-  })
+  });
 
   const {
     isLoading,
@@ -279,21 +277,21 @@ const Products = () => {
   } = useQuery({
     queryKey: ['prices'],
     queryFn: fetchProducts,
-  })
+  });
 
   const displayWriterPrice = () => {
     if (billingInterval == 'year') {
-      let amount = prices.filter(
+      const amount = prices.filter(
         (price) => price.product_id == Const.productWriterId && price.interval == 'year'
-      )[0]?.unit_amount
-      return `$${amount / 100} / year`
+      )[0]?.unit_amount;
+      return `$${amount / 100} / year`;
     } else {
-      let amount = prices.filter(
+      const amount = prices.filter(
         (price) => price.product_id == Const.productWriterId && price.interval == 'month'
-      )[0]?.unit_amount
-      return `$${amount / 100} / month`
+      )[0]?.unit_amount;
+      return `$${amount / 100} / month`;
     }
-  }
+  };
 
   return (
     <PlansSectionStyled>
@@ -344,7 +342,7 @@ const Products = () => {
             </sub>
           </PlanTitleStyled>
           <PlansLimitsBoxStyled>
-            Unlimited entries<Infinity>∞</Infinity>
+            Unlimited entries<StyledInfinity>∞</StyledInfinity>
           </PlansLimitsBoxStyled>
           {subscription == null && (
             <PriceContainerStyled>
@@ -356,11 +354,11 @@ const Products = () => {
                   id='s1'
                   checked={billingInterval == 'year'}
                   onCheckedChange={(checked) => {
-                    checked ? setBillingInterval('year') : setBillingInterval('month')
+                    checked ? setBillingInterval('year') : setBillingInterval('month');
                     window.electronAPI.capture({
                       distinctId: session.user.id,
                       event: 'settings upgrade toggle-billing-interval',
-                    })
+                    });
                   }}
                 >
                   <SwitchThumbStyled />
@@ -395,7 +393,7 @@ const Products = () => {
         </PlanStyled>
       </SkeletonTheme>
     </PlansSectionStyled>
-  )
-}
+  );
+};
 
-export { Products }
+export { Products };

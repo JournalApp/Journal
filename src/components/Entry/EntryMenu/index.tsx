@@ -1,15 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react'
-import styled, { keyframes } from 'styled-components'
-import { Icon, SettingsDialog } from 'components'
-import { theme, lightTheme, darkTheme } from 'themes'
-import { useAppearanceContext, useEntriesContext } from 'context'
-import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { entryHasNoContent, logger, ordinal } from 'utils'
-import { useUserContext } from 'context'
-import { Modal } from './Modal'
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
-dayjs.extend(relativeTime)
+import React, { useState, useEffect, useRef } from 'react';
+import styled, { keyframes } from 'styled-components';
+import { Icon } from '@/components';
+import { theme } from '@/themes';
+import { useEntriesContext , useUserContext } from '@/context';
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import { logger, ordinal } from '@/utils';
+import { Modal } from './Modal';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+dayjs.extend(relativeTime);
 
 const showDropdown = keyframes`
   0% {
@@ -17,7 +16,7 @@ const showDropdown = keyframes`
   }
   100% {
     opacity: 1;
-  }`
+  }`;
 
 const DropdownStyled = styled(DropdownMenu.Content)`
   z-index: 9999;
@@ -29,7 +28,7 @@ const DropdownStyled = styled(DropdownMenu.Content)`
   animation-name: ${showDropdown};
   animation-duration: ${theme('animation.time.normal')};
   -webkit-app-region: no-drag;
-`
+`;
 
 const ItemStyled = styled(DropdownMenu.Item)`
   display: flex;
@@ -47,7 +46,7 @@ const ItemStyled = styled(DropdownMenu.Item)`
     outline: none;
     background-color: ${theme('color.popper.hover')};
   }
-`
+`;
 interface ItemTitleProps {
   textColor?: string
 }
@@ -67,11 +66,11 @@ const ItemTitle = styled.span<ItemTitleProps>`
     opacity: 0.6;
     font-style: normal;
   }
-`
+`;
 
 const isToday = (day: any) => {
-  return day.toString() == dayjs().format('YYYY-MM-DD')
-}
+  return day.toString() == dayjs().format('YYYY-MM-DD');
+};
 
 interface MenuButtonProps {
   open: boolean
@@ -99,78 +98,78 @@ const MenuButtonStyled = styled(DropdownMenu.Trigger)<MenuButtonProps>`
     transition: box-shadow
       ${theme('animation.time.veryFast') + ' ' + theme('animation.timingFunction.dynamic')};
   }
-`
+`;
 
 const Divider = styled(DropdownMenu.Separator)`
   background-color: ${theme('color.popper.border')};
   height: 1px;
   margin: 4px 12px;
-`
+`;
 
 const StatsWrapperStyled = styled.div`
   padding: 12px;
   display: flex;
   flex-direction: column;
   gap: 4px;
-`
+`;
 
 const StatsRowStyled = styled.div`
   display: flex;
   font-weight: 400;
   font-size: 12px;
   line-height: 20px;
-`
+`;
 
 const StatsTitleStyled = styled.div`
   flex: 1;
   opacity: 0.6;
-`
+`;
 
-const StatsValueStyled = styled.div``
+const StatsValueStyled = styled.div``;
 
 interface EntryMenuProps {
   renderTrigger: any
   date: string
-  wordCount: React.MutableRefObject<number>
+  wordCount: React.MutableRefObject<number | string[]>
 }
 
 const EntryMenu = ({ renderTrigger, wordCount, date }: EntryMenuProps) => {
-  logger('EntryMenu re-render')
-  const [open, setOpen] = useState(false)
-  const [openModal, setOpenModal] = useState(false)
-  const [lastModifiedAt, setLastModifiedAt] = useState('')
-  const [dayNo, setDayNo] = useState(0)
-  const { userEntries, deleteEntry } = useEntriesContext()
-  const { session } = useUserContext()
+  logger('EntryMenu re-render');
+  const [open, setOpen] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+  const [lastModifiedAt, setLastModifiedAt] = useState('');
+  const [dayNo, setDayNo] = useState(0);
+  const { userEntries, deleteEntry } = useEntriesContext();
+  const { session } = useUserContext();
 
-  const returnFocus = useRef<HTMLButtonElement>(null)
+  const returnFocus = useRef<HTMLButtonElement>(null);
 
   const deleteEntryHandler = (day: string) => {
-    deleteEntry(day)
+    deleteEntry(day);
     window.electronAPI.capture({
       distinctId: session.user.id,
       event: 'entry entry-menu item',
       properties: { action: 'delete-entry' },
-    })
-  }
+    });
+  };
 
   useEffect(() => {
     if (open) {
-      const lm = userEntries.current.find((entry) => entry.day == date)?.modified_at
-      if (lm) setLastModifiedAt(dayjs(lm).fromNow())
+      const lm = userEntries.current.find((entry: { day: string; }) => entry.day == date)?.modified_at;
+      if (lm) setLastModifiedAt(dayjs(lm).fromNow());
 
-      const i = userEntries.current.findIndex((e) => e.day == date)
-      if (i) setDayNo(i)
+      const i = userEntries.current.findIndex((e: { day: string; }) => e.day == date);
+      if (i) setDayNo(i);
 
       if (isToday(date)) {
-        setDayNo(userEntries.current.length)
+        setDayNo(userEntries.current.length);
       }
       window.electronAPI.capture({
         distinctId: session.user.id,
         event: 'entry entry-menu open',
-      })
+      });
     }
-  }, [open])
+  }, [open]);
 
   return (
     <DropdownMenu.Root onOpenChange={(open) => setOpen(open)}>
@@ -210,10 +209,10 @@ const EntryMenu = ({ renderTrigger, wordCount, date }: EntryMenuProps) => {
               onSelect={() => {
                 if (wordCount.current == 0) {
                   setTimeout(() => {
-                    deleteEntryHandler(date)
-                  }, 200)
+                    deleteEntryHandler(date);
+                  }, 200);
                 } else {
-                  setOpenModal(true)
+                  setOpenModal(true);
                 }
               }}
             >
@@ -225,7 +224,7 @@ const EntryMenu = ({ renderTrigger, wordCount, date }: EntryMenuProps) => {
       </DropdownStyled>
       {openModal && <Modal action={() => deleteEntryHandler(date)} setOpenModal={setOpenModal} />}
     </DropdownMenu.Root>
-  )
-}
+  );
+};
 
-export { EntryMenu }
+export { EntryMenu };

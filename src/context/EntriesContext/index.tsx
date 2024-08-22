@@ -1,17 +1,17 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react'
-import dayjs from 'dayjs'
-import { useUserContext } from 'context'
-import { electronAPIType } from '../../preload'
-import { supabase, logger } from 'utils'
-import { PlateEditor } from '@udecode/plate'
-import type { Day, Entry, Tag, EntryTag } from 'types'
-import type { RealtimeSubscription } from '@supabase/supabase-js'
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import dayjs from 'dayjs';
+import { useUserContext } from '@/context';
+import { electronAPIType } from '../../preload';
+import { supabase, logger } from '@/utils';
+import { PlateEditor } from '@udecode/plate';
+import type { Day, Entry, Tag, EntryTag } from '@/types';
+import type { RealtimeSubscription } from '@supabase/supabase-js';
 import {
   syncEntries,
   cacheAddOrUpdateEntry,
   cacheUpdateEntry,
   cacheUpdateEntryProperty,
-} from './entries'
+} from './entries';
 import {
   cacheAddOrUpdateTag,
   cacheDeleteTag,
@@ -19,8 +19,8 @@ import {
   cacheAddOrUpdateEntryTag,
   cacheUpdateEntryTagProperty,
   syncTags,
-} from './tags'
-import { initRealtimeEntries, initRealtimeTags, initRealtimeEntryTags } from './realtime'
+} from './tags';
+import { initRealtimeEntries, initRealtimeTags, initRealtimeEntryTags } from './realtime';
 
 interface EntriesContextInterface {
   userEntries: React.MutableRefObject<Entry[]>
@@ -47,120 +47,120 @@ interface EntriesContextInterface {
   rerenderCalendar: () => void
 }
 
-const EntriesContext = createContext<EntriesContextInterface | null>(null)
+const EntriesContext = createContext<EntriesContextInterface | null>(null);
 
 export function EntriesProvider({ children }: any) {
-  const { session, serverTimeNow, signOut, getSecretKey } = useUserContext()
-  const [cacheFetchDone, setCacheFetchDone] = useState(false)
-  const today = useRef<Day>(dayjs().format('YYYY-MM-DD') as Day)
-  const editorsRef = useRef<Array<PlateEditor | null>>([])
-  const invokeRerenderCalendar = useRef<any | null>({})
+  const { session, signOut, getSecretKey } = useUserContext();
+  const [cacheFetchDone, setCacheFetchDone] = useState(false);
+  const today = useRef<Day>(dayjs().format('YYYY-MM-DD') as Day);
+  const editorsRef = useRef<Array<PlateEditor | null>>([]);
+  const invokeRerenderCalendar = useRef<any | null>({});
 
   // Entries
-  const userEntries = useRef<Entry[]>([])
-  const invokeRerenderEntryList = useRef<any | null>({})
-  const invokeRerenderEntryTags = useRef<any | null>({})
-  const invokeRerenderEntry = useRef<any | null>({})
-  const invokeForceSaveEntry = useRef<any | null>({})
-  const initialEntriesFetchDone = useRef(false)
-  const syncEntriesInterval = useRef<NodeJS.Timeout | null>(null)
+  const userEntries = useRef<Entry[]>([]);
+  const invokeRerenderEntryList = useRef<any | null>({});
+  const invokeRerenderEntryTags = useRef<any | null>({});
+  const invokeRerenderEntry = useRef<any | null>({});
+  const invokeForceSaveEntry = useRef<any | null>({});
+  const initialEntriesFetchDone = useRef(false);
+  const syncEntriesInterval = useRef<NodeJS.Timeout | null>(null);
 
   // Tags
-  const userTags = useRef<Tag[]>([])
-  const syncTagsInterval = useRef<NodeJS.Timeout | null>(null)
-  const initialTagsFetchDone = useRef(false)
+  const userTags = useRef<Tag[]>([]);
+  const syncTagsInterval = useRef<NodeJS.Timeout | null>(null);
+  const initialTagsFetchDone = useRef(false);
 
   // EntryTags
-  const userEntryTags = useRef<EntryTag[]>([])
-  const initialEntryTagsFetchDone = useRef(false)
+  const userEntryTags = useRef<EntryTag[]>([]);
+  const initialEntryTagsFetchDone = useRef(false);
 
   // Realtime
-  const realtimeEntriesSub = useRef<RealtimeSubscription | null>(null)
-  const realtimeTagsSub = useRef<RealtimeSubscription | null>(null)
-  const realtimeEntryTagsSub = useRef<RealtimeSubscription | null>(null)
+  const realtimeEntriesSub = useRef<RealtimeSubscription | null>(null);
+  const realtimeTagsSub = useRef<RealtimeSubscription | null>(null);
+  const realtimeEntryTagsSub = useRef<RealtimeSubscription | null>(null);
 
-  logger('EntriesContext render')
+  logger('EntriesContext render');
 
   //////////////////////////
   // Entries functions
   //////////////////////////
 
   const cacheAddEntryIfNotExists = async (day: string) => {
-    const exists = await window.electronAPI.cache.doesEntryExist(session.user.id, day)
+    const exists = await window.electronAPI.cache.doesEntryExist(session.user.id, day);
     if (!exists) {
-      logger(`Day ${day} doesnt exist, creating...`)
-      await invokeForceSaveEntry.current[day]()
+      logger(`Day ${day} doesnt exist, creating...`);
+      await invokeForceSaveEntry.current[day]();
     } else {
-      logger(`Day already ${day} exists`)
+      logger(`Day already ${day} exists`);
     }
-  }
+  };
 
   const deleteEntry = async (day: string) => {
     if (typeof day == 'string') {
-      logger(`Removing day ${day}`)
-      const i = userEntries.current.findIndex((e) => e.day == day)
-      userEntries.current.splice(i, 1)
-      rerenderEntriesAndCalendar()
-      cacheUpdateEntryProperty({ sync_status: 'pending_delete' }, { user_id: session.user.id, day })
+      logger(`Removing day ${day}`);
+      const i = userEntries.current.findIndex((e) => e.day == day);
+      userEntries.current.splice(i, 1);
+      rerenderEntriesAndCalendar();
+      cacheUpdateEntryProperty({ sync_status: 'pending_delete' }, { user_id: session.user.id, day });
     } else {
-      logger('Day is not a string')
+      logger('Day is not a string');
     }
-  }
+  };
 
   const rerenderEntriesWithTag = async (tag_id: string) => {
-    const days = await window.electronAPI.cache.getDaysWithTag(tag_id)
+    const days = await window.electronAPI.cache.getDaysWithTag(tag_id);
     days.map((day) => {
-      if (!!invokeRerenderEntryTags.current[day]) {
-        invokeRerenderEntryTags.current[day]()
+      if (invokeRerenderEntryTags.current[day]) {
+        invokeRerenderEntryTags.current[day]();
       }
-    })
-  }
+    });
+  };
 
   const rerenderEntry = (day: Day) => {
-    if (!!invokeRerenderEntry.current[day]) {
-      invokeRerenderEntry.current[day]()
+    if (invokeRerenderEntry.current[day]) {
+      invokeRerenderEntry.current[day]();
     }
-  }
+  };
 
   const rerenderEntries = () => {
-    if (!!invokeRerenderEntryList.current) {
-      invokeRerenderEntryList.current()
+    if (invokeRerenderEntryList.current) {
+      invokeRerenderEntryList.current();
     }
-  }
+  };
 
   const rerenderCalendar = () => {
-    if (!!invokeRerenderCalendar.current) {
-      invokeRerenderCalendar.current()
+    if (invokeRerenderCalendar.current) {
+      invokeRerenderCalendar.current();
     }
-  }
+  };
 
   const rerenderEntriesAndCalendar = () => {
-    rerenderEntries()
-    rerenderCalendar()
-  }
+    rerenderEntries();
+    rerenderCalendar();
+  };
 
   const cacheFetchTags = async () => {
-    const tags = await window.electronAPI.cache.getTags(session.user.id)
-    userTags.current = tags
-    logger('Cached Tags:')
-    logger(tags)
-  }
+    const tags = await window.electronAPI.cache.getTags(session.user.id);
+    userTags.current = tags;
+    logger('Cached Tags:');
+    logger(tags);
+  };
 
   const cacheFetchEntryTags = async () => {
-    const cachedEntryTags = await window.electronAPI.cache.getEntryTags(session.user.id)
-    userEntryTags.current = cachedEntryTags
-  }
+    const cachedEntryTags = await window.electronAPI.cache.getEntryTags(session.user.id);
+    userEntryTags.current = cachedEntryTags;
+  };
 
   const cacheFetchEntries = async () => {
-    const entries = await window.electronAPI.cache.getEntries(session.user.id)
-    userEntries.current = entries
-  }
+    const entries = await window.electronAPI.cache.getEntries(session.user.id);
+    userEntries.current = entries;
+  };
 
   const forceSyncTags = () => {
-    initialTagsFetchDone.current = false
-    initialEntryTagsFetchDone.current = false
-    onTagPending()
-  }
+    initialTagsFetchDone.current = false;
+    initialEntryTagsFetchDone.current = false;
+    onTagPending();
+  };
 
   // Entries
   const syncEntriesArgs = {
@@ -174,19 +174,19 @@ export function EntriesProvider({ children }: any) {
     session,
     signOut,
     getSecretKey,
-  }
+  };
   // Handeler for SQLite trigger
   const onEntryPending = () => {
-    syncEntries(syncEntriesArgs)
-    logger('onEntryPending()')
+    syncEntries(syncEntriesArgs);
+    logger('onEntryPending()');
     if (!syncEntriesInterval.current) {
-      syncEntriesInterval.current = setInterval(syncEntries, 5000, syncEntriesArgs)
-      logger('interval set')
+      syncEntriesInterval.current = setInterval(syncEntries, 5000, syncEntriesArgs);
+      logger('interval set');
     } else {
-      logger('interval not set')
-      logger(syncEntriesInterval.current)
+      logger('interval not set');
+      logger(syncEntriesInterval.current);
     }
-  }
+  };
 
   // Tags
   const syncTagsArgs = {
@@ -199,18 +199,18 @@ export function EntriesProvider({ children }: any) {
     syncTagsInterval,
     session,
     signOut,
-  }
+  };
   // Handeler for SQLite trigger
   const onTagPending = () => {
-    logger('onTagPending()')
+    logger('onTagPending()');
     if (!syncTagsInterval.current) {
-      syncTagsInterval.current = setInterval(syncTags, 5000, syncTagsArgs)
-      logger('interval set')
+      syncTagsInterval.current = setInterval(syncTags, 5000, syncTagsArgs);
+      logger('interval set');
     } else {
-      logger('interval not set')
-      logger(syncTagsInterval.current)
+      logger('interval not set');
+      logger(syncTagsInterval.current);
     }
-  }
+  };
 
   //////////////////////////
   // ⛰ useEffect on mount
@@ -218,45 +218,45 @@ export function EntriesProvider({ children }: any) {
 
   useEffect(() => {
     const cacheFetchAll = async () => {
-      await cacheFetchTags()
-      await cacheFetchEntryTags()
-      await cacheFetchEntries()
-      setCacheFetchDone(true)
-      rerenderEntriesAndCalendar()
-    }
+      await cacheFetchTags();
+      await cacheFetchEntryTags();
+      await cacheFetchEntries();
+      setCacheFetchDone(true);
+      rerenderEntriesAndCalendar();
+    };
 
-    cacheFetchAll()
+    cacheFetchAll();
 
     const hasNewDayCome = setInterval(() => {
-      let realToday = dayjs().format('YYYY-MM-DD') as Day
+      const realToday = dayjs().format('YYYY-MM-DD') as Day;
       if (today.current != realToday) {
-        logger(`New day has come ${realToday} !!!`)
-        today.current = realToday
-        rerenderEntriesAndCalendar()
+        logger(`New day has come ${realToday} !!!`);
+        today.current = realToday;
+        rerenderEntriesAndCalendar();
         window.electronAPI.capture({
           type: 'system',
           distinctId: session.user.id,
           event: 'entry new-day-overnight',
-        })
+        });
       }
-    }, 1000)
+    }, 1000);
 
     // Sync Entires on mount
-    syncEntriesInterval.current = setInterval(syncEntries, 5000, syncEntriesArgs)
-    syncEntries(syncEntriesArgs)
+    syncEntriesInterval.current = setInterval(syncEntries, 5000, syncEntriesArgs);
+    syncEntries(syncEntriesArgs);
     // Set handeler for SQLite trigger
-    window.electronAPI.onEntryPending(onEntryPending)
+    window.electronAPI.onEntryPending(onEntryPending);
 
     // Sync Tags on mount
-    syncTagsInterval.current = setInterval(syncTags, 5000, syncTagsArgs)
-    syncTags(syncTagsArgs)
+    syncTagsInterval.current = setInterval(syncTags, 5000, syncTagsArgs);
+    syncTags(syncTagsArgs);
     // Set handeler for SQLite trigger
-    window.electronAPI.onTagPending(onTagPending)
+    window.electronAPI.onTagPending(onTagPending);
 
     // Realtime Entries
     function syncEntriesRealtime() {
-      initialEntriesFetchDone.current = false
-      syncEntries(syncEntriesArgs)
+      initialEntriesFetchDone.current = false;
+      syncEntries(syncEntriesArgs);
     }
 
     initRealtimeEntries({
@@ -264,12 +264,12 @@ export function EntriesProvider({ children }: any) {
       realtimeEntriesSub,
       user_id: session.user.id,
       onUpdate: syncEntriesRealtime,
-    })
+    });
 
     // Realtime Tags
     function syncTagsRealtime() {
-      initialTagsFetchDone.current = false
-      syncTags(syncTagsArgs)
+      initialTagsFetchDone.current = false;
+      syncTags(syncTagsArgs);
     }
 
     initRealtimeTags({
@@ -277,12 +277,12 @@ export function EntriesProvider({ children }: any) {
       realtimeTagsSub,
       user_id: session.user.id,
       onUpdate: syncTagsRealtime,
-    })
+    });
 
     // Realtime Entry Tags
     function syncEntryTagsRealtime() {
-      initialEntryTagsFetchDone.current = false
-      syncTags(syncTagsArgs)
+      initialEntryTagsFetchDone.current = false;
+      syncTags(syncTagsArgs);
     }
 
     initRealtimeEntryTags({
@@ -290,41 +290,41 @@ export function EntriesProvider({ children }: any) {
       realtimeEntryTagsSub,
       user_id: session.user.id,
       onUpdate: syncEntryTagsRealtime,
-    })
+    });
 
     // Sync all TO and FROM
     function syncAll() {
-      logger('syncAll')
-      initialEntriesFetchDone.current = false
-      initialTagsFetchDone.current = false
-      initialEntryTagsFetchDone.current = false
-      syncTags(syncTagsArgs)
-      syncEntries(syncEntriesArgs)
+      logger('syncAll');
+      initialEntriesFetchDone.current = false;
+      initialTagsFetchDone.current = false;
+      initialEntryTagsFetchDone.current = false;
+      syncTags(syncTagsArgs);
+      syncEntries(syncEntriesArgs);
     }
 
     // Sync all when back online
-    window.addEventListener('online', syncAll)
+    window.addEventListener('online', syncAll);
 
     // Sync all after waking from sleep
-    window.electronAPI.onPowerMonitorResume(syncAll)
+    window.electronAPI.onPowerMonitorResume(syncAll);
 
     return () => {
-      clearInterval(hasNewDayCome)
+      clearInterval(hasNewDayCome);
       if (syncEntriesInterval.current) {
-        clearInterval(syncEntriesInterval.current)
-        syncEntriesInterval.current = null
+        clearInterval(syncEntriesInterval.current);
+        syncEntriesInterval.current = null;
       }
       if (syncTagsInterval.current) {
-        clearInterval(syncTagsInterval.current)
-        syncTagsInterval.current = null
+        clearInterval(syncTagsInterval.current);
+        syncTagsInterval.current = null;
       }
       // Realtime unsubscribe
-      supabase.removeAllSubscriptions()
-      window.removeEventListener('online', syncAll)
-    }
-  }, [])
+      supabase.removeAllSubscriptions();
+      window.removeEventListener('online', syncAll);
+    };
+  }, []);
 
-  let state = {
+  const state = {
     userEntries,
     userTags,
     userEntryTags,
@@ -347,12 +347,12 @@ export function EntriesProvider({ children }: any) {
     rerenderEntriesWithTag,
     rerenderEntriesAndCalendar,
     rerenderCalendar,
-  }
+  };
   return (
     <EntriesContext.Provider value={state}>{cacheFetchDone && children}</EntriesContext.Provider>
-  )
+  );
 }
 
 export function useEntriesContext() {
-  return useContext(EntriesContext)
+  return useContext(EntriesContext);
 }

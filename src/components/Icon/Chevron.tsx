@@ -1,5 +1,5 @@
-import React from 'react'
-import { theme } from 'themes'
+import React from 'react';
+import { theme } from '@/themes';
 
 export function Chevron({ tintColor, size = 16, type = 'down', ...props }: any) {
   switch (type) {
@@ -15,7 +15,7 @@ export function Chevron({ tintColor, size = 16, type = 'down', ...props }: any) 
                 strokeLinejoin='round'
               />
             </svg>
-          )
+          );
         case 8:
           return (
             <svg width={8} height={8} fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
@@ -26,7 +26,9 @@ export function Chevron({ tintColor, size = 16, type = 'down', ...props }: any) 
                 strokeLinejoin='round'
               />
             </svg>
-          )
+          );
+          default:
+            return <></>;
       }
 
     case 'up':
@@ -41,7 +43,7 @@ export function Chevron({ tintColor, size = 16, type = 'down', ...props }: any) 
                 strokeLinejoin='round'
               />
             </svg>
-          )
+          );
         case 8:
           return (
             <svg width={8} height={8} fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
@@ -52,9 +54,11 @@ export function Chevron({ tintColor, size = 16, type = 'down', ...props }: any) 
                 strokeLinejoin='round'
               />
             </svg>
-          )
+          );
+          default:
+            return <></>;
       }
     default:
-      return <></>
+      return <></>;
   }
 }

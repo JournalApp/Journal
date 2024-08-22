@@ -1,1 +1,1 @@
-export * from './useIsOnline'
+export * from './useIsOnline';

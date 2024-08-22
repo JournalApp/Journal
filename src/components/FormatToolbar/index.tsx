@@ -1,5 +1,5 @@
-import React, { ReactPortal, useState, useEffect, useLayoutEffect, forwardRef, useRef } from 'react'
-import * as Toolbar from '@radix-ui/react-toolbar'
+import React, { useState, useEffect, useLayoutEffect } from 'react';
+import * as Toolbar from '@radix-ui/react-toolbar';
 import {
   offset,
   shift,
@@ -7,11 +7,11 @@ import {
   FloatingPortal,
   useDismiss,
   useInteractions,
-} from '@floating-ui/react-dom-interactions'
-import { Icon } from 'components'
-import { BlockTypeSelect } from './BlockTypeSelect'
-import { theme } from 'themes'
-import { useUserContext } from 'context'
+} from '@floating-ui/react-dom-interactions';
+import { Icon } from '@/components';
+import { BlockTypeSelect } from './BlockTypeSelect';
+import { theme } from '@/themes';
+import { useUserContext } from '@/context';
 
 import {
   MARK_BOLD,
@@ -20,27 +20,21 @@ import {
   MARK_STRIKETHROUGH,
   MARK_CODE,
   MARK_HIGHLIGHT,
-  ELEMENT_H1,
-  MarkToolbarButton,
   usePlateEditorRef,
   getPluginType,
   getSelectionText,
   isSelectionExpanded,
-} from '@udecode/plate'
-import {
+
   getPreventDefaultHandler,
-  someNode,
-  toggleNodeType,
   toggleMark,
   useEventPlateId,
   usePlateEditorState,
   withPlateEventProvider,
   isMarkActive,
-} from '@udecode/plate'
-import styled, { keyframes } from 'styled-components'
-import { logger } from 'src/utils'
+} from '@udecode/plate';
+import styled, { keyframes } from 'styled-components';
 
-const MARK_HAND_STRIKETHROUGH = 'hand-strikethrough'
+const MARK_HAND_STRIKETHROUGH = 'hand-strikethrough';
 
 interface WrapperProps {
   posX?: string
@@ -58,7 +52,7 @@ const showToolbar = keyframes`
   100% {
     opacity: 1;
   }
-`
+`;
 
 const Wrapper = styled.div<WrapperProps>`
   position: ${(props) => (props.pos ? props.pos : 'absolute')};
@@ -67,7 +61,7 @@ const Wrapper = styled.div<WrapperProps>`
   transition: ${theme('animation.time.fast')};
   animation-name: ${showToolbar};
   animation-duration: ${theme('animation.time.long')};
-`
+`;
 
 const StyledToolbar = styled(Toolbar.Root)`
   display: flex;
@@ -77,7 +71,7 @@ const StyledToolbar = styled(Toolbar.Root)`
   min-width: max-content;
   border-radius: 12px;
   background-color: ${theme('color.popper.surface')};
-`
+`;
 
 interface StyledToggleProps {
   toggleOn: boolean
@@ -95,7 +89,7 @@ const ToggleGroup = styled.div`
   & > :last-child {
     border-radius: 0 8px 8px 0;
   }
-`
+`;
 
 const StyledToggle = styled.div<StyledToggleProps>`
   width: 36px;
@@ -111,20 +105,20 @@ const StyledToggle = styled.div<StyledToggleProps>`
       props.toggleOn ? theme('color.popper.main') : theme('color.popper.hoverInverted')};
   }
   transition: ${theme('animation.time.normal')};
-`
+`;
 
 const getSelectionBoundingClientRect = () => {
-  const domSelection = window.getSelection()
-  if (!domSelection || domSelection.rangeCount < 1) return
-  const domRange = domSelection.getRangeAt(0)
-  return domRange.getBoundingClientRect()
-}
+  const domSelection = window.getSelection();
+  if (!domSelection || domSelection.rangeCount < 1) return;
+  const domRange = domSelection.getRangeAt(0);
+  return domRange.getBoundingClientRect();
+};
 
 const options = [
   { value: 'chocolate', label: 'Chocolate' },
   { value: 'strawberry', label: 'Strawberry' },
   { value: 'vanilla', label: 'Vanilla' },
-]
+];
 
 interface FormatToolbarProps {
   setIsEditorFocused: any
@@ -132,20 +126,20 @@ interface FormatToolbarProps {
 }
 
 export const FormatToolbar = ({ setIsEditorFocused, isContextMenuVisible }: FormatToolbarProps) => {
-  const editorRef = usePlateEditorRef()
-  const editor = usePlateEditorState(useEventPlateId())
-  const [open, setOpen] = useState(true)
-  const [editorFocused, setEditorFocused] = useState(false)
-  const selectionExpanded = editor && isSelectionExpanded(editor)
-  const selectionText = editor && getSelectionText(editor)
+  const editorRef = usePlateEditorRef();
+  const editor = usePlateEditorState(useEventPlateId());
+  const [open, setOpen] = useState(true);
+  const [editorFocused, setEditorFocused] = useState(false);
+  const selectionExpanded = editor && isSelectionExpanded(editor);
+  const selectionText = editor && getSelectionText(editor);
   const { x, y, reference, floating, strategy, context } = useFloating({
     placement: 'top-start',
     middleware: [shift(), offset({ mainAxis: 8 })],
     open,
     onOpenChange: setOpen,
-  })
-  const { getReferenceProps, getFloatingProps } = useInteractions([useDismiss(context)])
-  const { session } = useUserContext()
+  });
+  const { getFloatingProps } = useInteractions([useDismiss(context)]);
+  const { session } = useUserContext();
 
   // https://github.com/udecode/plate/issues/1352#issuecomment-1056975461
   // useEffect(() => {
@@ -155,42 +149,42 @@ export const FormatToolbar = ({ setIsEditorFocused, isContextMenuVisible }: Form
   // }, [editor])
 
   useEffect(() => {
-    setIsEditorFocused.current = setEditorFocused
-  }, [])
+    setIsEditorFocused.current = setEditorFocused;
+  }, []);
 
   useLayoutEffect(() => {
-    const select = getSelectionBoundingClientRect()
+    const select = getSelectionBoundingClientRect();
     if (select) {
       reference({
         getBoundingClientRect() {
-          const { top, right, bottom, left, width, height, x, y } = select
-          return { top, right, bottom, left, width, height, x, y }
+          const { top, right, bottom, left, width, height, x, y } = select;
+          return { top, right, bottom, left, width, height, x, y };
         },
-      })
+      });
     }
-  }, [reference, selectionExpanded, selectionText, editor.children])
+  }, [reference, selectionExpanded, selectionText, editor.children]);
 
   useEffect(() => {
     if (!editorFocused) {
-      setOpen(false)
+      setOpen(false);
     } else {
       if (!selectionText) {
-        setOpen(false)
+        setOpen(false);
       } else if (selectionText && selectionExpanded) {
-        setOpen(true)
+        setOpen(true);
       }
     }
-  }, [selectionExpanded, selectionText, editorFocused])
+  }, [selectionExpanded, selectionText, editorFocused]);
 
   const Toggle = withPlateEventProvider(({ markType, iconName }: any) => {
-    const id = useEventPlateId()
-    const editor = usePlateEditorState(id)
-    const type = getPluginType(editorRef, markType)
-    const state = !!editor?.selection && isMarkActive(editor, type!)
+    const id = useEventPlateId();
+    const editor = usePlateEditorState(id);
+    const type = getPluginType(editorRef, markType);
+    const state = !!editor?.selection && isMarkActive(editor, type!);
 
     const onMouseDown = (e: any) => {
       if (editor) {
-        getPreventDefaultHandler(toggleMark, editor, { key: type, clear: '' })(e)
+        getPreventDefaultHandler(toggleMark, editor, { key: type, clear: '' })(e);
       }
       window.electronAPI.capture({
         distinctId: session.user.id,
@@ -198,8 +192,8 @@ export const FormatToolbar = ({ setIsEditorFocused, isContextMenuVisible }: Form
         properties: {
           item: markType,
         },
-      })
-    }
+      });
+    };
 
     return (
       <StyledToggle toggleOn={state} onMouseDown={onMouseDown}>
@@ -208,8 +202,8 @@ export const FormatToolbar = ({ setIsEditorFocused, isContextMenuVisible }: Form
           tintColor={state ? theme('color.popper.inverted') : theme('color.popper.main')}
         />
       </StyledToggle>
-    )
-  })
+    );
+  });
 
   return (
     <FloatingPortal>
@@ -236,5 +230,5 @@ export const FormatToolbar = ({ setIsEditorFocused, isContextMenuVisible }: Form
         </Wrapper>
       )}
     </FloatingPortal>
-  )
-}
+  );
+};

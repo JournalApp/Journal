@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react'
-import styled, { keyframes } from 'styled-components'
-import { theme } from 'themes'
-import { breakpoints } from 'utils'
-import { Icon } from 'components'
+import React from 'react';
+import styled, { keyframes } from 'styled-components';
+import { theme } from '@/themes';
+import { breakpoints } from '@/utils';
+import { Icon } from '@/components';
 
 const reveal = keyframes`
   0% {
@@ -13,7 +13,7 @@ const reveal = keyframes`
     bottom: 0;
     opacity: var(--prompt-opacity);
   }
-`
+`;
 
 const hide = keyframes`
   0% {
@@ -24,7 +24,7 @@ const hide = keyframes`
     bottom: -30px;
     opacity: 0;
   }
-`
+`;
 
 interface PromptWindowStyledProps {
   isExpanded: boolean
@@ -54,7 +54,7 @@ const PromptWindowStyled = styled.div<PromptWindowStyledProps>`
   animation-duration: ${theme('animation.time.long')};
   animation-timing-function: cubic-bezier(0.03, 0.54, 0.12, 1);
   animation-fill-mode: both;
-`
+`;
 
 interface PromptStyledProps {
   isVisible: boolean
@@ -85,7 +85,7 @@ const PromptStyled = styled.div<PromptStyledProps>`
     background-color: ${(props) =>
       props.isExpanded ? theme('color.popper.hover') : 'transparent'};
   }
-`
+`;
 
 const ChevronStyled = styled((props) => <Icon name='Chevron' size={8} {...props} />)`
   opacity: 0.8;
@@ -95,7 +95,7 @@ const ChevronStyled = styled((props) => <Icon name='Chevron' size={8} {...props}
     opacity: 1;
     color: ${theme('color.primary.main')};
   }
-`
+`;
 
 const PromptsButtonStyled = styled.div`
   position: fixed;
@@ -117,7 +117,7 @@ const PromptsButtonStyled = styled.div`
     opacity: 0.7;
     background-color: ${theme('color.primary.hover')};
   }
-`
+`;
 
 const PromptsCloseButtonStyled = styled.div`
   position: fixed;
@@ -139,7 +139,7 @@ const PromptsCloseButtonStyled = styled.div`
     opacity: 0.7;
     background-color: ${theme('color.primary.hover')};
   }
-`
+`;
 
 interface PromptTitleStyledProps {
   isVisible: boolean
@@ -165,7 +165,7 @@ const PromptTitleStyled = styled.div<PromptTitleStyledProps>`
       transform: rotate(180deg);
     }
   }
-`
+`;
 
 interface PromptContentStyledProps {
   isVisible: boolean
@@ -181,7 +181,7 @@ const PromptContentStyled = styled.div<PromptContentStyledProps>`
   & p {
     margin: 0;
   }
-`
+`;
 
 export {
   PromptStyled,
@@ -191,4 +191,4 @@ export {
   PromptWindowStyled,
   PromptContentStyled,
   ChevronStyled,
-}
+};

@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { lightTheme, darkTheme, forestTheme, cappuccinoTheme } from 'themes'
-import { useAppearanceContext, AppearanceContextInterface, useUserContext } from 'context'
+import React, { useState, useEffect, useRef } from 'react';
+import { lightTheme, darkTheme, forestTheme, cappuccinoTheme } from '@/themes';
+import { useAppearanceContext, AppearanceContextInterface, useUserContext } from '@/context';
 import {
   useFloating,
   FloatingTree,
@@ -12,21 +12,18 @@ import {
   useFloatingNodeId,
   FloatingNode,
   FloatingPortal,
-} from '@floating-ui/react-dom-interactions'
+} from '@floating-ui/react-dom-interactions';
 import {
   AppearanceToolbarWrapperStyled,
   AppearanceToolbarStyled,
   ToggleButtonStyled,
-  ToggleButtonSmallStyled,
   ToggleGroupStyled,
-  ToggleGroupNestedStyled,
   ToggleFontAStyled,
   ToggleFontAAStyled,
   ToggleFontAAAStyled,
   ColorSwatchStyled,
-  ColorSwatchSmallStyled,
   HorizontalDividerStyled,
-} from './styled'
+} from './styled';
 
 interface AppearanceToolbarProps {
   setOpenAppearanceToolbar: React.MutableRefObject<any>
@@ -34,67 +31,67 @@ interface AppearanceToolbarProps {
 }
 
 const AppearanceToolbar = ({ setOpenAppearanceToolbar, returnFocus }: AppearanceToolbarProps) => {
-  const [open, setOpen] = useState(false)
-  const { session } = useUserContext()
-  const firstRender = useRef(true)
-  const initialFocus = useRef<HTMLDivElement>(null)
-  const nodeId = useFloatingNodeId()
+  const [open, setOpen] = useState(false);
+  const { session } = useUserContext();
+  const firstRender = useRef(true);
+  const initialFocus = useRef<HTMLDivElement>(null);
+  const nodeId = useFloatingNodeId();
   const { fontSize, setFontSize, fontFace, setFontFace, colorTheme, setColorTheme } =
-    useAppearanceContext()
+    useAppearanceContext();
 
   const { floating, context, refs } = useFloating({
     open,
     onOpenChange: setOpen,
     nodeId,
-  })
+  });
 
   const { getFloatingProps } = useInteractions([
     useClick(context),
     useDismiss(context, {
       escapeKey: false,
     }),
-  ])
+  ]);
 
   const handleCloseEsc = (e: any) => {
     if (e.key == 'Escape') {
       if (refs.floating.current && refs.floating.current.contains(document.activeElement)) {
-        setOpen(false)
+        setOpen(false);
       }
     }
-  }
+  };
 
   useEffect(() => {
-    setOpenAppearanceToolbar.current = setOpen
+    setOpenAppearanceToolbar.current = setOpen;
 
-    document.addEventListener('keydown', handleCloseEsc)
+    document.addEventListener('keydown', handleCloseEsc);
     return () => {
-      document.removeEventListener('keydown', handleCloseEsc)
-    }
-  }, [])
+      document.removeEventListener('keydown', handleCloseEsc);
+    };
+  }, []);
 
   useEffect(() => {
     if (firstRender.current) {
-      firstRender.current = false
+      firstRender.current = false;
     } else {
       if (open) {
-        document.documentElement.style.setProperty('--prompt-opacity', '0')
+        document.documentElement.style.setProperty('--prompt-opacity', '0');
         setTimeout(() => {
-          initialFocus.current.focus()
-        }, 100)
+          initialFocus.current.focus();
+        }, 100);
       } else {
-        document.documentElement.style.setProperty('--prompt-opacity', '1')
+        document.documentElement.style.setProperty('--prompt-opacity', '1');
         setTimeout(() => {
-          returnFocus.current.focus()
-        }, 100)
+          returnFocus.current.focus();
+        }, 100);
       }
     }
     if (open) {
       window.electronAPI.capture({
         distinctId: session.user.id,
         event: 'appearance open',
-      })
+      });
     }
-  }, [open])
+  }, [open]);
 
   return (
     <FloatingTree>
@@ -109,7 +106,7 @@ const AppearanceToolbar = ({ setOpenAppearanceToolbar, returnFocus }: Appearance
                       type='single'
                       defaultValue={fontSize}
                       onValueChange={(value) => {
-                        setFontSize(value as AppearanceContextInterface['fontSize'])
+                        setFontSize(value as AppearanceContextInterface['fontSize']);
                       }}
                     >
                       <ToggleFontAStyled value='small' disabled={fontSize == 'small'}>
@@ -127,7 +124,7 @@ const AppearanceToolbar = ({ setOpenAppearanceToolbar, returnFocus }: Appearance
                       type='single'
                       defaultValue={colorTheme}
                       onValueChange={(value) => {
-                        setColorTheme(value as AppearanceContextInterface['colorTheme'])
+                        setColorTheme(value as AppearanceContextInterface['colorTheme']);
                       }}
                     >
                       <ToggleButtonStyled
@@ -192,7 +189,7 @@ const AppearanceToolbar = ({ setOpenAppearanceToolbar, returnFocus }: Appearance
                       type='single'
                       defaultValue={fontFace}
                       onValueChange={(value) => {
-                        setFontFace(value as AppearanceContextInterface['fontFace'])
+                        setFontFace(value as AppearanceContextInterface['fontFace']);
                       }}
                     >
                       <ToggleButtonStyled value='inter' disabled={fontFace == 'inter'}>
@@ -214,7 +211,7 @@ const AppearanceToolbar = ({ setOpenAppearanceToolbar, returnFocus }: Appearance
         </FloatingPortal>
       </FloatingNode>
     </FloatingTree>
-  )
-}
+  );
+};
 
-export { AppearanceToolbar }
+export { AppearanceToolbar };

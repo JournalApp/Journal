@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { Icon } from 'components'
-import styled, { keyframes } from 'styled-components'
-import { theme } from 'themes'
-import { useQuery } from '@tanstack/react-query'
-import { getCustomer } from '../../../../context/UserContext/subscriptions'
-import { useUserContext } from 'context'
+import React from 'react';
+import { Icon } from '@/components';
+import styled from 'styled-components';
+import { theme } from '@/themes';
+import { useQuery } from '@tanstack/react-query';
+import { getCustomer } from '../../../../context/UserContext/subscriptions';
+import { useUserContext } from '@/context';
 
 const WrapperStyled = styled.div`
   padding: 16px 48px;
@@ -12,14 +12,14 @@ const WrapperStyled = styled.div`
   align-items: center;
   gap: 24px;
   flex-direction: column;
-`
+`;
 
 const MessageStyled = styled.div`
   color: ${theme('color.popper.main')};
   text-align: center;
   line-height: 20px;
   font-size: 14px;
-`
+`;
 
 const ButtonStyled = styled.button`
   font-weight: 500;
@@ -44,14 +44,14 @@ const ButtonStyled = styled.button`
   &:focus {
     box-shadow: 0 0 0 4px ${theme('color.popper.main', 0.15)};
   }
-`
+`;
 
 const Success = () => {
-  const { session } = useUserContext()
+  const { session } = useUserContext();
   useQuery({
     queryKey: ['billingInfo'],
     queryFn: async () => getCustomer(session.access_token),
-  })
+  });
 
   return (
     <WrapperStyled>
@@ -62,7 +62,7 @@ const Success = () => {
         you are all set!
       </MessageStyled>
     </WrapperStyled>
-  )
-}
+  );
+};
 
-export { Success }
+export { Success };

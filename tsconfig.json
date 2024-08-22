@@ -12,15 +12,7 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "paths": {
-      "*": ["*"],
-      "components": ["./src/components/"],
-      "hooks": ["./src/hooks/"],
-      "utils": ["./src/utils/"],
-      "themes": ["./src/themes/"],
-      "types": ["./src/types/"],
-      "consts": ["./src/constants/"],
-      "config": ["./src/config/"],
-      "context": ["./src/context/"]
+      "@/*": ["./src/*"],
     },
     "lib": ["es2021", "dom"],
     "target": "es2021"

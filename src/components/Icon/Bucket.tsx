@@ -1,5 +1,4 @@
-import React from 'react'
-import { theme } from 'themes'
+import React from 'react';
 
 // export function Bucket({ tintColor, ...props }: any) {
 //   return (
@@ -20,7 +19,7 @@ import { theme } from 'themes'
 //   )
 // }
 
-export function Bucket({ tintColor, ...props }: any) {
+export function Bucket({ ...props }: any) {
   return (
     <svg width={16} height={16} fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
       <path
@@ -41,5 +40,5 @@ export function Bucket({ tintColor, ...props }: any) {
         </linearGradient>
       </defs>
     </svg>
-  )
+  );
 }

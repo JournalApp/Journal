@@ -1,5 +1,5 @@
-import React from 'react'
-import { theme } from 'themes'
+import React from 'react';
+import { theme } from '@/themes';
 
 export function Offline({ tintColor, ...props }: any) {
   return (
@@ -11,5 +11,5 @@ export function Offline({ tintColor, ...props }: any) {
         strokeLinejoin='round'
       />
     </svg>
-  )
+  );
 }
