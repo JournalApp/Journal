@@ -1,21 +1,20 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { theme, getCSSVar } from 'themes'
-import { useForm, Controller, SubmitHandler } from 'react-hook-form'
-import { isDev, logger, getZipRegexByCountry } from 'utils'
-import * as Const from 'consts'
-import { useQuery } from '@tanstack/react-query'
-import { displayAmount } from 'utils'
-import { PaymentIntent } from '@stripe/stripe-js'
-import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
-import Select from 'react-select'
-import type { Countries, BillingInfo, Price } from 'types'
-import { useUserContext } from 'context'
-import Stripe from 'stripe'
+import React, { useState, useEffect, useRef } from 'react';
+import { theme, getCSSVar } from '@/themes';
+import { useForm, Controller, SubmitHandler } from 'react-hook-form';
+import { logger, getZipRegexByCountry , displayAmount } from '@/utils';
+import * as Const from '@/constants';
+import { useQuery } from '@tanstack/react-query';
+import { PaymentIntent } from '@stripe/stripe-js';
+import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import Select from 'react-select';
+import type { BillingInfo, Price } from '@/types';
+import { useUserContext } from '@/context';
+import Stripe from 'stripe';
 import {
   getSubscription,
   calcYearlyPlanSavings,
-} from '../../../../context/UserContext/subscriptions'
-import { ButtonStyled, TextStyled } from './styled'
+} from '../../../../context/UserContext/subscriptions';
+import { ButtonStyled, TextStyled } from './styled';
 import {
   LabelStyled,
   AddressInputStyled,
@@ -29,11 +28,11 @@ import {
   getCustomStyles,
   IconCloseStyled,
   IconChevronStyled,
-} from '../styled'
-import { Success } from './Success'
-import { LeftPanel } from './LeftPanel'
-import { PaymentMethod } from './../Billing/PaymentMethod'
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
+} from '../styled';
+import { Success } from './Success';
+import { LeftPanel } from './LeftPanel';
+import { PaymentMethod } from './../Billing/PaymentMethod';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 
 interface SubscribeProps {
   setOpen: React.Dispatch<React.SetStateAction<boolean>>
@@ -56,7 +55,7 @@ type FormData = {
   zip: string
   state: string
   cardElement: any
-}
+};
 
 ////////////////////////////////
 // 🍔 Subscribe Modal component
@@ -70,41 +69,41 @@ const Modal = ({
   billingInfoIsLoading,
   countries,
 }: SubscribeProps) => {
-  logger('Subscribe Modal rerender')
-  const [subscriptionId, setSubscriptionId] = useState<string | null>(null)
-  const [cardElemetFocused, setCardElemetFocused] = useState(false)
-  const [cardElemetReady, setCardElemetReady] = useState(false)
-  const [cardElemetComplete, setCardElemetComplete] = useState(false)
-  const [formProcessing, setFormProcessing] = useState(false)
-  const [poolingSubscription, setPoolingSubscription] = useState(false)
-  const [paymentIntent, setPaymentIntent] = useState<PaymentIntent | null>(null)
-  const [messages, setMessages] = useState('')
-  const [success, setSuccess] = useState(false)
-  const [isCardPayment, setIsCardPayment] = useState(true)
-  const [subscriptionCreated, setSubscriptionCreated] = useState(false)
-  const customStylesCardElement = useRef({})
-  const { session, subscription, createSubscription } = useUserContext()
+  logger('Subscribe Modal rerender');
+  const [subscriptionId, setSubscriptionId] = useState<string | null>(null);
+  const [cardElemetFocused, setCardElemetFocused] = useState(false);
+  const [cardElemetReady, setCardElemetReady] = useState(false);
+  const [cardElemetComplete, setCardElemetComplete] = useState(false);
+  const [formProcessing, setFormProcessing] = useState(false);
+  const [poolingSubscription, setPoolingSubscription] = useState(false);
+  const [paymentIntent, setPaymentIntent] = useState<PaymentIntent | null>(null);
+  const [messages, setMessages] = useState('');
+  const [success, setSuccess] = useState(false);
+  const [isCardPayment, setIsCardPayment] = useState(true);
+  const [subscriptionCreated, setSubscriptionCreated] = useState(false);
+  const customStylesCardElement = useRef({});
+  const { session, subscription, createSubscription } = useUserContext();
 
   useQuery({
     queryKey: ['subscription', session?.user.id],
     queryFn: async () => {
-      setPoolingSubscription(true)
-      logger('setPoolingSubscription(true)')
-      return await getSubscription(session?.user.id, session.access_token)
+      setPoolingSubscription(true);
+      logger('setPoolingSubscription(true)');
+      return await getSubscription(session?.user.id, session.access_token);
     },
     refetchInterval: (data) => {
       if (data?.status == 'active' && data?.id == subscriptionId) {
-        logger('Active subscription received!')
-        setPoolingSubscription(false)
-        setSuccess(true)
-        return false
+        logger('Active subscription received!');
+        setPoolingSubscription(false);
+        setSuccess(true);
+        return false;
       } else {
-        return 2000
+        return 2000;
       }
     },
     refetchIntervalInBackground: true,
     enabled: !!(paymentIntent?.status === 'succeeded' || subscriptionCreated),
-  })
+  });
 
   interface PricingOption {
     value: 'year' | 'month'
@@ -113,22 +112,22 @@ const Modal = ({
 
   const savings = prices
     ? calcYearlyPlanSavings(prices.filter((price) => price.product_id == Const.productWriterId))
-    : ''
+    : '';
 
   const yearlyPrice = prices
     ? prices.filter(
         (price) => price.product_id == Const.productWriterId && price.interval == 'year'
       )[0]?.unit_amount
-    : 0
+    : 0;
   const monthlyPrice = prices
     ? prices.filter(
         (price) => price.product_id == Const.productWriterId && price.interval == 'month'
       )[0]?.unit_amount
-    : 0
+    : 0;
   const billingIntervalOptions: PricingOption[] = [
     { value: 'year', label: `Yearly – $${yearlyPrice / 100} / year (save ${savings})` },
     { value: 'month', label: `Monthly – $${monthlyPrice / 100} / month` },
-  ]
+  ];
 
   const {
     register,
@@ -139,20 +138,20 @@ const Modal = ({
     control,
     watch,
     formState: { errors },
-  } = useForm<FormData>()
+  } = useForm<FormData>();
 
   const watchCountry = watch('country', {
     value: 'US',
     label: '',
-  })
+  });
   const watchBillingInterval = watch(
     'billingInterval',
     billingIntervalOptions.find((price) => price.value == billingInterval)
-  )
+  );
 
   // Initialize an instance of stripe.
-  const stripe = useStripe()
-  const elements = useElements()
+  const stripe = useStripe();
+  const elements = useElements();
 
   //////////////////////////
   // 🏓 useEffect
@@ -164,75 +163,75 @@ const Modal = ({
         distinctId: session.user.id,
         event: 'settings upgrade-form error',
         properties: { message: messages },
-      })
+      });
     }
-  }, [messages])
+  }, [messages]);
 
   useEffect(() => {
     if (success) {
       window.electronAPI.capture({
         distinctId: session.user.id,
         event: 'settings upgrade-form success',
-      })
+      });
     }
-  }, [success])
+  }, [success]);
 
   useEffect(() => {
     setValue(
       'billingInterval',
       billingIntervalOptions.find((price) => price.value == billingInterval)
-    )
-  }, [billingInterval])
+    );
+  }, [billingInterval]);
 
   useEffect(() => {
     if (billingInfo && prices) {
-      let charge = prices.filter(
+      const charge = prices.filter(
         (price) =>
           price.product_id == Const.productWriterId && price.interval == watchBillingInterval.value
-      )[0].unit_amount
-      let balance = billingInfo.customer.balance
+      )[0].unit_amount;
+      const balance = billingInfo.customer.balance;
       if (charge + balance <= 0) {
-        setIsCardPayment(false)
+        setIsCardPayment(false);
       } else {
-        setIsCardPayment(true)
+        setIsCardPayment(true);
       }
-      logger(`To pay: ${(charge + balance) / 100}`)
+      logger(`To pay: ${(charge + balance) / 100}`);
     }
-  }, [watchBillingInterval])
+  }, [watchBillingInterval]);
 
   useEffect(() => {
     if (getValues('zip')) {
-      trigger('zip')
+      trigger('zip');
     }
-  }, [watchCountry])
+  }, [watchCountry]);
 
   useEffect(() => {
     if (billingInfo?.customer?.address?.country && countries) {
       setValue(
         'country',
         countries.find((country) => country.value == billingInfo.customer.address.country)
-      )
+      );
     }
     if (billingInfo?.customer?.address?.city) {
-      setValue('city', billingInfo.customer.address.city)
+      setValue('city', billingInfo.customer.address.city);
     }
     if (billingInfo?.customer?.address?.line1) {
-      setValue('address', billingInfo.customer.address.line1)
+      setValue('address', billingInfo.customer.address.line1);
     }
     if (billingInfo?.customer?.address?.postal_code) {
-      setValue('zip', billingInfo.customer.address.postal_code)
+      setValue('zip', billingInfo.customer.address.postal_code);
     }
     if (billingInfo?.customer?.address?.state) {
-      setValue('state', billingInfo.customer.address.state)
+      setValue('state', billingInfo.customer.address.state);
     }
     if (billingInfo?.card?.billing_details?.name) {
-      setValue('name', billingInfo.card.billing_details.name)
+      setValue('name', billingInfo.card.billing_details.name);
     }
-  }, [billingInfo])
+  }, [billingInfo]);
 
   useEffect(() => {
     // Get css variable values to pass to sripe CardElement
-    const styles = getComputedStyle(document.body)
+    const styles = getComputedStyle(document.body);
 
     customStylesCardElement.current = {
       base: {
@@ -248,13 +247,13 @@ const Modal = ({
         color: `rgba(${styles.getPropertyValue(getCSSVar('color.error.main'))},1)`,
         iconColor: `rgba(${styles.getPropertyValue(getCSSVar('color.error.main'))},1)`,
       },
-    }
+    };
 
     setValue(
       'billingInterval',
       billingIntervalOptions.find((price) => price.value == billingInterval)
-    )
-  }, [])
+    );
+  }, []);
 
   //////////////////////////
   // 💸 Submit form
@@ -262,20 +261,20 @@ const Modal = ({
 
   const submitCheckout: SubmitHandler<FormData> = async (data) => {
     if (formProcessing) {
-      return
+      return;
     }
-    logger('Submitted data:')
-    logger(data)
+    logger('Submitted data:');
+    logger(data);
     if (!billingInfo.card) {
       if (!cardElemetComplete) {
-        elements.getElement(CardElement).focus()
-        return
+        elements.getElement(CardElement).focus();
+        return;
       }
     }
-    setFormProcessing(true)
+    setFormProcessing(true);
 
     // 1. Create subscription and Save billing address to make stripe tax work
-    let address: Stripe.Address | null = null
+    let address: Stripe.Address | null = null;
     if (isCardPayment && !billingInfo?.card) {
       address = {
         city: data.city,
@@ -284,7 +283,7 @@ const Modal = ({
         line2: '',
         postal_code: data.zip,
         state: data.state,
-      }
+      };
     }
 
     const { subscriptionId, clientSecret } = await createSubscription({
@@ -294,52 +293,52 @@ const Modal = ({
           price.product_id == Const.productWriterId && price.interval == data.billingInterval.value
       )[0]?.id,
       ...(address && { address }),
-    })
+    });
 
     if (subscriptionId) {
-      setSubscriptionId(subscriptionId)
+      setSubscriptionId(subscriptionId);
     } else {
-      setMessages('There was an error processing your payment, please try again')
-      setFormProcessing(false)
-      return
+      setMessages('There was an error processing your payment, please try again');
+      setFormProcessing(false);
+      return;
     }
 
     if (isCardPayment) {
       if (clientSecret) {
         // 2. Create payment using clientSecret
         // if clientSecret is empty, stripe didn't create a invoice
-        const cardElement = elements.getElement(CardElement)
-        let { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+        const cardElement = elements.getElement(CardElement);
+        const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
           payment_method: billingInfo?.card?.id || {
             card: cardElement,
             billing_details: {
               name: data.name,
             },
           },
-        })
+        });
         if (error) {
-          setMessages('There was an error processing your payment, please try again')
-          setFormProcessing(false)
-          return
+          setMessages('There was an error processing your payment, please try again');
+          setFormProcessing(false);
+          return;
         }
-        setPaymentIntent(paymentIntent)
+        setPaymentIntent(paymentIntent);
       } else {
         // TODO handle case for not reaching min charge amount
         // Charge is > 0, but stripe did not charge as charge is < $0.50
         // If card field was visible, save card for future use (SetupIntent)
         // For now, just don't save the card and set subs as created
-        setSubscriptionCreated(true)
+        setSubscriptionCreated(true);
       }
     } else {
-      setSubscriptionCreated(true)
+      setSubscriptionCreated(true);
     }
-  }
+  };
 
   const submitButtonText = () => {
     if (poolingSubscription) {
-      return 'Finalizing...'
+      return 'Finalizing...';
     } else if (formProcessing) {
-      return 'Processing...'
+      return 'Processing...';
     } else {
       return (
         'Upgrade to Writer' +
@@ -352,15 +351,15 @@ const Modal = ({
             )[0]?.unit_amount /
               100
           : '')
-      )
+      );
     }
-  }
+  };
 
   const ChargeSummary = () => {
-    const balance = billingInfo.customer.balance
+    const balance = billingInfo.customer.balance;
 
     if (balance == 0) {
-      return <></>
+      return <></>;
     }
     if (balance > 0) {
       return (
@@ -370,20 +369,20 @@ const Modal = ({
             Math.abs(billingInfo.customer.balance)
           )} balance.`}
         </TextStyled>
-      )
+      );
     }
     if (balance < 0) {
       const charge = prices.filter(
         (price) =>
           price.product_id == Const.productWriterId && price.interval == watchBillingInterval?.value
-      )[0]?.unit_amount
+      )[0]?.unit_amount;
       return (
         <TextStyled>{`${displayAmount(
           Math.min(-balance, charge)
         )} will be used from your balance.`}</TextStyled>
-      )
+      );
     }
-  }
+  };
 
   //////////////////////////
   // 🚀 Return
@@ -505,7 +504,6 @@ const Modal = ({
                               {...register('zip', {
                                 required: { value: true, message: 'Required' },
                                 pattern: new RegExp(
-                                  // @ts-ignore
                                   getZipRegexByCountry(getValues('country')?.value)
                                 ),
                               })}
@@ -538,7 +536,7 @@ const Modal = ({
                     ) : (
                       <CardElementStyled
                         onReady={(element) => {
-                          setCardElemetReady(true)
+                          setCardElemetReady(true);
                         }}
                         isFocused={cardElemetFocused}
                         isReady={cardElemetReady}
@@ -549,7 +547,7 @@ const Modal = ({
                           style: customStylesCardElement.current,
                         }}
                         onChange={({ empty, complete, error }) => {
-                          setCardElemetComplete(complete)
+                          setCardElemetComplete(complete);
                         }}
                       />
                     )}
@@ -569,7 +567,7 @@ const Modal = ({
         </>
       )}
     </>
-  )
-}
+  );
+};
 
-export { Modal }
+export { Modal };

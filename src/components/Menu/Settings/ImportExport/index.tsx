@@ -1,25 +1,25 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { theme } from 'themes'
-import { logger } from 'utils'
-import { SectionTitleStyled } from '../styled'
-import { serialize } from 'remark-slate'
-import { useEntriesContext, useUserContext } from 'context'
-import type { Entry } from 'types'
-import { plateNodeTypes } from './nodeTypes'
-import styled from 'styled-components'
+import React, { useEffect } from 'react';
+import { theme } from '@/themes';
+import { logger } from '@/utils';
+import { SectionTitleStyled } from '../styled';
+import { serialize } from 'remark-slate';
+import { useEntriesContext, useUserContext } from '@/context';
+import type { Entry } from '@/types';
+import { plateNodeTypes } from './nodeTypes';
+import styled from 'styled-components';
 
 const WrapperStyled = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
-`
+`;
 const ButtonsWrapperStyled = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
   width: fit-content;
   padding-top: 16px;
-`
+`;
 
 const ButtonStyled = styled.button`
   font-weight: 500;
@@ -43,7 +43,7 @@ const ButtonStyled = styled.button`
     opacity: 0.6;
     cursor: default;
   }
-`
+`;
 
 const TitleStyled = styled.div`
   font-style: normal;
@@ -51,45 +51,44 @@ const TitleStyled = styled.div`
   font-size: 16px;
   line-height: 24px;
   letter-spacing: -0.03em;
-`
+`;
 
 const TextStyled = styled.div`
   font-weight: 400;
   font-size: 14px;
   line-height: 20px;
   opacity: 0.6;
-`
+`;
 
 const toMarkdown = (content: any) => {
   return content
     .map((v: any) => {
-      logger(v)
+      logger(v);
       if (v.type == 'hr') {
-        return '---\n'
+        return '---\n';
       }
-      if (!!!v?.type) {
-        logger('no type')
-        v.type = 'p'
+      if (!v?.type) {
+        logger('no type');
+        v.type = 'p';
       }
-      //@ts-ignore
-      return serialize(v, { nodeTypes: plateNodeTypes })
+      return serialize(v, { nodeTypes: plateNodeTypes as any });
     })
-    .join('')
-}
+    .join('');
+};
 
 const exportTxt = (entries: Entry[]) => {
   try {
     const output = entries
       .map((entry) => {
-        return 'Day: ' + entry.day + '\n\n' + toMarkdown(entry.content)
+        return 'Day: ' + entry.day + '\n\n' + toMarkdown(entry.content);
       })
-      .join('\n\n\n')
-    window.electronAPI.saveFile(output, 'txt')
+      .join('\n\n\n');
+    window.electronAPI.saveFile(output, 'txt');
   } catch (error) {
-    logger('Error:')
-    logger(error)
+    logger('Error:');
+    logger(error);
   }
-}
+};
 
 const exportJson = (entries: Entry[]) => {
   try {
@@ -97,45 +96,45 @@ const exportJson = (entries: Entry[]) => {
       return {
         day: entry.day,
         content: toMarkdown(entry.content),
-      }
-    })
-    window.electronAPI.saveFile(JSON.stringify(output), 'json')
+      };
+    });
+    window.electronAPI.saveFile(JSON.stringify(output), 'json');
   } catch (error) {
-    logger('Error:')
-    logger(error)
+    logger('Error:');
+    logger(error);
   }
-}
+};
 
 const ImportExportTabContent = () => {
-  logger('ImportExport re-render')
-  const { userEntries } = useEntriesContext()
-  const { session } = useUserContext()
+  logger('ImportExport re-render');
+  const { userEntries } = useEntriesContext();
+  const { session } = useUserContext();
 
   useEffect(() => {
     window.electronAPI.capture({
       distinctId: session.user.id,
       event: 'settings view-tab',
       properties: { tab: 'export' },
-    })
-  }, [])
+    });
+  }, []);
 
   const exportTxtHandler = () => {
-    exportTxt(userEntries.current)
+    exportTxt(userEntries.current);
     window.electronAPI.capture({
       distinctId: session.user.id,
       event: 'settings export-journal',
       properties: { format: 'txt' },
-    })
-  }
+    });
+  };
 
   const exportJsonHandler = () => {
-    exportJson(userEntries.current)
+    exportJson(userEntries.current);
     window.electronAPI.capture({
       distinctId: session.user.id,
       event: 'settings export-journal',
       properties: { format: 'json' },
-    })
-  }
+    });
+  };
 
   return (
     <>
@@ -153,7 +152,7 @@ const ImportExportTabContent = () => {
         </ButtonsWrapperStyled>
       </WrapperStyled>
     </>
-  )
-}
+  );
+};
 
-export { ImportExportTabContent }
+export { ImportExportTabContent };

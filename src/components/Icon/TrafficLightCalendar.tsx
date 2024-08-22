@@ -1,5 +1,5 @@
-import React from 'react'
-import { theme } from 'themes'
+import React from 'react';
+import { theme } from '@/themes';
 
 export function TrafficLightCalendar({ tintColor, type = 'down', ...props }: any) {
   switch (type) {
@@ -19,7 +19,7 @@ export function TrafficLightCalendar({ tintColor, type = 'down', ...props }: any
             d='M7 3h1v10H7zM3 6h2v1H3zM3 9h2v1H3z'
           />
         </svg>
-      )
+      );
     case 'on':
       return (
         <svg width={19} height={16} fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
@@ -38,8 +38,8 @@ export function TrafficLightCalendar({ tintColor, type = 'down', ...props }: any
             fill={tintColor || theme('color.primary.main')}
           />
         </svg>
-      )
+      );
     default:
-      return <></>
+      return <></>;
   }
 }

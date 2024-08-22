@@ -5,11 +5,11 @@ import {
   autoformatMath,
   autoformatPunctuation,
   autoformatSmartQuotes,
-} from '@udecode/plate'
-import { autoformatBlocks } from './autoformatBlocks'
-import { autoformatLists } from './autoformatLists'
-import { autoformatMarks } from './autoformatMarks'
-import { autoformatMultiplication } from './autoformatOperation'
+} from '@udecode/plate';
+import { autoformatBlocks } from './autoformatBlocks';
+import { autoformatLists } from './autoformatLists';
+import { autoformatMarks } from './autoformatMarks';
+import { autoformatMultiplication } from './autoformatOperation';
 
 export const autoformatRules = [
   ...autoformatBlocks,
@@ -22,4 +22,4 @@ export const autoformatRules = [
   ...autoformatLegalHtml,
   ...autoformatArrow,
   ...autoformatMath,
-]
+];

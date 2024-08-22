@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react'
-import styled, { keyframes } from 'styled-components'
-import { theme } from 'themes'
-import { Icon } from 'components'
+import React from 'react';
+import styled from 'styled-components';
+import { theme } from '@/themes';
+import { Icon } from '@/components';
 
 const IconCloseStyled = styled((props) => <Icon name='Cross' {...props} />)`
   position: absolute;
@@ -13,7 +13,7 @@ const IconCloseStyled = styled((props) => <Icon name='Cross' {...props} />)`
     opacity: 1;
     color: ${theme('color.primary.main')};
   }
-`
+`;
 
 const ModalStyled = styled.div`
   background-color: ${theme('color.popper.surface')};
@@ -27,7 +27,7 @@ const ModalStyled = styled.div`
   margin: 48px 8px 8px 8px;
   border-radius: 12px;
   -webkit-app-region: no-drag;
-`
+`;
 
 const ButtonDestructiveStyled = styled.button`
   font-weight: 500;
@@ -50,7 +50,7 @@ const ButtonDestructiveStyled = styled.button`
     opacity: 0.6;
     cursor: default;
   }
-`
+`;
 
 const ButtonStyled = styled.button`
   background-color: ${theme('color.popper.main')};
@@ -73,7 +73,7 @@ const ButtonStyled = styled.button`
     opacity: 0.6;
     cursor: default;
   }
-`
+`;
 
 const ButtonGhostStyled = styled.button`
   font-weight: 400;
@@ -99,7 +99,7 @@ const ButtonGhostStyled = styled.button`
     opacity: 0.6;
     cursor: default;
   }
-`
+`;
 
 const TitleStyled = styled.div`
   font-style: normal;
@@ -108,20 +108,20 @@ const TitleStyled = styled.div`
   line-height: 28px;
   margin-bottom: 8px;
   letter-spacing: -0.03em;
-`
+`;
 
 const DescriptionStyled = styled.div`
   font-weight: 400;
   font-size: 12px;
   line-height: 18px;
-`
+`;
 
 const ActionsWrapperStyled = styled.div`
   display: flex;
   gap: 16px;
   margin-top: 32px;
   height: 38px;
-`
+`;
 
 export {
   IconCloseStyled,
@@ -132,4 +132,4 @@ export {
   TitleStyled,
   DescriptionStyled,
   ActionsWrapperStyled,
-}
+};

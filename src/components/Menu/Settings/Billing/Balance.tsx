@@ -1,11 +1,11 @@
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
-import { HeaderStyled, TextStyled } from './styled'
-import { displayAmount } from 'utils'
-import type { PaymentMethodProps } from './types'
-import dayjs from 'dayjs'
-import { theme } from 'themes'
-import relativeTime from 'dayjs/plugin/relativeTime'
-dayjs.extend(relativeTime)
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import { HeaderStyled, TextStyled } from './styled';
+import { displayAmount } from '@/utils';
+import type { PaymentMethodProps } from './types';
+import dayjs from 'dayjs';
+import { theme } from '@/themes';
+import relativeTime from 'dayjs/plugin/relativeTime';
+dayjs.extend(relativeTime);
 
 const Balance = ({ billingInfo, isLoading }: PaymentMethodProps) => {
   return (
@@ -15,7 +15,7 @@ const Balance = ({ billingInfo, isLoading }: PaymentMethodProps) => {
       </HeaderStyled>
       <TextStyled>Balance</TextStyled>
     </SkeletonTheme>
-  )
-}
+  );
+};
 
-export { Balance }
+export { Balance };

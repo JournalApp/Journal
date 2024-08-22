@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { theme, getCSSVar } from 'themes'
-import { isDev, logger } from 'utils'
+import React, { useState, useEffect } from 'react';
+import { theme } from '@/themes';
+import { isDev, logger } from '@/utils';
 import {
   useFloating,
   FloatingOverlay,
@@ -11,19 +11,17 @@ import {
   useFloatingNodeId,
   FloatingNode,
   FloatingPortal,
-} from '@floating-ui/react-dom-interactions'
-import { loadStripe } from '@stripe/stripe-js/pure'
-import { useQuery } from '@tanstack/react-query'
-import { CheckoutModalStyled } from './styled'
-import { Modal } from './Modal'
-import { Elements } from '@stripe/react-stripe-js'
-import { useUserContext } from 'context'
+} from '@floating-ui/react-dom-interactions';
+import { loadStripe } from '@stripe/stripe-js/pure';
+import { useQuery } from '@tanstack/react-query';
+import { CheckoutModalStyled } from './styled';
+import { Modal } from './Modal';
+import { Elements } from '@stripe/react-stripe-js';
+import { useUserContext } from '@/context';
 import {
-  getSubscription,
   getCustomer,
   fetchCountries,
-  createSetupIntent,
-} from '../../../../context/UserContext/subscriptions'
+} from '../../../../context/UserContext/subscriptions';
 
 interface AddCardProps {
   renderTrigger: any
@@ -35,16 +33,16 @@ interface AddCardProps {
 //////////////////////////
 
 const AddCard = ({ renderTrigger, isUpdate = false }: AddCardProps) => {
-  logger('AddCard rerender')
-  const { session, subscription, createSubscription } = useUserContext()
-  const [stripePromise, setStripePromise] = useState<any | null>(null)
-  const [open, setOpen] = useState(false)
-  const nodeId = useFloatingNodeId()
+  logger('AddCard rerender');
+  const { session } = useUserContext();
+  const [stripePromise, setStripePromise] = useState<any | null>(null);
+  const [open, setOpen] = useState(false);
+  const nodeId = useFloatingNodeId();
 
   const { data: countries } = useQuery({
     queryKey: ['countries'],
     queryFn: fetchCountries,
-  })
+  });
 
   const {
     isLoading: billingInfoIsLoading,
@@ -53,52 +51,52 @@ const AddCard = ({ renderTrigger, isUpdate = false }: AddCardProps) => {
   } = useQuery({
     queryKey: ['billingInfo'],
     queryFn: async () => getCustomer(session.access_token),
-  })
+  });
 
   useQuery({
     queryKey: ['stripePromise'],
     queryFn: async () => {
-      const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do'
-      const { publishableKey } = await fetch(`${url}/api/v1/config`).then((r) => r.json())
-      setStripePromise(() => loadStripe(publishableKey))
-      return publishableKey
+      const url = isDev() ? 'https://s.journal.local' : 'https://s.journal.do';
+      const { publishableKey } = await fetch(`${url}/api/v1/config`).then((r) => r.json());
+      setStripePromise(() => loadStripe(publishableKey));
+      return publishableKey;
     },
-  })
+  });
 
   const { reference, floating, context, refs } = useFloating({
     open,
     onOpenChange: setOpen,
     nodeId,
-  })
+  });
 
   const { getReferenceProps, getFloatingProps } = useInteractions([
     useClick(context),
     useDismiss(context, {
       escapeKey: false,
     }),
-  ])
+  ]);
 
   const handleCloseEsc = (e: any) => {
     if (e.key == 'Escape') {
       if (refs.floating.current && refs.floating.current.contains(document.activeElement)) {
-        setOpen(false)
+        setOpen(false);
       }
     }
-  }
+  };
 
   //////////////////////////
   // 🏓 useEffect
   //////////////////////////
 
   useEffect(() => {
-    logger('✅ addEventListener')
-    document.addEventListener('keydown', handleCloseEsc)
+    logger('✅ addEventListener');
+    document.addEventListener('keydown', handleCloseEsc);
 
     return () => {
-      logger('❌ removeEventListener')
-      document.removeEventListener('keydown', handleCloseEsc)
-    }
-  }, [])
+      logger('❌ removeEventListener');
+      document.removeEventListener('keydown', handleCloseEsc);
+    };
+  }, []);
 
   useEffect(() => {
     if (open) {
@@ -106,9 +104,9 @@ const AddCard = ({ renderTrigger, isUpdate = false }: AddCardProps) => {
         distinctId: session.user.id,
         event: 'settings billing payment-method',
         properties: { action: isUpdate ? 'update' : 'add' },
-      })
+      });
     }
-  }, [open])
+  }, [open]);
 
   //////////////////////////
   // 🚀 Return
@@ -146,7 +144,7 @@ const AddCard = ({ renderTrigger, isUpdate = false }: AddCardProps) => {
         )}
       </FloatingPortal>
     </FloatingNode>
-  )
-}
+  );
+};
 
-export { AddCard }
+export { AddCard };

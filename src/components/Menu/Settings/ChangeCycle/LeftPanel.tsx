@@ -1,11 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react'
-import styled, { keyframes } from 'styled-components'
-import { theme } from 'themes'
-import {
-  getCustomer,
-  fetchCountries,
-  calcYearlyPlanSavings,
-} from '../../../../context/UserContext/subscriptions'
+import React from 'react';
+import styled from 'styled-components';
+import { theme } from '@/themes';
+
+
 
 const LeftPanelStyled = styled.div`
   width: 260px;
@@ -17,7 +14,7 @@ const LeftPanelStyled = styled.div`
     opacity: 0.6;
     font-style: normal;
   }
-`
+`;
 interface LeftPanelProps {
   saving: string
 }
@@ -33,7 +30,7 @@ const LeftPanel = ({ saving }: LeftPanelProps) => {
       <br />
       <em>{`save ${saving}`}</em>
     </LeftPanelStyled>
-  )
-}
+  );
+};
 
-export { LeftPanel }
+export { LeftPanel };

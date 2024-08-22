@@ -1,8 +1,7 @@
-import { InputNodeTypes } from 'remark-slate'
+import { InputNodeTypes } from 'remark-slate';
 import {
   ELEMENT_BLOCKQUOTE,
   ELEMENT_CODE_BLOCK,
-  ELEMENT_CODE_LINE,
   ELEMENT_H1,
   ELEMENT_H2,
   ELEMENT_H3,
@@ -11,24 +10,15 @@ import {
   ELEMENT_H6,
   ELEMENT_IMAGE,
   ELEMENT_LI,
-  ELEMENT_LIC,
   ELEMENT_LINK,
-  ELEMENT_MEDIA_EMBED,
-  ELEMENT_MENTION,
-  ELEMENT_MENTION_INPUT,
   ELEMENT_OL,
   ELEMENT_PARAGRAPH,
-  ELEMENT_TABLE,
-  ELEMENT_TD,
-  ELEMENT_TH,
-  ELEMENT_TODO_LI,
-  ELEMENT_TR,
   ELEMENT_UL,
   MARK_BOLD,
   MARK_CODE,
   MARK_ITALIC,
   MARK_STRIKETHROUGH,
-} from '@udecode/plate'
+} from '@udecode/plate';
 // Override the default remark-slate node type names to match Plate defaults
 //format: <remark-slate type>:<plate type>;
 
@@ -54,6 +44,6 @@ const plateNodeTypes: InputNodeTypes = {
   inline_code_mark: MARK_CODE,
   thematic_break: 'thematic_break',
   image: ELEMENT_IMAGE,
-}
+};
 
-export { plateNodeTypes }
+export { plateNodeTypes };

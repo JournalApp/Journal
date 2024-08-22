@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react'
-import { useFloating, shift, offset } from '@floating-ui/react-dom'
-import { Icon } from 'components'
-import { BlockTypeSelectItem } from './BlockTypeSelectItem'
-import { theme } from 'themes'
-import styled, { keyframes } from 'styled-components'
+import React, { useState } from 'react';
+import { useFloating, shift, offset } from '@floating-ui/react-dom';
+import { Icon } from '@/components';
+import { BlockTypeSelectItem } from './BlockTypeSelectItem';
+import { theme } from '@/themes';
+import styled, { keyframes } from 'styled-components';
 import {
-  ELEMENT_DEFAULT,
   ELEMENT_PARAGRAPH,
   ELEMENT_H1,
   ELEMENT_H2,
@@ -17,15 +16,14 @@ import {
   getParentNode,
   getListItemEntry,
   toggleList,
-} from '@udecode/plate'
-import {
+
   getPreventDefaultHandler,
   someNode,
   toggleNodeType,
   useEventPlateId,
   usePlateEditorState,
-} from '@udecode/plate'
-import { useUserContext } from 'context'
+} from '@udecode/plate';
+import { useUserContext } from '@/context';
 
 interface BlockTypeSelectButtonProps {
   isHidden?: boolean
@@ -35,7 +33,7 @@ const Divider = styled.div`
   background-color: ${theme('color.popper.border')};
   height: 1px;
   margin: 8px 12px;
-`
+`;
 
 const BlockTypeSelectButton = styled.button<BlockTypeSelectButtonProps>`
   height: 36px;
@@ -51,7 +49,7 @@ const BlockTypeSelectButton = styled.button<BlockTypeSelectButtonProps>`
     background-color: ${theme('color.popper.hoverInverted')};
   }
   transition: ${theme('animation.time.normal')};
-`
+`;
 
 const showDropdown = keyframes`
   0% {
@@ -60,7 +58,7 @@ const showDropdown = keyframes`
   100% {
     opacity: 1;
   }
-`
+`;
 
 const Dropdown = styled.div`
   display: flex;
@@ -71,54 +69,54 @@ const Dropdown = styled.div`
   background-color: ${theme('color.popper.surface')};
   animation-name: ${showDropdown};
   animation-duration: ${theme('animation.time.normal')};
-`
+`;
 
 export const BlockTypeSelect = () => {
-  const editorRef = usePlateEditorRef()
-  const [isHidden, setIsHidden] = useState(true)
-  const id = useEventPlateId()
-  const editor = usePlateEditorState(id)
+  const editorRef = usePlateEditorRef();
+  const [isHidden, setIsHidden] = useState(true);
+  const id = useEventPlateId();
+  const editor = usePlateEditorState(id);
   const sel = useFloating({
     placement: 'bottom-start',
     middleware: [shift(), offset({ crossAxis: -4, mainAxis: 8 })],
-  })
-  const { session } = useUserContext()
+  });
+  const { session } = useUserContext();
 
-  const parent = getParentNode(editor, editor?.selection?.anchor)
-  const node = parent && Array.isArray(parent) ? parent[0] : null
+  const parent = getParentNode(editor, editor?.selection?.anchor);
+  const node = parent && Array.isArray(parent) ? parent[0] : null;
 
-  const res = !!editor?.selection && getListItemEntry(editor)
-  const list = !!res ? res.list[0].type : null
+  const res = !!editor?.selection && getListItemEntry(editor);
+  const list = res ? res.list[0].type : null;
 
-  const typeH1 = getPluginType(editorRef, ELEMENT_H1)
-  const typeH2 = getPluginType(editorRef, ELEMENT_H2)
-  const typeH3 = getPluginType(editorRef, ELEMENT_H3)
-  const typeOL = getPluginType(editorRef, ELEMENT_OL)
-  const typeUL = getPluginType(editorRef, ELEMENT_UL)
-  const typeP = getPluginType(editorRef, ELEMENT_PARAGRAPH)
+  const typeH1 = getPluginType(editorRef, ELEMENT_H1);
+  const typeH2 = getPluginType(editorRef, ELEMENT_H2);
+  const typeH3 = getPluginType(editorRef, ELEMENT_H3);
+  const typeOL = getPluginType(editorRef, ELEMENT_OL);
+  const typeUL = getPluginType(editorRef, ELEMENT_UL);
+  const typeP = getPluginType(editorRef, ELEMENT_PARAGRAPH);
 
   const toggleDropdown = (e: any) => {
-    e.preventDefault()
-    setIsHidden(!isHidden)
-  }
+    e.preventDefault();
+    setIsHidden(!isHidden);
+  };
 
   const markList = (type: string, e: any) => {
-    setIsHidden(true)
+    setIsHidden(true);
     if (editor) {
-      getPreventDefaultHandler(toggleList, editor, { type })(e)
+      getPreventDefaultHandler(toggleList, editor, { type })(e);
     }
-  }
+  };
 
   const mark = (type: string, e: any) => {
     if (list) {
       // first toggle of existing list
-      markList(list, e)
+      markList(list, e);
     }
-    setIsHidden(true)
+    setIsHidden(true);
     if (editor) {
       getPreventDefaultHandler(toggleNodeType, editor, {
         activeType: type,
-      })(e)
+      })(e);
     }
     window.electronAPI.capture({
       distinctId: session.user.id,
@@ -126,45 +124,45 @@ export const BlockTypeSelect = () => {
       properties: {
         item: type,
       },
-    })
-  }
+    });
+  };
 
   const isCurrent = (type: any) => {
-    let current = !!editor?.selection && someNode(editor, { match: { type } })
-    return current
-  }
+    const current = !!editor?.selection && someNode(editor, { match: { type } });
+    return current;
+  };
 
   const isCurrentList = (type: any) => {
-    const res = !!editor?.selection && getListItemEntry(editor)
-    let current = !!res && res.list[0].type === type
-    return current
-  }
+    const res = !!editor?.selection && getListItemEntry(editor);
+    const current = !!res && res.list[0].type === type;
+    return current;
+  };
 
   const nodeFullName = (nodeType: string) => {
     if (nodeType == 'lic') {
       switch (list) {
         case 'ol':
-          return <Icon name='BlockNumList' />
+          return <Icon name='BlockNumList' />;
         case 'ul':
-          return <Icon name='BlockBulletList' />
+          return <Icon name='BlockBulletList' />;
         default:
-          return <Icon name='BlockNumList' />
+          return <Icon name='BlockNumList' />;
       }
     } else {
       switch (nodeType) {
         case 'p':
-          return <Icon name='BlockText' />
+          return <Icon name='BlockText' />;
         case 'h1':
-          return <Icon name='BlockH1' />
+          return <Icon name='BlockH1' />;
         case 'h2':
-          return <Icon name='BlockH2' />
+          return <Icon name='BlockH2' />;
         case 'h3':
-          return <Icon name='BlockH3' />
+          return <Icon name='BlockH3' />;
         default:
-          return <Icon name='BlockText' />
+          return <Icon name='BlockText' />;
       }
     }
-  }
+  };
 
   return (
     <>
@@ -228,5 +226,5 @@ export const BlockTypeSelect = () => {
         </Dropdown>
       )}
     </>
-  )
-}
+  );
+};

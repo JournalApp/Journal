@@ -1,6 +1,6 @@
-import styled from 'styled-components'
-import { theme } from 'themes'
-import { breakpoints } from 'utils'
+import styled from 'styled-components';
+import { theme } from '@/themes';
+import { breakpoints } from '@/utils';
 
 const Container = styled.div`
   display: flex;
@@ -9,7 +9,7 @@ const Container = styled.div`
   @media ${breakpoints.s} {
     padding: 16px 24px;
   }
-`
+`;
 
 const MainWrapper = styled.div`
   width: min-content;
@@ -36,7 +36,7 @@ const MainWrapper = styled.div`
   @media ${breakpoints.s} {
     padding: 0;
   }
-`
+`;
 const MiniDate = styled.div`
   padding: 0 0 8px 0;
   margin: 0;
@@ -46,17 +46,17 @@ const MiniDate = styled.div`
   font-size: 12px;
   font-family: 'Inter var';
   line-height: 16px;
-`
+`;
 
 const LimitReachedWrapperStyled = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
-`
+`;
 
 const LimitReachedTextStyled = styled.div`
   opacity: 0.4;
-`
+`;
 
 const UpgradeButtonStyled = styled.button`
   font-weight: 500;
@@ -79,7 +79,7 @@ const UpgradeButtonStyled = styled.button`
     opacity: 0.6;
     cursor: default;
   }
-`
+`;
 
 export {
   Container,
@@ -88,4 +88,4 @@ export {
   UpgradeButtonStyled,
   LimitReachedTextStyled,
   LimitReachedWrapperStyled,
-}
+};

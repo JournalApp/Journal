@@ -1,10 +1,10 @@
-import React from 'react'
-import styled, { keyframes } from 'styled-components'
-import { theme } from 'themes'
-import dayjs from 'dayjs'
-import { useUserContext, useEntriesContext } from 'context'
-import { select, focusEditor } from '@udecode/plate'
-import { logger } from 'utils'
+import React from 'react';
+import styled from 'styled-components';
+import { theme } from '@/themes';
+import dayjs from 'dayjs';
+import { useUserContext, useEntriesContext } from '@/context';
+import { select, focusEditor } from '@udecode/plate';
+import { logger } from '@/utils';
 
 const ScrollToTodayButton = styled.button`
   position: fixed;
@@ -26,37 +26,37 @@ const ScrollToTodayButton = styled.button`
   &:hover {
     opacity: 0.7;
   }
-`
+`;
 
 function ScrollToToday() {
-  const { session } = useUserContext()
-  const { editorsRef } = useEntriesContext()
+  const { session } = useUserContext();
+  const { editorsRef } = useEntriesContext();
   const scrollToToday = () => {
-    let today = dayjs().format('YYYY-MM-DD')
-    let entry = document.getElementById(`${today}-entry`)
+    const today = dayjs().format('YYYY-MM-DD');
+    const entry = document.getElementById(`${today}-entry`);
     if (entry) {
-      logger('scrollToToday')
-      entry.scrollIntoView()
-      const editor = editorsRef.current[today]
+      logger('scrollToToday');
+      entry.scrollIntoView();
+      const editor = editorsRef.current[today];
       if (editor) {
-        focusEditor(editor)
+        focusEditor(editor);
         select(editor, {
           path: [0, 0],
           offset: 0,
-        })
+        });
       }
     }
     window.electronAPI.capture({
       distinctId: session.user.id,
       event: 'entry scroll-to-today',
-    })
-  }
+    });
+  };
 
   return (
     <ScrollToTodayButton id='ScrollToToday' onClick={() => scrollToToday()}>
       ↓ Back to Today
     </ScrollToTodayButton>
-  )
+  );
 }
 
-export { ScrollToToday }
+export { ScrollToToday };

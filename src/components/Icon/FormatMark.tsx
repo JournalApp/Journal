@@ -1,5 +1,5 @@
-import * as React from 'react'
-import { theme } from 'themes'
+import * as React from 'react';
+import { theme } from '@/themes';
 
 export function FormatMark({ tintColor, ...props }: any) {
   return (
@@ -13,5 +13,5 @@ export function FormatMark({ tintColor, ...props }: any) {
         strokeWidth={1}
       />
     </svg>
-  )
+  );
 }

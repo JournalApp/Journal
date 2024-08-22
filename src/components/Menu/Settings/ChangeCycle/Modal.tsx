@@ -1,49 +1,36 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { theme, getCSSVar } from 'themes'
-import { useForm, Controller, SubmitHandler } from 'react-hook-form'
-import { isDev, logger, getZipRegexByCountry } from 'utils'
-import * as Const from 'consts'
-import { useQuery } from '@tanstack/react-query'
-import { displayAmount } from 'utils'
-import { PaymentIntent } from '@stripe/stripe-js'
-import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
-import Select from 'react-select'
-import type { Countries, BillingInfo, Price } from 'types'
-import { useUserContext } from 'context'
-import Stripe from 'stripe'
+import React, { useState, useEffect } from 'react';
+import { theme } from '@/themes';
+import { useForm, SubmitHandler } from 'react-hook-form';
+import { logger,  displayAmount } from '@/utils';
+import * as Const from '@/constants';
+import { useQuery } from '@tanstack/react-query';
+import { useStripe } from '@stripe/react-stripe-js';
+import type { BillingInfo, Price } from '@/types';
+import { useUserContext } from '@/context';
 import {
   getSubscription,
   calcYearlyPlanSavings,
   previewInvoice,
   updateSubscriptionToYearly,
-} from '../../../../context/UserContext/subscriptions'
+} from '../../../../context/UserContext/subscriptions';
 import {
   ButtonStyled,
-  TextStyled,
   RowStyled,
   CellStyled,
   CellFillStyled,
   TableStyled,
   Divider,
   FormStyled,
-} from './styled'
+} from './styled';
 import {
-  LabelStyled,
-  AddressInputStyled,
-  CardElementStyled,
   AddressStyled,
-  AddressInputsStyled,
-  AddressRowStyled,
   ErrorStyled,
-  InputContainerStyled,
-  getCustomStyles,
   IconCloseStyled,
-  IconChevronStyled,
-} from '../styled'
-import { Success } from './Success'
-import { LeftPanel } from './LeftPanel'
-import { PaymentMethod } from './../Billing/PaymentMethod'
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
+} from '../styled';
+import { Success } from './Success';
+import { LeftPanel } from './LeftPanel';
+import { PaymentMethod } from './../Billing/PaymentMethod';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 
 interface ChangeCycleProps {
   setOpen: React.Dispatch<React.SetStateAction<boolean>>
@@ -61,49 +48,49 @@ type FormData = {
   zip: string
   state: string
   cardElement: any
-}
+};
 
 ////////////////////////////////
 // 🍔 ChangeCycle Modal component
 ////////////////////////////////
 
 const Modal = ({ setOpen, prices, billingInfo, billingInfoIsLoading }: ChangeCycleProps) => {
-  logger('ChangeCycle Modal rerender')
-  const [formProcessing, setFormProcessing] = useState(false)
-  const [poolingSubscription, setPoolingSubscription] = useState(false)
-  const [messages, setMessages] = useState('')
-  const [success, setSuccess] = useState(false)
-  const [subscriptionUpdated, setSubscriptionUpdated] = useState(false)
-  const { session, subscription, createSubscription } = useUserContext()
-  const stripe = useStripe()
+  logger('ChangeCycle Modal rerender');
+  const [formProcessing, setFormProcessing] = useState(false);
+  const [poolingSubscription, setPoolingSubscription] = useState(false);
+  const [messages, setMessages] = useState('');
+  const [success, setSuccess] = useState(false);
+  const [subscriptionUpdated, setSubscriptionUpdated] = useState(false);
+  const { session, subscription, createSubscription } = useUserContext();
+  const stripe = useStripe();
 
   useQuery({
     queryKey: ['subscription', session?.user.id],
     queryFn: async () => {
-      setPoolingSubscription(true)
-      logger('setPoolingSubscription(true)')
-      return await getSubscription(session?.user.id, session.access_token)
+      setPoolingSubscription(true);
+      logger('setPoolingSubscription(true)');
+      return await getSubscription(session?.user.id, session.access_token);
     },
     refetchInterval: (data) => {
       if (data?.status == 'active' && data?.prices?.interval == 'year') {
-        logger('Active yearly subscription received!')
-        setPoolingSubscription(false)
-        setSuccess(true)
-        return false
+        logger('Active yearly subscription received!');
+        setPoolingSubscription(false);
+        setSuccess(true);
+        return false;
       } else {
-        return 2000
+        return 2000;
       }
     },
     refetchIntervalInBackground: true,
     enabled: subscriptionUpdated,
-  })
+  });
 
   const { data: invoicePreview, isLoading } = useQuery({
     queryKey: ['invoicePreview'],
     queryFn: async () => {
-      return await previewInvoice({ access_token: session.access_token })
+      return await previewInvoice({ access_token: session.access_token });
     },
-  })
+  });
 
   useEffect(() => {
     if (messages) {
@@ -111,78 +98,78 @@ const Modal = ({ setOpen, prices, billingInfo, billingInfoIsLoading }: ChangeCyc
         distinctId: session.user.id,
         event: 'settings billing plan upgrade-to-yearly error',
         properties: { message: messages },
-      })
+      });
     }
-  }, [messages])
+  }, [messages]);
 
   useEffect(() => {
     if (success) {
       window.electronAPI.capture({
         distinctId: session.user.id,
         event: 'settings billing plan upgrade-to-yearly success',
-      })
+      });
     }
-  }, [success])
+  }, [success]);
 
   const savings = prices
     ? calcYearlyPlanSavings(prices.filter((price) => price.product_id == Const.productWriterId))
-    : ''
+    : '';
 
   const yearlyPrice = prices
     ? prices.filter(
         (price) => price.product_id == Const.productWriterId && price.interval == 'year'
       )[0]?.unit_amount
-    : 0
+    : 0;
 
   const productName = prices
     ? prices.filter((price) => price.product_id == Const.productWriterId)[0]?.products.name
-    : ''
+    : '';
 
-  const { handleSubmit } = useForm<FormData>()
+  const { handleSubmit } = useForm<FormData>();
 
   //////////////////////////
   // 💸 Submit form
   //////////////////////////
 
-  const submitCheckout: SubmitHandler<FormData> = async (data) => {
+  const submitCheckout: SubmitHandler<FormData> = async () => {
     if (formProcessing) {
-      return
+      return;
     }
-    setFormProcessing(true)
+    setFormProcessing(true);
     try {
       const { clientSecret } = await updateSubscriptionToYearly({
         access_token: session.access_token,
         subscriptionId: subscription.id,
-      })
+      });
 
       if (clientSecret) {
         // Create payment using clientSecret
         // if clientSecret is empty, stripe didn't create a invoice
-        let { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+        const { error } = await stripe.confirmCardPayment(clientSecret, {
           payment_method: billingInfo?.card?.id,
-        })
+        });
         if (error) {
-          setFormProcessing(false)
-          throw error
+          setFormProcessing(false);
+          throw error;
         }
       }
-      setSubscriptionUpdated(true)
+      setSubscriptionUpdated(true);
     } catch (err) {
-      logger(err)
-      setFormProcessing(false)
-      setMessages('There was an error when changing to yearly')
+      logger(err);
+      setFormProcessing(false);
+      setMessages('There was an error when changing to yearly');
     }
-  }
+  };
 
   const submitButtonText = () => {
     if (poolingSubscription) {
-      return 'Finalizing...'
+      return 'Finalizing...';
     } else if (formProcessing) {
-      return 'Processing...'
+      return 'Processing...';
     } else {
-      return 'Change to yearly'
+      return 'Change to yearly';
     }
-  }
+  };
 
   //////////////////////////
   // 🚀 Return
@@ -269,7 +256,7 @@ const Modal = ({ setOpen, prices, billingInfo, billingInfoIsLoading }: ChangeCyc
         </>
       )}
     </>
-  )
-}
+  );
+};
 
-export { Modal }
+export { Modal };

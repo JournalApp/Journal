@@ -1,6 +1,6 @@
-type SyncStatus = 'synced' | 'pending_insert' | 'pending_update' | 'pending_delete'
+type SyncStatus = 'synced' | 'pending_insert' | 'pending_update' | 'pending_delete';
 
-type Day = `${number}-${number}-${number}`
+type Day = `${number}-${number}-${number}`;
 
 type Entry = {
   user_id: string
@@ -8,10 +8,10 @@ type Entry = {
   journal_id?: number
   created_at: string
   modified_at: string
-  content: any[] | string
+  content: any
   iv?: string
   revision?: number
   sync_status?: SyncStatus
-}
+};
 
-export { Day, Entry }
+export { Day, Entry };

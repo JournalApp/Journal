@@ -1,6 +1,6 @@
-import { lightTheme, theme } from 'themes'
+import { lightTheme } from '@/themes';
 
-type SyncStatus = 'synced' | 'pending_insert' | 'pending_update' | 'pending_delete'
+type SyncStatus = 'synced' | 'pending_insert' | 'pending_update' | 'pending_delete';
 
 type Tag = {
   id: string
@@ -11,7 +11,8 @@ type Tag = {
   modified_at?: string
   revision?: number
   sync_status?: SyncStatus
-}
+  entries_tags?: EntryTag[]
+};
 
 type EntryTag = {
   user_id?: string
@@ -23,29 +24,30 @@ type EntryTag = {
   modified_at?: string
   revision?: number
   sync_status?: SyncStatus
-}
+};
 
-type EntryTagProperty =
-  | { user_id: string }
-  | { day: string }
-  | { journal_id: number }
-  | { tag_id: string }
-  | { order_no: number }
-  | { created_at: string }
-  | { modified_at: string }
-  | { revision: number }
-  | { sync_status: SyncStatus }
+type EntryTagProperty = {
+  user_id?: string
+  day?: string
+  journal_id?: number
+  tag_id?: string
+  order_no?: number
+  created_at?: string
+  modified_at?: string
+  revision?: number
+  sync_status?: SyncStatus
+};
 
 type ListItemActionType = {
   type: 'action'
   value: 'CREATE'
-}
+};
 
 type ListItemTagType = {
   type: 'tag'
   value: Tag
-}
+};
 
-type ListItemType = ListItemActionType | ListItemTagType
+type ListItemType = ListItemActionType | ListItemTagType;
 
-export { Tag, EntryTag, EntryTagProperty, ListItemType }
+export { Tag, EntryTag, EntryTagProperty, ListItemType };

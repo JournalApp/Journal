@@ -1,106 +1,105 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { EntryItem } from 'components'
-import { useEventEditorSelectors } from '@udecode/plate'
-import { supabase, arrayEquals, isUnauthorized, logger } from 'utils'
-import { useEntriesContext, useUserContext } from 'context'
-import dayjs from 'dayjs'
-import { BeforeEntries, PostEntries, Wrapper } from './styled'
-import type { Day, Tag } from 'types'
+import React, { useState, useEffect } from 'react';
+import { EntryItem } from '@/components';
+import { logger } from '@/utils';
+import { useEntriesContext } from '@/context';
+import dayjs from 'dayjs';
+import { BeforeEntries, PostEntries, Wrapper } from './styled';
+import type { Day } from '@/types';
 
-var visibleSections: String[] = []
-var rangeMarker: any
-var calendarContainer: any
-var scrollToToday: any
-var rangeMarkerTop: number
+let visibleSections: string[] = [];
+let rangeMarker: any;
+let calendarContainer: any;
+let scrollToToday: any;
+let rangeMarkerTop: number;
 
 const renderScrollToToday = () => {
   if (!scrollToToday) {
-    scrollToToday = document.getElementById('ScrollToToday')
+    scrollToToday = document.getElementById('ScrollToToday');
   }
-  let today = dayjs().format('YYYY-MM-DD')
+  const today = dayjs().format('YYYY-MM-DD');
   if (visibleSections.some((day) => day == today)) {
-    scrollToToday.style.marginBottom = '-32px'
+    scrollToToday.style.marginBottom = '-32px';
   } else {
-    scrollToToday.style.marginBottom = 0
+    scrollToToday.style.marginBottom = 0;
   }
-}
+};
 
 const renderMarker = () => {
-  visibleSections.sort()
+  visibleSections.sort();
 
   if (!rangeMarker) {
-    rangeMarker = document.getElementById('RangeVisible')
+    rangeMarker = document.getElementById('RangeVisible');
   }
 
   visibleSections.forEach((date: string, i) => {
-    let elem = document.getElementById(`${date}-calendar`)
+    const elem = document.getElementById(`${date}-calendar`);
     if (elem) {
-      const top = elem.offsetTop
+      const top = elem.offsetTop;
 
       if (i == 0) {
-        rangeMarkerTop = top
-        rangeMarker.style.top = rangeMarkerTop - 2 + 'px'
+        rangeMarkerTop = top;
+        rangeMarker.style.top = rangeMarkerTop - 2 + 'px';
       }
 
       if (i == visibleSections.length - 1) {
-        let height = top - rangeMarkerTop + elem.offsetHeight + 4 + 'px'
-        rangeMarker.style.height = height
+        const height = top - rangeMarkerTop + elem.offsetHeight + 4 + 'px';
+        rangeMarker.style.height = height;
       }
     }
-  })
-}
+  });
+};
 
 const onIntersection = (entries: any) => {
   entries.forEach((entry: any) => {
-    let date = entry.target.id.slice(0, 10)
+    const date = entry.target.id.slice(0, 10);
     if (entry.isIntersecting) {
       // Add to array
-      visibleSections.push(date)
+      visibleSections.push(date);
     } else {
       // Remove from array
       visibleSections = visibleSections.filter((v) => {
-        return v != date
-      })
+        return v != date;
+      });
     }
-    renderMarker()
-    renderScrollToToday()
-  })
+    renderMarker();
+    renderScrollToToday();
+  });
 
   if (!calendarContainer) {
-    calendarContainer = document.getElementById('CalendarContainer')
+    calendarContainer = document.getElementById('CalendarContainer');
   }
 
   calendarContainer.scrollTo({
     top: rangeMarkerTop - 48,
     behavior: 'smooth',
-  })
-}
+  });
+};
 
 const entriesObserver = new IntersectionObserver(onIntersection, {
   rootMargin: '-100px',
-})
+});
 
 const EntryMemo = React.memo(EntryItem, (prevProps, nextProps) => {
-  logger('New memo compare')
+  logger('New memo compare');
   if (prevProps.entryDay === nextProps.entryDay) {
-    return true
+    return true;
   }
-  return false
-})
+  return false;
+});
 
 function EntryList() {
-  const [days, setDaysInternal] = useState<Day[]>([])
-  const { userEntries, invokeRerenderEntryList } = useEntriesContext()
+  const [days, setDaysInternal] = useState<Day[]>([]);
+  const { userEntries, invokeRerenderEntryList } = useEntriesContext();
 
   const setDays = () => {
-    let today = dayjs().format('YYYY-MM-DD') as Day
-    let daysInCache = userEntries.current.map((entry) => entry.day) as Day[]
-    setDaysInternal([...new Set([...daysInCache, today])].sort())
-  }
+    const today = dayjs().format('YYYY-MM-DD') as Day;
+    const daysInCache = userEntries.current.map((entry) => entry.day) as Day[];
+    setDaysInternal([...new Set([...daysInCache, today])].sort());
+  };
 
   useEffect(() => {
-    invokeRerenderEntryList.current = setDays
-  }, [])
+    invokeRerenderEntryList.current = setDays;
+  }, []);
 
   return (
     <Wrapper>
@@ -108,7 +107,7 @@ function EntryList() {
       {days
         .slice(0)
         .reverse()
-        .map((day, i) => (
+        .map((day) => (
           <EntryMemo
             key={day}
             entryDay={day}
@@ -118,7 +117,7 @@ function EntryList() {
         ))}
       <BeforeEntries></BeforeEntries>
     </Wrapper>
-  )
+  );
 }
 
-export { EntryList }
+export { EntryList };

@@ -1,41 +1,41 @@
-import { lightTheme, darkTheme, forestTheme, cappuccinoTheme } from 'themes'
+import { lightTheme, darkTheme, forestTheme, cappuccinoTheme } from '@/themes';
 
 const fontSizeMap = {
   small: 18,
   normal: 21,
   large: 23,
-}
-type FontSize = keyof typeof fontSizeMap
+};
+type FontSize = keyof typeof fontSizeMap;
 
 const fontFaceMap = {
   inter: 'Inter var',
   novela: 'Novela',
-}
-type FontFace = keyof typeof fontFaceMap
+};
+type FontFace = keyof typeof fontFaceMap;
 
 const colorThemeMap = {
   light: lightTheme,
   dark: darkTheme,
   forest: forestTheme,
   cappuccino: cappuccinoTheme,
-}
-type ColorTheme = keyof typeof colorThemeMap
+};
+type ColorTheme = keyof typeof colorThemeMap;
 
 const spellCheckMap = {
   true: 'true',
   false: 'false',
-}
-type SpellCheckEnabled = keyof typeof spellCheckMap
+};
+type SpellCheckEnabled = keyof typeof spellCheckMap;
 
 const calendarOpenMap = {
   opened: { entriesOffset: 200, miniDatesVisibility: 'visible' },
   closed: { entriesOffset: 0, miniDatesVisibility: 'hidden' },
-}
-type CalendarOpen = keyof typeof calendarOpenMap
+};
+type CalendarOpen = keyof typeof calendarOpenMap;
 
-type PromptsOpen = 'opened' | 'closed'
+type PromptsOpen = 'opened' | 'closed';
 
-type PromptSelectedId = number
+type PromptSelectedId = number;
 
 const defaultUserPreferences = {
   fontSize: 'normal' as FontSize,
@@ -45,7 +45,7 @@ const defaultUserPreferences = {
   spellCheckEnabled: 'true' as SpellCheckEnabled,
   promptsOpen: 'closed' as PromptsOpen,
   promptSelectedId: 1 as PromptSelectedId,
-}
+};
 
 const baseTheme = {
   appearance: {
@@ -65,48 +65,48 @@ const baseTheme = {
       dynamic: 'cubic-bezier(0.31, 0.3, 0.17, 0.99)',
     },
   },
-}
+};
 
 const getFontSize = (name: FontSize) => {
-  return fontSizeMap[name] ? fontSizeMap[name] : fontSizeMap['normal']
-}
+  return fontSizeMap[name] ? fontSizeMap[name] : fontSizeMap['normal'];
+};
 
 const getFontFace = (name: FontFace) => {
-  return fontFaceMap[name] ? fontFaceMap[name] : fontFaceMap['inter']
-}
+  return fontFaceMap[name] ? fontFaceMap[name] : fontFaceMap['inter'];
+};
 
 const getColorTheme = (name: ColorTheme) => {
-  return colorThemeMap[name] ? colorThemeMap[name] : colorThemeMap['light']
-}
+  return colorThemeMap[name] ? colorThemeMap[name] : colorThemeMap['light'];
+};
 
 const getSpellCheckIsEnabled = (name: SpellCheckEnabled) => {
-  return spellCheckMap[name] ? spellCheckMap[name] : spellCheckMap['true']
-}
+  return spellCheckMap[name] ? spellCheckMap[name] : spellCheckMap['true'];
+};
 
 const getCalendarIsOpen = (state: CalendarOpen) => {
-  return calendarOpenMap[state] ? calendarOpenMap[state] : calendarOpenMap['closed']
-}
+  return calendarOpenMap[state] ? calendarOpenMap[state] : calendarOpenMap['closed'];
+};
 
 const getBaseThemeWithOverrides = (overrides: any) => {
-  let theme = { ...baseTheme }
+  const theme = { ...baseTheme };
 
   if (overrides && overrides.fontFace) {
-    theme.appearance.fontFace = getFontFace(overrides.fontFace)
+    theme.appearance.fontFace = getFontFace(overrides.fontFace);
   }
 
   if (overrides && overrides.fontSize) {
-    theme.appearance.fontSize = getFontSize(overrides.fontSize) + 'px'
+    theme.appearance.fontSize = getFontSize(overrides.fontSize) + 'px';
   }
 
   if (overrides && overrides.calendarOpen) {
-    theme.appearance.entriesOffset = getCalendarIsOpen(overrides.calendarOpen).entriesOffset + 'px'
+    theme.appearance.entriesOffset = getCalendarIsOpen(overrides.calendarOpen).entriesOffset + 'px';
     theme.appearance.miniDatesVisibility = getCalendarIsOpen(
       overrides.calendarOpen
-    ).miniDatesVisibility
+    ).miniDatesVisibility;
   }
 
-  return theme
-}
+  return theme;
+};
 
 export {
   baseTheme,
@@ -124,4 +124,4 @@ export {
   SpellCheckEnabled,
   PromptsOpen,
   PromptSelectedId,
-}
+};

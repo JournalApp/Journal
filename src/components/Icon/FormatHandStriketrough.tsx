@@ -1,5 +1,5 @@
-import * as React from 'react'
-import { theme } from 'themes'
+import * as React from 'react';
+import { theme } from '@/themes';
 
 export function FormatHandStriketrough({ tintColor, ...props }: any) {
   return (
@@ -16,5 +16,5 @@ export function FormatHandStriketrough({ tintColor, ...props }: any) {
         strokeLinecap='round'
       />
     </svg>
-  )
+  );
 }

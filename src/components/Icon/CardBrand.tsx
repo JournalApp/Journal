@@ -1,7 +1,6 @@
-import React from 'react'
-import { theme } from 'themes'
+import React from 'react';
 
-export function CardBrand({ tintColor, type, ...props }: any) {
+export function CardBrand({ type, ...props }: any) {
   switch (type) {
     case 'amex':
       return (
@@ -12,7 +11,7 @@ export function CardBrand({ tintColor, type, ...props }: any) {
             fill='#fff'
           />
         </svg>
-      )
+      );
 
     case 'diners':
       return (
@@ -23,7 +22,7 @@ export function CardBrand({ tintColor, type, ...props }: any) {
             fill='#fff'
           />
         </svg>
-      )
+      );
     case 'discover':
       return (
         <svg width={28} height={20} fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
@@ -36,7 +35,7 @@ export function CardBrand({ tintColor, type, ...props }: any) {
           />
           <rect x={0.5} y={0.5} width={27} height={19} rx={1.5} stroke='#EEE' />
         </svg>
-      )
+      );
     case 'jcb':
       return (
         <svg width={28} height={20} fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
@@ -53,7 +52,7 @@ export function CardBrand({ tintColor, type, ...props }: any) {
             </clipPath>
           </defs>
         </svg>
-      )
+      );
     case 'mastercard':
       return (
         <svg width={28} height={20} fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
@@ -76,7 +75,7 @@ export function CardBrand({ tintColor, type, ...props }: any) {
             </clipPath>
           </defs>
         </svg>
-      )
+      );
     case 'visa':
       return (
         <svg width={28} height={20} fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
@@ -87,7 +86,7 @@ export function CardBrand({ tintColor, type, ...props }: any) {
           />
           <rect x={0.5} y={0.5} width={27} height={19} rx={1.5} stroke='#EEE' />
         </svg>
-      )
+      );
     case 'unionpay':
       return (
         <svg width={28} height={20} fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
@@ -117,7 +116,7 @@ export function CardBrand({ tintColor, type, ...props }: any) {
             </clipPath>
           </defs>
         </svg>
-      )
+      );
 
     default:
       return (
@@ -126,6 +125,6 @@ export function CardBrand({ tintColor, type, ...props }: any) {
           <path fill='#212121' d='M0 6h28v4H0z' />
           <rect x={19} y={13} width={6} height={4} rx={0.933} fill='#fff' />
         </svg>
-      )
+      );
   }
 }

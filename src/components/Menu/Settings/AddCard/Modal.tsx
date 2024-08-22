@@ -1,31 +1,23 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { theme, getCSSVar } from 'themes'
-import { useForm, Controller, SubmitHandler } from 'react-hook-form'
-import { isDev, logger, getZipRegexByCountry } from 'utils'
-import * as Const from 'consts'
-import { loadStripe } from '@stripe/stripe-js/pure'
-import { useQuery } from '@tanstack/react-query'
-import { displayAmount } from 'utils'
-import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
-import Select from 'react-select'
-import type { Countries, Price, BillingInfo } from 'types'
-import { useUserContext } from 'context'
+import React, { useState, useEffect, useRef } from 'react';
+import { theme, getCSSVar } from '@/themes';
+import { useForm, Controller, SubmitHandler } from 'react-hook-form';
+import { logger, getZipRegexByCountry  } from '@/utils';
+import { loadStripe } from '@stripe/stripe-js/pure';
+import { CardElement, useStripe, useElements  } from '@stripe/react-stripe-js';
+import Select from 'react-select';
+import type { BillingInfo } from '@/types';
+import { useUserContext } from '@/context';
 import {
-  getSubscription,
-  getCustomer,
-  fetchCountries,
   deletePreviousCards,
   createSetupIntent,
-} from '../../../../context/UserContext/subscriptions'
+} from '../../../../context/UserContext/subscriptions';
 import {
-  CheckoutModalStyled,
   ButtonStyled,
-  TextStyled,
   FormStyled,
   Title,
   ActionsWrapperStyled,
   ButtonGhostStyled,
-} from './styled'
+} from './styled';
 import {
   LabelStyled,
   AddressInputStyled,
@@ -38,12 +30,10 @@ import {
   getCustomStyles,
   IconCloseStyled,
   IconChevronStyled,
-} from '../styled'
-import { Elements } from '@stripe/react-stripe-js'
-import { PaymentMethod } from './../Billing/PaymentMethod'
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
+} from '../styled';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 
-loadStripe.setLoadParameters({ advancedFraudSignals: false })
+loadStripe.setLoadParameters({ advancedFraudSignals: false });
 
 interface ModalProps {
   setOpen: React.Dispatch<React.SetStateAction<boolean>>
@@ -65,7 +55,7 @@ type FormData = {
   zip: string
   state: string
   cardElement: any
-}
+};
 
 //////////////////////////
 // 🍔 AddCard Modal component
@@ -79,16 +69,16 @@ const Modal = ({
   isUpdate,
   refetchBillingInfo,
 }: ModalProps) => {
-  logger('AddCard Modal rerender')
+  logger('AddCard Modal rerender');
 
-  const [cardElemetFocused, setCardElemetFocused] = useState(false)
-  const [cardElemetReady, setCardElemetReady] = useState(false)
-  const [cardElemetComplete, setCardElemetComplete] = useState(false)
-  const [formProcessing, setFormProcessing] = useState(false)
-  const [messages, setMessages] = useState('')
-  const [success, setSuccess] = useState(false)
-  const customStylesCardElement = useRef({})
-  const { session } = useUserContext()
+  const [cardElemetFocused, setCardElemetFocused] = useState(false);
+  const [cardElemetReady, setCardElemetReady] = useState(false);
+  const [cardElemetComplete, setCardElemetComplete] = useState(false);
+  const [formProcessing, setFormProcessing] = useState(false);
+  const [messages, setMessages] = useState('');
+  const [success, setSuccess] = useState(false);
+  const customStylesCardElement = useRef({});
+  const { session } = useUserContext();
 
   const {
     register,
@@ -100,16 +90,16 @@ const Modal = ({
     control,
     watch,
     formState: { errors },
-  } = useForm<FormData>()
+  } = useForm<FormData>();
 
   const watchCountry = watch('country', {
     value: 'US',
     label: '',
-  })
+  });
 
   // Initialize an instance of stripe.
-  const stripe = useStripe()
-  const elements = useElements()
+  const stripe = useStripe();
+  const elements = useElements();
 
   //////////////////////////
   // 🏓 useEffect
@@ -121,9 +111,9 @@ const Modal = ({
         distinctId: session.user.id,
         event: 'settings billing payment-method error',
         properties: { action: isUpdate ? 'update' : 'add', message: messages },
-      })
+      });
     }
-  }, [messages])
+  }, [messages]);
 
   useEffect(() => {
     if (success) {
@@ -131,49 +121,49 @@ const Modal = ({
         distinctId: session.user.id,
         event: 'settings billing payment-method success',
         properties: { action: isUpdate ? 'update' : 'add' },
-      })
+      });
     }
-  }, [success])
+  }, [success]);
 
   useEffect(() => {
     if (getValues('zip')) {
-      trigger('zip')
+      trigger('zip');
     }
-  }, [watchCountry])
+  }, [watchCountry]);
 
   useEffect(() => {
     if (success) {
-      setOpen(false)
+      setOpen(false);
     }
-  }, [success])
+  }, [success]);
 
   useEffect(() => {
     if (billingInfo?.customer?.address?.country && countries) {
       setValue(
         'country',
         countries.find((country) => country.value == billingInfo.customer.address.country)
-      )
+      );
     }
     if (billingInfo?.customer?.address?.city) {
-      setValue('city', billingInfo.customer.address.city)
+      setValue('city', billingInfo.customer.address.city);
     }
     if (billingInfo?.customer?.address?.line1) {
-      setValue('address', billingInfo.customer.address.line1)
+      setValue('address', billingInfo.customer.address.line1);
     }
     if (billingInfo?.customer?.address?.postal_code) {
-      setValue('zip', billingInfo.customer.address.postal_code)
+      setValue('zip', billingInfo.customer.address.postal_code);
     }
     if (billingInfo?.customer?.address?.state) {
-      setValue('state', billingInfo.customer.address.state)
+      setValue('state', billingInfo.customer.address.state);
     }
     if (billingInfo?.card?.billing_details?.name) {
-      setValue('name', billingInfo.card.billing_details.name)
+      setValue('name', billingInfo.card.billing_details.name);
     }
-  }, [billingInfo])
+  }, [billingInfo]);
 
   useEffect(() => {
     // Get css variable values to pass to sripe CardElement
-    const styles = getComputedStyle(document.body)
+    const styles = getComputedStyle(document.body);
 
     customStylesCardElement.current = {
       base: {
@@ -189,8 +179,8 @@ const Modal = ({
         color: `rgba(${styles.getPropertyValue(getCSSVar('color.error.main'))},1)`,
         iconColor: `rgba(${styles.getPropertyValue(getCSSVar('color.error.main'))},1)`,
       },
-    }
-  }, [])
+    };
+  }, []);
 
   //////////////////////////
   // 💳 Submit form
@@ -198,17 +188,17 @@ const Modal = ({
 
   const submitCard: SubmitHandler<FormData> = async (data) => {
     if (formProcessing) {
-      return
+      return;
     }
-    logger('Submitted data:')
-    logger(data)
+    logger('Submitted data:');
+    logger(data);
 
     if (!cardElemetComplete) {
-      elements.getElement(CardElement).focus()
-      return
+      elements.getElement(CardElement).focus();
+      return;
     }
 
-    setFormProcessing(true)
+    setFormProcessing(true);
 
     // 1. Create subscription and Save billing address to make stripe tax work
 
@@ -219,53 +209,57 @@ const Modal = ({
       line2: '',
       postal_code: data.zip,
       state: data.state,
-    }
+    };
 
     const { clientSecret } = await createSetupIntent({
       access_token: session.access_token,
       address,
-    })
+    });
 
     // 2. Save card using clientSecret
-    const cardElement = elements.getElement(CardElement)
+    const cardElement = elements.getElement(CardElement);
 
-    let { setupIntent, error } = await stripe.confirmCardSetup(clientSecret, {
+    const { setupIntent, error } = await stripe.confirmCardSetup(clientSecret, {
       payment_method: {
         card: cardElement,
         billing_details: {
           name: data.name,
         },
       },
-    })
+    });
 
-    logger('setupIntent:')
-    logger(setupIntent)
+    logger('setupIntent:');
+    logger(setupIntent);
 
     if (error) {
-      logger(error.message)
-      setMessages('There was an error when saving your card, please try again.')
-      setFormProcessing(false)
-      return
+      logger(error.message);
+      setMessages('There was an error when saving your card, please try again.');
+      setFormProcessing(false);
+      return;
     }
 
     if (setupIntent) {
       try {
-        await deletePreviousCards(session.access_token)
-      } catch {}
-      await refetchBillingInfo()
-      setSuccess(true)
+        await deletePreviousCards(session.access_token);
+      } catch {
+        logger(error.message);
+        setMessages('There was an error when deleting your card, please try again.');
+        setFormProcessing(false);
+      }
+      await refetchBillingInfo();
+      setSuccess(true);
     }
-  }
+  };
 
   const submitButtonText = () => {
     if (success) {
-      return 'Done'
+      return 'Done';
     } else if (formProcessing) {
-      return isUpdate ? 'Updating...' : 'Adding...'
+      return isUpdate ? 'Updating...' : 'Adding...';
     } else {
-      return isUpdate ? 'Update' : 'Add'
+      return isUpdate ? 'Update' : 'Add';
     }
-  }
+  };
 
   //////////////////////////
   // 🚀 Return
@@ -350,7 +344,6 @@ const Modal = ({
                     {...register('zip', {
                       required: { value: true, message: 'Required' },
                       pattern: new RegExp(
-                        // @ts-ignore
                         getZipRegexByCountry(getValues('country')?.value)
                       ),
                     })}
@@ -376,7 +369,7 @@ const Modal = ({
             ) : (
               <CardElementStyled
                 onReady={(element) => {
-                  setCardElemetReady(true)
+                  setCardElemetReady(true);
                 }}
                 isFocused={cardElemetFocused}
                 isReady={cardElemetReady}
@@ -387,7 +380,7 @@ const Modal = ({
                   style: customStylesCardElement.current,
                 }}
                 onChange={({ empty, complete, error }) => {
-                  setCardElemetComplete(complete)
+                  setCardElemetComplete(complete);
                 }}
               />
             )}
@@ -412,7 +405,7 @@ const Modal = ({
         </FormStyled>
       </SkeletonTheme>
     </>
-  )
-}
+  );
+};
 
-export { Modal }
+export { Modal };

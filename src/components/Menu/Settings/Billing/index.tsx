@@ -1,38 +1,37 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { logger, supabase, stripeEpochToDate, isDev } from 'utils'
-import { SectionTitleStyled } from '../styled'
-import { useQuery } from '@tanstack/react-query'
-import { useUserContext } from 'context'
-import { getCustomer } from '../../../../context/UserContext/subscriptions'
-import { PaymentMethod } from './PaymentMethod'
-import { Receipts } from './Receipts'
-import { Plan } from './Plan'
-import { Balance } from './Balance'
-import { Divider } from './styled'
+import React, { useEffect } from 'react';
+import { logger } from '@/utils';
+import { SectionTitleStyled } from '../styled';
+import { useQuery } from '@tanstack/react-query';
+import { useUserContext } from '@/context';
+import { getCustomer } from '../../../../context/UserContext/subscriptions';
+import { PaymentMethod } from './PaymentMethod';
+import { Receipts } from './Receipts';
+import { Plan } from './Plan';
+import { Balance } from './Balance';
+import { Divider } from './styled';
 
 const BillingTabContent = () => {
-  logger('BillingTabContent re-render')
-  const { session, subscription } = useUserContext()
+  logger('BillingTabContent re-render');
+  const { session, subscription } = useUserContext();
   const {
     isLoading,
-    isError,
     data: billingInfo,
   } = useQuery({
     queryKey: ['billingInfo'],
     queryFn: async () => getCustomer(session.access_token),
-  })
+  });
 
   useEffect(() => {
     window.electronAPI.capture({
       distinctId: session.user.id,
       event: 'settings view-tab',
       properties: { tab: 'billing' },
-    })
-  }, [])
+    });
+  }, []);
 
   useEffect(() => {
-    logger(billingInfo)
-  }, [billingInfo])
+    logger(billingInfo);
+  }, [billingInfo]);
 
   return (
     <>
@@ -45,7 +44,7 @@ const BillingTabContent = () => {
       <Divider />
       <Receipts billingInfo={billingInfo} isLoading={isLoading} />
     </>
-  )
-}
+  );
+};
 
-export { BillingTabContent }
+export { BillingTabContent };

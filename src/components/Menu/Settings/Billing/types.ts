@@ -1,5 +1,4 @@
-import Stripe from 'stripe'
-import { BillingInfo } from 'types'
+import { BillingInfo } from '@/types';
 
 interface PaymentMethodProps {
   billingInfo: BillingInfo
@@ -7,4 +6,4 @@ interface PaymentMethodProps {
   showCardOnly?: boolean
 }
 
-export { PaymentMethodProps }
+export { PaymentMethodProps };

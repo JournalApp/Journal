@@ -1,15 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react'
-import * as Tabs from '@radix-ui/react-tabs'
-import styled, { keyframes } from 'styled-components'
-import { theme } from 'themes'
-import { Icon } from 'components'
-import { CardElement } from '@stripe/react-stripe-js'
+import styled from 'styled-components';
+import { theme } from '@/themes';
 
 const TextStyled = styled.div`
   font-weight: 500;
   font-size: 14px;
   line-height: 24px;
-`
+`;
 
 const CheckoutModalStyled = styled.div`
   background-color: ${theme('color.popper.surface')};
@@ -20,7 +16,7 @@ const CheckoutModalStyled = styled.div`
   margin: 48px 8px 8px 8px;
   border-radius: 8px;
   -webkit-app-region: no-drag;
-`
+`;
 
 const ButtonStyled = styled.button`
   background-color: ${theme('color.popper.main')};
@@ -45,6 +41,6 @@ const ButtonStyled = styled.button`
     opacity: 0.6;
     cursor: default;
   }
-`
+`;
 
-export { TextStyled, CheckoutModalStyled, ButtonStyled }
+export { TextStyled, CheckoutModalStyled, ButtonStyled };

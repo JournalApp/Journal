@@ -1,5 +1,5 @@
-import React from 'react'
-import { theme } from 'themes'
+import React from 'react';
+import { theme } from '@/themes';
 
 export function Cross({ tintColor, size, ...props }: any) {
   switch (size) {
@@ -13,7 +13,7 @@ export function Cross({ tintColor, size, ...props }: any) {
             strokeLinejoin='round'
           />
         </svg>
-      )
+      );
 
     case 16:
       return (
@@ -25,7 +25,7 @@ export function Cross({ tintColor, size, ...props }: any) {
             strokeLinejoin='round'
           />
         </svg>
-      )
+      );
 
     default:
       return (
@@ -37,6 +37,6 @@ export function Cross({ tintColor, size, ...props }: any) {
             fill={tintColor || theme('color.primary.main')}
           />
         </svg>
-      )
+      );
   }
 }

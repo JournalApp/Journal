@@ -1,21 +1,16 @@
-import React, { ReactPortal, useState, useEffect, useLayoutEffect, useRef, useMemo } from 'react'
-import { logger } from 'utils'
-import { theme } from 'themes'
+import React, { useState, useEffect } from 'react';
+import { logger } from '@/utils';
+import { theme } from '@/themes';
 import {
   offset,
   shift,
   flip,
   useFloating,
   FloatingPortal,
-  FloatingOverlay,
-  useInteractions,
-  useClick,
-} from '@floating-ui/react-dom-interactions'
-import { getSelectionText } from '@udecode/plate'
-import { usePlateEditorState, useEventPlateId } from '@udecode/plate'
-import { insertText } from '@udecode/plate'
-import styled, { keyframes } from 'styled-components'
-import { useAppearanceContext } from 'context'
+} from '@floating-ui/react-dom-interactions';
+import { getSelectionText , usePlateEditorState, useEventPlateId , insertText } from '@udecode/plate';
+import styled, { keyframes } from 'styled-components';
+import { useAppearanceContext } from '@/context';
 
 const showDropdown = keyframes`
   0% {
@@ -24,7 +19,7 @@ const showDropdown = keyframes`
   100% {
     opacity: 1;
   }
-`
+`;
 interface MenuProps {
   posX?: string
   posY?: string
@@ -42,7 +37,7 @@ const Dropdown = styled.div<MenuProps>`
   animation-name: ${showDropdown};
   animation-duration: ${theme('animation.time.normal')};
   -webkit-app-region: no-drag;
-`
+`;
 
 const Item = styled.button`
   display: flex;
@@ -58,7 +53,7 @@ const Item = styled.button`
   &:hover {
     background-color: ${theme('color.popper.hover')};
   }
-`
+`;
 
 const ItemTitle = styled.span`
   flex-grow: 1;
@@ -66,7 +61,7 @@ const ItemTitle = styled.span`
   font-size: 14px;
   line-height: 20px;
   text-align: left;
-`
+`;
 
 const ItemShortcut = styled.span`
   font-size: 14px;
@@ -74,13 +69,13 @@ const ItemShortcut = styled.span`
   line-height: 20px;
   text-align: right;
   opacity: 0.3;
-`
+`;
 
 const Divider = styled.div`
   background-color: ${theme('color.popper.border')};
   height: 1px;
   margin: 8px 12px;
-`
+`;
 
 interface ContextMenuProps {
   setIsEditorFocused: any
@@ -93,27 +88,27 @@ export const ContextMenu = ({
   setContextMenuVisible,
   toggleContextMenu,
 }: ContextMenuProps) => {
-  const editor = usePlateEditorState(useEventPlateId())
-  const [spellSuggections, setSpellSuggections] = useState([])
-  const [editorFocused, setEditorFocused] = useState(false)
-  const [visible, setVisible] = useState(false)
-  const selectionText = editor && getSelectionText(editor)
-  const { x, y, reference, floating, strategy, refs } = useFloating({
+  const editor = usePlateEditorState(useEventPlateId());
+  const [spellSuggections, setSpellSuggections] = useState([]);
+  const [editorFocused, setEditorFocused] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const selectionText = editor && getSelectionText(editor);
+  const { x, y, reference, floating, strategy } = useFloating({
     placement: 'right-start',
     middleware: [offset({ mainAxis: 5, alignmentAxis: 4 }), flip(), shift()],
-  })
-  const { setSpellCheck, spellCheckIsEnabled } = useAppearanceContext()
+  });
+  const { setSpellCheck, spellCheckIsEnabled } = useAppearanceContext();
 
   const setOpen = (e: any) => {
-    logger('onContextMenu')
+    logger('onContextMenu');
     if (!visible) {
       window.electronAPI.handleSpellCheck((event: any, value: any) => {
-        if (!!value.dictionarySuggestions) {
-          setSpellSuggections([...value.dictionarySuggestions])
+        if (value.dictionarySuggestions) {
+          setSpellSuggections([...value.dictionarySuggestions]);
         }
-      })
+      });
     }
-    setVisible(!visible)
+    setVisible(!visible);
 
     reference({
       getBoundingClientRect() {
@@ -126,25 +121,25 @@ export const ContextMenu = ({
           right: e.clientX,
           bottom: e.clientY,
           left: e.clientX,
-        }
+        };
       },
-    })
-  }
+    });
+  };
 
   const replaceWithSuggestion = (e: any, suggestion: string) => {
-    insertText(editor, suggestion)
-    setVisible(false)
-    e.preventDefault()
-  }
+    insertText(editor, suggestion);
+    setVisible(false);
+    e.preventDefault();
+  };
 
   const clipboardCommand = (e: any, command: string) => {
     switch (command) {
       case 'copy':
-        document.execCommand('copy')
-        break
+        document.execCommand('copy');
+        break;
       case 'cut':
-        document.execCommand('cut')
-        break
+        document.execCommand('cut');
+        break;
       case 'paste':
         navigator.clipboard.read().then((result) => {
           for (let i = 0; i < result.length; i++) {
@@ -156,48 +151,48 @@ export const ContextMenu = ({
                       name: 'DataTransfer',
                     },
                     getData: (format: string) => format === 'text/html' && res,
-                  } as any
+                  } as any;
                   // TODO Fix bullet lists pasting
-                  editor.insertData(dataTransfer)
-                  logger(res)
-                })
-              })
+                  editor.insertData(dataTransfer);
+                  logger(res);
+                });
+              });
             } else if (result[i].types.includes('text/plain')) {
               result[i].getType('text/plain').then((blob) => {
                 blob.text().then((res) => {
-                  insertText(editor, res)
-                })
-              })
+                  insertText(editor, res);
+                });
+              });
             }
           }
-        })
-        break
+        });
+        break;
       default:
-        break
+        break;
     }
-    setVisible(false)
-    e.preventDefault()
-  }
+    setVisible(false);
+    e.preventDefault();
+  };
 
   useEffect(() => {
     // Assign function to parent's Ref
-    toggleContextMenu.current = setOpen
-    setIsEditorFocused.current = setEditorFocused
-  }, [])
+    toggleContextMenu.current = setOpen;
+    setIsEditorFocused.current = setEditorFocused;
+  }, []);
 
   useEffect(() => {
-    setContextMenuVisible(visible)
+    setContextMenuVisible(visible);
     if (visible) {
-      logger('addEventListener')
-      window.addEventListener('click', () => setVisible(false), { once: true })
+      logger('addEventListener');
+      window.addEventListener('click', () => setVisible(false), { once: true });
     }
-  }, [visible])
+  }, [visible]);
 
   useEffect(() => {
     if (!editorFocused) {
-      setVisible(false)
+      setVisible(false);
     }
-  }, [editorFocused])
+  }, [editorFocused]);
 
   return (
     <FloatingPortal>
@@ -218,9 +213,9 @@ export const ContextMenu = ({
           {spellCheckIsEnabled == 'true' && (
             <>
               <Item
-                onMouseDown={(e) => {
-                  setSpellCheck('false')
-                  setVisible(false)
+                onMouseDown={() => {
+                  setSpellCheck('false');
+                  setVisible(false);
                 }}
               >
                 <ItemTitle>Disable spell check</ItemTitle>
@@ -249,9 +244,9 @@ export const ContextMenu = ({
             <>
               <Divider />
               <Item
-                onMouseDown={(e) => {
-                  setSpellCheck('true')
-                  setVisible(false)
+                onMouseDown={() => {
+                  setSpellCheck('true');
+                  setVisible(false);
                 }}
               >
                 <ItemTitle>Enable spell check</ItemTitle>
@@ -262,5 +257,5 @@ export const ContextMenu = ({
         </Dropdown>
       )}
     </FloatingPortal>
-  )
-}
+  );
+};

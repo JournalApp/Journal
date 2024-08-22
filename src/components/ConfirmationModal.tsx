@@ -1,7 +1,7 @@
-import * as Dialog from '@radix-ui/react-dialog'
-import React, { useRef } from 'react'
-import styled from 'styled-components'
-import { theme } from 'themes'
+import * as Dialog from '@radix-ui/react-dialog';
+import React, { useRef } from 'react';
+import styled from 'styled-components';
+import { theme } from '@/themes';
 
 const Overlay = styled(Dialog.Overlay)`
   position: fixed;
@@ -12,7 +12,7 @@ const Overlay = styled(Dialog.Overlay)`
   background-color: ${theme('color.primary.surface', 0.8)};
   display: grid;
   place-items: center;
-`
+`;
 
 const Content = styled(Dialog.Content)`
   -webkit-app-region: no-drag;
@@ -25,7 +25,7 @@ const Content = styled(Dialog.Content)`
   display: flex;
   flex-direction: column;
   width: 330px;
-`
+`;
 
 const Trigger = styled(Dialog.Trigger)`
   border: 0;
@@ -33,7 +33,7 @@ const Trigger = styled(Dialog.Trigger)`
   background: transparent;
   padding: 0;
   margin: 0;
-`
+`;
 
 const Title = styled(Dialog.Title)`
   font-style: normal;
@@ -42,18 +42,18 @@ const Title = styled(Dialog.Title)`
   line-height: 28px;
   margin-bottom: 8px;
   letter-spacing: -0.03em;
-`
+`;
 
 const Description = styled.div`
   font-weight: 400;
   font-size: 12px;
   line-height: 15px;
-`
+`;
 const Actions = styled.div`
   display: flex;
   gap: 16px;
   margin-top: 32px;
-`
+`;
 
 const Close = styled.button`
   font-weight: 400;
@@ -71,7 +71,7 @@ const Close = styled.button`
     box-shadow: 0 0 0 3px ${theme('color.popper.border')};
     transition: box-shadow ${theme('animation.time.normal')} ease;
   }
-`
+`;
 
 const Action = styled.button`
   font-weight: 500;
@@ -89,7 +89,7 @@ const Action = styled.button`
     box-shadow: 0 0 0 3px ${theme('color.error.main', 0.2)};
     transition: box-shadow ${theme('animation.time.normal')} ease;
   }
-`
+`;
 
 interface ConfirmationModalProps {
   action: any
@@ -107,22 +107,22 @@ const ConfirmationModal = ({
   descriptionText = '',
   confirmActionText = 'Confirm',
   cancelActionText = 'Cancel',
-}: any) => {
-  const [open, setOpen] = React.useState(false)
-  const closeRef = useRef<HTMLButtonElement>(null)
+}: ConfirmationModalProps) => {
+  const [open, setOpen] = React.useState(false);
+  const closeRef = useRef<HTMLButtonElement>(null);
 
   const performAction = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    action()
-    setOpen(false)
-  }
+    e.preventDefault();
+    e.stopPropagation();
+    action();
+    setOpen(false);
+  };
 
   const close = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setOpen(false)
-  }
+    e.preventDefault();
+    e.stopPropagation();
+    setOpen(false);
+  };
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
@@ -142,7 +142,7 @@ const ConfirmationModal = ({
         </Overlay>
       </Dialog.Portal>
     </Dialog.Root>
-  )
-}
+  );
+};
 
-export { ConfirmationModal }
+export { ConfirmationModal };

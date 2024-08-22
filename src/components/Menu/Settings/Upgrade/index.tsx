@@ -1,19 +1,19 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { SectionTitleStyled } from '../styled'
-import { Features } from './Features'
-import { Products } from './Products'
-import { useUserContext } from 'context'
+import React, { useEffect } from 'react';
+import { SectionTitleStyled } from '../styled';
+import { Features } from './Features';
+import { Products } from './Products';
+import { useUserContext } from '@/context';
 
 const UpgradeTabContent = () => {
-  const { session, subscription } = useUserContext()
+  const { session, subscription } = useUserContext();
 
   useEffect(() => {
     window.electronAPI.capture({
       distinctId: session.user.id,
       event: 'settings view-tab',
       properties: { tab: 'upgrade' },
-    })
-  }, [])
+    });
+  }, []);
 
   return (
     <>
@@ -23,7 +23,7 @@ const UpgradeTabContent = () => {
       <Products />
       <Features />
     </>
-  )
-}
+  );
+};
 
-export { UpgradeTabContent }
+export { UpgradeTabContent };

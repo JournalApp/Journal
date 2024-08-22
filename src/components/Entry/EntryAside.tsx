@@ -1,11 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { theme } from 'themes'
-import styled from 'styled-components'
-import dayjs from 'dayjs'
-import { ordinal, breakpoints, logger, arrayEquals } from 'utils'
-import { Icon, EntryTags } from 'components'
-import { useEntriesContext } from 'context'
-import { EntryMenu } from './EntryMenu'
+import React from 'react';
+import { theme } from '@/themes';
+import styled from 'styled-components';
+import dayjs from 'dayjs';
+import { breakpoints } from '@/utils';
+import { Icon, EntryTags } from '@/components';
+import { EntryMenu } from './EntryMenu';
 
 const AsideDay = styled.p`
   padding: 0;
@@ -15,7 +14,7 @@ const AsideDay = styled.p`
   font-size: 16px;
   font-weight: 500;
   line-height: 24px;
-`
+`;
 
 const AsideYear = styled.p`
   padding: 0;
@@ -25,7 +24,7 @@ const AsideYear = styled.p`
   font-size: 12px;
   font-weight: 300;
   line-height: 20px;
-`
+`;
 
 const AsideMeta = styled.div`
   top: 0;
@@ -33,17 +32,17 @@ const AsideMeta = styled.div`
   text-align: -webkit-right;
   transition: ${theme('animation.time.normal')};
   padding-top: 24px;
-`
+`;
 
 const AsideMain = styled.div`
   transition: ${theme('animation.time.normal')};
-`
+`;
 
 const AsideStickyContainer = styled.div`
   position: sticky;
   top: 48px;
   text-align: end;
-`
+`;
 
 const Aside = styled.div`
   -webkit-app-region: no-drag;
@@ -54,7 +53,7 @@ const Aside = styled.div`
   @media ${breakpoints.s} {
     display: none;
   }
-`
+`;
 
 const AsideMenu = styled.div`
   width: 40px;
@@ -69,7 +68,7 @@ const AsideMenu = styled.div`
   @media ${breakpoints.xl} {
     padding-right: var(--appearance-entriesOffset);
   }
-`
+`;
 
 const AsideMenuStickyContainer = styled.div`
   position: sticky;
@@ -77,17 +76,17 @@ const AsideMenuStickyContainer = styled.div`
   top: 48px;
   display: flex;
   justify-content: center;
-`
+`;
 
 const Trigger = styled((props) => <Icon {...props} />)`
   -webkit-app-region: no-drag;
   opacity: 0.5;
   transition: opacity ${theme('animation.time.normal')};
-`
+`;
 
 const isToday = (day: any) => {
-  return day.toString() == dayjs().format('YYYY-MM-DD')
-}
+  return day.toString() == dayjs().format('YYYY-MM-DD');
+};
 
 const showDate = (day: any) => {
   if (isToday(day)) {
@@ -96,22 +95,22 @@ const showDate = (day: any) => {
         <AsideDay>Today</AsideDay>
         <AsideYear>{dayjs(dayjs(day.toString(), 'YYYY-MM-DD')).format('D MMMM YYYY')}</AsideYear>
       </>
-    )
+    );
   } else {
     return (
       <>
         <AsideDay>{dayjs(dayjs(day.toString(), 'YYYY-MM-DD')).format('D MMMM')}</AsideDay>
         <AsideYear>{dayjs(dayjs(day.toString(), 'YYYY-MM-DD')).format('YYYY')}</AsideYear>
       </>
-    )
+    );
   }
-}
+};
 
 type EntryAsideProps = {
   date: string
-  wordCount: React.MutableRefObject<number>
+  wordCount: React.MutableRefObject<number | string[]>
   freePlanLimitReached: boolean
-}
+};
 
 function EntryAside({ date, wordCount, freePlanLimitReached }: EntryAsideProps) {
   return (
@@ -132,7 +131,7 @@ function EntryAside({ date, wordCount, freePlanLimitReached }: EntryAsideProps) 
         </AsideMenuStickyContainer>
       </AsideMenu>
     </>
-  )
+  );
 }
 
-export { EntryAside }
+export { EntryAside };

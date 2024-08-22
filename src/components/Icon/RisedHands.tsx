@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 
 export function RisedHands({ ...props }) {
   return (
@@ -63,5 +63,5 @@ export function RisedHands({ ...props }) {
         fill='#727272'
       />
     </svg>
-  )
+  );
 }

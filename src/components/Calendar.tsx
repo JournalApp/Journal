@@ -1,15 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react'
-import styled from 'styled-components'
-import dayjs from 'dayjs'
-import { theme } from 'themes'
-import { select, focusEditor } from '@udecode/plate'
-import { useAppearanceContext, useEntriesContext, useUserContext } from 'context'
-import { CalendarOpen, getCalendarIsOpen } from 'config'
-import { createDays, getYearsSince, logger, entryHasNoContent } from 'utils'
-import { Icon } from 'components'
-import { defaultContent } from 'config'
-import type { Entry, Day } from 'types'
-import * as Const from 'consts'
+import React, { useState, useEffect } from 'react';
+import styled from 'styled-components';
+import dayjs from 'dayjs';
+import { theme } from '@/themes';
+import { select, focusEditor } from '@udecode/plate';
+import { useAppearanceContext, useEntriesContext, useUserContext } from '@/context';
+import { CalendarOpen, getCalendarIsOpen , defaultContent } from '@/config';
+import { createDays, getYearsSince, logger, entryHasNoContent } from '@/utils';
+import type { Entry, Day } from '@/types';
+import * as Const from '@/constants';
 
 interface ContainerProps {
   isOpen: CalendarOpen
@@ -29,12 +27,12 @@ const Container = styled.div<ContainerProps>`
   &::-webkit-scrollbar {
     display: none;
   }
-`
+`;
 
 const DayLabel = styled.div`
   font-size: 14px;
   line-height: 20px;
-`
+`;
 
 interface DayProps {
   isToday: boolean
@@ -44,7 +42,7 @@ interface DayProps {
 const Day = styled.div`
   height: 30px;
   -webkit-app-region: no-drag;
-`
+`;
 
 const DayButton = styled.button<DayProps>`
   display: block;
@@ -86,14 +84,14 @@ const DayButton = styled.button<DayProps>`
       }
     }
   }
-`
+`;
 
 const Month = styled.div`
   display: flex;
   flex-direction: row;
   width: 100%;
   gap: 6px;
-`
+`;
 
 const MonthLabel = styled.div`
   top: 48px;
@@ -101,7 +99,7 @@ const MonthLabel = styled.div`
   position: sticky;
   height: fit-content;
   padding: 4px 0;
-`
+`;
 
 const MonthLabelMonth = styled.div`
   font-weight: 400;
@@ -109,7 +107,7 @@ const MonthLabelMonth = styled.div`
   line-height: 16px;
   color: ${theme('color.primary.main')};
   opacity: 0.7;
-`
+`;
 
 const MonthLabelYear = styled.div`
   font-weight: 400;
@@ -117,7 +115,7 @@ const MonthLabelYear = styled.div`
   line-height: 16px;
   color: ${theme('color.primary.main')};
   opacity: 0.3;
-`
+`;
 
 const Days = styled.div`
   display: flex;
@@ -126,7 +124,7 @@ const Days = styled.div`
   gap: 6px;
   text-align: end;
   flex-grow: 1;
-`
+`;
 
 const Years = styled.div`
   display: flex;
@@ -136,7 +134,7 @@ const Years = styled.div`
   padding: 0 48px 0 16px;
   text-align: end;
   padding-bottom: 50vh;
-`
+`;
 
 const FadeTop = styled.div<ContainerProps>`
   position: fixed;
@@ -154,7 +152,7 @@ const FadeTop = styled.div<ContainerProps>`
     ${theme('color.primary.surface')} 35%,
     ${theme('color.primary.surface', 0)} 100%
   );
-`
+`;
 
 const FadeDown = styled.div<ContainerProps>`
   position: fixed;
@@ -172,7 +170,7 @@ const FadeDown = styled.div<ContainerProps>`
     ${theme('color.primary.surface')} 20%,
     ${theme('color.primary.surface', 0)} 100%
   );
-`
+`;
 
 const RangeVisible = styled.div`
   position: absolute;
@@ -185,112 +183,112 @@ const RangeVisible = styled.div`
   background-color: ${theme('color.popper.surface')};
   z-index: -1;
   opacity: 0.3;
-`
+`;
 
 const withLeadingZero = (num: number) => {
-  return (num < 10 ? '0' : '') + num
-}
+  return (num < 10 ? '0' : '') + num;
+};
 
 const Calendar = () => {
-  const { isCalendarOpen } = useAppearanceContext()
+  const { isCalendarOpen } = useAppearanceContext();
   const {
     cacheAddOrUpdateEntry,
     rerenderEntriesAndCalendar,
     editorsRef,
     invokeRerenderCalendar,
     userEntries,
-  } = useEntriesContext()
-  const [days, setDaysInternal] = useState([])
-  const [daysWithNoContent, setDaysWithNoContent] = useState<string[]>([])
-  const { session, serverTimeNow, subscription, invokeOpenSettings } = useUserContext()
-  const today = new Date()
+  } = useEntriesContext();
+  const [days, setDaysInternal] = useState([]);
+  const [_, setDaysWithNoContent] = useState<string[]>([]);
+  const { session, serverTimeNow, subscription, invokeOpenSettings } = useUserContext();
+  const today = new Date();
 
-  logger('Calendar render')
+  logger('Calendar render');
 
   const setDays = () => {
-    let today = dayjs().format('YYYY-MM-DD') as Day
-    let daysWithNoContent: Day[] = []
-    let daysInCache = userEntries.current.map((entry) => {
+    const today = dayjs().format('YYYY-MM-DD') as Day;
+    const daysWithNoContent: Day[] = [];
+    const daysInCache = userEntries.current.map((entry) => {
       if (Array.isArray(entry.content) && entryHasNoContent(entry.content)) {
-        daysWithNoContent.push(entry.day)
+        daysWithNoContent.push(entry.day);
       }
-      return entry.day
-    }) as Day[]
-    setDaysInternal([...new Set([...daysInCache, today])].sort())
-    setDaysWithNoContent([...daysWithNoContent])
-  }
+      return entry.day;
+    }) as Day[];
+    setDaysInternal([...new Set([...daysInCache, today])].sort());
+    setDaysWithNoContent([...daysWithNoContent]);
+  };
 
   //////////////////////////
   // ⛰ useEffect on mount
   //////////////////////////
 
   useEffect(() => {
-    invokeRerenderCalendar.current = setDays
-    let today = dayjs().format('YYYY-MM-DD')
-    let element = document.getElementById(`${today}-calendar`)
+    invokeRerenderCalendar.current = setDays;
+    const today = dayjs().format('YYYY-MM-DD');
+    const element = document.getElementById(`${today}-calendar`);
     if (element) {
-      element.scrollIntoView({ block: 'center' })
+      element.scrollIntoView({ block: 'center' });
     }
-  }, [])
+  }, []);
 
   const hasEntry = (date: string) => {
     if (days && Array.isArray(days)) {
-      return days.some((el: string) => el == date)
+      return days.some((el: string) => el == date);
     } else {
-      return false
+      return false;
     }
-  }
+  };
 
   const isToday = (year: number, month: number, day: number) => {
-    return year == today.getFullYear() && month == today.getMonth() && day == today.getDate()
-  }
+    return year == today.getFullYear() && month == today.getMonth() && day == today.getDate();
+  };
 
   const isBeforeToday = (year: number, month: number, day?: number) => {
     if (year < today.getFullYear()) {
-      return true
+      return true;
     } else if (year == today.getFullYear()) {
       if (month < today.getMonth()) {
-        return true
+        return true;
       } else if (month == today.getMonth()) {
         if (!day || day <= today.getDate()) {
-          return true
+          return true;
         }
       }
     }
-    return false
-  }
+    return false;
+  };
 
   const scrollToDayAndAdd = async (day: Day) => {
-    let element = document.getElementById(`${day}-entry`)
+    const element = document.getElementById(`${day}-entry`);
     if (element) {
-      element.scrollIntoView()
-      const editor = editorsRef.current[day]
+      element.scrollIntoView();
+      const editor = editorsRef.current[day];
       if (editor) {
-        focusEditor(editor)
+        focusEditor(editor);
         select(editor, {
           path: [0, 0],
           offset: 0,
-        })
+        });
       }
       window.electronAPI.capture({
         distinctId: session.user.id,
         event: 'calendar scroll-to-day',
-      })
+      });
     } else {
       // Open settings if limit is hit
       if (subscription == null) {
-        const limit = Const.entriesLimit
-        const count = await window.electronAPI.cache.getEntriesCount(session.user.id)
+        const limit = Const.entriesLimit;
+        const count = await window.electronAPI.cache.getEntriesCount(session.user.id);
         if (count > limit) {
-          invokeOpenSettings.current(true)
-          return
+          invokeOpenSettings.current(true);
+          return;
         }
       }
 
-      logger('no such day, adding...')
+      logger('no such day, adding...');
 
-      const user_id = session.user.id
-      const modified_at = serverTimeNow()
+      const user_id = session.user.id;
+      const modified_at = serverTimeNow();
       const entryToInsert: Entry = {
         user_id,
         day,
@@ -299,45 +297,45 @@ const Calendar = () => {
         content: defaultContent,
         revision: 0,
         sync_status: 'pending_insert',
-      }
+      };
 
       // Local state: add entry
-      userEntries.current.push({ ...entryToInsert })
+      userEntries.current.push({ ...entryToInsert });
 
       // Cache: save
-      entryToInsert.content = JSON.stringify(defaultContent)
-      cacheAddOrUpdateEntry(entryToInsert)
+      entryToInsert.content = JSON.stringify(defaultContent);
+      cacheAddOrUpdateEntry(entryToInsert);
 
       // Rerender
-      rerenderEntriesAndCalendar()
+      rerenderEntriesAndCalendar();
 
       //
       const focusInterval = setInterval(() => {
-        const editor = editorsRef.current[day]
+        const editor = editorsRef.current[day];
         if (editor) {
-          logger('Found editor for added day')
-          clearInterval(focusInterval)
+          logger('Found editor for added day');
+          clearInterval(focusInterval);
 
           // Scroll to new entry
-          const editorRef = document.getElementById(`${day}-entry`)
-          editorRef.scrollIntoView()
+          const editorRef = document.getElementById(`${day}-entry`);
+          editorRef.scrollIntoView();
 
           // Set focus
-          focusEditor(editor)
+          focusEditor(editor);
           select(editor, {
             path: [0, 0],
             offset: 0,
-          })
+          });
         } else {
-          logger('No editor for added day yet')
+          logger('No editor for added day yet');
         }
-      }, 100)
+      }, 100);
       window.electronAPI.capture({
         distinctId: session.user.id,
         event: 'calendar add-day',
-      })
+      });
     }
-  }
+  };
 
   return (
     <>
@@ -362,7 +360,7 @@ const Calendar = () => {
                       {createDays(year, month + 1).map((day) => {
                         const today = `${year}-${withLeadingZero(month + 1)}-${withLeadingZero(
                           day
-                        )}` as Day
+                        )}` as Day;
                         return (
                           isBeforeToday(year, month, day) && (
                             <Day key={`${today}-wrapper`}>
@@ -377,7 +375,7 @@ const Calendar = () => {
                               </DayButton>
                             </Day>
                           )
-                        )
+                        );
                       })}
                     </Days>
                   </Month>
@@ -388,7 +386,7 @@ const Calendar = () => {
         <RangeVisible id='RangeVisible' />
       </Container>
     </>
-  )
-}
+  );
+};
 
-export { Calendar }
+export { Calendar };

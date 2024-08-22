@@ -1,8 +1,8 @@
-import React from 'react'
-import dayjs from 'dayjs'
-import { supabase, logger } from 'utils'
-import type { Entry, EntryTag, Tag } from 'types'
-import { RealtimeSubscription } from '@supabase/supabase-js'
+import React from 'react';
+import dayjs from 'dayjs';
+import { supabase, logger } from '@/utils';
+import type { Entry, EntryTag, Tag } from '@/types';
+import { RealtimeSubscription } from '@supabase/supabase-js';
 
 ////////////////////////////////////////////////////
 // Entries realtime
@@ -34,58 +34,58 @@ function initRealtimeEntries({
       // Try removeSubscription first
       if (realtimeEntriesSub.current) {
         try {
-          await supabase.removeSubscription(realtimeEntriesSub.current)
-          realtimeEntriesSub.current = null
+          await supabase.removeSubscription(realtimeEntriesSub.current);
+          realtimeEntriesSub.current = null;
         } catch {
-          logger('Could not remove Subscription')
+          logger('Could not remove Subscription');
         }
       }
       // Skip reconnecting if mac is in sleep mode
       if (window.electronAPI.getSystemIdleState() != 'locked' && window.electronAPI.isOnline()) {
-        logger(`🔄 🔄 🔄 realtimeEntriesSub connecting...`)
+        logger(`🔄 🔄 🔄 realtimeEntriesSub connecting...`);
         realtimeEntriesSub.current = supabase
           .from(`journals_${user_id.replaceAll('-', '_')}`)
           .on('*', handleEntryUpdate)
-          .subscribe()
+          .subscribe();
       } else {
-        logger('Skipping reconnecting, mac is offline or sleeping')
+        logger('Skipping reconnecting, mac is offline or sleeping');
       }
     } else {
-      let log = {
+      const log = {
         isErrored: realtimeEntriesSub.current.isErrored(),
         state: realtimeEntriesSub.current.state,
         isJoined: realtimeEntriesSub.current.isJoined(),
-      }
+      };
       logger(
         `${dayjs()} – connected, system state: ${window.electronAPI.getSystemIdleState()}, online: ${window.electronAPI.isOnline()}`
-      )
-      logger(log)
+      );
+      logger(log);
     }
   }
-  setInterval(connectAndKeepAlive, 5000)
+  setInterval(connectAndKeepAlive, 5000);
 
   function handleEntryUpdate(payload: RealtimePayloadEntries) {
-    logger('🙋‍♂️ handleEntryUpdate')
+    logger('🙋‍♂️ handleEntryUpdate');
     if (payload?.eventType == 'INSERT' || payload?.eventType == 'UPDATE') {
       const isSameCreatedAt = dayjs(payload.new.created_at).isSame(
         userEntries.current.find((e) => e.day == payload.new.day)?.created_at
-      )
+      );
       const isSameRevision =
-        payload.new.revision == userEntries.current.find((e) => e.day == payload.new.day)?.revision
-      const isSame = isSameCreatedAt && isSameRevision
+        payload.new.revision == userEntries.current.find((e) => e.day == payload.new.day)?.revision;
+      const isSame = isSameCreatedAt && isSameRevision;
       if (!isSame) {
-        logger('🎾 🎾 🎾 New updated, syncing...')
-        onUpdate()
+        logger('🎾 🎾 🎾 New updated, syncing...');
+        onUpdate();
       } else {
-        logger('🥱 🥱 🥱 Already up to date')
+        logger('🥱 🥱 🥱 Already up to date');
       }
     }
     if (payload?.eventType == 'DELETE') {
       if (userEntries.current.find((e) => e.day == payload.old.day)) {
-        logger('Deleted entry exists syncing...')
-        onUpdate()
+        logger('Deleted entry exists syncing...');
+        onUpdate();
       } else {
-        logger('🥱 🥱 🥱 Already deleted')
+        logger('🥱 🥱 🥱 Already deleted');
       }
     }
   }
@@ -108,7 +108,7 @@ interface RealtimePayloadTags {
   old?: Tag
 }
 
-function initRealtimeTags({ userTags, realtimeTagsSub, user_id, onUpdate }: initRealtimeTagsProps) {
+function initRealtimeTags({ userTags, realtimeTagsSub, onUpdate }: initRealtimeTagsProps) {
   // Subscribe, keep connection alive
   async function connectAndKeepAlive() {
     // Connect if not connected
@@ -116,45 +116,45 @@ function initRealtimeTags({ userTags, realtimeTagsSub, user_id, onUpdate }: init
       // Try removeSubscription first
       if (realtimeTagsSub.current) {
         try {
-          await supabase.removeSubscription(realtimeTagsSub.current)
-          realtimeTagsSub.current = null
+          await supabase.removeSubscription(realtimeTagsSub.current);
+          realtimeTagsSub.current = null;
         } catch {
-          logger('Could not remove Subscription')
+          logger('Could not remove Subscription');
         }
       }
       // Skip reconnecting if mac is in sleep mode
       if (window.electronAPI.getSystemIdleState() != 'locked' && window.electronAPI.isOnline()) {
-        logger(`🔄 🔄 🔄 realtimeTagsSub connecting...`)
-        realtimeTagsSub.current = supabase.from(`tags`).on('*', handleTagsUpdate).subscribe()
+        logger(`🔄 🔄 🔄 realtimeTagsSub connecting...`);
+        realtimeTagsSub.current = supabase.from(`tags`).on('*', handleTagsUpdate).subscribe();
       } else {
-        logger('Skipping reconnecting, mac is offline or sleeping')
+        logger('Skipping reconnecting, mac is offline or sleeping');
       }
     }
   }
-  setInterval(connectAndKeepAlive, 5000)
+  setInterval(connectAndKeepAlive, 5000);
 
   function handleTagsUpdate(payload: RealtimePayloadTags) {
-    logger('🙋‍♂️ handleTagsUpdate')
+    logger('🙋‍♂️ handleTagsUpdate');
     if (payload?.eventType == 'INSERT' || payload?.eventType == 'UPDATE') {
       const isSameCreatedAt = dayjs(payload.new.created_at).isSame(
         userTags.current.find((e) => e.id == payload.new.id)?.created_at
-      )
+      );
       const isSameRevision =
-        payload.new.revision == userTags.current.find((e) => e.id == payload.new.id)?.revision
-      const isSame = isSameCreatedAt && isSameRevision
+        payload.new.revision == userTags.current.find((e) => e.id == payload.new.id)?.revision;
+      const isSame = isSameCreatedAt && isSameRevision;
       if (!isSame) {
-        logger('🎾 🎾 🎾 New updated, syncing...')
-        onUpdate()
+        logger('🎾 🎾 🎾 New updated, syncing...');
+        onUpdate();
       } else {
-        logger('🥱 🥱 🥱 Already up to date')
+        logger('🥱 🥱 🥱 Already up to date');
       }
     }
     if (payload?.eventType == 'DELETE') {
       if (userTags.current.find((e) => e.id == payload.old.id)) {
-        logger('Deleted entry exists syncing...')
-        onUpdate()
+        logger('Deleted entry exists syncing...');
+        onUpdate();
       } else {
-        logger('🥱 🥱 🥱 Already deleted')
+        logger('🥱 🥱 🥱 Already deleted');
       }
     }
   }
@@ -190,45 +190,45 @@ function initRealtimeEntryTags({
       // Try removeSubscription first
       if (realtimeEntryTagsSub.current) {
         try {
-          await supabase.removeSubscription(realtimeEntryTagsSub.current)
-          realtimeEntryTagsSub.current = null
+          await supabase.removeSubscription(realtimeEntryTagsSub.current);
+          realtimeEntryTagsSub.current = null;
         } catch {
-          logger('Could not remove Subscription')
+          logger('Could not remove Subscription');
         }
       }
       // Skip reconnecting if mac is in sleep mode
       if (window.electronAPI.getSystemIdleState() != 'locked' && window.electronAPI.isOnline()) {
-        logger(`🔄 🔄 🔄 realtimeEntryTagsSub connecting...`)
+        logger(`🔄 🔄 🔄 realtimeEntryTagsSub connecting...`);
         realtimeEntryTagsSub.current = supabase
           .from(`entries_tags_${user_id.replaceAll('-', '_')}`)
           .on('*', handleEntryTagsUpdate)
-          .subscribe()
+          .subscribe();
       } else {
-        logger('Skipping reconnecting, mac is offline or sleeping')
+        logger('Skipping reconnecting, mac is offline or sleeping');
       }
     }
   }
-  setInterval(connectAndKeepAlive, 5000)
+  setInterval(connectAndKeepAlive, 5000);
 
   function handleEntryTagsUpdate(payload: RealtimePayloadEntryTags) {
-    logger('🙋‍♂️ handleEntryTagsUpdate')
+    logger('🙋‍♂️ handleEntryTagsUpdate');
     if (payload?.eventType == 'INSERT' || payload?.eventType == 'UPDATE') {
       const isSameCreatedAt = dayjs(payload.new.created_at).isSame(
         userEntryTags.current.find(
           (e) => e.day == payload.new.day && e.tag_id == payload.new.tag_id
         )?.created_at
-      )
+      );
       const isSameRevision =
         payload.new.revision ==
         userEntryTags.current.find(
           (e) => e.day == payload.new.day && e.tag_id == payload.new.tag_id
-        )?.revision
-      const isSame = isSameCreatedAt && isSameRevision
+        )?.revision;
+      const isSame = isSameCreatedAt && isSameRevision;
       if (!isSame) {
-        logger('🎾 🎾 🎾 New updated, syncing...')
-        onUpdate()
+        logger('🎾 🎾 🎾 New updated, syncing...');
+        onUpdate();
       } else {
-        logger('🥱 🥱 🥱 Already up to date')
+        logger('🥱 🥱 🥱 Already up to date');
       }
     }
     if (payload?.eventType == 'DELETE') {
@@ -237,13 +237,13 @@ function initRealtimeEntryTags({
           (e) => e.day == payload.old.day && e.tag_id == payload.old.tag_id
         )
       ) {
-        logger('Deleted entry exists syncing...')
-        onUpdate()
+        logger('Deleted entry exists syncing...');
+        onUpdate();
       } else {
-        logger('🥱 🥱 🥱 Already deleted')
+        logger('🥱 🥱 🥱 Already deleted');
       }
     }
   }
 }
 
-export { initRealtimeEntries, initRealtimeEntryTags, initRealtimeTags }
+export { initRealtimeEntries, initRealtimeEntryTags, initRealtimeTags };

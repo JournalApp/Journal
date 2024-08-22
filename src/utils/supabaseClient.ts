@@ -1,5 +1,5 @@
-import { createClient } from '@supabase/supabase-js'
-import { isDev } from './'
+import { createClient } from '@supabase/supabase-js';
+import { isDev } from './';
 
 const supabaseEnv = {
   local: {
@@ -17,11 +17,11 @@ const supabaseEnv = {
     supabaseAnonKey:
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzYmFncGpobHh6YWJwaWl0cWp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2NTI0MjMwOTEsImV4cCI6MTk2Nzk5OTA5MX0.O-QNy1tbJ7AvZMRhBf8i7_UDNUDhBMQ_yKJEEeS5p84',
   },
-}
+};
 
-const { supabaseUrl } = supabaseEnv[isDev() ? 'local' : 'prod']
-const { supabaseAnonKey } = supabaseEnv[isDev() ? 'local' : 'prod']
+const { supabaseUrl } = supabaseEnv[isDev() ? 'local' : 'prod'];
+const { supabaseAnonKey } = supabaseEnv[isDev() ? 'local' : 'prod'];
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey)
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-export { supabaseUrl, supabaseAnonKey, supabase }
+export { supabaseUrl, supabaseAnonKey, supabase };

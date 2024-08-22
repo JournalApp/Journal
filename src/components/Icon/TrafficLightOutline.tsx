@@ -1,5 +1,5 @@
-import React from 'react'
-import { theme } from 'themes'
+import React from 'react';
+import { theme } from '@/themes';
 
 export function TrafficLightOutline({ tintColor, ...props }: any) {
   return (
@@ -8,5 +8,5 @@ export function TrafficLightOutline({ tintColor, ...props }: any) {
       <circle cx={28} cy={8} r={5.5} stroke={tintColor || theme('color.primary.main')} />
       <circle cx={48} cy={8} r={5.5} stroke={tintColor || theme('color.primary.main')} />
     </svg>
-  )
+  );
 }

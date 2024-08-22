@@ -1,5 +1,5 @@
-import * as React from 'react'
-import { theme } from 'themes'
+import * as React from 'react';
+import { theme } from '@/themes';
 
 export function FormatItalic({ tintColor, ...props }: any) {
   return (
@@ -9,5 +9,5 @@ export function FormatItalic({ tintColor, ...props }: any) {
         fill={tintColor || theme('color.primary.main')}
       />
     </svg>
-  )
+  );
 }

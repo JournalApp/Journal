@@ -1,9 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react'
-import * as Tabs from '@radix-ui/react-tabs'
-import styled, { keyframes } from 'styled-components'
-import { theme } from 'themes'
-import { Icon } from 'components'
-import { CardElement } from '@stripe/react-stripe-js'
+import styled from 'styled-components';
+import { theme } from '@/themes';
 
 const FormStyled = styled.form`
   width: 280px;
@@ -11,13 +7,13 @@ const FormStyled = styled.form`
   display: flex;
   flex-direction: column;
   gap: 24px;
-`
+`;
 
 const TextStyled = styled.div`
   font-weight: 500;
   font-size: 14px;
   line-height: 24px;
-`
+`;
 
 const CheckoutModalStyled = styled.div`
   background-color: ${theme('color.popper.surface')};
@@ -28,7 +24,7 @@ const CheckoutModalStyled = styled.div`
   margin: 48px 8px 8px 8px;
   border-radius: 8px;
   -webkit-app-region: no-drag;
-`
+`;
 
 const ButtonStyled = styled.button`
   background-color: ${theme('color.popper.main')};
@@ -53,7 +49,7 @@ const ButtonStyled = styled.button`
     opacity: 0.6;
     cursor: default;
   }
-`
+`;
 
 const TableStyled = styled.div`
   letter-spacing: -0.03em;
@@ -66,7 +62,7 @@ const TableStyled = styled.div`
     font-size: 16px;
     font-style: normal;
   }
-`
+`;
 
 interface RowStyledProps {
   padding?: string
@@ -75,7 +71,7 @@ interface RowStyledProps {
 const RowStyled = styled.div<RowStyledProps>`
   display: flex;
   padding: ${(props) => (props.padding ? props.padding : '0')};
-`
+`;
 
 interface CellFillStyledProps {
   opacity?: string
@@ -84,15 +80,15 @@ interface CellFillStyledProps {
 const CellFillStyled = styled.div<CellFillStyledProps>`
   flex: 1;
   opacity: ${(props) => (props.opacity ? props.opacity : '0.8')};
-`
+`;
 
 const Divider = styled.div`
   height: 1px;
   margin: 8px 0;
   background-color: ${theme('color.popper.border')};
-`
+`;
 
-const CellStyled = styled.div``
+const CellStyled = styled.div``;
 
 export {
   TextStyled,
@@ -104,4 +100,4 @@ export {
   TableStyled,
   Divider,
   FormStyled,
-}
+};

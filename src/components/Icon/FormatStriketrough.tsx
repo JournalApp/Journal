@@ -1,5 +1,5 @@
-import * as React from 'react'
-import { theme } from 'themes'
+import * as React from 'react';
+import { theme } from '@/themes';
 
 export function FormatStriketrough({ tintColor, ...props }: any) {
   return (
@@ -10,5 +10,5 @@ export function FormatStriketrough({ tintColor, ...props }: any) {
       />
       <path d='M6 12.5h12v1.09H6V12.5z' fill={tintColor || theme('color.primary.main')} />
     </svg>
-  )
+  );
 }

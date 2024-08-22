@@ -1,3 +1,3 @@
-export * from './AppearanceContext'
-export * from './EntriesContext/index'
-export * from './UserContext'
+export * from './AppearanceContext';
+export * from './EntriesContext/index';
+export * from './UserContext';

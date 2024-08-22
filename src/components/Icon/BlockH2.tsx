@@ -1,5 +1,5 @@
-import React from 'react'
-import { theme } from 'themes'
+import React from 'react';
+import { theme } from '@/themes';
 
 export function BlockH2({ tintColor, ...props }: any) {
   return (
@@ -14,5 +14,5 @@ export function BlockH2({ tintColor, ...props }: any) {
         fill={tintColor || theme('color.primary.main')}
       />
     </svg>
-  )
+  );
 }

@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react'
-import styled from 'styled-components'
-import { theme } from 'themes'
+import styled from 'styled-components';
+import { theme } from '@/themes';
 
 const HeaderStyled = styled.div`
   font-weight: 500;
@@ -10,7 +9,7 @@ const HeaderStyled = styled.div`
   color: ${theme('color.popper.main')};
   margin-bottom: 8px;
   margin-top: 32px;
-`
+`;
 
 const TextStyled = styled.div`
   flex-grow: 1;
@@ -26,7 +25,7 @@ const TextStyled = styled.div`
     font-size: 14px;
     line-height: 24px;
   }
-`
+`;
 
 const ActionsStyled = styled.div`
   display: flex;
@@ -35,10 +34,10 @@ const ActionsStyled = styled.div`
   align-self: flex-start;
   row-gap: 2px;
   gap: 4px;
-`
+`;
 type ActionStyledProps = {
   isHidden?: boolean
-}
+};
 
 const ActionStyled = styled.button<ActionStyledProps>`
   ${(props) => (props.isHidden ? 'display: none;' : '')};
@@ -62,11 +61,11 @@ const ActionStyled = styled.button<ActionStyledProps>`
     background-color: ${theme('color.popper.hover')};
     opacity: 1;
   }
-`
+`;
 
 const ContentStyled = styled.div`
   display: flex;
-`
+`;
 
 const CardStyled = styled.div`
   display: flex;
@@ -76,7 +75,7 @@ const CardStyled = styled.div`
     font-weight: 500;
     font-style: normal;
   }
-`
+`;
 
 const ReceiptsTableStyled = styled.div`
   &:first-child {
@@ -85,19 +84,19 @@ const ReceiptsTableStyled = styled.div`
   > * {
     border-bottom: 1px solid ${theme('color.popper.border')};
   }
-`
+`;
 
 const ReceiptsRowStyled = styled.div`
   display: flex;
   padding: 8px 0;
   gap: 16px;
-`
+`;
 
 const ReceiptsCellStyled = styled.div`
   &:first-child {
     flex-grow: 1;
   }
-`
+`;
 
 const DownloadStyled = styled.a`
   font-weight: 400;
@@ -118,13 +117,13 @@ const DownloadStyled = styled.a`
     background-color: ${theme('color.popper.hover')};
     opacity: 1;
   }
-`
+`;
 
 const Divider = styled.div`
   background-color: ${theme('color.popper.border')};
   height: 1px;
   margin: 32px 0;
-`
+`;
 
 export {
   HeaderStyled,
@@ -138,4 +137,4 @@ export {
   ReceiptsCellStyled,
   Divider,
   DownloadStyled,
-}
+};
