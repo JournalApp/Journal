@@ -7,7 +7,7 @@ import {
   FloatingPortal,
   useDismiss,
   useInteractions,
-} from '@floating-ui/react-dom-interactions';
+} from '@floating-ui/react';
 import { Icon } from '@/components';
 import { BlockTypeSelect } from './BlockTypeSelect';
 import { theme } from '@/themes';
@@ -24,7 +24,6 @@ import {
   getPluginType,
   getSelectionText,
   isSelectionExpanded,
-
   getPreventDefaultHandler,
   toggleMark,
   useEventPlateId,
@@ -37,9 +36,9 @@ import styled, { keyframes } from 'styled-components';
 const MARK_HAND_STRIKETHROUGH = 'hand-strikethrough';
 
 interface WrapperProps {
-  posX?: string
-  posY?: string
-  pos?: string
+  posX?: string;
+  posY?: string;
+  pos?: string;
 }
 
 const showToolbar = keyframes`
@@ -74,7 +73,7 @@ const StyledToolbar = styled(Toolbar.Root)`
 `;
 
 interface StyledToggleProps {
-  toggleOn: boolean
+  toggleOn: boolean;
 }
 
 const ToggleGroup = styled.div`
@@ -121,8 +120,8 @@ const options = [
 ];
 
 interface FormatToolbarProps {
-  setIsEditorFocused: any
-  isContextMenuVisible: any
+  setIsEditorFocused: any;
+  isContextMenuVisible: any;
 }
 
 export const FormatToolbar = ({ setIsEditorFocused, isContextMenuVisible }: FormatToolbarProps) => {
@@ -132,7 +131,7 @@ export const FormatToolbar = ({ setIsEditorFocused, isContextMenuVisible }: Form
   const [editorFocused, setEditorFocused] = useState(false);
   const selectionExpanded = editor && isSelectionExpanded(editor);
   const selectionText = editor && getSelectionText(editor);
-  const { x, y, reference, floating, strategy, context } = useFloating({
+  const { x, y, refs, strategy, context } = useFloating({
     placement: 'top-start',
     middleware: [shift(), offset({ mainAxis: 8 })],
     open,
@@ -155,14 +154,14 @@ export const FormatToolbar = ({ setIsEditorFocused, isContextMenuVisible }: Form
   useLayoutEffect(() => {
     const select = getSelectionBoundingClientRect();
     if (select) {
-      reference({
+      refs.setReference({
         getBoundingClientRect() {
           const { top, right, bottom, left, width, height, x, y } = select;
           return { top, right, bottom, left, width, height, x, y };
         },
       });
     }
-  }, [reference, selectionExpanded, selectionText, editor.children]);
+  }, [refs.setReference, selectionExpanded, selectionText, editor.children]);
 
   useEffect(() => {
     if (!editorFocused) {
@@ -209,7 +208,7 @@ export const FormatToolbar = ({ setIsEditorFocused, isContextMenuVisible }: Form
     <FloatingPortal>
       {!isContextMenuVisible() && open && (
         <Wrapper
-          ref={floating}
+          ref={refs.setFloating}
           posX={`${Math.floor(x)}px`}
           posY={`${Math.floor(y)}px`}
           pos={strategy}
@@ -218,13 +217,13 @@ export const FormatToolbar = ({ setIsEditorFocused, isContextMenuVisible }: Form
           <StyledToolbar>
             <BlockTypeSelect />
             <ToggleGroup>
-              <Toggle markType={MARK_BOLD} iconName='FormatBold' />
-              <Toggle markType={MARK_ITALIC} iconName='FormatItalic' />
-              <Toggle markType={MARK_UNDERLINE} iconName='FormatUnderline' />
-              <Toggle markType={MARK_STRIKETHROUGH} iconName='FormatStriketrough' />
-              <Toggle markType={MARK_HAND_STRIKETHROUGH} iconName='FormatHandStriketrough' />
-              <Toggle markType={MARK_CODE} iconName='FormatCode' />
-              <Toggle markType={MARK_HIGHLIGHT} iconName='FormatMark' />
+              <Toggle markType={MARK_BOLD} iconName="FormatBold" />
+              <Toggle markType={MARK_ITALIC} iconName="FormatItalic" />
+              <Toggle markType={MARK_UNDERLINE} iconName="FormatUnderline" />
+              <Toggle markType={MARK_STRIKETHROUGH} iconName="FormatStriketrough" />
+              <Toggle markType={MARK_HAND_STRIKETHROUGH} iconName="FormatHandStriketrough" />
+              <Toggle markType={MARK_CODE} iconName="FormatCode" />
+              <Toggle markType={MARK_HIGHLIGHT} iconName="FormatMark" />
             </ToggleGroup>
           </StyledToolbar>
         </Wrapper>

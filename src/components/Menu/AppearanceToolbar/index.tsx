@@ -12,7 +12,7 @@ import {
   useFloatingNodeId,
   FloatingNode,
   FloatingPortal,
-} from '@floating-ui/react-dom-interactions';
+} from '@floating-ui/react';
 import {
   AppearanceToolbarWrapperStyled,
   AppearanceToolbarStyled,
@@ -26,8 +26,8 @@ import {
 } from './styled';
 
 interface AppearanceToolbarProps {
-  setOpenAppearanceToolbar: React.MutableRefObject<any>
-  returnFocus: React.MutableRefObject<HTMLButtonElement>
+  setOpenAppearanceToolbar: React.MutableRefObject<any>;
+  returnFocus: React.MutableRefObject<HTMLButtonElement>;
 }
 
 const AppearanceToolbar = ({ setOpenAppearanceToolbar, returnFocus }: AppearanceToolbarProps) => {
@@ -39,7 +39,7 @@ const AppearanceToolbar = ({ setOpenAppearanceToolbar, returnFocus }: Appearance
   const { fontSize, setFontSize, fontFace, setFontFace, colorTheme, setColorTheme } =
     useAppearanceContext();
 
-  const { floating, context, refs } = useFloating({
+  const { context, refs } = useFloating({
     open,
     onOpenChange: setOpen,
     nodeId,
@@ -100,36 +100,36 @@ const AppearanceToolbar = ({ setOpenAppearanceToolbar, returnFocus }: Appearance
           {open && (
             <FloatingOverlay style={{ zIndex: 300 }}>
               <FloatingFocusManager context={context}>
-                <AppearanceToolbarWrapperStyled ref={floating} {...getFloatingProps()}>
+                <AppearanceToolbarWrapperStyled ref={refs.setFloating} {...getFloatingProps()}>
                   <AppearanceToolbarStyled ref={initialFocus}>
                     <ToggleGroupStyled
-                      type='single'
+                      type="single"
                       defaultValue={fontSize}
                       onValueChange={(value) => {
                         setFontSize(value as AppearanceContextInterface['fontSize']);
                       }}
                     >
-                      <ToggleFontAStyled value='small' disabled={fontSize == 'small'}>
+                      <ToggleFontAStyled value="small" disabled={fontSize == 'small'}>
                         A
                       </ToggleFontAStyled>
-                      <ToggleFontAAStyled value='normal' disabled={fontSize == 'normal'}>
+                      <ToggleFontAAStyled value="normal" disabled={fontSize == 'normal'}>
                         A
                       </ToggleFontAAStyled>
-                      <ToggleFontAAAStyled value='large' disabled={fontSize == 'large'}>
+                      <ToggleFontAAAStyled value="large" disabled={fontSize == 'large'}>
                         A
                       </ToggleFontAAAStyled>
                     </ToggleGroupStyled>
                     <HorizontalDividerStyled />
                     <ToggleGroupStyled
-                      type='single'
+                      type="single"
                       defaultValue={colorTheme}
                       onValueChange={(value) => {
                         setColorTheme(value as AppearanceContextInterface['colorTheme']);
                       }}
                     >
                       <ToggleButtonStyled
-                        value='light'
-                        padding='8px'
+                        value="light"
+                        padding="8px"
                         disabled={colorTheme == 'light'}
                       >
                         <ColorSwatchStyled
@@ -137,8 +137,8 @@ const AppearanceToolbar = ({ setOpenAppearanceToolbar, returnFocus }: Appearance
                         />
                       </ToggleButtonStyled>
                       <ToggleButtonStyled
-                        value='cappuccino'
-                        padding='8px'
+                        value="cappuccino"
+                        padding="8px"
                         disabled={colorTheme == 'cappuccino'}
                       >
                         <ColorSwatchStyled
@@ -146,8 +146,8 @@ const AppearanceToolbar = ({ setOpenAppearanceToolbar, returnFocus }: Appearance
                         />
                       </ToggleButtonStyled>
                       <ToggleButtonStyled
-                        value='forest'
-                        padding='8px'
+                        value="forest"
+                        padding="8px"
                         disabled={colorTheme == 'forest'}
                       >
                         <ColorSwatchStyled
@@ -155,8 +155,8 @@ const AppearanceToolbar = ({ setOpenAppearanceToolbar, returnFocus }: Appearance
                         />
                       </ToggleButtonStyled>
                       <ToggleButtonStyled
-                        value='dark'
-                        padding='8px'
+                        value="dark"
+                        padding="8px"
                         disabled={colorTheme == 'dark'}
                       >
                         <ColorSwatchStyled
@@ -186,18 +186,18 @@ const AppearanceToolbar = ({ setOpenAppearanceToolbar, returnFocus }: Appearance
                     </ToggleGroupStyled>
                     <HorizontalDividerStyled />
                     <ToggleGroupStyled
-                      type='single'
+                      type="single"
                       defaultValue={fontFace}
                       onValueChange={(value) => {
                         setFontFace(value as AppearanceContextInterface['fontFace']);
                       }}
                     >
-                      <ToggleButtonStyled value='inter' disabled={fontFace == 'inter'}>
+                      <ToggleButtonStyled value="inter" disabled={fontFace == 'inter'}>
                         Inter
                       </ToggleButtonStyled>
                       <ToggleButtonStyled
-                        value='novela'
-                        fontName='Novela'
+                        value="novela"
+                        fontName="Novela"
                         disabled={fontFace == 'novela'}
                       >
                         Novela

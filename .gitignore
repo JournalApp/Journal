@@ -91,3 +91,5 @@ out/
 REPL
 
 test-output
+
+dist

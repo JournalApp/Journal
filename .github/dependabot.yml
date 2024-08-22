@@ -15,3 +15,9 @@ updates:
     ignore:
       # requires manual intervention since we are 15+ versions behind
       - dependency-name: '@udecode/plate'
+      # should be upgrade together with eslint
+      - dependency-name: 'eslint'
+      - dependency-name: '@typescript-eslint/parser'
+      - dependency-name: '@typescript-eslint/eslint-plugin'
+      - dependency-name: 'eslint-plugin-import'
+      - dependency-name: 'eslint-plugin-unused-imports'

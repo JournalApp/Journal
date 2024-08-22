@@ -11,21 +11,18 @@ import {
   useFloatingNodeId,
   FloatingNode,
   FloatingPortal,
-} from '@floating-ui/react-dom-interactions';
+} from '@floating-ui/react';
 import { loadStripe } from '@stripe/stripe-js/pure';
 import { useQuery } from '@tanstack/react-query';
 import { CheckoutModalStyled } from './styled';
 import { Modal } from './Modal';
 import { Elements } from '@stripe/react-stripe-js';
 import { useUserContext } from '@/context';
-import {
-  getCustomer,
-  fetchCountries,
-} from '../../../../context/UserContext/subscriptions';
+import { getCustomer, fetchCountries } from '../../../../context/UserContext/subscriptions';
 
 interface AddCardProps {
-  renderTrigger: any
-  isUpdate?: boolean
+  renderTrigger: any;
+  isUpdate?: boolean;
 }
 
 //////////////////////////
@@ -63,7 +60,7 @@ const AddCard = ({ renderTrigger, isUpdate = false }: AddCardProps) => {
     },
   });
 
-  const { reference, floating, context, refs } = useFloating({
+  const { context, refs } = useFloating({
     open,
     onOpenChange: setOpen,
     nodeId,
@@ -114,7 +111,7 @@ const AddCard = ({ renderTrigger, isUpdate = false }: AddCardProps) => {
 
   return (
     <FloatingNode id={nodeId}>
-      {renderTrigger({ open: () => setOpen(true), ref: reference, ...getReferenceProps() })}
+      {renderTrigger({ open: () => setOpen(true), ref: refs.setReference, ...getReferenceProps() })}
       <FloatingPortal>
         {open && (
           <FloatingOverlay
@@ -127,7 +124,7 @@ const AddCard = ({ renderTrigger, isUpdate = false }: AddCardProps) => {
             }}
           >
             <FloatingFocusManager context={context}>
-              <CheckoutModalStyled ref={floating} {...getFloatingProps()}>
+              <CheckoutModalStyled ref={refs.setFloating} {...getFloatingProps()}>
                 <Elements stripe={stripePromise}>
                   <Modal
                     isUpdate={isUpdate}

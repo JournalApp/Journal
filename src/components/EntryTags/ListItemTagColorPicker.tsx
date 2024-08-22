@@ -1,11 +1,6 @@
 import React, { useState } from 'react';
 import { theme, lightTheme } from '@/themes';
-import {
-  useFloating,
-  offset,
-  FloatingFocusManager,
-  FloatingPortal,
-} from '@floating-ui/react-dom-interactions';
+import { useFloating, offset, FloatingFocusManager, FloatingPortal } from '@floating-ui/react';
 import {
   StyledEditTagColorPickerPopover,
   StyledEditTagColorPickerContainer,
@@ -18,11 +13,11 @@ import { logger } from 'src/utils';
 import { useUserContext } from '@/context';
 
 type ListItemTagColorPickerProps = {
-  tag: Tag
-  inputRef: React.MutableRefObject<HTMLInputElement>
-  colorPickerOpen: boolean
-  setColorPickerOpen: any
-  tagEditColorRef: React.MutableRefObject<Tag['color']>
+  tag: Tag;
+  inputRef: React.MutableRefObject<HTMLInputElement>;
+  colorPickerOpen: boolean;
+  setColorPickerOpen: any;
+  tagEditColorRef: React.MutableRefObject<Tag['color']>;
 };
 
 function ListItemTagColorPicker({
@@ -33,7 +28,7 @@ function ListItemTagColorPicker({
 }: ListItemTagColorPickerProps) {
   const [selectedColor, setSelectedColor] = useState<Tag['color']>(tagEditColorRef.current);
   const { session } = useUserContext();
-  const { floating, strategy, reference, x, y, context } = useFloating<HTMLInputElement>({
+  const { refs, strategy, x, y, context } = useFloating<HTMLInputElement>({
     placement: 'left-start',
     open: colorPickerOpen,
     onOpenChange: setColorPickerOpen,
@@ -68,7 +63,7 @@ function ListItemTagColorPicker({
 
   return (
     <>
-      <StyledEditTagColorPickerContainer ref={reference}>
+      <StyledEditTagColorPickerContainer ref={refs.setReference}>
         <StyledTagColorDot fillColor={theme(`color.tags.${selectedColor}`)} />
         <StyledColorPickerChevronIcon
           type={colorPickerOpen ? 'up' : 'down'}
@@ -77,9 +72,9 @@ function ListItemTagColorPicker({
       </StyledEditTagColorPickerContainer>
       <FloatingPortal>
         {colorPickerOpen && (
-          <FloatingFocusManager context={context} preventTabbing>
+          <FloatingFocusManager context={context}>
             <StyledEditTagColorPickerPopover
-              ref={floating}
+              ref={refs.setFloating}
               style={{
                 position: strategy,
                 top: y ?? 0,
@@ -95,7 +90,7 @@ function ListItemTagColorPicker({
                   >
                     <StyledTagColorDot size={16} fillColor={theme(`color.tags.${color}`)} />
                   </StyledItemColorPicker>
-                )
+                ),
               )}
             </StyledEditTagColorPickerPopover>
           </FloatingFocusManager>

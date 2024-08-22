@@ -16,7 +16,6 @@ import {
   getParentNode,
   getListItemEntry,
   toggleList,
-
   getPreventDefaultHandler,
   someNode,
   toggleNodeType,
@@ -26,7 +25,7 @@ import {
 import { useUserContext } from '@/context';
 
 interface BlockTypeSelectButtonProps {
-  isHidden?: boolean
+  isHidden?: boolean;
 }
 
 const Divider = styled.div`
@@ -142,36 +141,38 @@ export const BlockTypeSelect = () => {
     if (nodeType == 'lic') {
       switch (list) {
         case 'ol':
-          return <Icon name='BlockNumList' />;
+          return <Icon name="BlockNumList" />;
         case 'ul':
-          return <Icon name='BlockBulletList' />;
+          return <Icon name="BlockBulletList" />;
         default:
-          return <Icon name='BlockNumList' />;
+          return <Icon name="BlockNumList" />;
       }
     } else {
       switch (nodeType) {
         case 'p':
-          return <Icon name='BlockText' />;
+          return <Icon name="BlockText" />;
         case 'h1':
-          return <Icon name='BlockH1' />;
+          return <Icon name="BlockH1" />;
         case 'h2':
-          return <Icon name='BlockH2' />;
+          return <Icon name="BlockH2" />;
         case 'h3':
-          return <Icon name='BlockH3' />;
+          return <Icon name="BlockH3" />;
         default:
-          return <Icon name='BlockText' />;
+          return <Icon name="BlockText" />;
       }
     }
   };
 
   return (
     <>
+      {/* @ts-expect-error will fix types */}
       <BlockTypeSelectButton onMouseDown={toggleDropdown} ref={sel.reference} isHidden={isHidden}>
         {nodeFullName((node?.type as string) || '')}
-        <Icon name='Chevron' type={isHidden ? 'down' : 'up'} />
+        <Icon name="Chevron" type={isHidden ? 'down' : 'up'} />
       </BlockTypeSelectButton>
       {!isHidden && (
         <Dropdown
+          // @ts-expect-error will fix types
           ref={sel.floating}
           style={{
             position: sel.strategy,
@@ -182,7 +183,7 @@ export const BlockTypeSelect = () => {
           <BlockTypeSelectItem
             onMouseDown={(e) => mark(typeP, e)}
             current={isCurrent(typeP)}
-            icon='BlockText'
+            icon="BlockText"
           >
             Text
           </BlockTypeSelectItem>
@@ -190,21 +191,21 @@ export const BlockTypeSelect = () => {
           <BlockTypeSelectItem
             onMouseDown={(e) => mark(typeH1, e)}
             current={isCurrent(typeH1)}
-            icon='BlockH1'
+            icon="BlockH1"
           >
             Heading 1
           </BlockTypeSelectItem>
           <BlockTypeSelectItem
             onMouseDown={(e) => mark(typeH2, e)}
             current={isCurrent(typeH2)}
-            icon='BlockH2'
+            icon="BlockH2"
           >
             Heading 2
           </BlockTypeSelectItem>
           <BlockTypeSelectItem
             onMouseDown={(e) => mark(typeH3, e)}
             current={isCurrent(typeH3)}
-            icon='BlockH3'
+            icon="BlockH3"
           >
             Heading 3
           </BlockTypeSelectItem>
@@ -212,14 +213,14 @@ export const BlockTypeSelect = () => {
           <BlockTypeSelectItem
             onMouseDown={(e) => markList(typeOL, e)}
             current={isCurrentList(typeOL)}
-            icon='BlockNumList'
+            icon="BlockNumList"
           >
             Numbered list
           </BlockTypeSelectItem>
           <BlockTypeSelectItem
             onMouseDown={(e) => markList(typeUL, e)}
             current={isCurrentList(typeUL)}
-            icon='BlockBulletList'
+            icon="BlockBulletList"
           >
             Bullet list
           </BlockTypeSelectItem>

@@ -8,7 +8,7 @@ import {
   useDismiss,
   useClick,
   FloatingPortal,
-} from '@floating-ui/react-dom-interactions';
+} from '@floating-ui/react';
 import {
   PromptStyled,
   PromptsButtonStyled,
@@ -31,8 +31,8 @@ const fetchPrompts = async () => {
   await Promise.all(
     data.map(
       async (prompt) =>
-        (prompt.content = await window.electronAPI.mdxSerialize(prompt.content ?? ''))
-    )
+        (prompt.content = await window.electronAPI.mdxSerialize(prompt.content ?? '')),
+    ),
   );
   return data;
 };
@@ -64,8 +64,8 @@ const components = {
 };
 
 interface PromptsProps {
-  initialPromptsOpen: PromptsOpen
-  initialPromptSelectedId: PromptSelectedId
+  initialPromptsOpen: PromptsOpen;
+  initialPromptSelectedId: PromptSelectedId;
 }
 
 const Prompts = ({ initialPromptsOpen, initialPromptSelectedId }: PromptsProps) => {
@@ -95,7 +95,7 @@ const Prompts = ({ initialPromptsOpen, initialPromptSelectedId }: PromptsProps) 
     logger(`Prompts ${open ? 'open' : 'close'}`);
   }, [open]);
 
-  const { floating, context } = useFloating({
+  const { refs, context } = useFloating({
     open: expanded,
     onOpenChange: setExpanded,
   });
@@ -172,7 +172,7 @@ const Prompts = ({ initialPromptsOpen, initialPromptSelectedId }: PromptsProps) 
           <PromptWindowStyled
             isExpanded={expanded}
             beforeOpen={beforeOpen}
-            ref={floating}
+            ref={refs.setFloating}
             {...getFloatingProps()}
           >
             {prompts.map((prompt) => {

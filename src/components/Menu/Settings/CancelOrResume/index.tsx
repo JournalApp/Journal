@@ -11,7 +11,7 @@ import {
   useFloatingNodeId,
   FloatingNode,
   FloatingPortal,
-} from '@floating-ui/react-dom-interactions';
+} from '@floating-ui/react';
 import { useQuery } from '@tanstack/react-query';
 import { useUserContext } from '@/context';
 import {
@@ -31,8 +31,8 @@ import {
 import dayjs from 'dayjs';
 
 interface CancelOrResumeProps {
-  action: 'cancel' | 'resume'
-  renderTrigger: any
+  action: 'cancel' | 'resume';
+  renderTrigger: any;
 }
 
 const CancelOrResume = ({ action, renderTrigger }: CancelOrResumeProps) => {
@@ -69,7 +69,7 @@ const CancelOrResume = ({ action, renderTrigger }: CancelOrResumeProps) => {
     enabled: isCanceledOrResumed == true,
   });
 
-  const { reference, floating, context, refs } = useFloating({
+  const { context, refs } = useFloating({
     open,
     onOpenChange: setOpen,
     nodeId,
@@ -174,7 +174,7 @@ const CancelOrResume = ({ action, renderTrigger }: CancelOrResumeProps) => {
 
   return (
     <FloatingNode id={nodeId}>
-      {renderTrigger({ open: () => setOpen(true), ref: reference, ...getReferenceProps() })}
+      {renderTrigger({ open: () => setOpen(true), ref: refs.setReference, ...getReferenceProps() })}
       <FloatingPortal>
         {open && (
           <FloatingOverlay
@@ -187,7 +187,7 @@ const CancelOrResume = ({ action, renderTrigger }: CancelOrResumeProps) => {
             }}
           >
             <FloatingFocusManager context={context} initialFocus={0}>
-              <ModalStyled ref={floating} {...getFloatingProps()}>
+              <ModalStyled ref={refs.setFloating} {...getFloatingProps()}>
                 {/* <IconCloseStyled onClick={() => setOpen(false)} /> */}
                 {action == 'cancel' && (
                   <>

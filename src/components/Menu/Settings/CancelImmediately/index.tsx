@@ -11,7 +11,7 @@ import {
   useFloatingNodeId,
   FloatingNode,
   FloatingPortal,
-} from '@floating-ui/react-dom-interactions';
+} from '@floating-ui/react';
 import { useQuery } from '@tanstack/react-query';
 import { useUserContext } from '@/context';
 import {
@@ -28,7 +28,7 @@ import {
 } from './styled';
 
 interface CancelImmediatelyProps {
-  renderTrigger: any
+  renderTrigger: any;
 }
 
 const CancelImmediately = ({ renderTrigger }: CancelImmediatelyProps) => {
@@ -64,7 +64,7 @@ const CancelImmediately = ({ renderTrigger }: CancelImmediatelyProps) => {
     enabled: isCanceled == true,
   });
 
-  const { reference, floating, context, refs } = useFloating({
+  const { context, refs } = useFloating({
     open,
     onOpenChange: setOpen,
     nodeId,
@@ -141,7 +141,11 @@ const CancelImmediately = ({ renderTrigger }: CancelImmediatelyProps) => {
 
   return (
     <FloatingNode id={nodeId}>
-      {renderTrigger({ open: () => setOpenHandler(), ref: reference, ...getReferenceProps() })}
+      {renderTrigger({
+        open: () => setOpenHandler(),
+        ref: refs.setReference,
+        ...getReferenceProps(),
+      })}
       <FloatingPortal>
         {open && (
           <FloatingOverlay
@@ -154,7 +158,7 @@ const CancelImmediately = ({ renderTrigger }: CancelImmediatelyProps) => {
             }}
           >
             <FloatingFocusManager context={context} initialFocus={0}>
-              <ModalStyled ref={floating} {...getFloatingProps()}>
+              <ModalStyled ref={refs.setFloating} {...getFloatingProps()}>
                 <TitleStyled>Oh no, cancel your plan?</TitleStyled>
                 <DescriptionStyled>
                   If you proceed with canceling your plan, it will become inactive immediately.

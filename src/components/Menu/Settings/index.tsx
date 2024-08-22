@@ -11,7 +11,7 @@ import {
   useFloatingNodeId,
   FloatingNode,
   FloatingPortal,
-} from '@floating-ui/react-dom-interactions';
+} from '@floating-ui/react';
 import { UpgradeTabContent } from './Upgrade';
 import { BillingTabContent } from './Billing';
 import { ImportExportTabContent } from './ImportExport';
@@ -28,7 +28,7 @@ import {
 import { useUserContext } from '@/context';
 
 interface SettingsDialogProps {
-  returnFocus: React.MutableRefObject<HTMLButtonElement>
+  returnFocus: React.MutableRefObject<HTMLButtonElement>;
 }
 
 const SettingsDialog = ({ returnFocus }: SettingsDialogProps) => {
@@ -39,7 +39,7 @@ const SettingsDialog = ({ returnFocus }: SettingsDialogProps) => {
   const isOnline = useIsOnline();
   const { session, subscription, invokeOpenSettings } = useUserContext();
 
-  const { floating, context, refs } = useFloating({
+  const { context, refs } = useFloating({
     open,
     onOpenChange: setOpen,
     nodeId,
@@ -104,38 +104,38 @@ const SettingsDialog = ({ returnFocus }: SettingsDialogProps) => {
             >
               <FloatingFocusManager context={context}>
                 <TabsStyled
-                  ref={floating}
+                  ref={refs.setFloating}
                   {...getFloatingProps()}
-                  defaultValue='tab1'
-                  orientation='vertical'
+                  defaultValue="tab1"
+                  orientation="vertical"
                 >
                   <ListStyled>
                     <SettingsTitleStyled>Settings</SettingsTitleStyled>
-                    <MenuItemStyled ref={initialFocus} value='tab-upgrade'>
+                    <MenuItemStyled ref={initialFocus} value="tab-upgrade">
                       {subscription == null ? 'Upgrade' : 'Plans'}
                     </MenuItemStyled>
                     {/* <MenuItemStyled value='tab2'>Earn credit</MenuItemStyled> */}
-                    <MenuItemStyled value='tab-billing'>Billing</MenuItemStyled>
-                    <MenuItemStyled value='tab-importexport'>Export</MenuItemStyled>
+                    <MenuItemStyled value="tab-billing">Billing</MenuItemStyled>
+                    <MenuItemStyled value="tab-importexport">Export</MenuItemStyled>
                   </ListStyled>
                   {isOnline ? (
                     <>
-                      <ContentStyled value='tab-upgrade'>
+                      <ContentStyled value="tab-upgrade">
                         <UpgradeTabContent />
                       </ContentStyled>
                       {/* <ContentStyled value='tab2'>
                         <EarnTabContent />
                       </ContentStyled> */}
-                      <ContentStyled value='tab-billing'>
+                      <ContentStyled value="tab-billing">
                         <BillingTabContent />
                       </ContentStyled>
-                      <ContentStyled value='tab-importexport'>
+                      <ContentStyled value="tab-importexport">
                         <ImportExportTabContent />
                       </ContentStyled>
                     </>
                   ) : (
                     <Offline>
-                      <Icon name='Offline' tintColor={theme('color.popper.main', 0.2)} /> Please go
+                      <Icon name="Offline" tintColor={theme('color.popper.main', 0.2)} /> Please go
                       online to manage your settings.
                     </Offline>
                   )}

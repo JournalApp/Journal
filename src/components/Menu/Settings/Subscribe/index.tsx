@@ -11,7 +11,7 @@ import {
   useFloatingNodeId,
   FloatingNode,
   FloatingPortal,
-} from '@floating-ui/react-dom-interactions';
+} from '@floating-ui/react';
 import { useQuery } from '@tanstack/react-query';
 import { loadStripe } from '@stripe/stripe-js/pure';
 import { Elements } from '@stripe/react-stripe-js';
@@ -22,9 +22,9 @@ import { CheckoutModalStyled } from './styled';
 import { Modal } from './Modal';
 
 interface SubscribeProps {
-  renderTrigger: any
-  prices: Price[]
-  billingInterval: 'year' | 'month'
+  renderTrigger: any;
+  prices: Price[];
+  billingInterval: 'year' | 'month';
 }
 
 //////////////////////////
@@ -58,7 +58,7 @@ const Subscribe = ({ renderTrigger, prices, billingInterval }: SubscribeProps) =
     },
   });
 
-  const { reference, floating, context, refs } = useFloating({
+  const { context, refs } = useFloating({
     open,
     onOpenChange: setOpen,
     nodeId,
@@ -109,7 +109,7 @@ const Subscribe = ({ renderTrigger, prices, billingInterval }: SubscribeProps) =
 
   return (
     <FloatingNode id={nodeId}>
-      {renderTrigger({ open: () => setOpen(true), ref: reference, ...getReferenceProps() })}
+      {renderTrigger({ open: () => setOpen(true), ref: refs.setReference, ...getReferenceProps() })}
       <FloatingPortal>
         {open && (
           <FloatingOverlay
@@ -122,7 +122,7 @@ const Subscribe = ({ renderTrigger, prices, billingInterval }: SubscribeProps) =
             }}
           >
             <FloatingFocusManager context={context}>
-              <CheckoutModalStyled ref={floating} {...getFloatingProps()}>
+              <CheckoutModalStyled ref={refs.setFloating} {...getFloatingProps()}>
                 <Elements stripe={stripePromise}>
                   <Modal
                     setOpen={setOpen}

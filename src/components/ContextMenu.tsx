@@ -1,14 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { logger } from '@/utils';
 import { theme } from '@/themes';
-import {
-  offset,
-  shift,
-  flip,
-  useFloating,
-  FloatingPortal,
-} from '@floating-ui/react-dom-interactions';
-import { getSelectionText , usePlateEditorState, useEventPlateId , insertText } from '@udecode/plate';
+import { offset, shift, flip, useFloating, FloatingPortal } from '@floating-ui/react';
+import { getSelectionText, usePlateEditorState, useEventPlateId, insertText } from '@udecode/plate';
 import styled, { keyframes } from 'styled-components';
 import { useAppearanceContext } from '@/context';
 
@@ -21,9 +15,9 @@ const showDropdown = keyframes`
   }
 `;
 interface MenuProps {
-  posX?: string
-  posY?: string
-  pos?: string
+  posX?: string;
+  posY?: string;
+  pos?: string;
 }
 
 const Dropdown = styled.div<MenuProps>`
@@ -78,9 +72,9 @@ const Divider = styled.div`
 `;
 
 interface ContextMenuProps {
-  setIsEditorFocused: any
-  setContextMenuVisible: (val: any) => void
-  toggleContextMenu: any
+  setIsEditorFocused: any;
+  setContextMenuVisible: (val: any) => void;
+  toggleContextMenu: any;
 }
 
 export const ContextMenu = ({
@@ -93,7 +87,7 @@ export const ContextMenu = ({
   const [editorFocused, setEditorFocused] = useState(false);
   const [visible, setVisible] = useState(false);
   const selectionText = editor && getSelectionText(editor);
-  const { x, y, reference, floating, strategy } = useFloating({
+  const { x, y, strategy, refs } = useFloating({
     placement: 'right-start',
     middleware: [offset({ mainAxis: 5, alignmentAxis: 4 }), flip(), shift()],
   });
@@ -110,7 +104,7 @@ export const ContextMenu = ({
     }
     setVisible(!visible);
 
-    reference({
+    refs.setReference({
       getBoundingClientRect() {
         return {
           x: e.clientX,
@@ -198,7 +192,7 @@ export const ContextMenu = ({
     <FloatingPortal>
       {visible && (
         <Dropdown
-          ref={floating}
+          ref={refs.setFloating}
           posX={`${Math.floor(x)}px`}
           posY={`${Math.floor(y)}px`}
           pos={strategy}

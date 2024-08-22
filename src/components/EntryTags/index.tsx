@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { MouseEvent, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { lightTheme, theme } from '@/themes';
 import { useEntriesContext, useUserContext } from '@/context';
 import { logger, randomInt } from '@/utils';
@@ -9,7 +9,7 @@ import {
   useListNavigation,
   useInteractions,
   FloatingFocusManager,
-} from '@floating-ui/react-dom-interactions';
+} from '@floating-ui/react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import {
   StyledWrapper,
@@ -32,7 +32,7 @@ import { ListItemTag } from './ListItemTag';
 import { Tag, EntryTag, ListItemType } from '@/types';
 
 type EntryTagsProps = {
-  date: string
+  date: string;
 };
 
 function EntryTags({ date }: EntryTagsProps) {
@@ -50,7 +50,7 @@ function EntryTags({ date }: EntryTagsProps) {
   const [colorPickerOpen, setColorPickerOpen] = useState(false);
   const [term, setTerm] = useState<string>('');
   const [entryTags, setEntryTags] = useState<EntryTag[]>(
-    userEntryTags.current.filter((t) => t.day == date).sort((a, b) => a.order_no - b.order_no)
+    userEntryTags.current.filter((t) => t.day == date).sort((a, b) => a.order_no - b.order_no),
   );
   const [results, setResults] = useState<Tag[]>([]);
   const listRef = useRef([]);
@@ -59,7 +59,7 @@ function EntryTags({ date }: EntryTagsProps) {
   const tagWrapperRef = useRef<HTMLDivElement>(null);
   const tagEditingRef = useRef<HTMLDivElement>(null);
   const tagEditingInputRef = useRef<HTMLInputElement>(null);
-  const newTagColor = useRef<keyof typeof lightTheme['color']['tags']>('red');
+  const newTagColor = useRef<keyof (typeof lightTheme)['color']['tags']>('red');
   const [open, setOpen] = useState(false); // 2. popver
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [selectedIndex, setSelectedIndex] = useState(Math.max(0, listRef.current.indexOf(term)));
@@ -72,7 +72,7 @@ function EntryTags({ date }: EntryTagsProps) {
     setEntryTags(
       userEntryTags.current
         .filter((t) => t.day == date && userTags.current.some((ut) => ut.id == t.tag_id))
-        .sort((a, b) => a.order_no - b.order_no)
+        .sort((a, b) => a.order_no - b.order_no),
     );
     if (open && term) {
       setResults([...searchTag(term)]);
@@ -86,9 +86,13 @@ function EntryTags({ date }: EntryTagsProps) {
     middleware: [offset({ crossAxis: 0, mainAxis: 4 })],
   });
 
+  const inputElement = sel.refs.reference.current as HTMLInputElement;
+
   const generateRandomTagColor = () => {
     const keys = Object.keys(lightTheme.color.tags);
-    newTagColor.current = keys[randomInt(keys.length)] as keyof typeof lightTheme['color']['tags'];
+    newTagColor.current = keys[
+      randomInt(keys.length)
+    ] as keyof (typeof lightTheme)['color']['tags'];
     logger(`New random color ${newTagColor.current}`);
   };
 
@@ -141,7 +145,7 @@ function EntryTags({ date }: EntryTagsProps) {
   // }, [tagIndexEditing])
 
   const clearInput = () => {
-    sel.refs.reference.current.value = '';
+    inputElement.value = '';
     setTerm('');
   };
 
@@ -153,7 +157,8 @@ function EntryTags({ date }: EntryTagsProps) {
   };
 
   function searchTag(term: string) {
-    const result = term.trim() === '' ? [] : matchSorter(userTags.current, term, { keys: ['name'] });
+    const result =
+      term.trim() === '' ? [] : matchSorter(userTags.current, term, { keys: ['name'] });
     logger(result);
     return result;
   }
@@ -181,7 +186,7 @@ function EntryTags({ date }: EntryTagsProps) {
         logger(`- removing tag ${entryTagTagId}`);
         // Remove from userEntryTags.current
         const i = userEntryTags.current.findIndex(
-          (t) => t.tag_id == entryTagTagId && t.day == date && t.user_id == session.user.id
+          (t) => t.tag_id == entryTagTagId && t.day == date && t.user_id == session.user.id,
         );
         userEntryTags.current.splice(i, 1);
         // Remove SQLite
@@ -189,7 +194,7 @@ function EntryTags({ date }: EntryTagsProps) {
           { sync_status: 'pending_delete' },
           session.user.id,
           date,
-          entryTagTagId
+          entryTagTagId,
         );
         return prev.filter((el) => el.tag_id != entryTagTagId);
       }
@@ -257,7 +262,7 @@ function EntryTags({ date }: EntryTagsProps) {
     if (activeIndex !== null) {
       if (item.type == 'action' && item.value == 'CREATE') {
         await cacheAddEntryIfNotExists(date);
-        handleCreateAndAddTag(e, sel.refs.reference.current.value);
+        handleCreateAndAddTag(e, inputElement.value);
       } else {
         const selectedTag = { ...item.value };
         if (entryTags.some((t) => t.tag_id == selectedTag.id)) {
@@ -288,7 +293,7 @@ function EntryTags({ date }: EntryTagsProps) {
     logger('onClick StyledWrapper');
     if (!editMode) {
       if (!entryTags.length) {
-        setTimeout(() => sel.refs.reference.current.focus(), 100);
+        setTimeout(() => inputElement.focus(), 100);
       }
       setEditMode(true);
       window.electronAPI.capture({
@@ -329,7 +334,7 @@ function EntryTags({ date }: EntryTagsProps) {
       const { user_id, day, tag_id } = entryTag;
       cacheUpdateEntryTagProperty({ order_no, sync_status, modified_at }, user_id, day, tag_id);
       const i = userEntryTags.current.findIndex(
-        (t) => t.tag_id == entryTag.tag_id && t.day == date && t.user_id == session.user.id
+        (t) => t.tag_id == entryTag.tag_id && t.day == date && t.user_id == session.user.id,
       );
       userEntryTags.current[i].order_no = order_no;
     });
@@ -377,7 +382,7 @@ function EntryTags({ date }: EntryTagsProps) {
         }
         if (tagIndexEditing != null) {
           logger('close Tag editing');
-          sel.refs.reference.current.focus();
+          inputElement.focus();
           setTagIndexEditing(null);
           return;
         }
@@ -428,7 +433,7 @@ function EntryTags({ date }: EntryTagsProps) {
         setColorPickerOpen(false);
         setTagIndexEditing(null);
         setTimeout(() => {
-          sel.refs.reference.current.focus();
+          inputElement.focus();
         }, 100);
         return;
       }
@@ -524,14 +529,15 @@ function EntryTags({ date }: EntryTagsProps) {
           );
         })}
       <StyledTagsInputWrapper ref={positioningRef} editMode={editMode}>
-        <StyledPlusIcon name='Plus' />
+        <StyledPlusIcon name="Plus" />
         <StyledTagsInput
           editMode={editMode}
           onChange={handleChange}
           tabIndex={-1}
           maxLength={80}
-          placeholder='Tag'
+          placeholder="Tag"
           {...getReferenceProps({
+            // @ts-expect-error will fix types
             ref: sel.reference,
             onFocus: () => {
               if (editMode) {
@@ -551,7 +557,7 @@ function EntryTags({ date }: EntryTagsProps) {
             // onBlur() {
             //   clearInput()
             // },
-            onKeyDown(e) {
+            onKeyDown(e: React.KeyboardEvent) {
               logger('onKeyDown');
               if (e.key === 'Enter') {
                 logger('Enter');
@@ -563,11 +569,12 @@ function EntryTags({ date }: EntryTagsProps) {
         ></StyledTagsInput>
       </StyledTagsInputWrapper>
       {open && !term && (
-        <FloatingFocusManager context={sel.context} preventTabbing>
+        <FloatingFocusManager context={sel.context}>
           <StyledPopover
             onScroll={handleOnScroll}
             // onFocus={() => sel.refs.reference.current.focus()}
             {...getFloatingProps({
+              // @ts-expect-error will fix types
               ref: sel.floating,
               style: {
                 position: sel.strategy,
@@ -600,6 +607,7 @@ function EntryTags({ date }: EntryTagsProps) {
                   colorPickerOpen={colorPickerOpen}
                   setColorPickerOpen={setColorPickerOpen}
                   handleSelect={handleSelect}
+                  // @ts-expect-error will fix types
                   tagsInputRef={sel.refs.reference}
                   getItemProps={getItemProps}
                 />
@@ -613,9 +621,10 @@ function EntryTags({ date }: EntryTagsProps) {
         </FloatingFocusManager>
       )}
       {open && term && (
-        <FloatingFocusManager context={sel.context} preventTabbing>
+        <FloatingFocusManager context={sel.context}>
           <StyledPopover
             {...getFloatingProps({
+              // @ts-expect-error will fix types
               ref: sel.floating,
               style: {
                 position: sel.strategy,
@@ -641,13 +650,15 @@ function EntryTags({ date }: EntryTagsProps) {
                 colorPickerOpen={colorPickerOpen}
                 setColorPickerOpen={setColorPickerOpen}
                 handleSelect={handleSelect}
+                // @ts-expect-error will fix types
                 tagsInputRef={sel.refs.reference}
                 getItemProps={getItemProps}
               />
             ))}
-            {!!results.length &&
-              !results.some((t) => t.name == sel.refs.reference.current.value) && <StyledDivider />}
-            {!results.some((t) => t.name == sel.refs.reference.current.value) && (
+            {!!results.length && !results.some((t) => t.name == inputElement.value) && (
+              <StyledDivider />
+            )}
+            {!results.some((t) => t.name == inputElement.value) && (
               <StyledItem
                 ref={(node) => {
                   listRef.current[results.length] = node;
@@ -657,15 +668,15 @@ function EntryTags({ date }: EntryTagsProps) {
                 isActive={activeIndex == results.length}
                 isAnyActiveIndex={activeIndex != null}
                 {...getItemProps({
-                  onMouseDown(e) {
+                  onMouseDown(e: MouseEvent) {
                     e.stopPropagation();
-                    sel.refs.reference.current.focus();
+                    inputElement.focus();
                     setTagIndexEditing(null);
-                    handleCreateAndAddTag(e, sel.refs.reference.current.value);
+                    handleCreateAndAddTag(e, inputElement.value);
                   },
                   onFocus() {
                     logger('StyledItem sel.refs.reference.current.focus()');
-                    sel.refs.reference.current.focus();
+                    inputElement.focus();
                   },
                   onKeyDown() {
                     logger('onKeyDown Create tag');
@@ -675,7 +686,7 @@ function EntryTags({ date }: EntryTagsProps) {
                 Create{' '}
                 <StyledTag editMode={false} maxWidth={200}>
                   <StyledTagColorDot fillColor={theme(`color.tags.${newTagColor.current}`)} />
-                  <StyledTagTitle>{sel.refs.reference.current.value}</StyledTagTitle>
+                  <StyledTagTitle>{inputElement.value}</StyledTagTitle>
                 </StyledTag>
               </StyledItem>
             )}

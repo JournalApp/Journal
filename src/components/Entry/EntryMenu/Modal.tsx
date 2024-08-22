@@ -11,7 +11,7 @@ import {
   useFloatingNodeId,
   FloatingNode,
   FloatingPortal,
-} from '@floating-ui/react-dom-interactions';
+} from '@floating-ui/react';
 import {
   ModalStyled,
   ButtonDestructiveStyled,
@@ -22,8 +22,8 @@ import {
 } from './styled';
 
 interface ModalProps {
-  setOpenModal: React.Dispatch<React.SetStateAction<boolean>>
-  action: any
+  setOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
+  action: any;
 }
 
 const Modal = ({ setOpenModal, action }: ModalProps) => {
@@ -31,7 +31,7 @@ const Modal = ({ setOpenModal, action }: ModalProps) => {
   const actionRef = useRef(null);
   const nodeId = useFloatingNodeId();
 
-  const { floating, context, refs } = useFloating({
+  const { context, refs } = useFloating({
     open,
     onOpenChange: setOpen,
     nodeId,
@@ -78,7 +78,7 @@ const Modal = ({ setOpenModal, action }: ModalProps) => {
           }}
         >
           <FloatingFocusManager context={context} initialFocus={0}>
-            <ModalStyled ref={floating} {...getFloatingProps()}>
+            <ModalStyled ref={refs.setFloating} {...getFloatingProps()}>
               <TitleStyled>Remove this entry permanently?</TitleStyled>
               <DescriptionStyled>This can't be undone.</DescriptionStyled>
               <ActionsWrapperStyled>

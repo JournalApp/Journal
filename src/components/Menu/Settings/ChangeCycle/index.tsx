@@ -11,21 +11,19 @@ import {
   useFloatingNodeId,
   FloatingNode,
   FloatingPortal,
-} from '@floating-ui/react-dom-interactions';
+} from '@floating-ui/react';
 import { useQuery } from '@tanstack/react-query';
 import { loadStripe } from '@stripe/stripe-js/pure';
 import { Elements } from '@stripe/react-stripe-js';
 import type { Price } from '@/types';
 import { useUserContext } from '@/context';
-import {
-  getCustomer,
-} from '../../../../context/UserContext/subscriptions';
+import { getCustomer } from '../../../../context/UserContext/subscriptions';
 import { CheckoutModalStyled } from './styled';
 import { Modal } from './Modal';
 
 interface SubscribeProps {
-  renderTrigger: any
-  prices: Price[]
+  renderTrigger: any;
+  prices: Price[];
 }
 
 ////////////////////////////
@@ -54,7 +52,7 @@ const ChangeCycle = ({ renderTrigger, prices }: SubscribeProps) => {
     queryFn: async () => getCustomer(session.access_token),
   });
 
-  const { reference, floating, context, refs } = useFloating({
+  const { context, refs } = useFloating({
     open,
     onOpenChange: setOpen,
     nodeId,
@@ -105,7 +103,7 @@ const ChangeCycle = ({ renderTrigger, prices }: SubscribeProps) => {
 
   return (
     <FloatingNode id={nodeId}>
-      {renderTrigger({ open: () => setOpen(true), ref: reference, ...getReferenceProps() })}
+      {renderTrigger({ open: () => setOpen(true), ref: refs.setReference, ...getReferenceProps() })}
       <FloatingPortal>
         {open && (
           <FloatingOverlay
@@ -118,7 +116,7 @@ const ChangeCycle = ({ renderTrigger, prices }: SubscribeProps) => {
             }}
           >
             <FloatingFocusManager context={context}>
-              <CheckoutModalStyled ref={floating} {...getFloatingProps()}>
+              <CheckoutModalStyled ref={refs.setFloating} {...getFloatingProps()}>
                 <Elements stripe={stripePromise}>
                   <Modal
                     setOpen={setOpen}
