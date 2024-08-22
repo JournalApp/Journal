@@ -176,7 +176,7 @@
     "electron-squirrel-startup": "^1.0.0",
     "jsdom": "^19.0.0",
     "loglevel": "^1.8.1",
-    "markdown-it": "^12.3.2",
+    "markdown-it": "^14.1.0",
     "marked": "^4.0.12",
     "match-sorter": "^6.3.1",
     "nanoid": "^3.3.4",
