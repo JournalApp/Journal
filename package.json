@@ -171,7 +171,7 @@
     "af-virtual-scroll": "^2.14.0",
     "arraybuffer-to-string": "^1.0.2",
     "better-sqlite3": "^8.0.1",
-    "dayjs": "^1.10.7",
+    "dayjs": "^1.11.13",
     "electron-log": "^4.4.7",
     "electron-squirrel-startup": "^1.0.0",
     "jsdom": "^19.0.0",
