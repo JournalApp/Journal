@@ -80,7 +80,7 @@ const runMigrations = () => {
   }
 
   const migrationQueue = migrations.filter(
-    (m, i) => i >= currentSchemaVersion && i < desiredSchemaVersion
+    (m, i) => i >= currentSchemaVersion && i < desiredSchemaVersion,
   );
 
   if (migrationQueue.length == 0) {
@@ -118,12 +118,12 @@ const addTriggers = () => {
   });
   // Entry updated
   db.prepare(
-    "CREATE TRIGGER entry_updated AFTER UPDATE ON journals WHEN NEW.sync_status = 'pending_update' or NEW.sync_status = 'pending_delete' BEGIN SELECT emitEntryEvent(); END"
+    "CREATE TRIGGER entry_updated AFTER UPDATE ON journals WHEN NEW.sync_status = 'pending_update' or NEW.sync_status = 'pending_delete' BEGIN SELECT emitEntryEvent(); END",
   ).run();
 
   // Entry inserted
   db.prepare(
-    "CREATE TRIGGER entry_inserted AFTER INSERT ON journals WHEN NEW.sync_status = 'pending_insert' BEGIN SELECT emitEntryEvent(); END"
+    "CREATE TRIGGER entry_inserted AFTER INSERT ON journals WHEN NEW.sync_status = 'pending_insert' BEGIN SELECT emitEntryEvent(); END",
   ).run();
 
   // 2. Tags & EntryTags
@@ -133,22 +133,22 @@ const addTriggers = () => {
 
   // Tag updated
   db.prepare(
-    "CREATE TRIGGER tag_updated AFTER UPDATE ON tags WHEN NEW.sync_status = 'pending_update' or NEW.sync_status = 'pending_delete' BEGIN SELECT emitTagEvent(); END"
+    "CREATE TRIGGER tag_updated AFTER UPDATE ON tags WHEN NEW.sync_status = 'pending_update' or NEW.sync_status = 'pending_delete' BEGIN SELECT emitTagEvent(); END",
   ).run();
 
   // Tag inserted
   db.prepare(
-    "CREATE TRIGGER tag_inserted AFTER INSERT ON tags WHEN NEW.sync_status = 'pending_insert' BEGIN SELECT emitTagEvent(); END"
+    "CREATE TRIGGER tag_inserted AFTER INSERT ON tags WHEN NEW.sync_status = 'pending_insert' BEGIN SELECT emitTagEvent(); END",
   ).run();
 
   // Entry tag inserted
   db.prepare(
-    "CREATE TRIGGER entry_tag_inserted AFTER INSERT ON entries_tags WHEN NEW.sync_status = 'pending_insert' BEGIN SELECT emitTagEvent(); END"
+    "CREATE TRIGGER entry_tag_inserted AFTER INSERT ON entries_tags WHEN NEW.sync_status = 'pending_insert' BEGIN SELECT emitTagEvent(); END",
   ).run();
 
   // Entry tag updated
   db.prepare(
-    "CREATE TRIGGER entry_tag_updated AFTER UPDATE ON entries_tags WHEN NEW.sync_status = 'pending_update' or NEW.sync_status = 'pending_delete' BEGIN SELECT emitTagEvent(); END"
+    "CREATE TRIGGER entry_tag_updated AFTER UPDATE ON entries_tags WHEN NEW.sync_status = 'pending_update' or NEW.sync_status = 'pending_delete' BEGIN SELECT emitTagEvent(); END",
   ).run();
 };
 
@@ -197,7 +197,7 @@ ipcMain.handle('cache-add-or-update-entry', async (_event, entry: Entry) => {
 
     const stmt = db.prepare(
       `INSERT INTO journals (user_id, day, created_at, modified_at, content, revision, sync_status) VALUES (@user_id, @day, @created_at, @modified_at, @content, @revision, @sync_status)
-      ON CONFLICT(user_id, journal_id, day) DO UPDATE SET content = excluded.content, created_at = excluded.created_at, modified_at = excluded.modified_at, revision = excluded.revision, sync_status = excluded.sync_status`
+      ON CONFLICT(user_id, journal_id, day) DO UPDATE SET content = excluded.content, created_at = excluded.created_at, modified_at = excluded.modified_at, revision = excluded.revision, sync_status = excluded.sync_status`,
     );
     return stmt.run({ user_id, day, created_at, modified_at, content, revision, sync_status });
   } catch (error) {
@@ -234,7 +234,7 @@ ipcMain.handle('cache-update-entry', async (_event, set, where) => {
     const { modified_at, content } = set;
 
     const stmt = db.prepare(
-      `UPDATE journals SET modified_at = @modified_at, content = @content WHERE day = @day and user_id = @user_id`
+      `UPDATE journals SET modified_at = @modified_at, content = @content WHERE day = @day and user_id = @user_id`,
     );
     return stmt.run({ user_id, day, modified_at, content });
   } catch (error) {
@@ -281,7 +281,7 @@ ipcMain.handle('cache-get-days', async (_event, user_id) => {
   try {
     const db = getDB();
     const stmt = db.prepare(
-      "SELECT day, revision FROM journals WHERE user_id = @user_id AND sync_status != 'pending_delete' ORDER BY day ASC"
+      "SELECT day, revision FROM journals WHERE user_id = @user_id AND sync_status != 'pending_delete' ORDER BY day ASC",
     );
     const result = stmt.all({ user_id }) as Entry[];
     return result;
@@ -297,7 +297,7 @@ ipcMain.handle('cache-get-entries', async (_event, user_id) => {
   try {
     const db = getDB();
     const stmt = db.prepare(
-      "SELECT * FROM journals WHERE user_id = @user_id AND sync_status != 'pending_delete'"
+      "SELECT * FROM journals WHERE user_id = @user_id AND sync_status != 'pending_delete'",
     );
     const result = stmt.all({ user_id });
     result.forEach((element: any) => {
@@ -316,7 +316,7 @@ ipcMain.handle('cache-get-pending-delete-entries', async (_event, user_id) => {
   try {
     const db = getDB();
     const stmt = db.prepare(
-      "SELECT * FROM journals WHERE user_id = @user_id AND sync_status = 'pending_delete'"
+      "SELECT * FROM journals WHERE user_id = @user_id AND sync_status = 'pending_delete'",
     );
     const result = stmt.all({ user_id });
     logger(`Pending delete entries: ${result.length}`);
@@ -333,7 +333,7 @@ ipcMain.handle('cache-get-pending-insert-entries', async (_event, user_id) => {
   try {
     const db = getDB();
     const stmt = db.prepare(
-      "SELECT * FROM journals WHERE user_id = @user_id AND sync_status = 'pending_insert'"
+      "SELECT * FROM journals WHERE user_id = @user_id AND sync_status = 'pending_insert'",
     );
     const result = stmt.all({ user_id });
     logger(`Pending insert entries: ${result.length}`);
@@ -350,7 +350,7 @@ ipcMain.handle('cache-get-pending-update-entries', async (_event, user_id) => {
   try {
     const db = getDB();
     const stmt = db.prepare(
-      "SELECT * FROM journals WHERE user_id = @user_id AND sync_status = 'pending_update'"
+      "SELECT * FROM journals WHERE user_id = @user_id AND sync_status = 'pending_update'",
     );
     const result = stmt.all({ user_id });
     logger(`Pending update entries: ${result.length}`);
@@ -399,7 +399,7 @@ ipcMain.handle('cache-get-entries-count', async (_event, user_id) => {
     const db = getDB();
     const result = db
       .prepare(
-        "SELECT count(*) FROM journals WHERE user_id = @user_id AND sync_status != 'pending_delete' AND created_at > @betaEndDate"
+        "SELECT count(*) FROM journals WHERE user_id = @user_id AND sync_status != 'pending_delete' AND created_at > @betaEndDate",
       )
       .get({ user_id, betaEndDate });
     return Object.values(result)[0] ?? 0;
@@ -421,7 +421,7 @@ ipcMain.handle('cache-add-or-update-tag', async (_event, val: Tag) => {
     const { id, user_id, name, color, created_at, modified_at, revision, sync_status } = val;
     const stmt = db.prepare(
       `INSERT INTO tags (id, user_id, name, color, created_at, modified_at, revision, sync_status ) VALUES (@id, @user_id, @name, @color, @created_at, @modified_at, @revision, @sync_status )
-      ON CONFLICT(id) DO UPDATE SET name = excluded.name, color = excluded.color, modified_at = excluded.modified_at, revision = excluded.revision, sync_status = excluded.sync_status`
+      ON CONFLICT(id) DO UPDATE SET name = excluded.name, color = excluded.color, modified_at = excluded.modified_at, revision = excluded.revision, sync_status = excluded.sync_status`,
     );
     return stmt.run({ id, user_id, name, color, created_at, modified_at, revision, sync_status });
   } catch (error) {
@@ -467,7 +467,7 @@ ipcMain.handle('cache-get-tags', async (_event, user_id) => {
   try {
     const db = getDB();
     const stmt = db.prepare(
-      "SELECT * FROM tags WHERE user_id = @user_id AND sync_status != 'pending_delete' ORDER BY modified_at DESC"
+      "SELECT * FROM tags WHERE user_id = @user_id AND sync_status != 'pending_delete' ORDER BY modified_at DESC",
     );
     const result = stmt.all({ user_id });
     return result;
@@ -513,7 +513,7 @@ ipcMain.handle('cache-get-pending-delete-tags', async (_event, user_id) => {
   try {
     const db = getDB();
     const stmt = db.prepare(
-      "SELECT * FROM tags WHERE user_id = @user_id AND sync_status = 'pending_delete'"
+      "SELECT * FROM tags WHERE user_id = @user_id AND sync_status = 'pending_delete'",
     );
     const result = stmt.all({ user_id });
     logger(`Pending delete tags: ${result.length}`);
@@ -530,7 +530,7 @@ ipcMain.handle('cache-get-pending-update-tags', async (_event, user_id) => {
   try {
     const db = getDB();
     const stmt = db.prepare(
-      "SELECT * FROM tags WHERE user_id = @user_id AND sync_status = 'pending_update'"
+      "SELECT * FROM tags WHERE user_id = @user_id AND sync_status = 'pending_update'",
     );
     const result = stmt.all({ user_id });
     logger(`Pending update tags: ${result.length}`);
@@ -547,7 +547,7 @@ ipcMain.handle('cache-get-pending-insert-tags', async (_event, user_id) => {
   try {
     const db = getDB();
     const stmt = db.prepare(
-      "SELECT * FROM tags WHERE user_id = @user_id AND sync_status = 'pending_insert'"
+      "SELECT * FROM tags WHERE user_id = @user_id AND sync_status = 'pending_insert'",
     );
     const result = stmt.all({ user_id });
     logger(`Pending insert tags: ${result.length}`);
@@ -585,7 +585,7 @@ ipcMain.handle('cache-add-or-update-entry-tag', async (_event, entryTag: EntryTa
       entryTag;
     const stmt = db.prepare(
       `INSERT INTO entries_tags (user_id, day, tag_id, order_no, created_at, modified_at, revision, sync_status ) VALUES (@user_id, @day, @tag_id, @order_no, @created_at, @modified_at, @revision, @sync_status )
-      ON CONFLICT(user_id, day, journal_id, tag_id) DO UPDATE SET order_no = excluded.order_no, modified_at = excluded.modified_at, revision = excluded.revision, sync_status = excluded.sync_status`
+      ON CONFLICT(user_id, day, journal_id, tag_id) DO UPDATE SET order_no = excluded.order_no, modified_at = excluded.modified_at, revision = excluded.revision, sync_status = excluded.sync_status`,
     );
     return stmt.run({
       user_id,
@@ -609,7 +609,7 @@ ipcMain.handle('cache-get-pending-insert-entry-tags', async (_event, user_id) =>
   try {
     const db = getDB();
     const stmt = db.prepare(
-      "SELECT * FROM entries_tags WHERE user_id = @user_id AND sync_status = 'pending_insert'"
+      "SELECT * FROM entries_tags WHERE user_id = @user_id AND sync_status = 'pending_insert'",
     );
     const result = stmt.all({ user_id });
     logger(`Pending insert entry tags: ${result.length}`);
@@ -632,7 +632,7 @@ ipcMain.handle(
       if (set.sync_status == 'pending_update') {
         const entryTag = db
           .prepare(
-            `SELECT sync_status FROM entries_tags WHERE user_id = @user_id AND day = @day AND tag_id = @tag_id`
+            `SELECT sync_status FROM entries_tags WHERE user_id = @user_id AND day = @day AND tag_id = @tag_id`,
           )
           .get({ user_id, day, tag_id }) as EntryTag;
         if (entryTag.sync_status == 'pending_insert') {
@@ -648,7 +648,7 @@ ipcMain.handle(
       expr = expr.slice(0, -2);
 
       const stmt = db.prepare(
-        `UPDATE entries_tags SET ${expr} WHERE user_id = @user_id AND day = @day AND tag_id = @tag_id`
+        `UPDATE entries_tags SET ${expr} WHERE user_id = @user_id AND day = @day AND tag_id = @tag_id`,
       );
       return stmt.run({ user_id, day, tag_id, ...set });
     } catch (error) {
@@ -656,7 +656,7 @@ ipcMain.handle(
       logger(error);
       return error;
     }
-  }
+  },
 );
 
 ipcMain.handle('cache-get-pending-delete-entry-tags', async (event, user_id) => {
@@ -664,7 +664,7 @@ ipcMain.handle('cache-get-pending-delete-entry-tags', async (event, user_id) => 
   try {
     const db = getDB();
     const stmt = db.prepare(
-      "SELECT * FROM entries_tags WHERE user_id = @user_id AND sync_status = 'pending_delete'"
+      "SELECT * FROM entries_tags WHERE user_id = @user_id AND sync_status = 'pending_delete'",
     );
     const result = stmt.all({ user_id });
     logger(`Pending delete entry tags: ${result.length}`);
@@ -681,7 +681,7 @@ ipcMain.handle('cache-delete-entry-tag', async (event, user_id, tag_id, day) => 
   try {
     const db = getDB();
     const stmt = db.prepare(
-      'DELETE FROM entries_tags WHERE user_id = @user_id AND day = @day AND tag_id = @tag_id'
+      'DELETE FROM entries_tags WHERE user_id = @user_id AND day = @day AND tag_id = @tag_id',
     );
     const result = stmt.run({ user_id, tag_id, day });
     return result;
@@ -697,7 +697,7 @@ ipcMain.handle('cache-get-pending-update-entry-tags', async (event, user_id) => 
   try {
     const db = getDB();
     const stmt = db.prepare(
-      "SELECT * FROM entries_tags WHERE user_id = @user_id AND sync_status = 'pending_update'"
+      "SELECT * FROM entries_tags WHERE user_id = @user_id AND sync_status = 'pending_update'",
     );
     const result = stmt.all({ user_id });
     logger(`Pending update entry tags: ${result.length}`);
@@ -714,7 +714,7 @@ ipcMain.handle('cache-get-entry-tags', async (event, user_id) => {
   try {
     const db = getDB();
     const stmt = db.prepare(
-      "SELECT * FROM entries_tags WHERE user_id = @user_id AND sync_status != 'pending_delete'"
+      "SELECT * FROM entries_tags WHERE user_id = @user_id AND sync_status != 'pending_delete'",
     );
     const result = stmt.all({ user_id }) as EntryTag[];
     return result;
@@ -730,7 +730,7 @@ ipcMain.handle('cache-get-entry-tags-on-day', async (event, user_id, day) => {
   try {
     const db = getDB();
     const stmt = db.prepare(
-      "SELECT * FROM entries_tags WHERE user_id = @user_id AND day = @day AND sync_status != 'pending_delete'"
+      "SELECT * FROM entries_tags WHERE user_id = @user_id AND day = @day AND sync_status != 'pending_delete'",
     );
     const result = stmt.all({ user_id, day }) as EntryTag[];
     return result;
@@ -747,21 +747,24 @@ ipcMain.handle('cache-get-entry-tags-on-day', async (event, user_id, day) => {
 
 ipcMain.on('preferences-get-all', (event, user_id?) => {
   interface prefMap {
-    [key: string]: string
+    [key: string]: string;
   }
 
   logger('preferences-get-all');
   try {
     const db = getDB();
     const stmt1 = db.prepare('SELECT value FROM app WHERE key = @key');
-    const lastUser = stmt1.get({ key: 'lastUser' });
+    const lastUser = stmt1.get({ key: 'lastUser' }) as { value: string };
     if (lastUser) {
       const stmt2 = db.prepare('SELECT * FROM preferences WHERE user_id = @user_id');
-      const prefs = stmt2.all({ user_id: user_id || lastUser.value });
+      const prefs = stmt2.all({ user_id: user_id || lastUser.value }) as {
+        item: string;
+        value: string;
+      }[];
       if (prefs.length) {
         const prettyPrefs = {} as prefMap;
-        for (let i = 0; i < prefs.length; i++) {
-          prettyPrefs[prefs[i].item] = prefs[i].value;
+        for (const element of prefs) {
+          prettyPrefs[element.item] = element.value;
         }
         event.returnValue = prettyPrefs;
       } else {
@@ -785,7 +788,7 @@ ipcMain.handle('preferences-set', async (event, user_id, set) => {
     const value = Object.values(set)[0];
     const stmt = db.prepare(
       `INSERT INTO preferences (user_id, item, value) VALUES (@user_id, @item, @value)
-      ON CONFLICT(user_id, item) DO UPDATE SET value = excluded.value`
+      ON CONFLICT(user_id, item) DO UPDATE SET value = excluded.value`,
     );
     return stmt.run({ user_id, item, value });
   } catch (error) {
@@ -818,7 +821,7 @@ ipcMain.on('app-get-key', (event, key) => {
   try {
     const db = getDB();
     const stmt = db.prepare('SELECT value FROM app WHERE key = @key');
-    const res = stmt.get({ key });
+    const res = stmt.get({ key }) as { value: string };
     event.returnValue = res.value;
   } catch (error) {
     logger(`error`);
@@ -835,7 +838,7 @@ ipcMain.handle('app-set-key', async (event, set) => {
     const value = Object.values(set)[0];
     const stmt = db.prepare(
       `INSERT INTO app (key, value) VALUES (@key, @value)
-      ON CONFLICT(key) DO UPDATE SET value = excluded.value`
+      ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
     );
     stmt.run({ key, value });
   } catch (error) {
@@ -856,7 +859,7 @@ ipcMain.handle('cache-add-user', async (event, id) => {
     stmt.run({ id });
     // Create default journal_catalog for the user
     const create_journal = db.prepare(
-      'INSERT INTO journals_catalog (user_id) VALUES (@id) ON CONFLICT (user_id, journal_id) DO NOTHING'
+      'INSERT INTO journals_catalog (user_id) VALUES (@id) ON CONFLICT (user_id, journal_id) DO NOTHING',
     );
     return create_journal.run({ id });
   } catch (error) {
@@ -871,7 +874,9 @@ ipcMain.handle('user-save-secret-key', async (event, user_id, secretKey) => {
   try {
     const encryptedSecreyKey = safeStorage.encryptString(secretKey);
     const db = getDB();
-    const stmt = db.prepare('UPDATE users SET secret_key = @encryptedSecreyKey WHERE id = @user_id');
+    const stmt = db.prepare(
+      'UPDATE users SET secret_key = @encryptedSecreyKey WHERE id = @user_id',
+    );
     stmt.run({ encryptedSecreyKey, user_id });
   } catch (error) {
     logger(`error`);
@@ -884,7 +889,7 @@ ipcMain.handle('app-get-secret-key', async (event, user_id) => {
   try {
     const db = getDB();
     const stmt = db.prepare('SELECT secret_key FROM users WHERE id = @user_id');
-    const res = stmt.get({ user_id });
+    const res = stmt.get({ user_id }) as { secret_key: Buffer };
     if (res?.secret_key) {
       return safeStorage.decryptString(res.secret_key);
     } else {
@@ -905,14 +910,14 @@ ipcMain.handle(
       const db = getDB();
       const stmt = db.prepare(
         `INSERT INTO users (id, subscription) VALUES (@id, @subscription)
-        ON CONFLICT(id) DO UPDATE SET subscription = excluded.subscription`
+        ON CONFLICT(id) DO UPDATE SET subscription = excluded.subscription`,
       );
       stmt.run({ id: user_id, subscription: JSON.stringify(subscription) });
     } catch (error) {
       logger(`error`);
       logger(error);
     }
-  }
+  },
 );
 
 ipcMain.on('user-get-subscription', (event, user_id: string) => {
@@ -920,7 +925,7 @@ ipcMain.on('user-get-subscription', (event, user_id: string) => {
   try {
     const db = getDB();
     const stmt = db.prepare('SELECT subscription FROM users WHERE id = @user_id');
-    const res = stmt.get({ user_id });
+    const res = stmt.get({ user_id }) as { subscription: string };
     if (res?.subscription) {
       event.returnValue = JSON.parse(res.subscription);
     } else {
@@ -941,7 +946,7 @@ const getAppBounds = (defaultWidth: number, defaultHeight: number) => {
   try {
     const db = getDB();
     const stmt = db.prepare("SELECT value FROM app WHERE key = 'windowBounds'");
-    const res = stmt.get();
+    const res = stmt.get() as { value: string };
     if (res?.value) {
       return JSON.parse(res.value);
     } else {
@@ -959,7 +964,7 @@ const setAppBounds = (value: Electron.Rectangle) => {
     const db = getDB();
     const stmt = db.prepare(
       `INSERT INTO app (key, value) VALUES ('windowBounds', @value)
-      ON CONFLICT(key) DO UPDATE SET value = excluded.value`
+      ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
     );
     stmt.run({ value: JSON.stringify(value) });
   } catch (error) {
@@ -973,7 +978,7 @@ const getLastUser = () => {
   try {
     const db = getDB();
     const stmt = db.prepare('SELECT value FROM app WHERE key = @key');
-    const lastUser = stmt.get({ key: 'lastUser' });
+    const lastUser = stmt.get({ key: 'lastUser' }) as { value: string };
     return lastUser?.value ?? null;
   } catch (error) {
     logger(`error`);
