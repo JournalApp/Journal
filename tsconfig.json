@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "allowJs": true,
-    "module": "es6",
+    "module": "CommonJS",
     "skipLibCheck": true,
     "esModuleInterop": true,
     "noImplicitAny": true,
@@ -12,7 +12,7 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "paths": {
-      "@/*": ["./src/*"],
+      "@/*": ["./src/*"]
     },
     "lib": ["es2021", "dom"],
     "target": "es2021"
