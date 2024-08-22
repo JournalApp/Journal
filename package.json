@@ -24,96 +24,19 @@
   "keywords": [],
   "author": "Jarek Ceborski",
   "license": "MIT",
-  "config": {
-    "forge": {
-      "packagerConfig": {
-        "icon": "./assets/icons/journal-macos-icon.icns",
-        "protocols": [
-          {
-            "name": "Journal",
-            "schemes": [
-              "journal"
-            ]
-          }
-        ],
-        "osxSign": {
-          "identity": "",
-          "hardened-runtime": true,
-          "entitlements": "entitlements.plist",
-          "entitlements-inherit": "entitlements.plist",
-          "signature-flags": "library"
-        },
-        "osxNotarize": {
-          "appleId": "",
-          "appleIdPassword": ""
-        }
-      },
-      "makers": [
-        {
-          "name": "@electron-forge/maker-squirrel",
-          "config": {
-            "name": "journal.do"
-          }
-        },
-        {
-          "name": "@electron-forge/maker-zip",
-          "platforms": [
-            "darwin"
-          ]
-        },
-        {
-          "name": "@electron-forge/maker-dmg",
-          "config": {
-            "background": "./assets/background.tiff",
-            "icon": "./assets/icons/journal-macos-icon.icns",
-            "format": "ULFO"
-          }
-        },
-        {
-          "name": "@electron-forge/maker-deb",
-          "config": {
-            "mimeType": [
-              "x-scheme-handler/journal"
-            ]
-          }
-        },
-        {
-          "name": "@electron-forge/maker-rpm",
-          "config": {}
-        }
-      ],
-      "plugins": [
-        {
-          "name": "@electron-forge/plugin-webpack",
-          "config": {
-            "mainConfig": "./webpack.main.config.js",
-            "devContentSecurityPolicy": "connect-src 'self' https://hsbagpjhlxzabpiitqjw.supabase.co https://tnfdauoowyrpxqodomqn.supabase.co http://localhost:8000 ws://localhost:8000 https://supabase.journal.local:8443 wss://supabase.journal.local:8443 https://kms.journal.do https://kms.journal.local https://capture.journal.local https://capture.journal.do https://s.journal.local https://s.journal.do 'unsafe-eval'",
-            "renderer": {
-              "config": "./webpack.renderer.config.js",
-              "entryPoints": [
-                {
-                  "html": "./src/index.html",
-                  "js": "./src/renderer.tsx",
-                  "name": "main_window",
-                  "preload": {
-                    "js": "./src/preload.ts"
-                  }
-                }
-              ]
-            }
-          }
-        }
-      ]
-    }
-  },
   "devDependencies": {
-    "@electron-forge/cli": "6.0.0",
-    "@electron-forge/maker-deb": "6.0.0",
-    "@electron-forge/maker-dmg": "6.0.0",
-    "@electron-forge/maker-rpm": "6.0.0",
-    "@electron-forge/maker-squirrel": "6.0.0",
-    "@electron-forge/maker-zip": "6.0.0",
-    "@electron-forge/plugin-webpack": "6.0.0",
+    "@electron-forge/cli": "7.4.0",
+    "@electron-forge/maker-dmg": "7.4.0",
+    "@electron-forge/core-utils": "7.4.0",
+    "@electron-forge/maker-deb": "7.4.0",
+    "@electron-forge/maker-rpm": "7.4.0",
+    "@electron-forge/maker-squirrel": "7.4.0",
+    "@electron-forge/maker-zip": "7.4.0",
+    "@electron-forge/plugin-auto-unpack-natives": "7.4.0",
+    "@electron-forge/plugin-fuses": "7.4.0",
+    "@electron-forge/plugin-webpack": "7.4.0",
+    "@electron-forge/test-utils": "7.4.0",
+    "@electron/fuses": "1.8.0",
     "@electron/asar": "^3.2.2",
     "@faker-js/faker": "^7.5.0",
     "@playwright/test": "^1.29.2",
@@ -142,6 +65,7 @@
     "style-loader": "^3.3.1",
     "ts-loader": "^9.2.6",
     "tsconfig-paths-webpack-plugin": "^3.5.2",
+    "ts-node": "^10.0.0",
     "typescript": "^4.5.4",
     "xvfb-maybe": "^0.2.1"
   },
