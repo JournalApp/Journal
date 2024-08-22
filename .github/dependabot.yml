@@ -5,7 +5,13 @@
 
 version: 2
 updates:
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  - package-ecosystem: 'npm' # See documentation for possible values
+    directory: '/' # Location of package manifests
     schedule:
-      interval: "weekly"
+      interval: 'weekly'
+    labels:
+      - 'dependencies'
+      - 'dependabot'
+    ignore:
+      # requires manual intervention since we are 15+ versions behind
+      - dependency-name: '@udecode/plate'
