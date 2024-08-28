@@ -117,7 +117,7 @@
     "react-select": "^5.6.0",
     "remark-slate": "^1.8.6",
     "remarkable": "^2.0.1",
-    "serialize-error": "^11.0.0",
+    "serialize-error": "^11.0.3",
     "string-to-arraybuffer": "^1.0.2",
     "stripe": "^10.15.0",
     "styled-components": "^5.3.3",
