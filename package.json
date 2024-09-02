@@ -100,7 +100,7 @@
     "better-sqlite3": "11.2.1",
     "dayjs": "^1.11.13",
     "electron-log": "^5.1.7",
-    "electron-squirrel-startup": "^1.0.0",
+    "electron-squirrel-startup": "^1.0.1",
     "jsdom": "^24.1.1",
     "loglevel": "^1.8.1",
     "markdown-it": "^14.1.0",
