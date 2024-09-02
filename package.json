@@ -59,7 +59,7 @@
     "node-abi": "^3.67.0",
     "node-loader": "^2.0.0",
     "pg": "^8.8.0",
-    "playwright": "^1.29.2",
+    "playwright": "^1.46.1",
     "playwright-core": "^1.29.2",
     "sqlite": "5.1.1",
     "sqlite3": "5.1.7",
