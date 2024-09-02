@@ -39,7 +39,7 @@
     "@electron/asar": "^3.2.2",
     "@electron/fuses": "1.8.0",
     "@faker-js/faker": "^7.5.0",
-    "@playwright/test": "^1.29.2",
+    "@playwright/test": "^1.46.1",
     "@types/draft-js": "^0.11.9",
     "@types/marked": "^4.0.2",
     "@types/pg": "^8.6.6",
