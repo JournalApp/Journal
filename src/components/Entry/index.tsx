@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import  { css } from 'styled-components';
+import { css } from 'styled-components';
 import dayjs from 'dayjs';
 import {
   usePlateEditorState,
-  useEventPlateId ,
+  useEventPlateId,
   createPluginFactory,
-  deselectEditor ,
+  deselectEditor,
   select,
   focusEditor,
   isEditorFocused,
-  getPlateActions,
+  usePlateActions,
   withPlate,
   createTEditor,
   createPlateUI,
@@ -48,11 +48,11 @@ import { LimitReached } from './LimitReached';
 const MARK_HAND_STRIKETHROUGH = 'hand-strikethrough';
 
 type EntryBlockProps = {
-  entryDay: Day
-  entryDayCount?: number
-  entriesObserver: IntersectionObserver
-  cachedEntry?: any
-  ref?: any
+  entryDay: Day;
+  entryDayCount?: number;
+  entriesObserver: IntersectionObserver;
+  cachedEntry?: any;
+  ref?: any;
 };
 
 const isToday = (day: any) => {
@@ -129,7 +129,7 @@ const EntryItem = ({ entryDay, cachedEntry, entriesObserver }: EntryBlockProps) 
       logger('Entry exists, updating...');
       cacheUpdateEntryProperty(
         { modified_at, content, sync_status: 'pending_update' },
-        { user_id, day }
+        { user_id, day },
       );
     } else {
       logger('Entry doesnt exist, inserting...');
@@ -348,7 +348,7 @@ const EntryItem = ({ entryDay, cachedEntry, entriesObserver }: EntryBlockProps) 
           },
         }),
       }),
-    }
+    },
   );
 
   const rerenderEntry = () => {
@@ -359,8 +359,8 @@ const EntryItem = ({ entryDay, cachedEntry, entriesObserver }: EntryBlockProps) 
       if (entry) {
         setInitialValue(entry.content);
         const newEditor = withPlate(createTEditor(), { id, plugins });
-        getPlateActions(id).value(entry.content);
-        getPlateActions(id).editor(newEditor);
+        usePlateActions(id).value(entry.content);
+        usePlateActions(id).editor(newEditor);
         editorsRef.current[entryDay] = newEditor;
         if (isFocused) {
           setShouldFocus(true);

@@ -16,7 +16,6 @@ import {
   getParentNode,
   getListItemEntry,
   toggleList,
-  getPreventDefaultHandler,
   someNode,
   toggleNodeType,
   useEventPlateId,
@@ -102,7 +101,7 @@ export const BlockTypeSelect = () => {
   const markList = (type: string, e: any) => {
     setIsHidden(true);
     if (editor) {
-      getPreventDefaultHandler(toggleList, editor, { type })(e);
+      toggleList(editor, { type });
     }
   };
 
@@ -113,9 +112,9 @@ export const BlockTypeSelect = () => {
     }
     setIsHidden(true);
     if (editor) {
-      getPreventDefaultHandler(toggleNodeType, editor, {
+      toggleNodeType(editor, {
         activeType: type,
-      })(e);
+      });
     }
     window.electronAPI.capture({
       distinctId: session.user.id,

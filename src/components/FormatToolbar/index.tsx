@@ -24,11 +24,10 @@ import {
   getPluginType,
   getSelectionText,
   isSelectionExpanded,
-  getPreventDefaultHandler,
   toggleMark,
   useEventPlateId,
   usePlateEditorState,
-  withPlateEventProvider,
+  withPlateProvider,
   isMarkActive,
 } from '@udecode/plate';
 import styled, { keyframes } from 'styled-components';
@@ -175,7 +174,7 @@ export const FormatToolbar = ({ setIsEditorFocused, isContextMenuVisible }: Form
     }
   }, [selectionExpanded, selectionText, editorFocused]);
 
-  const Toggle = withPlateEventProvider(({ markType, iconName }: any) => {
+  const Toggle = withPlateProvider(({ markType, iconName }: any) => {
     const id = useEventPlateId();
     const editor = usePlateEditorState(id);
     const type = getPluginType(editorRef, markType);
@@ -183,7 +182,7 @@ export const FormatToolbar = ({ setIsEditorFocused, isContextMenuVisible }: Form
 
     const onMouseDown = (e: any) => {
       if (editor) {
-        getPreventDefaultHandler(toggleMark, editor, { key: type, clear: '' })(e);
+        toggleMark(editor, { key: type, clear: '' });
       }
       window.electronAPI.capture({
         distinctId: session.user.id,
