@@ -25,9 +25,9 @@ jobs:
         with:
           node-version: 20
 
-       # Install package dependencies
+        # Install package dependencies
       - name: Install
-        run: npm ci
+        run: yarn install --frozen-lockfile
 
         # Run lint
       - name: Lint
