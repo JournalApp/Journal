@@ -85,7 +85,7 @@ const CTA = styled.button`
 `;
 
 interface TextAreaProps {
-  rows: any
+  rows: any;
 }
 
 const TextArea = styled.textarea<TextAreaProps>`
@@ -255,7 +255,7 @@ const GiveFeedbackButton = styled.div`
 `;
 
 interface FormProps {
-  visible: boolean
+  visible: boolean;
 }
 
 const FeedbackForm = styled.form<FormProps>`
@@ -353,7 +353,7 @@ const hideEmojiRating = keyframes`
 `;
 
 interface InputProps {
-  visible: boolean
+  visible: boolean;
 }
 
 const InputContainerAnimated = styled.div<InputProps>`
@@ -405,13 +405,13 @@ const feedbackTypeMap = {
 };
 
 type Keys = keyof typeof feedbackTypeMap;
-type Values = typeof feedbackTypeMap[Keys];
+type Values = (typeof feedbackTypeMap)[Keys];
 
 type FormData = {
-  feedbackType: Keys
-  rating: string
-  feedback: string
-  email: string
+  feedbackType: Keys;
+  rating: string;
+  feedback: string;
+  email: string;
 };
 
 function FeedbackWidget() {
@@ -456,7 +456,7 @@ function FeedbackWidget() {
             email: data.email,
           },
         ],
-        { returning: 'minimal' }
+        { returning: 'minimal' },
       )
       .single();
 
@@ -492,7 +492,7 @@ function FeedbackWidget() {
     setFormSubmitted(false);
   };
 
-  const escFunction = useCallback((event) => {
+  const escFunction = useCallback((event: { keyCode: number }) => {
     if (event.keyCode === 27) {
       closeForm();
       closeThankYou();
@@ -527,8 +527,8 @@ function FeedbackWidget() {
       <FeedbackForm onSubmit={handleSubmit(submitFeedback)} visible={formVisible}>
         <FormHeader>
           <Title>Give feedback</Title>
-          <a href='#' onClick={(e) => closeForm(e)} style={{ height: '24px' }}>
-            <Icon name='Cross' />
+          <a href="#" onClick={(e) => closeForm(e)} style={{ height: '24px' }}>
+            <Icon name="Cross" />
           </a>
         </FormHeader>
         <FormFieldsContainer>
@@ -549,7 +549,7 @@ function FeedbackWidget() {
               }
             />
             {errors.rating && (
-              <LabelErrorRating htmlFor='rating'>{errors.rating.message}</LabelErrorRating>
+              <LabelErrorRating htmlFor="rating">{errors.rating.message}</LabelErrorRating>
             )}
           </InputContainerAnimated>
           <InputContainer>
@@ -561,11 +561,11 @@ function FeedbackWidget() {
                 },
               })}
               placeholder={feedbackTypeMap['experience'].inputPlaceholder}
-              rows='4'
+              rows="4"
             ></TextArea>
-            <Label htmlFor='feedback'>{feedbackTypeMap[watchFeedbackType].inputLabel}</Label>
+            <Label htmlFor="feedback">{feedbackTypeMap[watchFeedbackType].inputLabel}</Label>
             {errors.feedback ? (
-              <LabelError htmlFor='feedback'>{errors.feedback.message}</LabelError>
+              <LabelError htmlFor="feedback">{errors.feedback.message}</LabelError>
             ) : (
               !feedbackTypeMap[watchFeedbackType].isInputRequired && (
                 <LabelOptional>(optional)</LabelOptional>
@@ -582,9 +582,9 @@ function FeedbackWidget() {
                 onBlur: (e) => setValue('email', e.target.value.trim(), { shouldValidate: true }),
               })}
             ></Input>
-            <Label htmlFor='email'>Follow-up email:</Label>
+            <Label htmlFor="email">Follow-up email:</Label>
             {errors.email ? (
-              <LabelError htmlFor='email'>{errors.email.message}</LabelError>
+              <LabelError htmlFor="email">{errors.email.message}</LabelError>
             ) : (
               <LabelOptional>(optional)</LabelOptional>
             )}
@@ -599,11 +599,11 @@ function FeedbackWidget() {
       <ThankYouScreen visible={formSubmitted}>
         <FormHeader>
           <Title></Title>
-          <a href='#' onClick={(e) => closeThankYou(e)} style={{ height: '24px' }}>
-            <Icon name='Cross' />
+          <a href="#" onClick={(e) => closeThankYou(e)} style={{ height: '24px' }}>
+            <Icon name="Cross" />
           </a>
         </FormHeader>
-        <Icon name='RisedHands' />
+        <Icon name="RisedHands" />
         <ThankYou>Thank you!</ThankYou>
         <Body>Your feedback was sent</Body>
       </ThankYouScreen>
