@@ -48,7 +48,7 @@
     "@types/styled-components": "^5.1.25",
     "@typescript-eslint/eslint-plugin": "6.21.0",
     "@typescript-eslint/parser": "6.21.0",
-    "@vercel/webpack-asset-relocator-loader": "^1.7.0",
+    "@vercel/webpack-asset-relocator-loader": "1.7.3",
     "css-loader": "^7.1.2",
     "drizzle-kit": "^0.24.2",
     "electron": "32.0.1",
@@ -100,7 +100,9 @@
     "arraybuffer-to-string": "^1.0.2",
     "better-sqlite3": "11.2.1",
     "dayjs": "^1.11.13",
+    "dotenv": "^16.4.5",
     "drizzle-orm": "^0.33.0",
+    "drizzle-zod": "^0.5.1",
     "electron-log": "^5.1.7",
     "electron-squirrel-startup": "^1.0.1",
     "jsdom": "^24.1.1",
@@ -122,11 +124,14 @@
     "remark-slate": "^1.8.6",
     "remarkable": "^2.0.1",
     "serialize-error": "^11.0.3",
+    "slate": "0.94.0",
+    "slate-history": "0.93.0",
     "slate-react": "0.95.0",
     "string-to-arraybuffer": "^1.0.2",
     "stripe": "^10.15.0",
     "styled-components": "^5.3.3",
     "tailwindcss": "^3.0.23",
-    "twin.macro": "^3.4.1"
+    "twin.macro": "^3.4.1",
+    "zod": "^3.23.8"
   }
 }

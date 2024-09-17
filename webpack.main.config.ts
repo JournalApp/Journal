@@ -1,3 +1,4 @@
+import path from 'path';
 import type { Configuration } from 'webpack';
 
 import { rules } from './webpack.rules';
@@ -16,6 +17,7 @@ export const mainConfig: Configuration = {
   },
   plugins,
   resolve: {
+    alias: { '@': path.join(__dirname, './src') },
     extensions: ['.js', '.ts', '.jsx', '.tsx', '.css', '.json', '.sql'],
   },
 };

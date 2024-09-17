@@ -75,7 +75,7 @@ const config: ForgeConfig = {
         ],
       },
       devContentSecurityPolicy:
-        "connect-src 'self' https://hsbagpjhlxzabpiitqjw.supabase.co https://tnfdauoowyrpxqodomqn.supabase.co http://localhost:8000 ws://localhost:8000 https://supabase.journal.local:8443 wss://supabase.journal.local:8443 https://kms.journal.do https://kms.journal.local https://capture.journal.local https://capture.journal.do https://s.journal.local https://s.journal.do 'unsafe-eval'",
+        "connect-src 'self' https://svqgaylgvcivfbkuqlei.supabase.co https://hsbagpjhlxzabpiitqjw.supabase.co https://tnfdauoowyrpxqodomqn.supabase.co http://localhost:8000 ws://localhost:8000 https://supabase.journal.local:8443 wss://supabase.journal.local:8443 https://kms.journal.do https://kms.journal.local https://capture.journal.local https://capture.journal.do https://s.journal.local https://s.journal.do 'unsafe-eval'",
     }),
     // Fuses are used to enable/disable various Electron functionality
     // at package time, before code signing the application

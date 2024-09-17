@@ -183,7 +183,7 @@ const createWindow = (): void => {
   ipcMain.handle('electron-enableSpellCheck', async () => {
     logger('electron-enableSpellCheck');
     mainWindow.webContents.session.setSpellCheckerLanguages(
-      mainWindow.webContents.session.availableSpellCheckerLanguages
+      mainWindow.webContents.session.availableSpellCheckerLanguages,
     );
   });
 
@@ -311,35 +311,35 @@ if (process.argv.includes('testing')) {
     const win = BrowserWindow.getAllWindows()[0];
     win.webContents.send('test-set-date', date);
 
-  // Create a new class that extends Date
-  class TestDate extends Date {
-    constructor(...args: any[]) {
-      if (args.length === 0) {
-        super(date);
-      } else {
-        // @ts-expect-error replacing ignore
-        super(...args);
+    // Create a new class that extends Date
+    class TestDate extends Date {
+      constructor(...args: any[]) {
+        if (args.length === 0) {
+          super(date);
+        } else {
+          // @ts-expect-error replacing ignore
+          super(...args);
+        }
       }
+
+      static now() {
+        return Date.now() + (date.getTime() - Date.now());
+      }
+
+      static parse(s: string) {
+        return Date.parse(s);
+      }
+
+      static UTC(...args: any[]) {
+        // @ts-expect-error replacing ignore
+        return Date.UTC(...args);
+      }
+
+      static readonly [Symbol.species] = Date;
     }
 
-    static now() {
-      return Date.now() + (date.getTime() - Date.now());
-    }
-
-    static parse(s: string) {
-      return Date.parse(s);
-    }
-
-    static UTC(...args: any[]) {
-      // @ts-expect-error replacing ignore
-      return Date.UTC(...args);
-    }
-
-    static readonly [Symbol.species] = Date;
-  }
-
-  // Use the new TestDate class in your tests
-  (global as any).TestDate = TestDate;
+    // Use the new TestDate class in your tests
+    (global as any).TestDate = TestDate;
   });
 }
 
