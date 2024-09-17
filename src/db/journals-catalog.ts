@@ -1,4 +1,5 @@
 import { foreignKey, integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { users } from './users';
 
 export const journalsCatalog = sqliteTable(
@@ -20,3 +21,7 @@ export const journalsCatalog = sqliteTable(
     };
   },
 );
+
+export const insertJournalsCatalogSchema = createInsertSchema(journalsCatalog);
+
+export const selectJournalsCatalogSchema = createSelectSchema(journalsCatalog);

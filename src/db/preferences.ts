@@ -1,4 +1,5 @@
 import { sqliteTable, primaryKey, foreignKey, text } from 'drizzle-orm/sqlite-core';
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { users } from './users';
 
 export const preferences = sqliteTable(
@@ -17,3 +18,7 @@ export const preferences = sqliteTable(
     };
   },
 );
+
+export const insertPreferenceSchema = createInsertSchema(preferences);
+
+export const selectPreferenceSchema = createSelectSchema(preferences);

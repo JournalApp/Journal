@@ -43,3 +43,49 @@ CREATE TABLE if not exists `users` (
 	`secret_key` blob,
 	`subscription` text
 );
+
+CREATE TRIGGER if not exists entry_updated
+	AFTER UPDATE ON journals
+	WHEN NEW.sync_status = 'pending_update'
+	or NEW.sync_status = 'pending_delete'
+	BEGIN
+		SELECT emitEntryEvent();
+	END;
+--> statement-breakpoint
+CREATE TRIGGER if not exists entry_inserted
+	AFTER INSERT ON journals
+	WHEN NEW.sync_status = 'pending_insert'
+ 	BEGIN
+ 		SELECT emitEntryEvent();
+ 	END;
+--> statement-breakpoint
+CREATE TRIGGER if not exists tag_updated
+	AFTER UPDATE ON tags
+	WHEN NEW.sync_status = 'pending_update'
+	or NEW.sync_status = 'pending_delete'
+	BEGIN
+		SELECT emitTagEvent();
+	END;
+--> statement-breakpoint
+CREATE TRIGGER if not exists tag_inserted
+	AFTER INSERT ON tags
+	WHEN NEW.sync_status = 'pending_insert'
+	BEGIN
+		SELECT emitTagEvent();
+	END;
+--> statement-breakpoint
+CREATE TRIGGER if not exists entry_tag_inserted
+	AFTER INSERT ON entries_tags
+	WHEN NEW.sync_status = 'pending_insert'
+	BEGIN
+		SELECT emitTagEvent();
+	END;
+--> statement-breakpoint
+CREATE TRIGGER if not exists entry_tag_updated
+	AFTER UPDATE ON entries_tags
+	WHEN NEW.sync_status = 'pending_update'
+	or NEW.sync_status = 'pending_delete'
+	BEGIN
+		SELECT emitTagEvent();
+	END;
+--> statement-breakpoint

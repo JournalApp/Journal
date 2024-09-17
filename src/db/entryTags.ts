@@ -1,5 +1,6 @@
-import { sql } from 'drizzle-orm';
+import { InferSelectModel, sql } from 'drizzle-orm';
 import { foreignKey, integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { tags } from './tags';
 
 export const entryTags = sqliteTable(
@@ -13,7 +14,7 @@ export const entryTags = sqliteTable(
     createdAt: text('created_at')
       .notNull()
       .default(sql`(CURRENT_TIMESTAMP)`),
-    modified_at: text('modified_at')
+    modifiedAt: text('modified_at')
       .notNull()
       .default(sql`(CURRENT_TIMESTAMP)`)
       .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
@@ -32,3 +33,9 @@ export const entryTags = sqliteTable(
     };
   },
 );
+
+export type EntryTag = InferSelectModel<typeof entryTags>;
+
+export const insertEntryTagSchema = createInsertSchema(entryTags);
+
+export const selectEntryTagSchema = createSelectSchema(entryTags);

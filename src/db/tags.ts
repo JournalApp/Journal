@@ -1,33 +1,29 @@
 import { sql } from 'drizzle-orm';
-import { sqliteTable, text, primaryKey, integer, foreignKey } from 'drizzle-orm/sqlite-core';
+import { foreignKey, integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { journalsCatalog } from './journals-catalog';
-import { users } from './users'; // Adjust the import according to your project structure
 
-// Define the Journals table
-export const journals = sqliteTable(
-  'journals',
+export const tags = sqliteTable(
+  'tags',
   {
-    userId: text('user_id').references(() => users.id, {
-      onDelete: 'cascade',
-      onUpdate: 'no action',
-    }),
-    day: text('day'),
+    id: text('id').unique(),
+    userId: text('user_id'),
     journalId: integer('journal_id').default(0),
-    tagId: text('tag_id'),
+    name: text('name'),
+    color: text('color'),
     createdAt: text('created_at')
       .notNull()
       .default(sql`(CURRENT_TIMESTAMP)`),
-    modified_at: text('modified_at')
+    modifiedAt: text('modified_at')
       .notNull()
       .default(sql`(CURRENT_TIMESTAMP)`)
       .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
-    content: text('content'),
     revision: integer('revision').notNull().default(0),
     syncStatus: text('sync_status').default('synced'),
   },
   (table) => {
     return {
-      pk: primaryKey({ columns: [table.userId, table.day, table.journalId, table.tagId] }),
+      pk: primaryKey({ columns: [table.id, table.userId, table.journalId] }),
       fk: foreignKey({
         columns: [table.userId, table.journalId],
         foreignColumns: [journalsCatalog.userId, journalsCatalog.journalId],
@@ -37,3 +33,7 @@ export const journals = sqliteTable(
     };
   },
 );
+
+export const insertTagSchema = createInsertSchema(tags);
+
+export const selectTagSchema = createSelectSchema(tags);

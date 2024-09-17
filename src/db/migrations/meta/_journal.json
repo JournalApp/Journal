@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1725457492267,
+      "tag": "0000_brief_quentin_quire",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1726500833713,
+      "tag": "0001_aromatic_forgotten_one",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1726500943554,
+      "tag": "0002_majestic_luminals",
+      "breakpoints": true
+    }
+  ]
+}
